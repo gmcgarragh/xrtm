@@ -1,0 +1,136 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+           "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<meta name="GENERATOR" content="TtH 4.03">
+ <style type="text/css"> div.p { margin-top: 7pt;}</style>
+ <style type="text/css"><!--
+ td div.comp { margin-top: -0.6ex; margin-bottom: -1ex;}
+ td div.comb { margin-top: -0.6ex; margin-bottom: -.6ex;}
+ td div.hrcomp { line-height: 0.9; margin-top: -0.8ex; margin-bottom: -1ex;}
+ td div.norm {line-height:normal;}
+ span.roman {font-family: serif; font-style: normal; font-weight: normal;} 
+ span.overacc2 {position: relative;  left: .8em; top: -1.2ex;}
+ span.overacc1 {position: relative;  left: .6em; top: -1.2ex;} --></style>
+ <style type="text/css"><!--
+ .tiny {font-size:30%;}
+ .scriptsize {font-size:xx-small;}
+ .footnotesize {font-size:x-small;}
+ .smaller {font-size:smaller;}
+ .small {font-size:small;}
+ .normalsize {font-size:medium;}
+ .large {font-size:large;}
+ .larger {font-size:x-large;}
+ .largerstill {font-size:xx-large;}
+ .huge {font-size:300%;}
+ --></style>
+ 
+
+<title>XRTM Documentation</title>
+<link rel="stylesheet" href="style.css" type="text/css">
+
+<div class="p"><!----></div>
+  
+<div style="text-align:center"><div class="huge"><b>XRTM</b></div> <br /><br />
+The X Radiative Transfer Model <br /><br />
+Version 0.91<br />
+Mar 27, 2012
+
+</div>
+
+
+<div class="p"><!----></div>
+
+
+<br />
+
+
+
+
+<div class="p"><!----></div>
+This manual describes how to install and use The X Radiative Transfer Model (XRTM) version 0.91.
+
+<div class="p"><!----></div>
+Copyright &#169; &nbsp;2007-2012 Greg McGarragh
+
+<div class="p"><!----></div>
+Permission is granted to copy, distribute and/or modify this document under the terms of the <a href="http://www.gnu.org/licenses/fdl-1.3.html">GNU Free Documentation License, Version 1.3</a> or any later version published by the Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A copy of the license is included in the section entitled "GNU Free Documentation License".
+
+
+<div class="p"><!----></div>
+
+<h1>Contents </h1><a href="sec1.html#tth_chAp1"
+>1&nbsp; Introduction to XRTM</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec1.html#tth_sEc1.1"
+>1.1&nbsp; License</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec1.html#tth_sEc1.2"
+>1.2&nbsp; Conventions used in this manual</a><br />
+<a href="sec2.html#tth_chAp2"
+>2&nbsp; Building and Using XRTM</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec2.html#tth_sEc2.1"
+>2.1&nbsp; Building XRTM</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec2.html#tth_sEc2.1.1"
+>2.1.1&nbsp; GNU Make</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec2.html#tth_sEc2.1.2"
+>2.1.2&nbsp; Visual Studio</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec2.html#tth_sEc2.2"
+>2.2&nbsp; Using XRTM in your code</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec2.html#tth_sEc2.2.1"
+>2.2.1&nbsp; C</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec2.html#tth_sEc2.2.2"
+>2.2.2&nbsp; C++</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec2.html#tth_sEc2.2.3"
+>2.2.3&nbsp; Fortran 77</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec2.html#tth_sEc2.2.4"
+>2.2.4&nbsp; Fortran 90</a><br />
+<a href="sec3.html#tth_chAp3"
+>3&nbsp; XRTM C Interface</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec3.html#tth_sEc3.1"
+>3.1&nbsp; (Arrays of (arrays of)) ... arrays</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec3.html#tth_sEc3.2"
+>3.2&nbsp; Configuration constants</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec3.html#tth_sEc3.2.1"
+>3.2.1&nbsp; Options</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec3.html#tth_sEc3.2.2"
+>3.2.2&nbsp; Solvers</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec3.html#tth_sEc3.2.3"
+>3.2.3&nbsp; BRDF kernels</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec3.html#tth_sEc3.2.4"
+>3.2.4&nbsp; Solutions</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec3.html#tth_sEc3.3"
+>3.3&nbsp; Initiating and destroying XRTM</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec3.html#tth_sEc3.4"
+>3.4&nbsp; Setting and getting inputs</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec3.html#tth_sEc3.5"
+>3.5&nbsp; Running the model and getting output</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec3.html#tth_sEc3.6"
+>3.6&nbsp; Miscellaneous functions</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec3.html#tth_sEc3.7"
+>3.7&nbsp; Error Handling</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec3.html#tth_sEc3.8"
+>3.8&nbsp; Example C program using XRTM</a><br />
+<a href="sec4.html#tth_chAp4"
+>4&nbsp; XRTM Utilities</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec4.html#tth_sEc4.1"
+>4.1&nbsp; Test suite: testxrtm</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec4.html#tth_sEc4.1.1"
+>4.1.1&nbsp; Testxrtm options</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec4.html#tth_sEc4.2"
+>4.2&nbsp; Stand alone execution: callxrtm</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec4.html#tth_sEc4.2.1"
+>4.2.1&nbsp; Callxrtm options</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="sec4.html#tth_sEc4.2.2"
+>4.2.2&nbsp; Callxrtm input format</a><br /><a href="refs.html">Bibliography</a><br />
+
+
+
+<div class="p"><!----></div>
+
+
+<div class="p"><!----></div>
+
+<hr /><table width="100%"><tr><td>
+ <a href="index.html">HEAD</a></td><td align="right">
+<a href="sec1.html">NEXT
+</a></td></tr></table>
+</div></body></html>

@@ -1,0 +1,18 @@
+#*******************************************************************************
+lmie is a linearized Mie scattering code which can be found along with
+documentation at:
+
+http://reef.atmos.colostate.edu/~gregm/lmie/
+
+
+The following is the calllmie command used to calculate the aerosol scattering
+properties found in the file 2_250000_miam00.gc used in the xrtm example case.
+It is for scattering by the accumulation mode mineral dust described by
+d'Almeida, 1991 at 2.25 um except with an effective variance of 0.2.
+
+../../lmie/utils/calllmie \
+     -dist log_normal 3.900e-01 1.823e-01 5.000e-03 5.000e+01 \
+     -lambda 2.250e+00 \
+     -m 1.530e+00 5.400e-03 \
+     -n_int2 64 -n_quad 64 \
+     -gc 2_250000_miam00.gc

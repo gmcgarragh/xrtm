@@ -1,0 +1,4420 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+           "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<meta name="GENERATOR" content="TtH 4.03">
+ <style type="text/css"> div.p { margin-top: 7pt;}</style>
+ <style type="text/css"><!--
+ td div.comp { margin-top: -0.6ex; margin-bottom: -1ex;}
+ td div.comb { margin-top: -0.6ex; margin-bottom: -.6ex;}
+ td div.hrcomp { line-height: 0.9; margin-top: -0.8ex; margin-bottom: -1ex;}
+ td div.norm {line-height:normal;}
+ span.roman {font-family: serif; font-style: normal; font-weight: normal;} 
+ span.overacc2 {position: relative;  left: .8em; top: -1.2ex;}
+ span.overacc1 {position: relative;  left: .6em; top: -1.2ex;} --></style>
+ <style type="text/css"><!--
+ .tiny {font-size:30%;}
+ .scriptsize {font-size:xx-small;}
+ .footnotesize {font-size:x-small;}
+ .smaller {font-size:smaller;}
+ .small {font-size:small;}
+ .normalsize {font-size:medium;}
+ .large {font-size:large;}
+ .larger {font-size:x-large;}
+ .largerstill {font-size:xx-large;}
+ .huge {font-size:300%;}
+ --></style>
+<title>sec3.html</title>
+<table width="100%"><tr><td>
+ <a href="index.html">HEAD</a></td><td align="right">
+ <a href="sec2.html">PREVIOUS
+</a></td></tr></table>
+ <a id="tth_sEc3"></a><h2>
+3&nbsp;&nbsp;XRTM C Interface</h2>
+<a id="xrtm_c_interface">
+</a>
+
+<div class="p"><!----></div>
+XRTM is unlike other common RT models in that it exists as an object/instance that is created, modified, and destroyed.  It maintains a valid state between simulations where only inputs that change need to be updated for subsequent simulations.  This design allows input overhead to be minimized and allows redundant calculations to be saved in a transparent manor.  Each XRTM instance is contained within an isolated memory scope so that multiple instances may be used in a shared memory multiprocessing environment.
+
+<div class="p"><!----></div>
+The interface is made up of input configuration constants (section&nbsp;<a href="sec3.html#xrtm_c_interface_configuration_constants">3.2</a>), functions for creating and destroying an XRTM instance (section&nbsp;<a href="sec3.html#xrtm_c_interface_inititiating_xrtm">3.3</a>), functions for setting and getting inputs (section&nbsp;<a href="sec3.html#xrtm_c_interface_setting_and_getting_inputs">3.4</a>), and functions that run the appropriate calculations and return outputs (section&nbsp;<a href="sec3.html#xrtm_c_interface_running_the_model_and_getting_output">3.5</a>).  Typical use of XRTM would be to create an instance with <a href="#xrtm_create"><tt><tt><b>xrtm_create</b>()</tt></tt></a>, set inputs with the <a href="#xrtm_c_interface_setting_and_getting_inputs"><tt><tt><b>xrtm_set_*</b>()</tt></tt></a> functions, run the model and get outputs with the <a href="#xrtm_c_interface_running_the_model_and_getting_output"><tt><tt><b>xrtm_calc_*</b>()</tt></tt></a> functions, loop over the last two steps until the model is no longer needed, and then finally, destroy the instance with <a href="#xrtm_destroy"><tt><tt><b>xrtm_destroy</b>()</tt></tt></a>.
+
+<div class="p"><!----></div>
+
+     <a id="tth_sEc3.1"></a><h3>
+3.1&nbsp;&nbsp;(Arrays of (arrays of)) ... arrays</h3>
+<a id="xrtm_c_interface_arrays_of_arrays_of_arrays">
+</a>
+
+<div class="p"><!----></div>
+Several of the XRTM input and output functions take multi-dimensional arrays as arguments.  In C89/90 if true multi-dimensional arrays are passed to functions all but the first dimension must be static.  This is an obvious limitation for the XRTM C interface as these sizes are in fact dynamic.  So instead, XRTM uses "(arrays of pointers to (arrays of pointers to)) ... 1-d arrays" or as they are referred to in this manual "(arrays of (arrays of)) ... 1-d arrays".  These structures may be allocated by the user but as a convenience XRTM provides functions to do this.  These functions are efficient in that internally they allocate memory with one call for all the arrays making up the entire structure and then set the pointers to the appropriate locations in memory.  This method also has the advantage that the data lies contiguously in memory.  So for example, with a 2 dimensional array the rows would lie one after a another where as if the rows were allocated separately they might not lie contiguously in memory.
+
+<div class="p"><!----></div>
+The following is a formal description of the functions for allocating "(arrays of (arrays of)) ... 1-d arrays" and their corresponding deallocation functions:
+
+<div class="p"><!----></div>
+<a id="alloc_array">
+</a><div class="large"><p class="hangingindent">
+<tt>&lt;type name&#62; *...*<b>alloc_array&lt;# of dimensions&#62;_&lt;type id&#62;</b>(<i>int&nbsp;<b>size_1</b>,...,int&nbsp;<b>size_n</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Allocate an "(array of (arrays of)) ... 1-d arrays".  <tt><tt><b>&lt;# of dimensions&#62;</b></tt></tt> is either 1, 2, 3, etc. and <tt><tt><b>&lt;type&#62;</b></tt></tt> is <tt><tt>i</tt></tt> or <tt><tt>d</tt></tt> for <tt><tt>int</tt></tt> or <tt><tt>double</tt></tt> arrays, respectively.  The arguments are the sizes of each dimension of the array (<tt><tt><i><b>size_1, ... size_n</b></i></tt></tt>) where <tt><tt><i><b>n</b></i></tt></tt> is the # of dimensions.  The return value is a "(pointer to (a pointer to)) ...
+a pointer" to <tt><tt>&lt;type name&#62;</tt></tt> with a pointer depth equal to the # of dimensions.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>size_1</b></em></tt> &nbsp;&nbsp; </td><td align="left">size of the first dimension </td></tr>
+<tr><td align="left"><tt><em><b>size_n</b></em></tt> &nbsp;&nbsp; </td><td align="left">size of the last (<tt><tt><i><b>n</b></i></tt></tt>th) dimension </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+A "(pointer to (a pointer to)) ... a pointer" to <tt><tt>&lt;type name&#62;</tt></tt> represting the allocated "(array of (arrays of)) ... 1-d arrays" or NULL on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="free_array">
+</a><div class="large"><p class="hangingindent">
+<tt>void <b>free_array&lt;# of dimensions&#62;_&lt;type id&#62;</b>(<i>&lt;type name&#62; *...*<b>array</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Deallocate (free) an "(array of (arrays of)) ... 1-d arrays".  <tt><tt><b>&lt;# of dimensions&#62;</b></tt></tt> is either 1, 2, 3, etc. and <tt><tt><b>&lt;type&#62;</b></tt></tt> is <tt><tt>i</tt></tt> or <tt><tt>d</tt></tt> for <tt><tt>int</tt></tt> or <tt><tt>double</tt></tt> arrays, respectively.  The argument is the "(pointer to (a pointer to)) ...
+a pointer" to <tt><tt>&lt;type name&#62;</tt></tt> represting the "(array of (arrays of)) ... 1-d arrays" returned by <tt><tt><b>alloc_array&lt;# of dimensions&#62;_&lt;type id&#62;</b></tt></tt>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>array</b></em></tt> &nbsp;&nbsp; </td><td align="left">"(pointer to (a pointer to)) ...
+a pointer" to <tt><tt>&lt;type name&#62;</tt></tt> represting the "(array of (arrays of)) ... 1-d arrays" </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+None.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>So for example, if a 2 dimensional array of arrays of type <tt><tt>double</tt></tt> is to be allocated then the function to call would be
+
+<dl>
+
+	<dd>
+
+<a id="alloc_array2_d">
+</a><div class="large"><p class="hangingindent">
+<tt>double **<b>alloc_array2_d</b>(<i>int&nbsp;<b>size_1</b>, int&nbsp;<b>size_2</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div></dd>
+</dl>and the corresponding deallocation routine would be
+
+<dl>
+
+	<dd>
+
+<a id="free_array2_d">
+</a><div class="large"><p class="hangingindent">
+<tt>void <b>free_array2_d</b>(<i>double **<b>array</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div></dd>
+</dl>
+     <a id="tth_sEc3.2"></a><h3>
+3.2&nbsp;&nbsp;Configuration constants</h3>
+<a id="xrtm_c_interface_configuration_constants">
+</a>
+
+<div class="p"><!----></div>
+      <a id="tth_sEc3.2.1"></a><h4>
+3.2.1&nbsp;&nbsp;Options</h4>
+<a id="xrtm_c_interface_configuration_constants_options">
+</a>
+
+<div class="p"><!----></div>
+Options are turned on by setting the appropriate bit of a 32 bit wide mask which is the <tt><tt><i><b>options</b></i></tt></tt> argument to <a href="#xrtm_create"><tt><tt><b>xrtm_create</b>()</tt></tt></a>.  The appropriate bits may be set using masks (declared as enumeration constants) associated with each option.  For example, Delta-M scaling and the pseudo spherical approximation may be turned on by using the bitwise inclusive OR operator with something like
+
+<dl>
+ <dt><b></b></dt>
+	<dd><tt><tt>options = <a href="#XRTM_OPTION_DELTA_M">XRTM_OPTION_DELTA_M</a>  |  <a href="#XRTM_OPTION_PSA">XRTM_OPTION_PSA</a></tt></tt>.</dd>
+</dl>
+
+<div class="p"><!----></div>
+
+<dl>
+<a id="XRTM_OPTION_CALC_DERIVS">
+</a> <dt><b><tt><tt>XRTM_OPTION_CALC_DERIVS</tt></tt></b></dt>
+	<dd>  <br />
+Calculate derivatives with respect to optical property inputs.  Requires <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a> to be greater than or equal to one.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_DELTA_M">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_DELTA_M</tt></tt></b></dt>
+	<dd>  <br />
+Use Delta-M scaling [<a href="refs.html#wiscombe_w_j_1977a"Wiscombe, 1977</a>].
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_N_T_TMS">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_N_T_TMS</tt></tt></b></dt>
+	<dd>  <br />
+Use the Nakajima and Tanaka TMS correction [<a href="refs.html#nakajima_t_1988"Nakajima and Tanaka, 1988</a>].
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_FOUR_CONV_OLD">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_FOUR_CONV_OLD</tt></tt></b></dt>
+	<dd>  <br />
+Used for testing purposes only.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_FOUR_CONV_NEW">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_FOUR_CONV_NEW</tt></tt></b></dt>
+	<dd>  <br />
+Used for testing purposes only.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_NO_AZIMUTHAL">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_NO_AZIMUTHAL</tt></tt></b></dt>
+	<dd>  <br />
+Include only the first Fourier term of the expansion in azimuth, i.e. the azimuthal average.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_OUTPUT_AT_LEVELS">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_OUTPUT_AT_LEVELS</tt></tt></b></dt>
+	<dd>  <br />
+Output at user specified levels.  This is in contrast to output at user specified optical depths.  Some solvers support output at TOA only, others support output at TOA and/or BOA, while some support output at any level.  Check the solver descriptions for which solver supports what.  Requires at least one call to <a href="#xrtm_set_out_levels"><tt><tt><b>xrtm_set_out_levels</b>()</tt></tt></a> once the model is created.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_OUTPUT_AT_TAUS">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_OUTPUT_AT_TAUS</tt></tt></b></dt>
+	<dd>  <br />
+Output at user specified optical depths from TOA.  This is in contrast to output at user specified levels.  Some solvers support output at TOA only, others support output at TOA and/or BOA, other support output at any level, while some support output at any optical depth (within layers).  Check the solver descriptions for which solver supports what.  Requires at least one call to <a href="#xrtm_set_out_taus"><tt><tt><b>xrtm_set_out_taus</b>()</tt></tt></a> once the model is created.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_PHASE_SCALAR">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_PHASE_SCALAR</tt></tt></b></dt>
+	<dd>  <br />
+Used for testing purposes only.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_PHASE_MATRIX_GC">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_PHASE_MATRIX_GC</tt></tt></b></dt>
+	<dd>  <br />
+Used for testing purposes only.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_PHASE_MATRIX_LC">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_PHASE_MATRIX_LC</tt></tt></b></dt>
+	<dd>  <br />
+Used for testing purposes only.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_PSA">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_PSA</tt></tt></b></dt>
+	<dd>  <br />
+Use the so called pseudo-spherical approximation to model the solar beam through a spherical spherical shell atmosphere [<a href="refs.html#dahlback_arne_1991"Dahlback and Stamnes, 1991</a>].
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_QUAD_NORM_GAUS_LEG">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_QUAD_NORM_GAUS_LEG</tt></tt></b></dt>
+	<dd>  <br />
+Use (standard) Gauss-Legendre quadrature.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_QUAD_DOUB_GAUS_LEG">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_QUAD_DOUB_GAUS_LEG</tt></tt></b></dt>
+	<dd>  <br />
+Use double Gauss-Legendre quadrature.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_QUAD_LOBATTO">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_QUAD_LOBATTO</tt></tt></b></dt>
+	<dd>  <br />
+Use Lobatto quadrature.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_SAVE_LEG_POLYS">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_SAVE_PHASE_MATS</tt></tt></b></dt>
+	<dd>  <br />
+Save phase matrices between XRTM calls.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_SAVE_LOCAL_R_T">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_SAVE_LOCAL_R_T</tt></tt></b></dt>
+	<dd>  <br />
+Save local <b>r</b> and <b>t</b> matrices between XRTM calls.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_SAVE_LAYER_R_T_S">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_SAVE_LAYER_R_T_S</tt></tt></b></dt>
+	<dd>  <br />
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_SAVE_TOTAL_R_T_S">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_SAVE_TOTAL_R_T_S</tt></tt></b></dt>
+	<dd>  <br />
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_SFI">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_SFI</tt></tt></b></dt>
+	<dd>  <br />
+For solvers that support it use source function integration for output at arbitrary zenith angles otherwise quadrature dummy nodes are used.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_SOURCE_SOLAR">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_SOURCE_SOLAR</tt></tt></b></dt>
+	<dd>  <br />
+Include solar sources.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_SOURCE_THERMAL">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_SOURCE_THERMAL</tt></tt></b></dt>
+	<dd>  <br />
+Include thermal sources.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_STACK_REUSE_ADDING">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_STACK_REUSE_ADDING</tt></tt></b></dt>
+	<dd>  <br />
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_TOP_DOWN_ADDING">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_TOP_DOWN_ADDING</tt></tt></b></dt>
+	<dd>  <br />
+For solvers that use adding add from the top down to get output at the surface only.  This is in contrast to full adding and can significantly improve run time.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_BOTTOM_UP_ADDING">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_BOTTOM_UP_ADDING</tt></tt></b></dt>
+	<dd>  <br />
+For solvers that use adding add from the bottom up to get output at TOA only.  This is in contrast to full adding and can significantly improve run time.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_UPWELLING_OUTPUT">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_UPWELLING_OUTPUT</tt></tt></b></dt>
+	<dd>  <br />
+Output upwelling values.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_DOWNWELLING_OUTPUT">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_DOWNWELLING_OUTPUT</tt></tt></b></dt>
+	<dd>  <br />
+Output downwelling values.
+
+<div class="p"><!----></div>
+<a id="XRTM_OPTION_VECTOR">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OPTION_VECTOR</tt></tt></b></dt>
+	<dd>  <br />
+Run the model in vector mode.</dd>
+</dl>
+
+<div class="p"><!----></div>
+
+      <a id="tth_sEc3.2.2"></a><h4>
+3.2.2&nbsp;&nbsp;Solvers</h4>
+<a id="xrtm_c_interface_configuration_constants_solvers">
+</a>
+XRTM may be created to use any number of solvers.  Limiting the initialization to only the solvers required will in some cases lead to significant memory savings.  Solvers are turned on by setting the appropriate bit of a 32 bit wide mask which is the <tt><tt><i><b>solvers</b></i></tt></tt> argument to <a href="#xrtm_create"><tt><tt><b>xrtm_create</b>()</tt></tt></a>.  The appropriate bits may be set using masks (declared as enumeration constants) associated with each solver.  For example, XRTM may be create to use the Eigenmatrix/BVP solver along with the single and second order scattering solvers by using the bitwise inclusive OR operator with something like
+
+<dl>
+ <dt><b></b></dt>
+	<dd><tt><tt>solvers = <a href="#XRTM_SOLVER_EIG_BVP">XRTM_SOLVER_EIG_BVP</a>  |  <a href="#XRTM_SOLVER_SINGLE">XRTM_SOLVER_SINGLE</a>  |  <a href="#XRTM_SOLVER_TWO_OS">XRTM_SOLVER_TWO_OS</a></tt></tt>.</dd>
+</dl>
+
+<div class="p"><!----></div>
+
+<dl>
+<a id="XRTM_SOLVER_DOUB_ADD">
+</a> <dt><b><tt><tt>XRTM_SOLVER_DOUB_ADD</tt></tt></b></dt>
+	<dd>  <br />
+Doubling/Adding: Use doubling to get global reflection and transmission matrices for each layer.  Then use adding to get global reflection and transmission matrices for the entire atmosphere [<a href="refs.html#grant_i_p_1969a" id="CITEgrant_i_p_1969a">Grant and Hunt, 1969</a>,<a href="refs.html#de_haan_j_f_1987" id="CITEde_haan_j_f_1987">de&nbsp;Haan et&nbsp;al., 1987</a>,<a href="refs.html#liou_k_n_2002" id="CITEliou_k_n_2002">Liou, 2002</a>].
+
+<div class="p"><!----></div>
+<a id="XRTM_SOLVER_EIG_ADD">
+</a></dd>
+ <dt><b><tt><tt>XRTM_SOLVER_EIG_ADD</tt></tt></b></dt>
+	<dd>  <br />
+Eigenmatrix/Adding: Use the Eigenvalue problem to get global reflection and transmission matrices for each layer.  Then use adding to get global reflection and transmission matrices for the entire atmosphere [<a href="refs.html#aronson_raphael_1972" id="CITEaronson_raphael_1972">Aronson, 1972</a>,<a href="refs.html#nakajima_t_1986" id="CITEnakajima_t_1986">Nakajima and Tanaka, 1986</a>,<a href="refs.html#voronovich_alexander_g_2004" id="CITEvoronovich_alexander_g_2004">Voronovich et&nbsp;al., 2004</a>,<a href="refs.html#spurr_r_j_d_2007" id="CITEspurr_r_j_d_2007">Spurr and Christi, 2007</a>].
+
+<div class="p"><!----></div>
+<a id="XRTM_SOLVER_EIG_BVP">
+</a></dd>
+ <dt><b><tt><tt>XRTM_SOLVER_EIG_BVP</tt></tt></b></dt>
+	<dd>  <br />
+Eigenmatrix/BVP (a.k.a. the Discrete Ordinate Method): Use the Eigenvalue problem to obtain the layer homogeneous solution.  Then solve a boundary value problem for the entire atmosphere [<a href="refs.html#liou_kuo-nan_1973" id="CITEliou_kuo-nan_1973">Liou, 1973</a>,<a href="refs.html#stamnes_knut_1988b" id="CITEstamnes_knut_1988b">Stamnes et&nbsp;al., 1988</a>,<a href="refs.html#siewert_c_e_2000a" id="CITEsiewert_c_e_2000a">Siewert, 2000</a>,<a href="refs.html#spurr_r_j_d_2001" id="CITEspurr_r_j_d_2001">Spurr et&nbsp;al., 2001</a>].
+
+<div class="p"><!----></div>
+<a id="XRTM_SOLVER_MEM_BVP">
+</a></dd>
+ <dt><b><tt><tt>XRTM_SOLVER_MEM_BVP</tt></tt></b></dt>
+	<dd>  <br />
+Matrix exponential by eigenmatrix / BVP: A variant of the Discrete Ordinate Method with a matrix exponential formulation [<a href="refs.html#doicu_a_2009a" id="CITEdoicu_a_2009a">Doicu and Trautmann, 2009a</a>,<a href="refs.html#doicu_a_2009b" id="CITEdoicu_a_2009b">Doicu and Trautmann, 2009b</a>].
+
+<div class="p"><!----></div>
+<a id="XRTM_SOLVER_PADE_ADD">
+</a></dd>
+ <dt><b><tt><tt>XRTM_SOLVER_PADE_ADD</tt></tt></b></dt>
+	<dd>  <br />
+Matrix exponential by Pad&#233; approximation / Adding (A.K.A. PARTM): Use the Pad&#233; approximation to the matrix exponential to get global reflection and transmission matrices for each layer.  Then use adding to get global reflection and transmission matrices for the entire atmosphere [<a href="refs.html#mcgarragh_greg_2010" id="CITEmcgarragh_greg_2010">McGarragh and Gabriel, 2010</a>].
+
+<div class="p"><!----></div>
+<a id="XRTM_SOLVER_SINGLE">
+</a></dd>
+ <dt><b><tt><tt>XRTM_SOLVER_SINGLE</tt></tt></b></dt>
+	<dd>  <br />
+Includes only first order scattering from the atmosphere and surface.
+
+<div class="p"><!----></div>
+<a id="XRTM_SOLVER_SOS">
+</a></dd>
+ <dt><b><tt><tt>XRTM_SOLVER_SOS</tt></tt></b></dt>
+	<dd>  <br />
+Successive orders of scattering using an approximate integration in optical thickness [<a href="refs.html#fymat_a_l_1974a" id="CITEfymat_a_l_1974a">Fymat and Ueno, 1974</a>,<a href="refs.html#min_qilong_2004b" id="CITEmin_qilong_2004b">Min and Duan, 2004</a>,<a href="refs.html#lenoble_j_2007" id="CITElenoble_j_2007">Lenoble et&nbsp;al., 2007</a>].
+
+<div class="p"><!----></div>
+<a id="XRTM_SOLVER_TWO_OS">
+</a></dd>
+ <dt><b><tt><tt>XRTM_SOLVER_TWO_OS</tt></tt></b></dt>
+	<dd>  <br />
+Second order scattering with the typical numerical integration over zenith and azimuth but with an analytical integration in optical thickness.
+[<a href="refs.html#kawabata_kiyoshi_1988" id="CITEkawabata_kiyoshi_1988">Kawabata and Ueno, 1988</a>,<a href="refs.html#natraj_vijay_2007a" id="CITEnatraj_vijay_2007a">Natraj and Spurr, 2007</a>]</dd>
+</dl>
+
+<div class="p"><!----></div>
+
+      <a id="tth_sEc3.2.3"></a><h4>
+3.2.3&nbsp;&nbsp;BRDF kernels</h4>
+<a id="xrtm_c_interface_configuration_constants_brdf_kernels">
+</a>
+
+<div class="p"><!----></div>
+[<a href="refs.html#spurr_r_j_d_2004"Spurr, 2004</a>]
+
+<div class="p"><!----></div>
+
+<dl>
+<a id="XRTM_KERNEL_LAMBERTIAN">
+</a> <dt><b><tt><tt>XRTM_KERNEL_LAMBERTIAN</tt></tt></b></dt>
+	<dd>  <br />
+
+<div class="p"><!----></div>
+<a id="XRTM_KERNEL_ROUJEAN">
+</a></dd>
+ <dt><b><tt><tt>XRTM_KERNEL_ROUJEAN</tt></tt></b></dt>
+	<dd>  <br />
+[<a href="refs.html#roujean_jean-louis_1992" id="CITEroujean_jean-louis_1992">Roujean et&nbsp;al., 1992</a>]
+
+<div class="p"><!----></div>
+<a id="XRTM_KERNEL_LI_SPARSE">
+</a></dd>
+ <dt><b><tt><tt>XRTM_KERNEL_LI_SPARSE</tt></tt></b></dt>
+	<dd>  <br />
+[<a href="refs.html#wanner_w_1995" id="CITEwanner_w_1995">Wanner et&nbsp;al., 1995</a>]
+
+<div class="p"><!----></div>
+<a id="XRTM_KERNEL_LI_DENSE">
+</a></dd>
+ <dt><b><tt><tt>XRTM_KERNEL_LI_DENSE</tt></tt></b></dt>
+	<dd>  <br />
+[<a href="refs.html#wanner_w_1995"Wanner et&nbsp;al., 1995</a>]
+
+<div class="p"><!----></div>
+<a id="XRTM_KERNEL_ROSS_THIN">
+</a></dd>
+ <dt><b><tt><tt>XRTM_KERNEL_ROSS_THIN</tt></tt></b></dt>
+	<dd>  <br />
+[<a href="refs.html#wanner_w_1995"Wanner et&nbsp;al., 1995</a>]
+
+<div class="p"><!----></div>
+<a id="XRTM_KERNEL_ROSS_THICK">
+</a></dd>
+ <dt><b><tt><tt>XRTM_KERNEL_ROSS_THICK</tt></tt></b></dt>
+	<dd>  <br />
+[<a href="refs.html#wanner_w_1995"Wanner et&nbsp;al., 1995</a>]
+
+<div class="p"><!----></div>
+<a id="XRTM_KERNEL_HAPKE">
+</a></dd>
+ <dt><b><tt><tt>XRTM_KERNEL_HAPKE</tt></tt></b></dt>
+	<dd>  <br />
+[<a href="refs.html#hapke_bruce_1981a" id="CITEhapke_bruce_1981a">Hapke, 1981</a>,<a href="refs.html#hapke_bruce_1981b" id="CITEhapke_bruce_1981b">Hapke and Wells, 1981</a>]
+
+<div class="p"><!----></div>
+<a id="XRTM_KERNEL_RAHMAN">
+</a></dd>
+ <dt><b><tt><tt>XRTM_KERNEL_RAHMAN</tt></tt></b></dt>
+	<dd>  <br />
+[<a href="refs.html#rahman_hafizur_1993b" id="CITErahman_hafizur_1993b">Rahman et&nbsp;al., 1993</a>]
+
+<div class="p"><!----></div>
+<a id="XRTM_KERNEL_COX_MUNK">
+</a></dd>
+ <dt><b><tt><tt>XRTM_KERNEL_COX_MUNK</tt></tt></b></dt>
+	<dd>  <br />
+[<a href="refs.html#cox_charles_1954" id="CITEcox_charles_1954">Cox and Munk, 1954</a>]</dd>
+</dl>
+
+<div class="p"><!----></div>
+
+      <a id="tth_sEc3.2.4"></a><h4>
+3.2.4&nbsp;&nbsp;Solutions</h4>
+<a id="xrtm_c_interface_configuration_constants_solutions">
+</a>
+
+<div class="p"><!----></div>
+
+<dl>
+<a id="XRTM_OUTPUT_RADIANCE">
+</a> <dt><b><tt><tt>XRTM_OUTPUT_RADIANCE</tt></tt></b></dt>
+	<dd>  <br />
+
+<div class="p"><!----></div>
+<a id="XRTM_OUTPUT_RADIANCE_MEAN">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OUTPUT_RADIANCE_MEAN</tt></tt></b></dt>
+	<dd>  <br />
+
+<div class="p"><!----></div>
+<a id="XRTM_OUTPUT_FLUX">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OUTPUT_FLUX</tt></tt></b></dt>
+	<dd>  <br />
+
+<div class="p"><!----></div>
+<a id="XRTM_OUTPUT_FLUX_DIVERGENCE">
+</a></dd>
+ <dt><b><tt><tt>XRTM_OUTPUT_FLUX_DIVERGENCE</tt></tt></b></dt>
+	<dd>  <br /></dd>
+</dl>
+
+<div class="p"><!----></div>
+
+     <a id="tth_sEc3.3"></a><h3>
+3.3&nbsp;&nbsp;Initiating and destroying XRTM</h3>
+<a id="xrtm_c_interface_inititiating_xrtm">
+</a>
+
+<div class="p"><!----></div>
+<a id="xrtm_create">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_create</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>options</b>, int&nbsp;<b>solvers</b>, int&nbsp;<b>max_coef</b>, int&nbsp;<b>n_quad</b>, int&nbsp;<b>n_stokes</b>, int&nbsp;<b>n_derivs</b>, int&nbsp;<b>n_layers</b>, int&nbsp;<b>n_kernels</b>, int&nbsp;<b>n_kernel_quad</b>, int&nbsp;*<b>kernels</b>, int&nbsp;<b>n_out_levels</b>, int&nbsp;<b>n_out_thetas</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Create a new XRTM instance.  When finished with the instance created, <a href="#xrtm_destroy"><tt><tt><b>xrtm_destroy</b>()</tt></tt></a> must be called to free memory allocated by <tt><tt><b>xrtm_create</b>()</tt></tt>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which will represent the instance created </td></tr>
+<tr><td align="left"><tt><em><b>options</b></em></tt> &nbsp;&nbsp; </td><td align="left">bit mask of XRTM configuration <a href="#xrtm_c_interface_configuration_constants_options"><tt><tt>options</tt></tt></a> </td></tr>
+<tr><td align="left"><tt><em><b>solvers</b></em></tt> &nbsp;&nbsp; </td><td align="left">bit mask of XRTM <a href="#xrtm_c_interface_configuration_constants_solvers"><tt><tt>solvers</tt></tt></a> that will be used </td></tr>
+<tr><td align="left"><tt><em><b>max_coef</b></em></tt> &nbsp;&nbsp; </td><td align="left">maximum number of phase function Legendre expansion coefficients that will be used </td></tr>
+<tr><td align="left"><tt><em><b>n_quad</b></em></tt> &nbsp;&nbsp; </td><td align="left">number of quadrature points in one hemisphere </td></tr>
+<tr><td align="left"><tt><em><b>n_stokes</b></em></tt> &nbsp;&nbsp; </td><td align="left">size of the stokes vector to calculate (set to one for scalar mode) </td></tr>
+<tr><td align="left"><tt><em><b>n_derivs</b></em></tt> &nbsp;&nbsp; </td><td align="left">number of derivatives to calculate </td></tr>
+<tr><td align="left"><tt><em><b>n_layers</b></em></tt> &nbsp;&nbsp; </td><td align="left">number of plane parallel layers in the atmosphere </td></tr>
+<tr><td align="left"><tt><em><b>n_kernels</b></em></tt> &nbsp;&nbsp; </td><td align="left">number of BRDF kernels to use for the BRDF </td></tr>
+<tr><td align="left"><tt><em><b>n_kernel_quad</b></em></tt> &nbsp;&nbsp; </td><td align="left">number of quadrature points to use for BRDF integration </td></tr>
+<tr><td align="left"><tt><em><b>kernels</b></em></tt> &nbsp;&nbsp; </td><td align="left">array of <a href="#xrtm_c_interface_configuration_constants_brdf_kernels">BRDF kernels</a> to use (of length <tt><tt><i><b>n_kernels</b></i></tt></tt>) </td></tr>
+<tr><td align="left"><tt><em><b>n_out_levels</b></em></tt> &nbsp;&nbsp; </td><td align="left">number of user defined output levels </td></tr>
+<tr><td align="left"><tt><em><b>n_out_thetas</b></em></tt> &nbsp;&nbsp; </td><td align="left">number of user defined output zenith angles </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_destroy">
+</a><div class="large"><p class="hangingindent">
+<tt>void <b>xrtm_destroy</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Destroy an XRTM instance which includes freeing all memory allocated by <a href="#xrtm_create"><tt><tt><b>xrtm_create</b>()</tt></tt></a>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+none
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+     <a id="tth_sEc3.4"></a><h3>
+3.4&nbsp;&nbsp;Setting and getting inputs</h3>
+<a id="xrtm_c_interface_setting_and_getting_inputs">
+</a>
+
+<div class="p"><!----></div>
+<a id="xrtm_get_options">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_options</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the bit mask of XRTM options with which this instance was created.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The bit mask of XRTM options with which this instance was created or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_solvers">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_solvers</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the bit mask of XRTM solvers for which this instance has been created to use.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The bit mask of XRTM solvers for which this instance has been created to use or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_max_coef">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_max_coef</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the maximum number of phase function Legendre expansion coefficients for which this XRTM instance has been created to handle.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The maximum number of phase function Legendre expansion coefficients for which this XRTM instance has been created to handle or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_n_quad">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_n_quad</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the number of quadrature points in one hemisphere used by this XRTM instance.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The number of quadrature points in one hemisphere used by this XRTM instance or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_n_stokes">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_n_stokes</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the size of the stokes vector for which this instance has been created to calculate.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The size of the stokes vector for which this instance has been created to calculate or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_n_derivs">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_n_derivs</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the number of derivatives for which this instance has been created to calculate.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The number of derivatives for which this instance has been created to calculate or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_n_layers">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_n_layers</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the number of plane parallel layers in the atmosphere modeled by this instance.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The number of plane parallel layers in the atmosphere modeled by this instance or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_n_kernels">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_n_kernels</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the number of BRDF kernels for which this instance has been created to use.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The number of BRDF kernels for which this instance has been created to use or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_n_kernel_quad">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_n_kernel_quad</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the number of quadrature points for BRDF integration used by this instance.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The number of quadrature points for BRDF integration used by this instance or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_kernel">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_kernel</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_kernel</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the kernel identifier for a given kernel index.  The kernel index is the index at which the kernel was given in the array <a href="#xrtm_create"><tt><tt><i><b>kernels</b></i></tt></tt></a> given as input to <a href="#xrtm_create"><tt><tt><b>xrtm_create</b>()</tt></tt></a>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_kernel</b></em></tt> &nbsp;&nbsp; </td><td align="left">the kernel index, where 0  &#8804; <tt><tt><i><b>i_kernel</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_kernels</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The kernel identifier for index <tt><tt><i><b>i_kernel</b></i></tt></tt> or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_n_out_levels">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_n_out_levels</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the number of levels at which this instance has been created to output.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The number of levels at which this instance has been created to output or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_n_out_thetas">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_n_out_thetas</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the number of zenith angles at which this instance has been created to output.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The number of zenith angles at which this instance has been created to output or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_doub_d_tau">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_doub_d_tau</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;<b>d_tau</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the initial layer optical thickness &#8710;&#964; for the doubling method.  To set this value XRTM must have been created to use at least one of the following solvers: <a href="#XRTM_SOLVER_DOUB_ADD">XRTM_SOLVER_DOUB_ADD</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>d_tau</b></em></tt> &nbsp;&nbsp; </td><td align="left">the initial layer optical thickness &#8710;&#964;, where <tt><tt><i><b>d_tau</b></i></tt></tt>  &gt;  0.0 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_doub_d_tau">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_doub_d_tau</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the initial layer optical thickness &#8710;&#964; for the doubling method.  To get this value XRTM must have been created to use at least one of the following solvers: <a href="#XRTM_SOLVER_DOUB_ADD">XRTM_SOLVER_DOUB_ADD</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The initial layer optical thickness &#8710;&#964; for the doubling method or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_pade_params">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_pade_params</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>pade_s</b>, int&nbsp;<b>pade_r</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the Pad&#233; scaling power of two (number of doublings) s and the degree of Pad&#233; approximate r.  If either value is set to a value that is out of range then s and r are chosen automatically from a lookup table based on layer optical thickness &#964; and the maximum output zenith angle &#952;.  To set these values, XRTM must have been created to use at least one of the following solvers: <a href="#XRTM_SOLVER_PADE_ADD">XRTM_SOLVER_PADE_ADD</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>pade_s</b></em></tt> &nbsp;&nbsp; </td><td align="left">Pad&#233; scaling power of two s, where <tt><tt><i><b>pade_s</b></i></tt></tt>  &#8805; 0 </td></tr>
+<tr><td align="left"><tt><em><b>pade_r</b></em></tt> &nbsp;&nbsp; </td><td align="left">degree of Pad&#233; approximate r, where <tt><tt><i><b>pade_r</b></i></tt></tt>  &gt;  0 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_pade_params">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_pade_params</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;*<b>pade_s</b>, int&nbsp;*<b>pade_r</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the Pad&#233; scaling power of two (number of doublings) s and the degree of Pad&#233; approximate r.  To get these values, XRTM must have been created to use at least one of the following solvers: <a href="#XRTM_SOLVER_PADE_ADD">XRTM_SOLVER_PADE_ADD</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>pade_s</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) Pad&#233; scaling power of two s </td></tr>
+<tr><td align="left"><tt><em><b>pade_r</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) degree of Pad&#233; approximate r </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_sos_params">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_sos_params</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>max_os</b>, double&nbsp;<b>max_tau</b>, double&nbsp;<b>sos_tol</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set parameters related to successive order of scattering.  They are the maximum order of scattering that will be computed, the maximum layer optical thickness used (all layers of a larger optical thickness are divided evenly into enough sub-layers so that each sub-layer has an optical thickness less than or equal to the maximum allowable value), and the successive order of scattering tolerance limit.  The tolerance limit is the minimum radiance contribution from any single quadrature angle with which the succession will continue to the next order of scattering.  If this limit is not met the succession will terminate.  To set these values, XRTM must have been created to use at least one of the following solvers: <a href="#XRTM_SOLVER_PADE_ADD">XRTM_SOLVER_SOS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>max_os</b></em></tt> &nbsp;&nbsp; </td><td align="left">maximum order of scattering, where <tt><tt><i><b>max_os</b></i></tt></tt>  &#8805; 0 </td></tr>
+<tr><td align="left"><tt><em><b>max_tau</b></em></tt> &nbsp;&nbsp; </td><td align="left">maximum layer optical thickness used, where <tt><tt><i><b>max_tau</b></i></tt></tt>  &gt;  0.0 </td></tr>
+<tr><td align="left"><tt><em><b>sos_tol</b></em></tt> &nbsp;&nbsp; </td><td align="left">successive order of scattering tolerance limit, where <tt><tt><i><b>sos_tol</b></i></tt></tt>  &#8805; 0.0 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_sos_params">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_sos_params</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;*<b>max_os</b>, double&nbsp;*<b>max_tau</b>, double&nbsp;*<b>sos_tol</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get parameters related to successive order of scattering.  To get these values, XRTM must have been created to use at least one of the following solvers: <a href="#XRTM_SOLVER_PADE_ADD">XRTM_SOLVER_SOS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>max_os</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) maximum order of scattering </td></tr>
+<tr><td align="left"><tt><em><b>max_tau</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) maximum layer optical thickness used </td></tr>
+<tr><td align="left"><tt><em><b>sos_tol</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) successive order of scattering tolerance limit </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_fourier_tol">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_fourier_tol</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;<b>fourier_tol</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the tolerance limit for the Fourier expansion in azimuth angle.  The tolerance limit is the minimum intensity contribution from any single output level and output angle with which the summation will continue to the next term.  If this limit is not met for <em>all</em> of the output levels and output angles the summation will terminate.  If a single scattering correction is to be applied (<a href="#XRTM_OPTION_N_T_TMS">XRTM_OPTION_N_T_TMS</a>) then the series starts with the full (untruncated) single scattering contribution while each term includes only the truncated multiple scattering contribution.  If it is set to zero then the summation will include all terms (2n).
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>fourier_tol</b></em></tt> &nbsp;&nbsp; </td><td align="left">tolerance limit for the Fourier expansion in azimuth angle, where <tt><tt><i><b>fourier_tol</b></i></tt></tt>  &#8805; 0.0 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_fourier_tol">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_fourier_tol</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the tolerance limit for the Fourier expansion in azimuth angle.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The tolerance limit for the Fourier expansion in azimuth angle or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<div class="p"><!----></div>
+
+<div class="p"><!----></div>
+
+<a id="xrtm_set_F_0">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_F_0</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;<b>F_0</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the intensity of the incident parallel beam at TOA F<sub>0</sub>.  Setting F<sub>0</sub> to zero turns off the solar source.  If a thermal source is used (<a href="#XRTM_OPTION_SOURCE_THERMAL">XRTM_OPTION_SOURCE_THERMAL</a>) then the units for F<sub>0</sub> and the TOA, BOA, and level Planck radiances must be the same.  Otherwise the units for F<sub>0</sub> are arbitrary.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>F_0</b></em></tt> &nbsp;&nbsp; </td><td align="left">intensity of the incident parallel beam at TOA F<sub>0</sub>, where <tt><tt><i><b>F_0</b></i></tt></tt>  &#8805; 0.0 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_F_0">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_F_0</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the intensity of the incident parallel beam at TOA F<sub>0</sub>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The intensity of the incident parallel beam at TOA F<sub>0</sub> or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_theta_0">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_theta_0</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;<b>theta_0</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the zenith angle for the incident parallel beam at TOA (the solar zenith angle) &#952;<sub>0</sub>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>theta_0</b></em></tt> &nbsp;&nbsp; </td><td align="left">zenith angle for the incident parallel beam at TOA &#952;<sub>0</sub>, where 0.0  &#8804; <tt><tt><i><b>theta_0</b></i></tt></tt>  &lt;  90.0 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_theta_0">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_theta_0</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the zenith angle for the incident parallel beam at TOA (the solar zenith angle) &#952;<sub>0</sub>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The zenith angle for incident parallel beam at TOA &#952;<sub>0</sub> or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_phi_0">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_phi_0</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;<b>phi_0</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the azimuth angle for the incident parallel beam at TOA (the solar azimuth angle) &#981;<sub>0</sub>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>phi_0</b></em></tt> &nbsp;&nbsp; </td><td align="left">azimuth angle for the incident parallel beam at TOA &#981;<sub>0</sub>, where 0.0  &#8804; <tt><tt><i><b>phi_0</b></i></tt></tt>  &lt;  360.0 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_phi_0">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_phi_0</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the azimuth angle for the incident parallel beam at TOA (the solar azimuth angle) &#981;<sub>0</sub>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The azimuth angle for incident parallel beam at TOA &#981;<sub>0</sub> or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_out_levels">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_out_levels</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;*<b>out_levels</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the levels at which to output results given an array of length <a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>.  Levels are defined at layer boundaries.  For example a 3 layer atmosphere would have 4 levels and TOA and BOA (the surface) would be levels 0 and 3, respectively.  Levels must be specified in ascending order.  To set this value XRTM must have been created with the option <a href="#XRTM_OPTION_OUTPUT_AT_LEVELS">XRTM_OPTION_OUTPUT_AT_LEVELS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>out_levels</b></em></tt> &nbsp;&nbsp; </td><td align="left">array of output level indices in ascending order, where 0  &#8804; <tt><tt><i><b>out_levels</b></i>[i]</tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> and 0  &#8804; <tt><tt>i</tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_out_levels">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_out_levels</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;*<b>out_levels</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the levels at which results are output at as an array of length <a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>.  To get this value XRTM must have been created with the option  <a href="#XRTM_OPTION_OUTPUT_AT_LEVELS">XRTM_OPTION_OUTPUT_AT_LEVELS</a>, otherwise it is an error. 
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>out_levels</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of output level indices in ascending order of length <a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a> </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_out_taus">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_out_taus</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;*<b>out_taus</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the optical depths at which to output results given an array of length <a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>.  Optical depths must be specified in ascending order.  To set this value XRTM must have been created with the option <a href="#XRTM_OPTION_OUTPUT_AT_TAUS">XRTM_OPTION_OUTPUT_AT_TAUS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>out_taus</b></em></tt> &nbsp;&nbsp; </td><td align="left">array of output optical depths in ascending order, where 0.0  &#8804; <tt><tt><i><b>out_taus</b></i>[i]</tt></tt>  &#8804; &#964;<sub>s</sub> and 0  &#8804; <tt><tt>i</tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a> &#8722; 1 and &#964;<sub>s</sub> is the optical depth to the surface </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_out_taus">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_out_taus</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;*<b>out_taus</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the optical depths at which results are output at as an array of length <a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>.  To get this value XRTM must have been created with the option <a href="#XRTM_OPTION_OUTPUT_AT_TAUS">XRTM_OPTION_OUTPUT_AT_TAUS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>out_taus</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of output optical depths in ascending order of length <a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a> </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_out_thetas">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_out_thetas</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;*<b>out_thetas</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the zenith angles &#952; at which to output results given an array of length <a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a>.  To set this value XRTM must have been created with <a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a>  &gt;  0, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>out_thetas</b></em></tt> &nbsp;&nbsp; </td><td align="left">array of output zenith angles &#952;, where 0.0  &#8804; <tt><tt><i><b>out_thetas</b></i>[i]</tt></tt>  &lt;  90.0 and 0  &#8804; <tt><tt>i</tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_out_thetas">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_out_thetas</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;*<b>out_thetas</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the zenith angles &#952; at which results are output at as an array of length <a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a>.  To set this value XRTM must have been created with <a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a>  &gt;  0, otherwise it is an error.  
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>out_thetas</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of output zenith angles &#952; of length <a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a> </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_top_b">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_top_b</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;<b>top_b</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the intensity of the downward isotopic radiation at TOA.  Must be in the same units as F<sub>0</sub> and the BOA and level Planck radiances.  To set this value XRTM must have been created with the option <a href="#XRTM_OPTION_SOURCE_THERMAL">XRTM_OPTION_SOURCE_THERMAL</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>top_b</b></em></tt> &nbsp;&nbsp; </td><td align="left">intensity of the downward isotopic radiation at TOA, where <tt><tt><i><b>top_b</b></i></tt></tt>  &#8805; 0.0 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_top_b">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_top_b</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the intensity of the downward isotopic radiation at TOA.  To get this value XRTM must have been created with the option <a href="#XRTM_OPTION_SOURCE_THERMAL">XRTM_OPTION_SOURCE_THERMAL</a>, otherwise it is an error. 
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The intensity of the downward isotopic radiation at TOA or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_planet_r">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_planet_r</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;<b>planet_r</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the planetary radius for the point located at BOA.  The units for this value and the level heights must be the same.  To set this value XRTM must have been created with the option <a href="#XRTM_OPTION_PSA">XRTM_OPTION_PSA</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>planet_r</b></em></tt> &nbsp;&nbsp; </td><td align="left">planetary radius, where <tt><tt><i><b>planet_r</b></i></tt></tt>  &#8805; 0.0 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_planet_r">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_planet_r</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the planetary radius for the point located at BOA.  To get this value XRTM must have been created with the option <a href="#XRTM_OPTION_PSA">XRTM_OPTION_PSA</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The planetary radius for the point located at BOA or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_levels_z">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_levels_z</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;*<b>levels_z</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the level heights z as an array of length <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> + 1.  The units for this value and the planetary radius must be the same.  To set this value XRTM must have been created with the option <a href="#XRTM_OPTION_PSA">XRTM_OPTION_PSA</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>levels_z</b></em></tt> &nbsp;&nbsp; </td><td align="left">array of level heights z, where <tt><tt><i><b>levels_z</b></i>[i]</tt></tt>  &#8805; 0.0 and 0  &#8804; <tt><tt>i</tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_levels_z">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_levels_z</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;*<b>levels_z</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the level heights z as an array of length <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> + 1.  To get this value XRTM must have been created with the option <a href="#XRTM_OPTION_PSA">XRTM_OPTION_PSA</a>, otherwise it is an error. 
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>levels_z</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of level heights z of length <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> + 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_levels_b">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_levels_b</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;*<b>levels_b</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the level Planck radiances B as an array of length <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> + 1.  Must be in the same units as F<sub>0</sub> and the TOA and BOA Planck radiances.  To set this value XRTM must have been created with the option <a href="#XRTM_OPTION_SOURCE_THERMAL">XRTM_OPTION_SOURCE_THERMAL</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>levels_b</b></em></tt> &nbsp;&nbsp; </td><td align="left">array of level Planck radiances B, where <tt><tt><i><b>levels_b</b></i>[i]</tt></tt>  &#8805; 0.0 and 0  &#8804; <tt><tt>i</tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_levels_b">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_levels_b</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;*<b>levels_b</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the level Planck radiances B as an array of length <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> + 1.  To get this value XRTM must have been created with the option <a href="#XRTM_OPTION_SOURCE_THERMAL">XRTM_OPTION_SOURCE_THERMAL</a>, otherwise it is an error. 
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>levels_b</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of level Planck radiances B of length <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> + 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<div class="p"><!----></div>
+
+<div class="p"><!----></div>
+
+<div class="p"><!----></div>
+
+<div class="p"><!----></div>
+
+<div class="p"><!----></div>
+
+<a id="xrtm_set_coef">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_coef_1</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b>, int&nbsp;<b>n_coef</b>, double&nbsp;**<b>coef</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_coef_n</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;*<b>n_coef</b>, double&nbsp;***<b>coef</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div></div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set layer phase matrix expansion coefficients B<sub>ij,l</sub>, where i,j = 1 for scalar transport (<a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a> = 1) and 1  &#8804; i,j  &#8804; 4 for vector transport (when option <a href="#XRTM_OPTION_VECTOR">XRTM_OPTION_VECTOR</a> has been specified and <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>  &gt;  1).  In the case of scalar transport a single element B<sub>0,0,l</sub> is given to XRTM which are the Legendre expansion coefficients &#946;<sub>l</sub> in the equation for the phase function given by
+
+<br clear="all" /><table border="0" width="90%"><tr><td>
+<table align="center" cellspacing="0"  cellpadding="2"><tr><td nowrap="nowrap" align="center">
+P(cos&#920;) = </td><td nowrap="nowrap" align="center">
+<small>N</small><!--sup
+--><br /><span class="largerstill">&#8721;<br />
+</span><small>l = 0</small>&nbsp;<br /></td><td nowrap="nowrap" align="center">
+&#946;<sub>l</sub> P<sub>l</sub>(cos&#920;),</td></tr></table>
+</td></tr></table>
+
+
+where &#920; is single scattering angle, P<sub>l</sub> are Legendre polynomials of degree l, and N is the maximum degree term in the expansion.  In the case of vector transport 6 elements are given to XRTM, the so "Greek constants" [<a href="refs.html#siewert_c_e_1982a" id="CITEsiewert_c_e_1982a">Siewert, 1982</a>] of the matrix
+
+<br clear="all" /><table border="0" width="90%"><tr><td>
+<table align="center" cellspacing="0"  cellpadding="2"><tr><td nowrap="nowrap" align="center">
+<b>B</b><sub>l</sub> = </td><td align="left" class="cl">&#x23A1;<br />&#x23A2;<br />&#x23A2;<br />&#x23A2;<br />
+&#x23A2;<br />&#x23A2;<br />&#x23A3;
+</td><td nowrap="nowrap" align="center">
+<table>
+<tr><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+&#946;<sub>l</sub> </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+&#947;<sub>l</sub> </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td></tr>
+<tr><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+&#947;<sub>l</sub> </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+&#945;<sub>l</sub> </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td></tr>
+<tr><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+&#950;<sub>l</sub> </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+&#8722;&#949;<sub>l</sub> </td></tr></table></td></tr>
+<tr><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+&#949;<sub>l</sub> </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+&#948;<sub>l</sub></td></tr></table></td></tr></table>
+</td><td align="left" class="cl">&#x23A4;<br />&#x23A5;<br />&#x23A5;<br />&#x23A5;<br />
+&#x23A5;<br />&#x23A5;<br />&#x23A6;
+</td><td nowrap="nowrap" align="center">
+,</td></tr></table>
+</td></tr></table>
+
+
+which are the coefficients for expansion in terms of generalized spherical functions of the phase matrix
+
+<br clear="all" /><table border="0" width="90%"><tr><td>
+<table align="center" cellspacing="0"  cellpadding="2"><tr><td nowrap="nowrap" align="center">
+<b>F</b>(&#920;) = </td><td align="left" class="cl">&#x23A1;<br />&#x23A2;<br />&#x23A2;<br />&#x23A2;<br />
+&#x23A2;<br />&#x23A2;<br />&#x23A3;
+</td><td nowrap="nowrap" align="center">
+<table>
+<tr><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+a<sub>1</sub>(&#920;) </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+b<sub>1</sub>(&#920;) </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td></tr>
+<tr><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+b<sub>1</sub>(&#920;) </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+a<sub>2</sub>(&#920;) </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td></tr>
+<tr><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+a<sub>3</sub>(&#920;) </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+b<sub>2</sub>(&#920;) </td></tr></table></td></tr>
+<tr><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+0 </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+&#8722;b<sub>2</sub>(&#920;) </td></tr></table></td><td align="center"><table border="0" cellspacing="0" cellpadding="0"><tr><td nowrap="nowrap" align="center">
+a<sub>4</sub>(&#920;)</td></tr></table></td></tr></table>
+</td><td align="left" class="cl">&#x23A4;<br />&#x23A5;<br />&#x23A5;<br />&#x23A5;<br />
+&#x23A5;<br />&#x23A5;<br />&#x23A6;
+</td><td nowrap="nowrap" align="center">
+,</td></tr></table>
+</td></tr></table>
+
+
+where
+
+<br clear="all" /><table border="0" width="90%"><tr><td>
+<table border="0" cellspacing="0" cellpadding="0">
+ <tr><td width="50%"></td><td nowrap="nowrap" align="right" colspan="1"><table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+a<sub>1</sub>(&#920;) </td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+=</td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+</td><td nowrap="nowrap" align="center">
+<small>N</small><!--sup
+--><br /><span class="largerstill">&#8721;<br />
+</span><small>l = 0</small>&nbsp;<br /></td><td nowrap="nowrap" align="center">
+&#946;<sub>l</sub> P<sup>l</sup><sub>0,0</sub>(cos&#920;), </td></tr></table></td><td width="50%"></td></tr>
+ <tr><td width="50%"></td><td nowrap="nowrap" align="right" colspan="1"><table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+a<sub>2</sub>(&#920;) + a<sub>3</sub>(&#920;) </td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+=</td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+</td><td nowrap="nowrap" align="center">
+<small>N</small><!--sup
+--><br /><span class="largerstill">&#8721;<br />
+</span><small>l = 2</small>&nbsp;<br /></td><td nowrap="nowrap" align="center">
+(&#945;<sub>l</sub> + &#950;<sub>l</sub>) P<sup>l</sup><sub>2,2</sub>(cos&#920;), </td></tr></table></td><td width="50%"></td></tr>
+ <tr><td width="50%"></td><td nowrap="nowrap" align="right" colspan="1"><table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+a<sub>3</sub>(&#920;) &#8722; a<sub>3</sub>(&#920;) </td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+=</td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+</td><td nowrap="nowrap" align="center">
+<small>N</small><!--sup
+--><br /><span class="largerstill">&#8721;<br />
+</span><small>l = 2</small>&nbsp;<br /></td><td nowrap="nowrap" align="center">
+(&#945;<sub>l</sub> &#8722; &#950;<sub>l</sub>) P<sup>l</sup><sub>2,&#8722;2</sub>(cos&#920;), </td></tr></table></td><td width="50%"></td></tr>
+ <tr><td width="50%"></td><td nowrap="nowrap" align="right" colspan="1"><table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+a<sub>4</sub>(&#920;) </td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+=</td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+</td><td nowrap="nowrap" align="center">
+<small>N</small><!--sup
+--><br /><span class="largerstill">&#8721;<br />
+</span><small>l = 0</small>&nbsp;<br /></td><td nowrap="nowrap" align="center">
+&#948;<sub>l</sub> P<sup>l</sup><sub>0,0</sub>(cos&#920;), </td></tr></table></td><td width="50%"></td></tr>
+ <tr><td width="50%"></td><td nowrap="nowrap" align="right" colspan="1"><table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+b<sub>1</sub>(&#920;) </td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+=</td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+</td><td nowrap="nowrap" align="center">
+<small>N</small><!--sup
+--><br /><span class="largerstill">&#8721;<br />
+</span><small>l = 0</small>&nbsp;<br /></td><td nowrap="nowrap" align="center">
+&#947;<sub>l</sub> P<sup>l</sup><sub>0,2</sub>(cos&#920;), </td></tr></table></td><td width="50%"></td></tr>
+ <tr><td width="50%"></td><td nowrap="nowrap" align="right" colspan="1"><table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+b<sub>2</sub>(&#920;) </td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+=</td></tr></table></td><td nowrap="nowrap" align="left">
+<table><tr><td nowrap="nowrap" align="right" colspan="1"></td><td nowrap="nowrap" align="center">
+<small>N</small><!--sup
+--><br /><span class="largerstill">&#8721;<br />
+</span><small>l = 0</small>&nbsp;<br /></td><td nowrap="nowrap" align="center">
+&#949;<sub>l</sub> P<sup>l</sup><sub>0,2</sub>(cos&#920;).</td></tr></table></td><td width="50%"></td></tr></table>
+</td></tr></table>
+
+
+The "Greek constants" are given to XRTM as a (6 &times; <tt><tt><i><b>n_coef</b></i></tt></tt>) array of arrays according to the mapping
+
+<br clear="all" /><table border="0" width="90%"><tr><td>
+<table border="0" cellspacing="0" cellpadding="0">
+ <tr><td width="50%"></td><td nowrap="nowrap" align="right" colspan="1"><table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+<tt><tt><i><b><tt>coef</tt></b></i><tt>[</tt><tt>0</tt><tt>]</tt><tt>[</tt><tt>l</tt><tt>]</tt></tt></tt> </td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+=</td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+&#946;<sub>l</sub> </td></tr></table></td><td width="50%"></td></tr>
+ <tr><td width="50%"></td><td nowrap="nowrap" align="right" colspan="1"><table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+<tt><tt><i><b><tt>coef</tt></b></i><tt>[</tt><tt>1</tt><tt>]</tt><tt>[</tt><tt>l</tt><tt>]</tt></tt></tt> </td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+=</td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+&#945;<sub>l</sub> </td></tr></table></td><td width="50%"></td></tr>
+ <tr><td width="50%"></td><td nowrap="nowrap" align="right" colspan="1"><table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+<tt><tt><i><b><tt>coef</tt></b></i><tt>[</tt><tt>2</tt><tt>]</tt><tt>[</tt><tt>l</tt><tt>]</tt></tt></tt> </td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+=</td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+&#950;<sub>l</sub> </td></tr></table></td><td width="50%"></td></tr>
+ <tr><td width="50%"></td><td nowrap="nowrap" align="right" colspan="1"><table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+<tt><tt><i><b><tt>coef</tt></b></i><tt>[</tt><tt>3</tt><tt>]</tt><tt>[</tt><tt>l</tt><tt>]</tt></tt></tt> </td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+=</td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+&#948;<sub>l</sub> </td></tr></table></td><td width="50%"></td></tr>
+ <tr><td width="50%"></td><td nowrap="nowrap" align="right" colspan="1"><table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+<tt><tt><i><b><tt>coef</tt></b></i><tt>[</tt><tt>4</tt><tt>]</tt><tt>[</tt><tt>l</tt><tt>]</tt></tt></tt> </td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+=</td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+&#8722;&#947;<sub>l</sub> </td></tr></table></td><td width="50%"></td></tr>
+ <tr><td width="50%"></td><td nowrap="nowrap" align="right" colspan="1"><table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+<tt><tt><i><b><tt>coef</tt></b></i><tt>[</tt><tt>5</tt><tt>]</tt><tt>[</tt><tt>l</tt><tt>]</tt></tt></tt> </td></tr></table></td><td nowrap="nowrap" align="left">
+<table border="0" cellspacing="0" cellpadding="2"><tr><td nowrap="nowrap" align="left">
+=</td></tr></table></td><td nowrap="nowrap" align="left">
+<table><tr><td nowrap="nowrap" align="right" colspan="1">&#8722;&#949;<sub>l</sub>,</td></tr></table></td><td width="50%"></td></tr></table>
+</td></tr></table>
+
+
+where as explanined below, <tt><tt><i><b>n_coef</b></i></tt></tt> is the number of coefficients, <tt><tt><i><b>coef</b></i></tt></tt> is the input array, and 0  &#8804; <tt><tt>l</tt></tt>  &#8804; <tt><tt><i><b>n_coef</b></i></tt></tt>.
+
+<div class="p"><!----></div>
+Any number of phase matrix coeffieicents may be supplied by the user for each layer with the restriction that the number must be less than or equal to <a href="#xrtm_create"><tt><tt><i><b>max_coef</b></i></tt></tt></a> which is set when an XRTM instance is created. (It is up to the user to set <a href="#xrtm_create"><tt><tt><i><b>max_coef</b></i></tt></tt></a> to the maximum number of coefficients to be supplied for all layers.)  It is important that the user is aware of the optimal choice in different cases.  With <a href="#XRTM_OPTION_DELTA_M">XRTM_OPTION_DELTA_M</a> turned off 2 * <a href="#xrtm_create"><tt><tt><i><b>n_quad</b></i></tt></tt></a> &#8722; 1 coeffieicents will be used so if your phase function has less than or equal to as many coeffieicents then supply them all, otherwise you only need to supply a maximum of 2 * <a href="#xrtm_create"><tt><tt><i><b>n_quad</b></i></tt></tt></a> &#8722; 1.  If <a href="#XRTM_OPTION_DELTA_M">XRTM_OPTION_DELTA_M</a> is turned on then an additional coefficient must be supplied for a total of 2 * <a href="#xrtm_create"><tt><tt><i><b>n_quad</b></i></tt></tt></a>.  If your phase function has less than as many coeffieicents then it does not need to be delta-M  scaled and will not be affected by delta-M scaling.  If <a href="#XRTM_OPTION_DELTA_M">XRTM_OPTION_N_T_TMS</a> is turned on (which requires  <a href="#XRTM_OPTION_DELTA_M">XRTM_OPTION_DELTA_M</a> to be turned on) then the all the coefficients required to represent the <em>full</em> phase matrix should be supplied.
+
+<div class="p"><!----></div>
+A choice of two functions are provided for this purpose of setting these elements.  <tt><tt><b>xrtm_set_coef_1</b>()</tt></tt> sets the values for a given layer index <tt><tt><i><b>i_layer</b></i></tt></tt> given an (<tt><tt><i><b>n_elem</b></i></tt></tt> &times; <tt><tt><i><b>n_coef</b></i></tt></tt>) array of arrays, where <tt><tt><i><b>n_coef</b></i></tt></tt> is the number of coefficients given for the layer.  <tt><tt><b>xrtm_set_coef_n</b>()</tt></tt> sets the values for all layers given an (<a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &times; <tt><tt><i><b>n_elem</b></i></tt></tt> &times; <tt><tt><i><b>n_coef</b></i>[i]</tt></tt>, 0  &#8804; <tt><tt>i</tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1) array of arrays of arrays where <tt><tt><i><b>n_coef</b></i></tt></tt> is an array of length <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> giving the number of coefficients for each layer.  In both cases <tt><tt><i><b>n_elem</b></i></tt></tt> = 1 for scalar mode and <tt><tt><i><b>n_elem</b></i></tt></tt> = 6 when option <a href="#XRTM_OPTION_VECTOR">XRTM_OPTION_VECTOR</a> has been specified.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_layer</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of layer to set, where 0  &#8804; <tt><tt><i><b>i_layer</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>n_coef</b></em></tt> &nbsp;&nbsp; </td><td align="left">number of coefficients given as a scalar (<tt><tt><b>_1</b></tt></tt>) or an array (<tt><tt><b>_n</b></tt></tt>) of length <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a>, depending on the function called, where 0  &#8804; <tt><tt><i><b>n_coef</b></i></tt></tt>, <tt><tt><i><b>n_coef</b></i>[i]</tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>max_coef</b></i></tt></tt></a> </td></tr>
+<tr><td align="left"><tt><em><b>coef</b></em></tt> &nbsp;&nbsp; </td><td align="left">phase matrix expansion coefficients &#946;<sub>ij</sub> as an array of arrays (<tt><tt><b>_1</b></tt></tt>) or an array of arrays of arrays (<tt><tt><b>_1</b></tt></tt>), depending on the function called, where &#8722;&#8734; &#8804; <tt><tt><i><b>coef</b></i>[i][j]</tt></tt>,<tt><tt><i><b>coef</b></i>[i][j][k]</tt></tt>  &#8804; &#8734;, except that <tt><tt><i><b>coef</b></i>[0][0]</tt></tt>,<tt><tt><i><b>coef</b></i>[i][0][0]</tt></tt> = 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_n_coef">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_get_n_coef</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the number of phase matrix expansion coefficients for layer index <tt><tt><i><b>i_layer</b></i></tt></tt>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_layer</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of layer to get, where 0  &#8804; <tt><tt><i><b>i_layer</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The number of phase matrix expansion coefficients for layer index <tt><tt><i><b>i_layer</b></i></tt></tt> or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_coef">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_coef</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b>, int&nbsp;<b>i_elem</b>, int&nbsp;<b>i_coef</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the phase matrix expansion coefficient for layer index <tt><tt><i><b>i_layer</b></i></tt></tt>, matrix element index <tt><tt><i><b>i_elem</b></i></tt></tt>, and coefficient index <tt><tt><i><b>i_coef</b></i></tt></tt>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_layer</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of layer to get, where 0  &#8804; <tt><tt><i><b>i_layer</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_elem</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of phase matrix element to get, where 0  &#8804; <tt><tt><i><b>i_elem</b></i></tt></tt>  &#8804; <tt><tt><i><b>n_elem</b></i></tt></tt> and <tt><tt><i><b>n_elem</b></i></tt></tt> = 0 for scalar mode and <tt><tt><i><b>n_elem</b></i></tt></tt> = 6 when option <a href="#XRTM_OPTION_VECTOR">XRTM_OPTION_VECTOR</a> has been specified </td></tr>
+<tr><td align="left"><tt><em><b>i_coef</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of phase matrix coefficient to get, where 0  &#8804; <tt><tt><i><b>i_coef</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_coef</b></i></tt></tt></a><tt><tt>[i]</tt></tt> &#8722; 1 and 0  &#8804; <tt><tt>i</tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The phase matrix expansion coefficient (<tt><tt><i><b>i_elem</b></i></tt></tt>, <tt><tt><i><b>i_coef</b></i></tt></tt>) for layer index <tt><tt><i><b>i_layer</b></i></tt></tt> or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_set_coef_l_11">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_coef_l_11</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b>, int&nbsp;<b>i_deriv</b>, double&nbsp;**<b>coef_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_coef_l_n1</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_deriv</b>, double&nbsp;***<b>coef_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_coef_l_1n</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b>, double&nbsp;***<b>coef_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_coef_l_nn</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;****<b>coef_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div></div></div></div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set layer linearized phase matrix expansion coefficients &#8706;&#946;<sub>ij</sub> / &#8706;x.  A choice of four functions are provided for this purpose.  <tt><tt><b>xrtm_set_coef_l_11</b>()</tt></tt> sets the values for a given layer index <tt><tt><i><b>i_layer</b></i></tt></tt> and a given derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt> given an (<tt><tt><i><b>n_elem</b></i></tt></tt> &times; <tt><tt><i><b>n_coef</b></i></tt></tt>) array of arrays.  <tt><tt><b>xrtm_set_coef_l_n1</b>()</tt></tt> sets the values for all layers for a given derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt> given an (<a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &times; <tt><tt><i><b>n_elem</b></i></tt></tt> &times; <tt><tt><i><b>n_coef</b></i>[i]</tt></tt>, 0  &#8804; <tt><tt>i</tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1) array of arrays of arrays.  <tt><tt><b>xrtm_set_coef_l_1n</b>()</tt></tt> sets the values for all derivatives for a given layer index <tt><tt><i><b>i_layer</b></i></tt></tt> given an (<a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a> &times; <tt><tt><i><b>n_elem</b></i></tt></tt> &times; <tt><tt><i><b>n_coef</b></i></tt></tt>) array of arrays of arrays.  Finally, <tt><tt><b>xrtm_set_coef_l_nn</b>()</tt></tt> sets the values for all layers and all derivatives given an (<a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &times; <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a> &times; <tt><tt><i><b>n_elem</b></i></tt></tt> &times; <tt><tt><i><b>n_coef</b></i>[i]</tt></tt>, 0  &#8804; <tt><tt>i</tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1) array of arrays of arrays of arrays.  In all cases <tt><tt><i><b>n_elem</b></i></tt></tt> = 1 for scalar mode and <tt><tt><i><b>n_elem</b></i></tt></tt> = 6 when option <a href="#XRTM_OPTION_VECTOR">XRTM_OPTION_VECTOR</a> has been specified and <tt><tt><i><b>n_coef</b></i></tt></tt> is defined for each layer by <a href="#xrtm_set_coef">xrtm_set_coef()</a>.  To set these values XRTM must have been created with the option <a href="#XRTM_OPTION_OUTPUT_AT_LEVELS">XRTM_CALC_DERIVS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_layer</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of layer to set, where 0  &#8804; <tt><tt><i><b>i_layer</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_deriv</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of derivative to set, where 0  &#8804; <tt><tt><i><b>i_deriv</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>coef_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">linearized phase matrix expansion coefficients &#8706;&#946;<sub>ij</sub> / &#8706;x as an array of arrays (<tt><tt><b>_11</b></tt></tt>), an array of arrays of arrays (<tt><tt><b>_n1</b></tt></tt> or <tt><tt><b>_1n</b></tt></tt>), or an array of arrays of arrays of arrays (<tt><tt><b>_nn</b></tt></tt>), depending on the function called, where &#8722;&#8734; &#8804; <tt><tt><i><b>coef_l</b></i>[i][j]</tt></tt>,<tt><tt><i><b>coef_l</b></i>[i][j][k]</tt></tt>,<tt><tt><i><b>coef_l</b></i>[i][j][k][l]</tt></tt>  &#8804; &#8734;, except that <tt><tt><i><b>coef_l</b></i>[0][0]</tt></tt>,<tt><tt><i><b>coef_l</b></i>[i][0][0]</tt></tt>,<tt><tt><i><b>coef_l</b></i>[i][j][0][0]</tt></tt> = 0 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_coef_l">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_coef_l</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b>, int&nbsp;<b>i_deriv</b>, int&nbsp;<b>i_elem</b>, int&nbsp;<b>i_coef</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the linearized phase matrix expansion coefficient for layer index <tt><tt><i><b>i_layer</b></i></tt></tt>, derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt>, matrix element index <tt><tt><i><b>i_elem</b></i></tt></tt>, and coefficient index <tt><tt><i><b>i_coef</b></i></tt></tt>.  To get these values XRTM must have been created with the option <a href="#XRTM_OPTION_OUTPUT_AT_LEVELS">XRTM_CALC_DERIVS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_layer</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of layer to get, where 0  &#8804; <tt><tt><i><b>i_layer</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_deriv</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of derivative to get, where 0  &#8804; <tt><tt><i><b>i_deriv</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_elem</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of phase matrix element to get, where 0  &#8804; <tt><tt><i><b>i_elem</b></i></tt></tt>  &#8804; <tt><tt><i><b>n_elem</b></i></tt></tt> and <tt><tt><i><b>n_elem</b></i></tt></tt> = 0 for scalar mode and <tt><tt><i><b>n_elem</b></i></tt></tt> = 6 when option <a href="#XRTM_OPTION_VECTOR">XRTM_OPTION_VECTOR</a> has been specified </td></tr>
+<tr><td align="left"><tt><em><b>i_coef</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of phase matrix coefficient to get, where 0  &#8804; <tt><tt><i><b>i_coef</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_coef</b></i></tt></tt></a><tt><tt>[i]</tt></tt> &#8722; 1 and 0  &#8804; <tt><tt>i</tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The linearized phase matrix expansion coefficient (<tt><tt><i><b>i_elem</b></i></tt></tt>, <tt><tt><i><b>i_coef</b></i></tt></tt>) for layer index <tt><tt><i><b>i_layer</b></i></tt></tt> and derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt> or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_omega_1">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_omega_1</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b>, double&nbsp;<b>omega</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_omega_n</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;*<b>omega</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div></div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set layer single scattering albedo &#969;.  A choice of two functions are provided for this purpose.  <tt><tt><b>xrtm_set_omega_1</b>()</tt></tt> sets the value for a given layer index <tt><tt><i><b>i_layer</b></i></tt></tt> given a scalar value.  <tt><tt><b>xrtm_set_omega_n</b>()</tt></tt> sets the values for all layers given an array of length <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_layer</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of layer to set, where 0  &#8804; <tt><tt><i><b>i_layer</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>omega</b></em></tt> &nbsp;&nbsp; </td><td align="left">single scattering albedo &#969; as a scalar (<tt><tt><b>_1</b></tt></tt>) or an array (<tt><tt><b>_n</b></tt></tt>), depending on the function called, where 0.0  &#8804; <tt><tt><i><b>omega</b></i></tt></tt>,<tt><tt><i><b>omega</b></i>[i]</tt></tt>  &#8804; 1.0 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_omega">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_omega</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get single scattering albedo &#969; for layer index <tt><tt><i><b>i_layer</b></i></tt></tt>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_layer</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of layer to get, where 0  &#8804; <tt><tt><i><b>i_layer</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The single scattering albedo &#969; for layer index <tt><tt><i><b>i_layer</b></i></tt></tt> or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_set_omega_l_11">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_omega_l_11</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b>, int&nbsp;<b>i_deriv</b>, double&nbsp;<b>omega_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_omega_l_n1</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_deriv</b>, double&nbsp;*<b>omega_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_omega_l_1n</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b>, double&nbsp;*<b>omega_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_omega_l_nn</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;**<b>omega_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div></div></div></div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set layer linearized single scattering albedo &#8706;&#969;/ &#8706;x.  A choice of four functions are provided for this purpose.  <tt><tt><b>xrtm_set_omega_l_11</b>()</tt></tt> sets the value for a given layer index <tt><tt><i><b>i_layer</b></i></tt></tt> and a given derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt> given a scalar value.  <tt><tt><b>xrtm_set_omega_l_n1</b>()</tt></tt> sets the values for all layers for a given derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt> given an array of length <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a>.  <tt><tt><b>xrtm_set_omega_l_1n</b>()</tt></tt> sets the values for all derivatives for a given layer index <tt><tt><i><b>i_layer</b></i></tt></tt> given an array of length <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>.  Finally, <tt><tt><b>xrtm_set_omega_l_nn</b>()</tt></tt> sets the values for all layers and all derivatives given an (<a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &times; <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>) array of arrays.  To set these values XRTM must have been created with the option <a href="#XRTM_OPTION_OUTPUT_AT_LEVELS">XRTM_CALC_DERIVS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_layer</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of layer to set, where 0  &#8804; <tt><tt><i><b>i_layer</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_deriv</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of derivative to set, where 0  &#8804; <tt><tt><i><b>i_deriv</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>omega_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">linearized single scattering albedo &#8706;&#969;/ &#8706;x as a scalar (<tt><tt><b>_1</b></tt></tt>), an array (<tt><tt><b>_n1</b></tt></tt> or <tt><tt><b>_1n</b></tt></tt>), or an array of arrays (<tt><tt><b>_nn</b></tt></tt>), depending on the function called, where &#8722;&#8734; &#8804; <tt><tt><i><b>omega_l</b></i></tt></tt>,<tt><tt><i><b>omega_l</b></i>[i]</tt></tt>,<tt><tt><i><b>omega_l</b></i>[i][j]</tt></tt>  &#8804; &#8734; </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_omega_l">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_omega_l</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b>, int&nbsp;<b>i_deriv</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get linearized single scattering albedo &#8706;&#969;/ &#8706;x for layer index <tt><tt><i><b>i_layer</b></i></tt></tt> and derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt>.  To get these values XRTM must have been created with the option <a href="#XRTM_OPTION_OUTPUT_AT_LEVELS">XRTM_CALC_DERIVS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_layer</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of layer to get, where 0  &#8804; <tt><tt><i><b>i_layer</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_deriv</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of derivative to get, where 0  &#8804; <tt><tt><i><b>i_deriv</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The linearized single scattering albedo &#8706;&#969;/ &#8706;x for layer index <tt><tt><i><b>i_layer</b></i></tt></tt> and derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt> or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_ltau_1">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_ltau_1</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b>, double&nbsp;<b>ltau</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_ltau_n</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;*<b>ltau</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div></div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set layer optical thickness &#964;.  A choice of two functions are provided for this purpose.  <tt><tt><b>xrtm_set_ltau_1</b>()</tt></tt> sets the value for a given layer index <tt><tt><i><b>i_layer</b></i></tt></tt> given a scalar value.  <tt><tt><b>xrtm_set_ltau_n</b>()</tt></tt> sets the values for all layers given an array of length <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_layer</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of layer to set, where 0  &#8804; <tt><tt><i><b>i_layer</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>ltau</b></em></tt> &nbsp;&nbsp; </td><td align="left">optical thickness &#964; as a scalar (<tt><tt><b>_1</b></tt></tt>) or an array (<tt><tt><b>_n</b></tt></tt>), depending on the function called, where <tt><tt><i><b>ltau</b></i></tt></tt>,<tt><tt><i><b>ltau</b></i></tt></tt>[i]  &#8805; 0.0 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_ltau">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_ltau</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get optical thickness &#964; for layer index <tt><tt><i><b>i_layer</b></i></tt></tt>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_layer</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of layer to get, where 0  &#8804; <tt><tt><i><b>i_layer</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The optical thickness &#964; for layer index <tt><tt><i><b>i_layer</b></i></tt></tt> or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_set_ltau_l_11">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_ltau_l_11</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b>, int&nbsp;<b>i_deriv</b>, double&nbsp;<b>ltau_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_ltau_l_n1</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_deriv</b>, double&nbsp;*<b>ltau_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_ltau_l_1n</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b>, double&nbsp;*<b>ltau_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_ltau_l_nn</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;**<b>ltau_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div></div></div></div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set linearized layer optical thickness &#8706;&#964;/ &#8706;x.  A choice of four functions are provided for this purpose.  <tt><tt><b>xrtm_set_ltau_l_11</b>()</tt></tt> sets the value for a given layer index <tt><tt><i><b>i_layer</b></i></tt></tt> and a given derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt> given a scalar value.  <tt><tt><b>xrtm_set_ltau_l_n1</b>()</tt></tt> sets the values for all layers for a given derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt> given an array of length <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a>.  <tt><tt><b>xrtm_set_ltau_l_1n</b>()</tt></tt> sets the values for all derivatives for a given layer index <tt><tt><i><b>i_layer</b></i></tt></tt> given an array of length <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>.  Finally, <tt><tt><b>xrtm_set_ltau_l_nn</b>()</tt></tt> sets the values for all layers and all derivatives given an (<a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &times; <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>) array of arrays.  To set these values XRTM must have been created with the option <a href="#XRTM_OPTION_OUTPUT_AT_LEVELS">XRTM_CALC_DERIVS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_layer</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of layer to set, where 0  &#8804; <tt><tt><i><b>i_layer</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_deriv</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of derivative to set, where 0  &#8804; <tt><tt><i><b>i_deriv</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>ltau_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">linearized optical thickness &#8706;&#964;/ &#8706;x as a scalar (<tt><tt><b>_11</b></tt></tt>), an array (<tt><tt><b>_n1</b></tt></tt> and <tt><tt><b>_1n</b></tt></tt>), or an array of arrays (<tt><tt><b>_nn</b></tt></tt>), depending on the function called, where &#8722;&#8734; &#8804; <tt><tt><i><b>ltau_l</b></i></tt></tt>, <tt><tt><i><b>ltau_l</b></i></tt></tt>[i],<tt><tt><i><b>ltau_l</b></i></tt></tt>[i][j]  &#8804; &#8734; </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_ltau_l">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_ltau_l</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_layer</b>, int&nbsp;<b>i_deriv</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get linearized optical thickness &#8706;&#964;/ &#8706;x for layer index <tt><tt><i><b>i_layer</b></i></tt></tt> and derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt>.  To get these values XRTM must have been created with the option <a href="#XRTM_OPTION_OUTPUT_AT_LEVELS">XRTM_CALC_DERIVS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_layer</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of layer to get, where 0  &#8804; <tt><tt><i><b>i_layer</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_layers</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_deriv</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of derivative to get, where 0  &#8804; <tt><tt><i><b>i_deriv</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The linearized optical thickness &#8706;&#964;/ &#8706;x for layer index <tt><tt><i><b>i_layer</b></i></tt></tt> and derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt> or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_surface_b">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_surface_b</b>(<i>xrtm_data&nbsp;*<b>d</b>, double&nbsp;<b>surface_b</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the surface Planck radiance.  Must be in the same units as F<sub>0</sub> and the TOA and level Planck radiances.  To set this value XRTM must have been created with the option <a href="#XRTM_OPTION_SOURCE_THERMAL">XRTM_OPTION_SOURCE_THERMAL</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>surface_b</b></em></tt> &nbsp;&nbsp; </td><td align="left">surface Planck radiance, where <tt><tt><i><b>surface_b</b></i></tt></tt>  &#8805; 0.0 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_surface_b">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_surface_b</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the surface Planck radiance.  To get this value XRTM must have been created with the option <a href="#XRTM_OPTION_SOURCE_THERMAL">XRTM_OPTION_SOURCE_THERMAL</a>, otherwise it is an error. 
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The surface Planck radiance or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<a id="xrtm_set_kernel_ampfac">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_kernel_ampfac</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_kernel</b>, double&nbsp;<b>ampfac</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the amplitude factor for kernel index <tt><tt><i><b>i_kernel</b></i></tt></tt>.  The kernel index is the index at which the kernel was given in the array <a href="#xrtm_create"><tt><tt><i><b>kernels</b></i></tt></tt></a> given as input to <a href="#xrtm_create"><tt><tt><b>xrtm_create</b>()</tt></tt></a>.  To set this value XRTM must have been created with <a href="#xrtm_create"><tt><tt><i><b>n_kernels</b></i></tt></tt></a>  &gt;  0, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_kernel</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of kernel to set, where 0  &#8804; <tt><tt><i><b>i_kernel</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_kernels</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>ampfac</b></em></tt> &nbsp;&nbsp; </td><td align="left">the amplitude factor for kernel <tt><tt><i><b>i_kernel</b></i></tt></tt>, where 0.0  &#8804; <tt><tt><i><b>ampfac</b></i></tt></tt>  &#8804; 1.0 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_kernel_ampfac">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_kernel_ampfac</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_kernel</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the amplitude factor for kernel index <tt><tt><i><b>i_kernel</b></i></tt></tt>.  The kernel index is the index at which the kernel was given in the array <a href="#xrtm_create"><tt><tt><i><b>kernels</b></i></tt></tt></a> given as input to <a href="#xrtm_create"><tt><tt><b>xrtm_create</b>()</tt></tt></a>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_kernel</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of kernel to get, where 0  &#8804; <tt><tt><i><b>i_kernel</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_kernels</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The amplitude factor for kernel index <tt><tt><i><b>i_kernel</b></i></tt></tt> or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_set_kernel_params_1">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_kernel_params_1</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_kernel</b>, int&nbsp;<b>i_param</b>, double&nbsp;<b>param</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_kernel_params_n</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_kernel</b>, double&nbsp;*<b>params</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div></div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the kernel parameters for kernel index <tt><tt><i><b>i_kernel</b></i></tt></tt>.  The kernel index is the index at which the kernel was given in the array <a href="#xrtm_create"><tt><tt><i><b>kernels</b></i></tt></tt></a> given as input to <a href="#xrtm_create"><tt><tt><b>xrtm_create</b>()</tt></tt></a>.  A choice of two functions are provided for this purpose.  <tt><tt><b>xrtm_set_kernel_params_1</b>()</tt></tt> sets the value for a given parameter index <tt><tt><i><b>i_param</b></i></tt></tt> given a scalar value.  <tt><tt><b>xrtm_set_kernel_params_n</b>()</tt></tt> sets the values for all parameters given an array of length <tt><tt><i><b>n_params</b></i></tt></tt>, where <tt><tt><i><b>n_params</b></i></tt></tt> is the number of parameters required for kernel <tt><tt><i><b>i_kernel</b></i></tt></tt>.  The number of parameters and a description of each parameter is given for each kernel in section&nbsp;<a href="sec3.html#xrtm_c_interface_configuration_constants_brdf_kernels">3.2.3</a>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_kernel</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of kernel to set, where 0  &#8804; <tt><tt><i><b>i_kernel</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_kernels</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_param</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of parameter to set, where 0  &#8804; <tt><tt><i><b>i_param</b></i></tt></tt>  &#8804; <tt><tt><i><b>n_params</b></i></tt></tt> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>param</b></em></tt> &nbsp;&nbsp; </td><td align="left">kernel parameter as a scalar (<tt><tt><b>_1</b></tt></tt>) or an array (<tt><tt><b>_n</b></tt></tt>), depending on the function called, where &#8722;&#8734; &#8804; <tt><tt><i><b>param</b></i></tt></tt>,<tt><tt><i><b>param</b></i></tt></tt>[i]  &#8804; &#8734; </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_kernel_params">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_kernel_params</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_kernel</b>, int&nbsp;<b>i_param</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the kernel parameter for kernel index <tt><tt><i><b>i_kernel</b></i></tt></tt> and parameter index <tt><tt><i><b>i_param</b></i></tt></tt>.  The kernel index is the index at which the kernel was given in the array <a href="#xrtm_create"><tt><tt><i><b>kernels</b></i></tt></tt></a> given as input to <a href="#xrtm_create"><tt><tt><b>xrtm_create</b>()</tt></tt></a>.  The parameter indices are described for each kernel in section&nbsp;<a href="sec3.html#xrtm_c_interface_configuration_constants_brdf_kernels">3.2.3</a>.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_kernel</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of kernel to get, where 0  &#8804; <tt><tt><i><b>i_kernel</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_kernels</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_param</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of parameter to set, where 0  &#8804; <tt><tt><i><b>i_param</b></i></tt></tt>  &#8804; <tt><tt><i><b>n_params</b></i></tt></tt> &#8722; 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The kernel parameter for kernel index <tt><tt><i><b>i_kernel</b></i></tt></tt> and parameter index <tt><tt><i><b>i_param</b></i></tt></tt> or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_set_kernel_ampfac_l_1">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_kernel_ampfac_l_1</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_kernel</b>, int&nbsp;<b>i_deriv</b>, double&nbsp;<b>ampfac_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_kernel_ampfac_l_n</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_kernel</b>, double&nbsp;*<b>ampfac_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div></div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the linearized amplitude factor for kernel index <tt><tt><i><b>i_kernel</b></i></tt></tt>.  The kernel index is the index at which the kernel was given in the array <a href="#xrtm_create"><tt><tt><i><b>kernels</b></i></tt></tt></a> given as input to <a href="#xrtm_create"><tt><tt><b>xrtm_create</b>()</tt></tt></a>.  A choice of two functions are provided for this purpose.  <tt><tt><b>xrtm_set_kernel_ampfac_l_1</b>()</tt></tt> sets the value for a given derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt> given a scalar value.  <tt><tt><b>xrtm_set_kernel_ampfac_l_n</b>()</tt></tt> sets the values for all derivatives given an array of length <tt><tt><i><b>n_derivs</b></i></tt></tt>.  To set this value XRTM must have been created with <a href="#xrtm_create"><tt><tt><i><b>n_kernels</b></i></tt></tt></a>  &gt;  0, otherwise it is an error.  To set these values XRTM must have been created with the option <a href="#XRTM_OPTION_OUTPUT_AT_LEVELS">XRTM_CALC_DERIVS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_kernel</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of kernel to set, where 0  &#8804; <tt><tt><i><b>i_kernel</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_kernels</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_deriv</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of derivative to set, where 0  &#8804; <tt><tt><i><b>i_deriv</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>ampfac_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">the linearized amplitude factor for kernel <tt><tt><i><b>i_kernel</b></i></tt></tt>, where &#8722;&#8734; &#8804; <tt><tt><i><b>ampfac</b></i></tt></tt>,<tt><tt><i><b>ampfac</b></i>[i]</tt></tt>  &#8804; &#8734; </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_kernel_ampfac_l">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_kernel_ampfac_l</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_kernel</b>, int&nbsp;<b>i_deriv</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the linearized amplitude factor for kernel index <tt><tt><i><b>i_kernel</b></i></tt></tt> and derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt> .  The kernel index is the index at which the kernel was given in the array <a href="#xrtm_create"><tt><tt><i><b>kernels</b></i></tt></tt></a> given as input to <a href="#xrtm_create"><tt><tt><b>xrtm_create</b>()</tt></tt></a>.  To get these values XRTM must have been created with the option <a href="#XRTM_OPTION_OUTPUT_AT_LEVELS">XRTM_CALC_DERIVS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_kernel</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of kernel to get, where 0  &#8804; <tt><tt><i><b>i_kernel</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_kernels</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_deriv</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of derivative to get, where 0  &#8804; <tt><tt><i><b>i_deriv</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The linearized amplitude factor for kernel index <tt><tt><i><b>i_kernel</b></i></tt></tt> or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_set_kernel_params_l_11">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_kernel_params_l_11</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_kernel</b>, int&nbsp;<b>i_deriv</b>, int&nbsp;<b>i_param</b>, double&nbsp;<b>param_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_kernel_params_l_1n</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_kernel</b>, int&nbsp;<b>i_deriv</b>, double&nbsp;*<b>params_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_kernel_params_l_n1</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_kernel</b>, int&nbsp;<b>i_param</b>, double&nbsp;*<b>params_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+<div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_set_kernel_params_l_nn</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_kernel</b>, double&nbsp;**<b>params_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div></div></div></div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Set the linearized kernel parameters for kernel index <tt><tt><i><b>i_kernel</b></i></tt></tt>.  The kernel index is the index at which the kernel was given in the array <a href="#xrtm_create"><tt><tt><i><b>kernels</b></i></tt></tt></a> given as input to <a href="#xrtm_create"><tt><tt><b>xrtm_create</b>()</tt></tt></a>.  A choice of four functions are provided for this purpose.  <tt><tt><b>xrtm_set_kernel_params_l_11</b>()</tt></tt> sets the value for a given derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt> and a given parameter index <tt><tt><i><b>i_param</b></i></tt></tt> given a scalar value.  <tt><tt><b>xrtm_set_kernel_params_l_1n</b>()</tt></tt> sets the value for all parameters given a derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt> given an array of length <tt><tt><i><b>n_params</b></i></tt></tt>.  <tt><tt><b>xrtm_set_kernel_params_l_n1</b>()</tt></tt> sets the value for all derivatives given a parameter index <tt><tt><i><b>i_param</b></i></tt></tt> given an array of length <tt><tt><i><b>n_derivs</b></i></tt></tt>.  <tt><tt><b>xrtm_set_kernel_params_l_nn</b>()</tt></tt> sets the value for all derivatives given and all parameters given a (<a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a> &times; <tt><tt><i><b>n_params</b></i></tt></tt>) array of arrays.  <tt><tt><i><b>n_params</b></i></tt></tt> is the number of parameters required for kernel <tt><tt><i><b>i_kernel</b></i></tt></tt>.  The number of parameters and a description of each parameter is given for each kernel in section&nbsp;<a href="sec3.html#xrtm_c_interface_configuration_constants_brdf_kernels">3.2.3</a>.  To set these values XRTM must have been created with the option <a href="#XRTM_OPTION_OUTPUT_AT_LEVELS">XRTM_CALC_DERIVS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_kernel</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of kernel to set, where 0  &#8804; <tt><tt><i><b>i_kernel</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_kernels</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_deriv</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of derivative to set, where 0  &#8804; <tt><tt><i><b>i_deriv</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_param</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of parameter to set, where 0  &#8804; <tt><tt><i><b>i_param</b></i></tt></tt>  &#8804; <tt><tt><i><b>n_params</b></i></tt></tt> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>param_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">the linearized kernel parameter for kernel <tt><tt><i><b>i_kernel</b></i></tt></tt>, where &#8722;&#8734; &#8804; <tt><tt><i><b>param_l</b></i></tt></tt>,<tt><tt><i><b>param_l</b></i>[i]</tt></tt>,<tt><tt><i><b>param_l</b></i>[i][j]</tt></tt>  &#8804; &#8734; </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_get_kernel_params_l">
+</a><div class="large"><p class="hangingindent">
+<tt>double <b>xrtm_get_kernel_params_l</b>(<i>xrtm_data&nbsp;*<b>d</b>, int&nbsp;<b>i_kernel</b>, int&nbsp;<b>i_deriv</b>, int&nbsp;<b>i_param</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the linearized kernel parameter for kernel index <tt><tt><i><b>i_kernel</b></i></tt></tt>, derivative index <tt><tt><i><b>i_deriv</b></i></tt></tt>, and parameter index <tt><tt><i><b>i_param</b></i></tt></tt>.  The kernel index is the index at which the kernel was given in the array <a href="#xrtm_create"><tt><tt><i><b>kernels</b></i></tt></tt></a> given as input to <a href="#xrtm_create"><tt><tt><b>xrtm_create</b>()</tt></tt></a>.  The parameter indices are described for each kernel in section&nbsp;<a href="sec3.html#xrtm_c_interface_configuration_constants_brdf_kernels">3.2.3</a>.  To get these values XRTM must have been created with the option <a href="#XRTM_OPTION_OUTPUT_AT_LEVELS">XRTM_CALC_DERIVS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>i_kernel</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of kernel to get, where 0  &#8804; <tt><tt><i><b>i_kernel</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_kernels</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_deriv</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of derivative to get, where 0  &#8804; <tt><tt><i><b>i_deriv</b></i></tt></tt>  &#8804; <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a> &#8722; 1 </td></tr>
+<tr><td align="left"><tt><em><b>i_param</b></em></tt> &nbsp;&nbsp; </td><td align="left">index of parameter to set, where 0  &#8804; <tt><tt><i><b>i_param</b></i></tt></tt>  &#8804; <tt><tt><i><b>n_params</b></i></tt></tt> &#8722; 1 </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+The linearized kernel parameter for kernel index <tt><tt><i><b>i_kernel</b></i></tt></tt> and parameter index <tt><tt><i><b>i_param</b></i></tt></tt> or <a href="#XRTM_DBL_ERROR">XRTM_DBL_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+     <a id="tth_sEc3.5"></a><h3>
+3.5&nbsp;&nbsp;Running the model and getting output</h3>
+<a id="xrtm_c_interface_running_the_model_and_getting_output">
+</a>
+
+<div class="p"><!----></div>
+<a id="xrtm_update_varied_layers">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_update_varied_layers</b>(<i>xrtm_data&nbsp;*<b>d</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+This function must be called every time the set of layers that vary, including the surface, changes.  A layer "varies" if at least one of the linearized values associated with that layer is nonzero.  For example, if at least one of the linearized values for a particular layer has been set to a nonzero value where before all the values for that layer were zero then that layer has been added to the set of layers that varies and <tt><tt><b>xrtm_update_varied_layers</b>()</tt></tt> must be called.  Equivalently, If all the linearized values for a layer are set to zero where before at least one of the values was nonzero then that layer has been removed from the set of layers that vary so <tt><tt><b>xrtm_update_varied_layers</b>()</tt></tt> must be called.  On the other hand, if the values of nonzero linearized values are only changed to other nonzero values then <tt><tt><b>xrtm_update_varied_layers</b>()</tt></tt> does not need to be called.  For efficiency, it is a good idea to call the function once, after all changes to all layers and all values have been changed just before running the model.  Calling this function is only valid when XRTM has been created with the option <a href="#XRTM_OPTION_OUTPUT_AT_LEVELS">XRTM_CALC_DERIVS</a>, otherwise it is an error.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+<div class="p"><!----></div>
+
+<div class="p"><!----></div>
+
+<div class="p"><!----></div>
+
+<div class="p"><!----></div>
+
+<a id="xrtm_solution">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_solution</b>(<i>xrtm_data&nbsp;*<b>d</b>, enum xrtm_solver_mask&nbsp;<b>solver</b>, int&nbsp;<b>solutions</b>, int&nbsp;<b>n_out_phis</b>, double&nbsp;**<b>out_phis</b>, double&nbsp;****<b>I_p</b>, double&nbsp;****<b>I_m</b>, double&nbsp;*****<b>I_p_l</b>, double&nbsp;*****<b>I_m_l</b>, double&nbsp;*<b>mean_p</b>, double&nbsp;*<b>mean_m</b>, double&nbsp;**<b>mean_p_l</b>, double&nbsp;**<b>mean_m_l</b>, double&nbsp;*<b>flux_p</b>, double&nbsp;*<b>flux_m</b>, double&nbsp;**<b>flux_p_l</b>, double&nbsp;**<b>flux_m_l</b>, double&nbsp;*<b>flux_div</b>, double&nbsp;**<b>flux_div_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Run XRTM using a specified solver and return various result types.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>solver</b></em></tt> &nbsp;&nbsp; </td><td align="left">bit mask for the <a href="#xrtm_c_interface_configuration_constants_solvers"><tt><tt>solver</tt></tt></a> to be used </td></tr>
+<tr><td align="left"><tt><em><b>solutions</b></em></tt> &nbsp;&nbsp; </td><td align="left">bit mask for the <a href="#xrtm_c_interface_configuration_constants_solutions"><tt><tt>solutions</tt></tt></a> to return results for </td></tr>
+<tr><td align="left"><tt><em><b>n_out_phis</b></em></tt> &nbsp;&nbsp; </td><td align="left">number azimuth angles &#981; to return results for </td></tr>
+<tr><td align="left"><tt><em><b>out_phis</b></em></tt> &nbsp;&nbsp; </td><td align="left">array of arrays of output azimuth angles with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a>, <tt><tt><i><b>n_out_phis</b></i></tt></tt>), where 0.0  &#8804; <tt><tt><i><b>out_phis</b></i>[i][j]</tt></tt>  &#8804; 360.0 </td></tr>
+<tr><td align="left"><tt><em><b>I_p</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of arrays of upward radiances with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_phis</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>I_m</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of arrays of downward radiances with dimen-sions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_phis</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>I_p_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of arrays of arrays of upward radi-ance derivatives with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_phis</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>I_m_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of arrays of arrays of downward radiance derivatives with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_phis</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>mean_p</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of upward mean radiances with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>mean_m</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of downward mean radiances with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>mean_p_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of upward mean radiance derivatives with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>mean_m_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of downward mean radiance derivatives with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>flux_p</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of upward fluxes with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>flux_m</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of downward fluxes with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>flux_p_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of upward flux derivatives with dimen- sions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>flux_m_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of downward flux derivatives with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>flux_div</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of flux divergence with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>flux_div_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of flux divergence derivatives with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_radiance">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_radiance</b>(<i>xrtm_data&nbsp;*<b>d</b>, enum xrtm_solver_mask&nbsp;<b>solver</b>, int&nbsp;<b>n_out_phis</b>, double&nbsp;**<b>out_phis</b>, double&nbsp;****<b>I_p</b>, double&nbsp;****<b>I_m</b>, double&nbsp;*****<b>I_p_l</b>, double&nbsp;*****<b>I_m_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Run XRTM using a specified solver and return radiance results.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>solver</b></em></tt> &nbsp;&nbsp; </td><td align="left">bit mask for the <a href="#xrtm_c_interface_configuration_constants_solvers"><tt><tt>solver</tt></tt></a> to be used </td></tr>
+<tr><td align="left"><tt><em><b>n_out_phis</b></em></tt> &nbsp;&nbsp; </td><td align="left">number azimuth angles &#981; to return results for </td></tr>
+<tr><td align="left"><tt><em><b>out_phis</b></em></tt> &nbsp;&nbsp; </td><td align="left">array of arrays of output azimuth angles with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a>, <tt><tt><i><b>n_out_phis</b></i></tt></tt>), where 0.0  &#8804; <tt><tt><i><b>out_phis</b></i>[i][j]</tt></tt>  &#8804; 360.0 </td></tr>
+<tr><td align="left"><tt><em><b>I_p</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of arrays of upward radiances with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_phis</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>I_m</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of arrays of downward radiances with dimen-sions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_phis</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>I_p_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of arrays of arrays of upward radi-ance derivatives with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_phis</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>I_m_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of arrays of arrays of downward radiance derivatives with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_thetas</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_out_phis</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_mean_radiance">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_mean_radiance</b>(<i>xrtm_data&nbsp;*<b>d</b>, enum xrtm_solver_mask&nbsp;<b>solver</b>, double&nbsp;*<b>mean_p</b>, double&nbsp;*<b>mean_m</b>, double&nbsp;**<b>mean_p_l</b>, double&nbsp;**<b>mean_m_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Run XRTM using a specified solver and return mean radiance results.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>solver</b></em></tt> &nbsp;&nbsp; </td><td align="left">bit mask for the <a href="#xrtm_c_interface_configuration_constants_solvers"><tt><tt>solver</tt></tt></a> to be used </td></tr>
+<tr><td align="left"><tt><em><b>mean_p</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of upward mean radiances with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>mean_m</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of downward mean radiances with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>mean_p_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of upward mean radiance derivatives with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>mean_m_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of downward mean radiance derivatives with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_flux">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_flux</b>(<i>xrtm_data&nbsp;*<b>d</b>, enum xrtm_solver_mask&nbsp;<b>solver</b>, double&nbsp;*<b>flux_p</b>, double&nbsp;*<b>flux_m</b>, double&nbsp;**<b>flux_p_l</b>, double&nbsp;**<b>flux_m_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Run XRTM using a specified solver and return flux results.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>solver</b></em></tt> &nbsp;&nbsp; </td><td align="left">bit mask for the <a href="#xrtm_c_interface_configuration_constants_solvers"><tt><tt>solver</tt></tt></a> to be used </td></tr>
+<tr><td align="left"><tt><em><b>flux_p</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of upward fluxes with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>flux_m</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of downward fluxes with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>flux_p_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of upward flux derivatives with dimen- sions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>flux_m_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of downward flux derivatives with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl><a id="xrtm_flux_divergence">
+</a><div class="large"><p class="hangingindent">
+<tt>int <b>xrtm_flux_divergence</b>(<i>xrtm_data&nbsp;*<b>d</b>, enum xrtm_solver_mask&nbsp;<b>solver</b>, double&nbsp;*<b>flux_div</b>, double&nbsp;**<b>flux_div_l</b></i>)</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Run XRTM using a specified solver and return flux divergence results.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left"><tt><em><b>d</b></em></tt> &nbsp;&nbsp; </td><td align="left">the <tt><tt><i>xrtm_data</i></tt></tt> structure which represents the instance created </td></tr>
+<tr><td align="left"><tt><em><b>solver</b></em></tt> &nbsp;&nbsp; </td><td align="left">bit mask for the <a href="#xrtm_c_interface_configuration_constants_solvers"><tt><tt>solver</tt></tt></a> to be used </td></tr>
+<tr><td align="left"><tt><em><b>flux_div</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of flux divergence with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"><tt><em><b>flux_div_l</b></em></tt> &nbsp;&nbsp; </td><td align="left">(output) array of arrays of arrays of flux divergence derivatives with dimensions (<a href="#xrtm_create"><tt><tt><i><b>n_out_levels</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_derivs</b></i></tt></tt></a>, <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>) </td></tr>
+<tr><td align="left"></td></tr></table>
+
+</dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> on error.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+     <a id="tth_sEc3.6"></a><h3>
+3.6&nbsp;&nbsp;Miscellaneous functions</h3>
+<a id="xrtm_c_interface_miscellaneous_functions">
+</a>
+
+<div class="p"><!----></div>
+<a id="xrtm_get_version">
+</a><div class="large"><p class="hangingindent">
+<tt>const char *<b>xrtm_get_version</b>()</tt>
+</p>
+
+<div class="p"><!----></div>
+</div>
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<b>Description:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Get the XRTM version sstring.
+
+<div class="p"><!----></div>
+</dd>
+</dl><b>Arguments:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+<table>
+<tr><td align="left">None.
+
+<div class="p"><!----></div>
+</td></tr></table>
+</dd>
+</dl><b>Return value:</b>
+
+<dl>
+ <dt><b></b></dt>
+	<dd>
+
+<div class="p"><!----></div>
+Pointer to the XRTM version string.
+
+<div class="p"><!----></div>
+</dd>
+</dl></dd>
+</dl>
+     <a id="tth_sEc3.7"></a><h3>
+3.7&nbsp;&nbsp;Error Handling</h3>
+<a id="xrtm_c_interface_error_handling">
+</a>
+
+<div class="p"><!----></div>
+All functions in the XRTM C interface return either an <tt><tt>int</tt></tt> or a <tt><tt>double</tt></tt>.  If an error occurs when calling these functions then the return value will be set to one of the follwing error constants depending on the function's return type:
+
+<div class="p"><!----></div>
+
+<dl>
+<a id="XRTM_INT_ERROR">
+</a> <dt><b><tt><tt>XRTM_INT_ERROR</tt></tt></b></dt>
+	<dd>  <br />
+Returned from functions returning an <tt><tt>int</tt></tt> when an error has occurred while calling the function.
+
+<div class="p"><!----></div>
+<a id="XRTM_DBL_ERROR">
+</a></dd>
+ <dt><b><tt><tt>XRTM_DBL_ERROR</tt></tt></b></dt>
+	<dd>  <br />
+Returned from functions returning a <tt><tt>double</tt></tt> when an error has occurred while calling the function.</dd>
+</dl>
+
+<div class="p"><!----></div>
+When an error occurs XRTM will print an error message followed by a function call stack to the standard error (<tt><tt>stderr</tt></tt>) stream.
+
+<div class="p"><!----></div>
+
+     <a id="tth_sEc3.8"></a><h3>
+3.8&nbsp;&nbsp;Example C program using XRTM</h3>
+<a id="xrtm_c_interface_example_c_program_using_xrtm">
+</a>
+
+<div class="p"><!----></div>
+An example program using the C interface is at
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;examples/example_c.c
+
+</pre>
+and when the XRTM code is compiled properly the C example program should be compiled as
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;examples/example_c
+
+</pre>
+
+<div class="p"><!----></div>
+
+<hr /><table width="100%"><tr><td>
+ <a href="index.html">HEAD</a></td><td align="right">
+<a href="sec4.html">NEXT
+</a></td></tr></table>
+</div></body></html>

@@ -1,0 +1,112 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+           "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<meta name="GENERATOR" content="TtH 4.03">
+ <style type="text/css"> div.p { margin-top: 7pt;}</style>
+ <style type="text/css"><!--
+ td div.comp { margin-top: -0.6ex; margin-bottom: -1ex;}
+ td div.comb { margin-top: -0.6ex; margin-bottom: -.6ex;}
+ td div.hrcomp { line-height: 0.9; margin-top: -0.8ex; margin-bottom: -1ex;}
+ td div.norm {line-height:normal;}
+ span.roman {font-family: serif; font-style: normal; font-weight: normal;} 
+ span.overacc2 {position: relative;  left: .8em; top: -1.2ex;}
+ span.overacc1 {position: relative;  left: .6em; top: -1.2ex;} --></style>
+ <style type="text/css"><!--
+ .tiny {font-size:30%;}
+ .scriptsize {font-size:xx-small;}
+ .footnotesize {font-size:x-small;}
+ .smaller {font-size:smaller;}
+ .small {font-size:small;}
+ .normalsize {font-size:medium;}
+ .large {font-size:large;}
+ .larger {font-size:x-large;}
+ .largerstill {font-size:xx-large;}
+ .huge {font-size:300%;}
+ --></style>
+<title>sec4.html</title>
+<table width="100%"><tr><td>
+ <a href="index.html">HEAD</a></td><td align="right">
+ <a href="sec3.html">PREVIOUS
+</a></td></tr></table>
+ <a id="tth_sEc4"></a><h2>
+4&nbsp;&nbsp;XRTM Utilities</h2>
+<a id="xrtm_utilities">
+</a>
+
+<div class="p"><!----></div>
+
+     <a id="tth_sEc4.1"></a><h3>
+4.1&nbsp;&nbsp;Test suite: testxrtm</h3>
+<a id="xrtm_utilities_test_suite_testxrtms">
+</a>
+
+<div class="p"><!----></div>
+      <a id="tth_sEc4.1.1"></a><h4>
+4.1.1&nbsp;&nbsp;Testxrtm options</h4>
+<a id="xrtm_utilities_stand_alone_execution_callxrtm_testxrtm_options">
+</a>
+
+<div class="p"><!----></div>
+
+     <a id="tth_sEc4.2"></a><h3>
+4.2&nbsp;&nbsp;Stand alone execution: callxrtm</h3>
+<a id="xrtm_utilities_stand_alone_execution_callxrtm">
+</a>
+
+<div class="p"><!----></div>
+<tt>callxrtm</tt> is a command line program  that takes inputs, either from the command line or from an input file, runs the model, and outputs results.  <tt>callxrtm</tt> was created primarily as a development and testing tool.  Although it is not recommended for production use (it is recommended that the API be used instead) it can also be useful for running XRTM for small studies.
+
+<div class="p"><!----></div>
+The path to <tt>callxrtm</tt> is 
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;utils/callxrtm
+
+</pre>
+or when using Visual Studio
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/callxrtm.exe
+
+</pre>
+where the variable <tt>$(SolutionDir)</tt> is <tt>msvs_2005</tt>, <tt>msvs_2008</tt>, or <tt>msvs_2010</tt> and the variable <tt>$(ConfigurationName)</tt> is <tt>Debug</tt> or <tt>Release</tt>.
+
+<div class="p"><!----></div>
+An example run of <tt>callxrtm</tt> is contained in the following test text file:
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;examples/callxrtm.txt
+
+</pre>
+Two cases are given.  One that runs <tt>callxrtm</tt> using the command line to set all the inputs and another that uses the following XRTM input file (<tt>.xif</tt>) to set the inputs
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;examples/example.xif
+
+</pre>
+Please see text file for more details about the example run.  The <tt>callxrtm</tt> input format for the command line and an input file is outlined in the next section.
+
+<div class="p"><!----></div>
+      <a id="tth_sEc4.2.1"></a><h4>
+4.2.1&nbsp;&nbsp;Callxrtm options</h4>
+<a id="xrtm_utilities_stand_alone_execution_callxrtm_callxrtm_options">
+</a>
+
+<div class="p"><!----></div>
+      <a id="tth_sEc4.2.2"></a><h4>
+4.2.2&nbsp;&nbsp;Callxrtm input format</h4>
+<a id="xrtm_utilities_stand_alone_execution_callxrtm_callxrtm_input_format">
+</a>
+
+<div class="p"><!----></div>
+
+
+<div class="p"><!----></div>
+
+
+<hr /><table width="100%"><tr><td>
+ <a href="index.html">HEAD</a></td><td align="right">
+<a href="refs.html">NEXT
+</a></td></tr></table>
+</div></body></html>

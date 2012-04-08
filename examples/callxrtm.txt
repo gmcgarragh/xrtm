@@ -1,0 +1,29 @@
+#*******************************************************************************
+callxrtm is a program that calls xrtm given input parameters on the command line
+or in an xrtm input file (.xif).  In most cases users will want to call xrtm
+from there own programs.  callxrtm's primary purpose is as a development tool.
+Never the less it is also useful as a quick way to get xrtm results for small
+problems.  Please see the xrtm documentation for details on running callxrtm.
+
+
+The following two examples are for the same scenario given in the example
+programs.
+
+Example using an xrtm input file (.xif):
+
+../utils/callxrtm -input_file example.xif -out_phis 45.
+
+Example where inputs are given on the command line in "input_string":
+
+../utils/callxrtm -input_string \
+     "-options 'calc_derivs','delta_m','n_t_tms' \
+      -solvers 'eig_add' \
+      -max_coef 34 -n_quad 8 -n_derivs 3 -n_layers 4 \
+      -n_kernels 1 -kernels 'lambertian' -n_out_levels 2 -n_out_thetas 3 :: \
+      -fourier_tol 1.e-4 -theta_0 35.-out_levels 0,4 -out_thetas 0.,30.,60. \
+      -ltau .02,.05,1.,.1 -ltau_l 0.,0.,0.; 0.,0.,0.; 1.,0.,0.; 0.,0.,0. \
+      -omega 1.,1.,.9,1. -omega_l 0.,0.,0.; 0.,0.,0.; 0.,1.,0.; 0.,0.,0. \
+      -coef_files 'gc6:2_250000_rayleigh.gc','gc6:2_250000_rayleigh.gc','gc6:2_250000_miam00.gc','gc6:2_250000_rayleigh.gc' \
+      -coef_files_l 'none','none','none'; 'none','none','none'; 'none','none','none'; 'none','none','none' \
+      -kernel_ampfac[0] .2 -kernel_ampfac_l[0] 0.,0.,1." \
+      -out_phis 45.

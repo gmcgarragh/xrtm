@@ -1,0 +1,23 @@
+/* xrtm_work.c */
+int work_init(work_data *work, int n_quad, int n_quad_x, int n_stokes, int n_derivs, int n_layers, int n_umus);
+void work_free(work_data *work);
+void *get_work_x1(work_data *work, size_t m, size_t size);
+uchar *get_work_uc1(work_data *work, size_t m);
+int *get_work_i1(work_data *work, size_t m);
+double *get_work_d1(work_data *work, size_t m);
+dcomplex *get_work_dc1(work_data *work, size_t m);
+void **get_work_x2(work_data *work, size_t m, size_t n, size_t size);
+int **get_work_i2(work_data *work, size_t m, size_t n);
+double **get_work_d2(work_data *work, size_t m, size_t n);
+dcomplex **get_work_dc2(work_data *work, size_t m, size_t n);
+void ***get_work_x3(work_data *work, size_t m, size_t n, size_t o, size_t size);
+int ***get_work_i3(work_data *work, size_t m, size_t n, size_t o);
+double ***get_work_d3(work_data *work, size_t m, size_t n, size_t o);
+dcomplex ***get_work_dc3(work_data *work, size_t m, size_t n, size_t o);
+void ****get_work_x4(work_data *work, size_t m, size_t n, size_t o, size_t p, size_t size);
+int ****get_work_i4(work_data *work, size_t m, size_t n, size_t o, size_t p);
+double ****get_work_d4(work_data *work, size_t m, size_t n, size_t o, size_t p);
+dcomplex ****get_work_dc4(work_data *work, size_t m, size_t n, size_t o, size_t p);
+void *work_get1(work_data *work, enum work_type type);
+void *work_get2(work_data *work, enum work_type type, enum work_v_type v_type, uchar *flags);
+void *work_get3(work_data *work, enum work_type type, enum work_v_type v_type, uchar **flags);

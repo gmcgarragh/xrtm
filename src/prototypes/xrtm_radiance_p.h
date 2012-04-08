@@ -1,0 +1,8 @@
+/* xrtm_radiance.c */
+void radiance_slab(int n_quad, int n_derivs, double **R_m, double **T_p, double *S_p, double ***R_m_l, double ***T_p_l, double **S_p_l, double *I1_m, double *I2_p, double **I1_m_l, double **I2_p_l, double *I1_p, double **I1_p_l, uchar *derivs, work_data work);
+void radiance_toa_ref(int n_quad, int n_derivs, double **R_m, double *S_p, double ***R_m_l, double **S_p_l, double *I1_m, double **I1_m_l, double *I1_p, double **I1_p_l, uchar *derivs, work_data work);
+void radiance_boa_ref(int n_quad, int n_derivs, double **R12_p, double *S12_m, double ***R12_p_l, double **S12_m_l, double **R23_m, double ***R23_m_l, double *I3_p, double **I3_p_l, double *I2_p, double **I2_p_l, double *I2_m, double **I2_m_l, uchar *derivs, work_data work);
+void radiance_toa_all(int n_quad, int n_derivs, double **R_m, double **T_p, double *S_p, double ***R_m_l, double ***T_p_l, double **S_p_l, double *I1_m, double *I2_p, double **I1_m_l, double **I2_p_l, double *I1_p, double *I1m_, double **I1_p_l, double **I1m_l_, uchar *derivs, work_data work);
+void radiance_boa_all(int n_quad, int n_derivs, double **R12_p, double **T12_m, double **R23_m, double *S12_m, double ***R12_p_l, double ***T12_m_l, double ***R23_m_l, double **S12_m_l, double *I3_p, double *I1_m, double **I3_p_l, double **I1_m_l, double *I2_p, double *I2_m, double **I2_p_l, double **I2_m_l, uchar *derivs, save_tree_data save_tree, work_data work);
+double radiance_to_mean(int n_quad, double *qx_v, double *qw_v, double F_0, double mu_0, double btran, double *I);
+double radiance_to_flux(int n_quad, double *qx_v, double *qw_v, double F_0, double mu_0, double btran, double *I);

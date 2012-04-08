@@ -1,0 +1,6 @@
+/* xrtm_source_a.c */
+int forward_save_build_source_vectors_1n_alloc(forward_save_build_source_vectors_1n_data *d, int n_quad_v);
+void build_source_vectors_1n_a(int n_quad, int n_stokes, double *qx_v, double F_0, double omega, double *omega_a, double as_0, double *as_0_a, double *P_q0_mm, double *P_q0_pm, double **tpr, double **tmr, double **gamma, double *F_p, double *F_m, double *P_q0_mm_a, double *P_q0_pm_a, double **tpr_a, double **tmr_a, double **gamma_a, double *F_p_a, double *F_m_a, save_tree_data save_tree, work_data work);
+void build_global_source_a(int n_quad_v, double atran, double *atran_a, double **R_p, double **T_p, double *F_p, double *F_m, double *S_p, double *S_m, double **R_p_a, double **T_p_a, double *F_p_a, double *F_m_a, double *S_p_a, double *S_m_a, work_data work);
+void build_global_source_a2(int n_quad_v, double atran, double *atran_a, double **R_p, double **T_p, double **R_m, double **T_m, double *F_p, double *F_m, double *S_p, double *S_m, double **R_p_a, double **T_p_a, double **R_m_a, double **T_m_a, double *F_p_a, double *F_m_a, double *S_p_a, double *S_m_a, work_data work);
+void scale_source_vectors_a(int n_quad_v, double btran, double *btran_a, double *F_p1, double *F_m1, double *F_p2, double *F_m2, double *F_p_a1, double *F_m_a1, double *F_p_a2, double *F_m_a2, work_data work);

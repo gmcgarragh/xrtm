@@ -1,0 +1,240 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+           "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<meta name="GENERATOR" content="TtH 4.03">
+ <style type="text/css"> div.p { margin-top: 7pt;}</style>
+ <style type="text/css"><!--
+ td div.comp { margin-top: -0.6ex; margin-bottom: -1ex;}
+ td div.comb { margin-top: -0.6ex; margin-bottom: -.6ex;}
+ td div.hrcomp { line-height: 0.9; margin-top: -0.8ex; margin-bottom: -1ex;}
+ td div.norm {line-height:normal;}
+ span.roman {font-family: serif; font-style: normal; font-weight: normal;} 
+ span.overacc2 {position: relative;  left: .8em; top: -1.2ex;}
+ span.overacc1 {position: relative;  left: .6em; top: -1.2ex;} --></style>
+ <style type="text/css"><!--
+ .tiny {font-size:30%;}
+ .scriptsize {font-size:xx-small;}
+ .footnotesize {font-size:x-small;}
+ .smaller {font-size:smaller;}
+ .small {font-size:small;}
+ .normalsize {font-size:medium;}
+ .large {font-size:large;}
+ .larger {font-size:x-large;}
+ .largerstill {font-size:xx-large;}
+ .huge {font-size:300%;}
+ --></style>
+<title>sec2.html</title>
+<table width="100%"><tr><td>
+ <a href="index.html">HEAD</a></td><td align="right">
+ <a href="sec1.html">PREVIOUS
+</a></td></tr></table>
+ <a id="tth_sEc2"></a><h2>
+2&nbsp;&nbsp;Building and Using XRTM</h2>
+<a id="building_and_using_xrtm">
+</a>
+
+<div class="p"><!----></div>
+The section discusses, first, the process of building (compiling) XRTM including the core library, the language interfaces, the example programs, and the utility programs.  Then the compilation details of using the XRTM core library and the appropriate language interface in your programs is outlined.
+
+<div class="p"><!----></div>
+     <a id="tth_sEc2.1"></a><h3>
+2.1&nbsp;&nbsp;Building XRTM</h3>
+<a id="building_and_using_xrtm_building_xrtm">
+</a>
+
+<div class="p"><!----></div>
+      <a id="tth_sEc2.1.1"></a><h4>
+2.1.1&nbsp;&nbsp;GNU Make</h4>
+<a id="building_and_using_xrtm_building_xrtm_gnu_make">
+</a>
+
+<div class="p"><!----></div>
+The standard build system uses GNU Make (other versions of UNIX Make may work but are not tested).  This should work on Linux, Unix, Mac OS, and on Windows using the either <a href="http://www.cygwin.com/">Cygwin</a> or <a href="http://www.mingw.org/">MinGW (Minimalist GNU for Windows)</a>.
+
+<div class="p"><!----></div>
+The first step is to configure the build for your environment.  This includes setting the compiler command and the associated options and setting the appropriate paths to your BLAS and LAPACK libraries.  Settings are contained in the file <tt>make.inc</tt> in the XRTM base directory. 
+
+<div class="p"><!----></div>
+Compiler and associated options are contained within the section identified as "Compiler and linker settings".  The commands for the compilers to use are represented by the variables <tt>CC</tt>, <tt>CXX</tt>, <tt>F77</tt>, and <tt>F90</tt>, for the C, C++, Fortran 77, and Fortran 90 compilers, respectively, and the associated options are represented by the variables <tt>CCFLAGS</tt>, <tt>CXXFLAGS</tt>, <tt>F77FLAGS</tt>, and <tt>F90FLAGS</tt>.  The default settings are appropriate for GCC (GNU Compiler Collection) versions 4.2 and greater and should not have to be modified unless other compilers are being used.  Note that XRTM is entirely C89/90 compliant except for the use of complex types.  Therefore, the C compiler must be C99 compliant.  As an alternative all of XRTM's C code may be built with a C++ compiler in which case the complex support is through the C++ standard library's complex class.
+
+<div class="p"><!----></div>
+The only external libraries that XRTM currently depends on are BLAS (Basic Linear Algebra Subprograms) and LAPACK (Linear Algebra PACKage).  Reference version of both libraries may be obtained from <a href="http://www.netlib.org/"><tt>http://www.netlib.org/</tt></a> but it is highly recommend, at least for BLAS, that libraries optimized for your platform are used instead.  The performance benefits are usually significant.  Optimized versions of BLAS include Intel Math Kernel Library (MKL), AMD Core Math Library (ACML), Automatically Tuned Linear Algebra Software (ATLAS), and GotoBLAS.  
+
+<div class="p"><!----></div>
+For each library the appropriate compiler command line additions required to use them are represented by the variables <tt>LIB_BLAS</tt> and <tt>LIB_LAPACK</tt> contained in the section of <tt>make.inc</tt> identified as "BLAS and LAPACK settings".  The values of these variables may contain link flags such as <tt>-lblas</tt> and <tt>-llapack</tt> and perhaps flags indicating the location of these libraries such as <tt>-L/opt/blas</tt> and <tt>-L/opt/lapack</tt>, respectively.  The values may also be set to the libraries themselves such as <tt>/opt/blas/libblas.a</tt> or <tt>/opt/lapack/liblapack.a</tt>.
+
+<div class="p"><!----></div>
+Once the proper settings have been set in <tt>make.inc</tt> XRTM may be compiled by executing the <tt>make</tt> command.
+
+<div class="p"><!----></div>
+      <a id="tth_sEc2.1.2"></a><h4>
+2.1.2&nbsp;&nbsp;Visual Studio</h4>
+<a id="building_and_using_xrtm_building_xrtm_visual_studio">
+</a>
+
+<div class="p"><!----></div>
+XRTM may also be built on Windows using Visual Studio along with Intel's Visual Fortran Composer XE for Windows.  Supported versions of Visual Studio are 2005, 2008, and 2010.   Depending on which version is being used the XRTM Visual Studio solution may be loaded from one of the following solution (<tt>.sln</tt>) files relative to the XRTM base directory:
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msvs_2005/xrtm.sln
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msvs_2008/xrtm.sln
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msvs_2010/xrtm.sln
+
+</pre>
+
+<div class="p"><!----></div>
+     <a id="tth_sEc2.2"></a><h3>
+2.2&nbsp;&nbsp;Using XRTM in your code</h3>
+<a id="building_and_using_xrtm_using_xrtm_in_your_code">
+</a>
+
+<div class="p"><!----></div>
+To use XRTM in your own code either have to include/use the appropriate header/module file and link with the appropriate XRTM library files and BLAS/LAPACK library files.
+
+<div class="p"><!----></div>
+      <a id="tth_sEc2.2.1"></a><h4>
+2.2.1&nbsp;&nbsp;C</h4>
+<a id="building_and_using_xrtm_using_xrtm_in_your_code_c">
+</a>
+
+<div class="p"><!----></div>
+The C interface is part of the core library in the <tt>src/</tt> directory.  To use the C interface your code must include the following header file
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src/xrtm_interface.h
+
+</pre>
+and must link with the following libraries:
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src/libxrtm.a
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;misc/libxrtm_misc.a
+
+</pre>
+or when using Visual Studio the following libraries:
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm.lib
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm_f.lib
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm_misc.lib
+
+</pre>
+where the variable <tt>$(SolutionDir)</tt> is <tt>msvs_2005</tt>, <tt>msvs_2008</tt>, or <tt>msvs_2010</tt> and the variable <tt>$(ConfigurationName)</tt> is <tt>Debug</tt> or <tt>Release</tt>.
+
+<div class="p"><!----></div>
+For example, if one has C code in a file named <tt>my_code.c</tt>, includes the XRTM C interface header file with
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#include&nbsp;&lt;xrtm_interface.h&#62;
+
+</pre>
+and uses gcc to compile and link the code the command may look like this
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gcc&nbsp;-O2&nbsp;my_code.c&nbsp;-I$(XRTM_HOME)/src&nbsp;-L$(XRTM_HOME)/src&nbsp;-L$(XRTM_HOME)/misc&nbsp;\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-lxrtm&nbsp;-lxrtm_misc&nbsp;$(BLAS_STUFF)&nbsp;$(LAPACK_STUFF)
+
+</pre>
+where the variable <tt>$(XRTM_HOME)</tt> is the location of the XRTM base directory and the variables <tt>$(BLAS_STUFF)</tt> and <tt>$(LAPACK_STUFF)</tt> represent what is required to link with BLAS and LAPACK, respectively.  For more information, take a look at the build details for the C interface example program <tt>examples/example_c.c</tt>.
+
+<div class="p"><!----></div>
+      <a id="tth_sEc2.2.2"></a><h4>
+2.2.2&nbsp;&nbsp;C++</h4>
+<a id="building_and_using_xrtm_using_xrtm_in_your_code_cpp">
+</a>
+
+<div class="p"><!----></div>
+To use the C++ interface your code must include the following header file
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interfaces/xrtm_int_cpp.h
+
+</pre>
+and must link with the following libraries:
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src/libxrtm.a
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;misc/libxrtm_misc.a
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interfaces/libxrtm_interfaces.a
+
+</pre>
+or when using Visual Studio the following libraries:
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm.lib
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm_f.lib
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm_misc.lib
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm_interfaces.lib
+
+</pre>
+where the variable <tt>$(SolutionDir)</tt> is <tt>msvs_2005</tt>, <tt>msvs_2008</tt>, or <tt>msvs_2010</tt> and the variable <tt>$(ConfigurationName)</tt> is <tt>Debug</tt> or <tt>Release</tt>.  For more information, take a look at the build details for the C++ interface example program <tt>examples/example_cpp.cpp</tt>.
+
+<div class="p"><!----></div>
+      <a id="tth_sEc2.2.3"></a><h4>
+2.2.3&nbsp;&nbsp;Fortran 77</h4>
+<a id="building_and_using_xrtm_using_xrtm_in_your_code_fortran_77">
+</a>
+
+<div class="p"><!----></div>
+To use the Fortran 77 interface your code must include the following file
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interfaces/xrtm_int_f77.inc
+
+</pre>
+and must link with the following libraries:
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src/libxrtm.a
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;misc/libxrtm_misc.a
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interfaces/libxrtm_interfaces.a
+
+</pre>
+or when using Visual Studio the following libraries:
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm.lib
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm_f.lib
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm_misc.lib
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm_interfaces.lib
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm_interfaces_f.lib
+
+</pre>
+where the variable <tt>$(SolutionDir)</tt> is <tt>msvs_2005</tt>, <tt>msvs_2008</tt>, or <tt>msvs_2010</tt> and the variable <tt>$(ConfigurationName)</tt> is <tt>Debug</tt> or <tt>Release</tt>.  For more information, take a look at the build details for the Fortran 77 interface example program <tt>examples/example_f77.f</tt>.
+
+<div class="p"><!----></div>
+      <a id="tth_sEc2.2.4"></a><h4>
+2.2.4&nbsp;&nbsp;Fortran 90</h4>
+<a id="building_and_using_xrtm_using_xrtm_in_your_code_fortran_90">
+</a>
+
+<div class="p"><!----></div>
+To use the Fortran 90 interface your code must <tt>USE</tt> the <tt>XRTM_INT_F90</tt> module
+and must link with the following libraries:
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src/libxrtm.a
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;misc/libxrtm_misc.a
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interfaces/libxrtm_interfaces.a
+
+</pre>
+or when using Visual Studio the following libraries:
+
+<pre>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm.lib
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm_f.lib
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm_misc.lib
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm_interfaces.lib
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(SolutionDir)/$(ConfigurationName)/libxrtm_interfaces_f.lib
+
+</pre>
+where the variable <tt>$(SolutionDir)</tt> is <tt>msvs_2005</tt>, <tt>msvs_2008</tt>, or <tt>msvs_2010</tt> and the variable <tt>$(ConfigurationName)</tt> is <tt>Debug</tt> or <tt>Release</tt>.  For more information, take a look at the build details for the Fortran 90 interface example program <tt>examples/example_f90.f90</tt>.
+
+<div class="p"><!----></div>
+
+<hr /><table width="100%"><tr><td>
+ <a href="index.html">HEAD</a></td><td align="right">
+<a href="sec3.html">NEXT
+</a></td></tr></table>
+</div></body></html>

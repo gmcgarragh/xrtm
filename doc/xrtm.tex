@@ -1,0 +1,2030 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\input{common.tex}
+
+
+\titleformat{\chapter}{\bf\LARGE}{\thechapter}{1em}{}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\newcommand\version{0.91}
+
+\iftth
+\newcommand\xrtmchapter[1]{\section{#1}}
+\newcommand\xrtmsection[1]{\subsection{#1}}
+\newcommand\xrtmsubsection[1]{\subsubsection{#1}}
+\else
+\newcommand\xrtmchapter[1]{\chapter{#1}}
+\newcommand\xrtmsection[1]{\section{#1}}
+\newcommand\xrtmsubsection[1]{\subsection{#1}}
+\fi
+
+\iftth
+\newcommand\source[1]{\texttt{\special{html:<tt>}#1\special{html:</tt>}}}
+\newcommand\sourcename[1]{\texttt{\special{html:<tt><b>}#1\special{html:</b></tt>}}}
+\newcommand\sourcenamefunc[1]{\texttt{\special{html:<tt><b>}#1\special{html:</b>}()\special{html:</tt>}}}
+\newcommand\sourcearg[1]{\texttt{\special{html:<tt><i>}#1\special{html:</i></tt>}}}
+\newcommand\sourcenamearg[1]{\texttt{\special{html:<tt><i><b>}#1\special{html:</b></i></tt>}}}
+\newcommand\sourcenameargarray[2]{\texttt{\special{html:<tt><i><b>}#1\special{html:</b></i>}#2\special{html:</tt>}}}
+\else
+\newcommand\source[1]{\texttt{#1}}
+\newcommand\sourcename[1]{\texttt{\textbf{#1}}}
+\newcommand\sourcenamefunc[1]{\texttt{\textbf{#1}()}}
+\newcommand\sourcearg[1]{\texttt{\textit{#1}}}
+\newcommand\sourcenamearg[1]{\texttt{\textit{\textbf{#1}}}}
+\newcommand\sourcenameargarray[2]{\texttt{\textit{\textbf{#1}}#2}}
+\fi
+
+\newcommand\createarg[1]{\xref{xrtm_create}{\sourcenamearg{#1}}}
+
+\newcommand\interror[1]{#1 or \xref{XRTM_INT_ERROR}{XRTM\_\-INT\_\-ERROR} on error.}
+\newcommand\dblerror[1]{#1 or \xref{XRTM_DBL_ERROR}{XRTM\_\-DBL\_\-ERROR} on error.}
+
+\newcommand\interrornoret{\interror{Zero with successful completion}}
+\newcommand\dblerrornoret{\dblerror{Zero with successful completion}}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\special{html:<title>XRTM Documentation</title>}
+\special{html:<link rel="stylesheet" href="style.css" type="text/css">}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\begin{document}
+
+\bibliographystyle{plainnat}
+
+
+\frontmatter
+
+
+\iftth
+\begin{center}
+{\huge \bfseries XRTM} \\ \\
+The X Radiative Transfer Model \\ \\
+Version \version \\
+\today
+\end{center}
+\else
+\begin{titlepage}
+\vspace*{1.25in}
+{\noindent \huge \bfseries XRTM} \\
+\rule{\linewidth}{3.0pt}
+\flushright
+X Radiative Transfer Model \\
+Version \version \\
+\usdate\today
+\vfill
+\flushleft
+\Large Greg McGarragh
+\rule{\linewidth}{1.5pt}
+\end{titlepage}
+\fi
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\null
+\iftth
+\vspace{0.25in}
+\else
+\vfill
+\fi
+{
+\setlength{\parskip}{7.5pt}
+
+\noindent
+This manual describes how to install and use The X Radiative Transfer Model (XRTM) version 0.91.
+
+\noindent
+Copyright \copyright \ 2007-2012 Greg McGarragh
+
+\noindent
+Permission is granted to copy, distribute and/or modify this document under the terms of the \href{http://www.gnu.org/licenses/fdl-1.3.html}{GNU Free Documentation License, Version 1.3} or any later version published by the Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A copy of the license is included in the section entitled ``GNU Free Documentation License''.
+}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\tableofcontents
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\mainmatter
+
+
+\setlength{\parskip}{5.0pt}
+
+
+\xrtmchapter{Introduction to XRTM}
+\label{introduction_to_xrtm}
+
+XRTM (X Radiative Transfer Model) is a plane-parallel multi-layer scalar/vector radiative transfer model with support for absorption, emission, and multiple scattering.   In addition to the radiances or Stokes vector elements, XRTM can analytically generate derivatives of these quantities with respect to model inputs either my forward propagation (tangent linear) or backward propagation (adjoint of the tangent linear).  XRTM implements several different radiative transfer solvers and includes several features some of which include Delta-M scaling \citep{wiscombe_w_j_1977a}, the Nakajima-Tanaka TMS correction \citep{nakajima_t_1988}, a pseudo-spherical approximation for solar and line-of-sight beams \citep{dahlback_arne_1991}, a generalized BRDF formulation \citep{spurr_r_j_d_2004}, and support to generate results for any number of view angles and/or levels simultaneously.
+
+XRTM's core library is coded in C with a well defined application programming interface (API) and is thread safe so that multiple instances can be called safely in shared memory multi-processor environments.  Interfaces are also provided for C++, Fortran 77, and Fortran 90 and as an alternative alternatively XRTM can be executed independently as a stand alone program.  Finally, example programs that call XRTM are provided for each language interface.
+
+XRTM includes an extensive test suite that attempts to test the model over the entire range of solvers, features and possible imputes.
+
+For up to date information regarding XRTM, to download the source code distribution, and/or to view the documentation please visit the XRTM web page at
+\begin{list}{}{}
+\item \url{http://reef.atmos.colostate.edu/~gregm/xrtm/}
+\end{list}
+
+For questions or comments or to report a bug email Greg at \href{mailto:gregm@atmos.colostate.edu}{gregm@atmos.colostate.edu}.  Bug reports are greatly appreciated!  If you would like to report a bug please include sample code that reproduces the bug, along with the inputs and expected outputs.
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmsection{License}
+\label{introduction_to_xrtm_license}
+
+XRTM is licensed under the \href{http://www.gnu.org/licenses/gpl.html}{GNU General Public License (GPL), Version 3} a copy of which is in the file COPYING in the top level directory of the XRTM source code distribution.
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmsection{Conventions used in this manual}
+\label{introduction_to_xrtm_conventions_used_in_this_manual}
+
+Source code such as interface definitions and examples are typeset in \texttt{typewriter font}.  Source code identifiers such as variable names and function names are also typeset in bold while function argument types, modifiers, and names, are also typeset in italics.  For example a function name will be typeset in bold typewriter font as \sourcename{func\_name}, argument types in italic typewriter font as \sourcearg{int}, and argument names in bold italic typewriter font as \sourcenamearg{arg\_name}.
+
+Internet links are typeset in the standard color \textcolor{urlcolor}{blue}.  Links that are local to the manual are typeset in a \textcolor{linkscolor}{dark red} except for citations that link to their corresponding bibliography entries which are in a \textcolor{citescolor}{dark green}.
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmchapter{Building and Using XRTM}
+\label{building_and_using_xrtm}
+
+The section discusses, first, the process of building (compiling) XRTM including the core library, the language interfaces, the example programs, and the utility programs.  Then the compilation details of using the XRTM core library and the appropriate language interface in your programs is outlined.
+
+
+\xrtmsection{Building XRTM}
+\label{building_and_using_xrtm_building_xrtm}
+
+
+\xrtmsubsection{GNU Make}
+\label{building_and_using_xrtm_building_xrtm_gnu_make}
+
+The standard build system uses GNU Make (other versions of UNIX Make may work but are not tested).  This should work on Linux, Unix, Mac OS, and on Windows using the either \href{http://www.cygwin.com/}{Cygwin} or \href{http://www.mingw.org/}{MinGW (Minimalist GNU for Windows)}.
+
+The first step is to configure the build for your environment.  This includes setting the compiler command and the associated options and setting the appropriate paths to your BLAS and LAPACK libraries.  Settings are contained in the file \texttt{make.inc} in the XRTM base directory. 
+
+Compiler and associated options are contained within the section identified as ``Compiler and linker settings''.  The commands for the compilers to use are represented by the variables \texttt{CC}, \texttt{CXX}, \texttt{F77}, and \texttt{F90}, for the C, C++, Fortran 77, and Fortran 90 compilers, respectively, and the associated options are represented by the variables \texttt{CCFLAGS}, \texttt{CXXFLAGS}, \texttt{F77FLAGS}, and \texttt{F90FLAGS}.  The default settings are appropriate for GCC (GNU Compiler Collection) versions 4.2 and greater and should not have to be modified unless other compilers are being used.  Note that XRTM is entirely C89/90 compliant except for the use of complex types.  Therefore, the C compiler must be C99 compliant.  As an alternative all of XRTM's C code may be built with a C++ compiler in which case the complex support is through the C++ standard library's complex class.
+
+The only external libraries that XRTM currently depends on are BLAS (Basic Linear Algebra Subprograms) and LAPACK (Linear Algebra PACKage).  Reference version of both libraries may be obtained from \url{http://www.netlib.org/} but it is highly recommend, at least for BLAS, that libraries optimized for your platform are used instead.  The performance benefits are usually significant.  Optimized versions of BLAS include Intel Math Kernel Library (MKL), AMD Core Math Library (ACML), Automatically Tuned Linear Algebra Software (ATLAS), and GotoBLAS.  
+
+For each library the appropriate compiler command line additions required to use them are represented by the variables \texttt{LIB\_BLAS} and \texttt{LIB\_LAPACK} contained in the section of \texttt{make.inc} identified as ``BLAS and LAPACK settings''.  The values of these variables may contain link flags such as \texttt{-lblas} and \texttt{-llapack} and perhaps flags indicating the location of these libraries such as \texttt{-L/opt/blas} and \texttt{-L/opt/lapack}, respectively.  The values may also be set to the libraries themselves such as \texttt{/opt/blas/libblas.a} or \texttt{/opt/lapack/liblapack.a}.
+
+Once the proper settings have been set in \texttt{make.inc} XRTM may be compiled by executing the \texttt{make} command.
+
+
+\xrtmsubsection{Visual Studio}
+\label{building_and_using_xrtm_building_xrtm_visual_studio}
+
+XRTM may also be built on Windows using Visual Studio along with Intel's Visual Fortran Composer XE for Windows.  Supported versions of Visual Studio are 2005, 2008, and 2010.   Depending on which version is being used the XRTM Visual Studio solution may be loaded from one of the following solution (\texttt{.sln}) files relative to the XRTM base directory:
+\begin{verbatim}
+     msvs_2005/xrtm.sln
+     msvs_2008/xrtm.sln
+     msvs_2010/xrtm.sln
+\end{verbatim}
+
+
+\xrtmsection{Using XRTM in your code}
+\label{building_and_using_xrtm_using_xrtm_in_your_code}
+
+To use XRTM in your own code either have to include/use the appropriate header/module file and link with the appropriate XRTM library files and BLAS/LAPACK library files.
+
+
+\xrtmsubsection{C}
+\label{building_and_using_xrtm_using_xrtm_in_your_code_c}
+
+The C interface is part of the core library in the \texttt{src/} directory.  To use the C interface your code must include the following header file
+\begin{verbatim}
+     src/xrtm_interface.h
+\end{verbatim}
+and must link with the following libraries:
+\begin{verbatim}
+     src/libxrtm.a
+     misc/libxrtm_misc.a
+\end{verbatim}
+or when using Visual Studio the following libraries:
+\begin{verbatim}
+     $(SolutionDir)/$(ConfigurationName)/libxrtm.lib
+     $(SolutionDir)/$(ConfigurationName)/libxrtm_f.lib
+     $(SolutionDir)/$(ConfigurationName)/libxrtm_misc.lib
+\end{verbatim}
+where the variable \texttt{\$(SolutionDir)} is \texttt{msvs\_2005}, \texttt{msvs\_2008}, or \texttt{msvs\_2010} and the variable \texttt{\$(ConfigurationName)} is \texttt{Debug} or \texttt{Release}.
+
+For example, if one has C code in a file named \texttt{my\_code.c}, includes the XRTM C interface header file with
+\begin{verbatim}
+     #include <xrtm_interface.h>
+\end{verbatim}
+and uses gcc to compile and link the code the command may look like this
+\begin{verbatim}
+     gcc -O2 my_code.c -I$(XRTM_HOME)/src -L$(XRTM_HOME)/src -L$(XRTM_HOME)/misc \
+         -lxrtm -lxrtm_misc $(BLAS_STUFF) $(LAPACK_STUFF)
+\end{verbatim}
+where the variable \texttt{\$(XRTM\_HOME)} is the location of the XRTM base directory and the variables \texttt{\$(BLAS\_STUFF)} and \texttt{\$(LAPACK\_STUFF)} represent what is required to link with BLAS and LAPACK, respectively.  For more information, take a look at the build details for the C interface example program \texttt{examples/example\_c.c}.
+
+
+\xrtmsubsection{C++}
+\label{building_and_using_xrtm_using_xrtm_in_your_code_cpp}
+
+To use the C++ interface your code must include the following header file
+\begin{verbatim}
+     interfaces/xrtm_int_cpp.h
+\end{verbatim}
+and must link with the following libraries:
+\begin{verbatim}
+     src/libxrtm.a
+     misc/libxrtm_misc.a
+     interfaces/libxrtm_interfaces.a
+\end{verbatim}
+or when using Visual Studio the following libraries:
+\begin{verbatim}
+     $(SolutionDir)/$(ConfigurationName)/libxrtm.lib
+     $(SolutionDir)/$(ConfigurationName)/libxrtm_f.lib
+     $(SolutionDir)/$(ConfigurationName)/libxrtm_misc.lib
+     $(SolutionDir)/$(ConfigurationName)/libxrtm_interfaces.lib
+\end{verbatim}
+where the variable \texttt{\$(SolutionDir)} is \texttt{msvs\_2005}, \texttt{msvs\_2008}, or \texttt{msvs\_2010} and the variable \texttt{\$(ConfigurationName)} is \texttt{Debug} or \texttt{Release}.  For more information, take a look at the build details for the C++ interface example program \texttt{examples/example\_cpp.cpp}.
+
+
+\xrtmsubsection{Fortran 77}
+\label{building_and_using_xrtm_using_xrtm_in_your_code_fortran_77}
+
+To use the Fortran 77 interface your code must include the following file
+\begin{verbatim}
+     interfaces/xrtm_int_f77.inc
+\end{verbatim}
+and must link with the following libraries:
+\begin{verbatim}
+     src/libxrtm.a
+     misc/libxrtm_misc.a
+     interfaces/libxrtm_interfaces.a
+\end{verbatim}
+or when using Visual Studio the following libraries:
+\begin{verbatim}
+     $(SolutionDir)/$(ConfigurationName)/libxrtm.lib
+     $(SolutionDir)/$(ConfigurationName)/libxrtm_f.lib
+     $(SolutionDir)/$(ConfigurationName)/libxrtm_misc.lib
+     $(SolutionDir)/$(ConfigurationName)/libxrtm_interfaces.lib
+     $(SolutionDir)/$(ConfigurationName)/libxrtm_interfaces_f.lib
+\end{verbatim}
+where the variable \texttt{\$(SolutionDir)} is \texttt{msvs\_2005}, \texttt{msvs\_2008}, or \texttt{msvs\_2010} and the variable \texttt{\$(ConfigurationName)} is \texttt{Debug} or \texttt{Release}.  For more information, take a look at the build details for the Fortran 77 interface example program \texttt{examples/example\_f77.f}.
+
+
+\xrtmsubsection{Fortran 90}
+\label{building_and_using_xrtm_using_xrtm_in_your_code_fortran_90}
+
+To use the Fortran 90 interface your code must \texttt{USE} the \texttt{XRTM\_INT\_F90} module
+and must link with the following libraries:
+\begin{verbatim}
+     src/libxrtm.a
+     misc/libxrtm_misc.a
+     interfaces/libxrtm_interfaces.a
+\end{verbatim}
+or when using Visual Studio the following libraries:
+\begin{verbatim}
+     $(SolutionDir)/$(ConfigurationName)/libxrtm.lib
+     $(SolutionDir)/$(ConfigurationName)/libxrtm_f.lib
+     $(SolutionDir)/$(ConfigurationName)/libxrtm_misc.lib
+     $(SolutionDir)/$(ConfigurationName)/libxrtm_interfaces.lib
+     $(SolutionDir)/$(ConfigurationName)/libxrtm_interfaces_f.lib
+\end{verbatim}
+where the variable \texttt{\$(SolutionDir)} is \texttt{msvs\_2005}, \texttt{msvs\_2008}, or \texttt{msvs\_2010} and the variable \texttt{\$(ConfigurationName)} is \texttt{Debug} or \texttt{Release}.  For more information, take a look at the build details for the Fortran 90 interface example program \texttt{examples/example\_f90.f90}.
+
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmchapter{XRTM C Interface}
+\label{xrtm_c_interface}
+
+XRTM is unlike other common RT models in that it exists as an object/instance that is created, modified, and destroyed.  It maintains a valid state between simulations where only inputs that change need to be updated for subsequent simulations.  This design allows input overhead to be minimized and allows redundant calculations to be saved in a transparent manor.  Each XRTM instance is contained within an isolated memory scope so that multiple instances may be used in a shared memory multiprocessing environment.
+
+The interface is made up of input configuration constants (section~\ref{xrtm_c_interface_configuration_constants}), functions for creating and destroying an XRTM instance (section~\ref{xrtm_c_interface_inititiating_xrtm}), functions for setting and getting inputs (section~\ref{xrtm_c_interface_setting_and_getting_inputs}), and functions that run the appropriate calculations and return outputs (section~\ref{xrtm_c_interface_running_the_model_and_getting_output}).  Typical use of XRTM would be to create an instance with \xref{xrtm_create}{\sourcenamefunc{xrtm\_create}}, set inputs with the \xref{xrtm_c_interface_setting_and_getting_inputs}{\sourcenamefunc{xrtm\_set\_*}} functions, run the model and get outputs with the \xref{xrtm_c_interface_running_the_model_and_getting_output}{\sourcenamefunc{xrtm\_calc\_*}} functions, loop over the last two steps until the model is no longer needed, and then finally, destroy the instance with \xref{xrtm_destroy}{\sourcenamefunc{xrtm\_destroy}}.
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmsection{(Arrays of (arrays of)) ... arrays}
+\label{xrtm_c_interface_arrays_of_arrays_of_arrays}
+
+Several of the XRTM input and output functions take multi-dimensional arrays as arguments.  In C89/90 if true multi-dimensional arrays are passed to functions all but the first dimension must be static.  This is an obvious limitation for the XRTM C interface as these sizes are in fact dynamic.  So instead, XRTM uses ``(arrays of pointers to (arrays of pointers to)) ... 1-d arrays'' or as they are referred to in this manual ``(arrays of (arrays of)) ... 1-d arrays''.  These structures may be allocated by the user but as a convenience XRTM provides functions to do this.  These functions are efficient in that internally they allocate memory with one call for all the arrays making up the entire structure and then set the pointers to the appropriate locations in memory.  This method also has the advantage that the data lies contiguously in memory.  So for example, with a 2 dimensional array the rows would lie one after a another where as if the rows were allocated separately they might not lie contiguously in memory.
+
+The following is a formal description of the functions for allocating ``(arrays of (arrays of)) ... 1-d arrays'' and their corresponding deallocation functions:
+
+\begin{prototype}{alloc_array}
+\proto{\texttt{<type name> *...*\textbf{alloc\_array<\# of dimensions>\_<type id>}(\textit{int~\textbf{size\_1},...,int~\textbf{size\_n}})}}
+\end{prototype}
+
+\funcdesc{
+Allocate an ``(array of (arrays of)) ... 1-d arrays''.  \sourcename{<\# of dimensions>} is either 1, 2, 3, etc. and \sourcename{<type>} is \source{i} or \source{d} for \source{int} or \source{double} arrays, respectively.  The arguments are the sizes of each dimension of the array (\sourcenamearg{size\_1, ... size\_n}) where \sourcenamearg{n} is the \# of dimensions.  The return value is a ``(pointer to (a pointer to)) ...
+a pointer'' to \source{<type name>} with a pointer depth equal to the \# of dimensions.
+}{
+\arg{size\_1}{size of the first dimension}
+\arg{size\_n}{size of the last (\sourcenamearg{n}th) dimension}
+}{
+A ``(pointer to (a pointer to)) ... a pointer'' to \source{<type name>} represting the allocated ``(array of (arrays of)) ... 1-d arrays'' or NULL on error.
+}
+
+\begin{prototype}{free_array}
+\proto{\texttt{void \textbf{free\_array<\# of dimensions>\_<type id>}(\textit{<type name> *...*\textbf{array}})}}
+\end{prototype}
+
+\funcdesc{
+Deallocate (free) an ``(array of (arrays of)) ... 1-d arrays''.  \sourcename{<\# of dimensions>} is either 1, 2, 3, etc. and \sourcename{<type>} is \source{i} or \source{d} for \source{int} or \source{double} arrays, respectively.  The argument is the ``(pointer to (a pointer to)) ...
+a pointer'' to \source{<type name>} represting the ``(array of (arrays of)) ... 1-d arrays'' returned by \sourcename{alloc\_array<\# of dimensions>\_<type id>}.
+}{
+\arg{array}{``(pointer to (a pointer to)) ...
+a pointer'' to \source{<type name>} represting the ``(array of (arrays of)) ... 1-d arrays''}
+}{
+None.
+}
+
+\noindent
+So for example, if a 2 dimensional array of arrays of type \source{double} is to be allocated then the function to call would be
+\begin{list}{}{}
+\item
+\begin{prototype}{alloc_array2_d}
+\proto{\texttt{double **\textbf{alloc\_array2\_d}(\textit{int~\textbf{size\_1}, int~\textbf{size\_2}})}}
+\end{prototype}
+\end{list}
+and the corresponding deallocation routine would be
+\begin{list}{}{}
+\item
+\begin{prototype}{free_array2_d}
+\proto{\texttt{void \textbf{free\_array2\_d}(\textit{double **\textbf{array}})}}
+\end{prototype}
+\end{list}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmsection{Configuration constants}
+\label{xrtm_c_interface_configuration_constants}
+
+\xrtmsubsection{Options}
+\label{xrtm_c_interface_configuration_constants_options}
+
+Options are turned on by setting the appropriate bit of a 32 bit wide mask which is the \sourcenamearg{options} argument to \xref{xrtm_create}{\sourcenamefunc{xrtm\_create}}.  The appropriate bits may be set using masks (declared as enumeration constants) associated with each option.  For example, Delta-M scaling and the pseudo spherical approximation may be turned on by using the bitwise inclusive OR operator with something like
+\begin{list}{}{}
+\item \source{options = \xref{XRTM_OPTION_DELTA_M}{XRTM\_OPTION\_DELTA\_M} $\mid$ \xref{XRTM_OPTION_PSA}{XRTM\_OPTION\_PSA}}.
+\end{list}
+
+\vspace{-10pt}
+\begin{description}
+
+\xlabel{XRTM_OPTION_CALC_DERIVS}
+\item[\source{XRTM\_OPTION\_CALC\_DERIVS}] \hfill \\
+Calculate derivatives with respect to optical property inputs.  Requires \createarg{n\_derivs} to be greater than or equal to one.
+
+\xlabel{XRTM_OPTION_DELTA_M}
+\item[\source{XRTM\_OPTION\_DELTA\_M}] \hfill \\
+Use Delta-M scaling \citep{wiscombe_w_j_1977a}.
+
+\xlabel{XRTM_OPTION_N_T_TMS}
+\item[\source{XRTM\_OPTION\_N\_T\_TMS}] \hfill \\
+Use the Nakajima and Tanaka TMS correction \citep{nakajima_t_1988}.
+
+\xlabel{XRTM_OPTION_FOUR_CONV_OLD}
+\item[\source{XRTM\_OPTION\_FOUR\_CONV\_OLD}] \hfill \\
+Used for testing purposes only.
+
+\xlabel{XRTM_OPTION_FOUR_CONV_NEW}
+\item[\source{XRTM\_OPTION\_FOUR\_CONV\_NEW}] \hfill \\
+Used for testing purposes only.
+
+\xlabel{XRTM_OPTION_NO_AZIMUTHAL}
+\item[\source{XRTM\_OPTION\_NO\_AZIMUTHAL}] \hfill \\
+Include only the first Fourier term of the expansion in azimuth, i.e. the azimuthal average.
+
+\xlabel{XRTM_OPTION_OUTPUT_AT_LEVELS}
+\item[\source{XRTM\_OPTION\_OUTPUT\_AT\_LEVELS}] \hfill \\
+Output at user specified levels.  This is in contrast to output at user specified optical depths.  Some solvers support output at TOA only, others support output at TOA and/or BOA, while some support output at any level.  Check the solver descriptions for which solver supports what.  Requires at least one call to \xref{xrtm_set_out_levels}{\sourcenamefunc{xrtm\_\-set\_\-out\_\-levels}} once the model is created.
+
+\xlabel{XRTM_OPTION_OUTPUT_AT_TAUS}
+\item[\source{XRTM\_OPTION\_\-OUTPUT\_AT\_TAUS}] \hfill \\
+Output at user specified optical depths from TOA.  This is in contrast to output at user specified levels.  Some solvers support output at TOA only, others support output at TOA and/or BOA, other support output at any level, while some support output at any optical depth (within layers).  Check the solver descriptions for which solver supports what.  Requires at least one call to \xref{xrtm_set_out_taus}{\sourcenamefunc{xrtm\_\-set\_\-out\_\-taus}} once the model is created.
+
+\xlabel{XRTM_OPTION_PHASE_SCALAR}
+\item[\source{XRTM\_OPTION\_PHASE\_SCALAR}] \hfill \\
+Used for testing purposes only.
+
+\xlabel{XRTM_OPTION_PHASE_MATRIX_GC}
+\item[\source{XRTM\_OPTION\_PHASE\_MATRIX\_GC}] \hfill \\
+Used for testing purposes only.
+
+\xlabel{XRTM_OPTION_PHASE_MATRIX_LC}
+\item[\source{XRTM\_OPTION\_PHASE\_MATRIX\_LC}] \hfill \\
+Used for testing purposes only.
+
+\xlabel{XRTM_OPTION_PSA}
+\item[\source{XRTM\_OPTION\_PSA}] \hfill \\
+Use the so called pseudo-spherical approximation to model the solar beam through a spherical spherical shell atmosphere \citep{dahlback_arne_1991}.
+
+\xlabel{XRTM_OPTION_QUAD_NORM_GAUS_LEG}
+\item[\source{XRTM\_OPTION\_QUAD\_NORM\_GAUS\_LEG}] \hfill \\
+Use (standard) Gauss-Legendre quadrature.
+
+\xlabel{XRTM_OPTION_QUAD_DOUB_GAUS_LEG}
+\item[\source{XRTM\_OPTION\_QUAD\_DOUB\_GAUS\_LEG}] \hfill \\
+Use double Gauss-Legendre quadrature.
+
+\xlabel{XRTM_OPTION_QUAD_LOBATTO}
+\item[\source{XRTM\_OPTION\_QUAD\_LOBATTO}] \hfill \\
+Use Lobatto quadrature.
+
+\xlabel{XRTM_OPTION_SAVE_LEG_POLYS}
+\item[\source{XRTM\_OPTION\_SAVE\_PHASE\_MATS}] \hfill \\
+Save phase matrices between XRTM calls.
+
+\xlabel{XRTM_OPTION_SAVE_LOCAL_R_T}
+\item[\source{XRTM\_OPTION\_SAVE\_LOCAL\_R\_T}] \hfill \\
+Save local $\mathbf{r}$ and $\mathbf{t}$ matrices between XRTM calls.
+
+\xlabel{XRTM_OPTION_SAVE_LAYER_R_T_S}
+\item[\source{XRTM\_OPTION\_SAVE\_LAYER\_R\_T\_S}] \hfill \\
+
+\xlabel{XRTM_OPTION_SAVE_TOTAL_R_T_S}
+\item[\source{XRTM\_OPTION\_SAVE\_TOTAL\_R\_T\_S}] \hfill \\
+
+\xlabel{XRTM_OPTION_SFI}
+\item[\source{XRTM\_OPTION\_SFI}] \hfill \\
+For solvers that support it use source function integration for output at arbitrary zenith angles otherwise quadrature dummy nodes are used.
+
+\xlabel{XRTM_OPTION_SOURCE_SOLAR}
+\item[\source{XRTM\_OPTION\_SOURCE\_SOLAR}] \hfill \\
+Include solar sources.
+
+\xlabel{XRTM_OPTION_SOURCE_THERMAL}
+\item[\source{XRTM\_OPTION\_SOURCE\_THERMAL}] \hfill \\
+Include thermal sources.
+
+\xlabel{XRTM_OPTION_STACK_REUSE_ADDING}
+\item[\source{XRTM\_OPTION\_STACK\_REUSE\_ADDING}] \hfill \\
+
+\xlabel{XRTM_OPTION_TOP_DOWN_ADDING}
+\item[\source{XRTM\_OPTION\_TOP\_DOWN\_ADDING}] \hfill \\
+For solvers that use adding add from the top down to get output at the surface only.  This is in contrast to full adding and can significantly improve run time.
+
+\xlabel{XRTM_OPTION_BOTTOM_UP_ADDING}
+\item[\source{XRTM\_OPTION\_BOTTOM\_UP\_ADDING}] \hfill \\
+For solvers that use adding add from the bottom up to get output at TOA only.  This is in contrast to full adding and can significantly improve run time.
+
+\xlabel{XRTM_OPTION_UPWELLING_OUTPUT}
+\item[\source{XRTM\_OPTION\_UPWELLING\_OUTPUT}] \hfill \\
+Output upwelling values.
+
+\xlabel{XRTM_OPTION_DOWNWELLING_OUTPUT}
+\item[\source{XRTM\_OPTION\_DOWNWELLING\_OUTPUT}] \hfill \\
+Output downwelling values.
+
+\xlabel{XRTM_OPTION_VECTOR}
+\item[\source{XRTM\_OPTION\_VECTOR}] \hfill \\
+Run the model in vector mode.
+
+\end{description}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmsubsection{Solvers}
+\label{xrtm_c_interface_configuration_constants_solvers}
+XRTM may be created to use any number of solvers.  Limiting the initialization to only the solvers required will in some cases lead to significant memory savings.  Solvers are turned on by setting the appropriate bit of a 32 bit wide mask which is the \sourcenamearg{solvers} argument to \xref{xrtm_create}{\sourcenamefunc{xrtm\_create}}.  The appropriate bits may be set using masks (declared as enumeration constants) associated with each solver.  For example, XRTM may be create to use the Eigenmatrix/BVP solver along with the single and second order scattering solvers by using the bitwise inclusive OR operator with something like
+\begin{list}{}{}
+\item \source{solvers = \xref{XRTM_SOLVER_EIG_BVP}{XRTM\_SOLVER\_EIG\_BVP} $\mid$ \xref{XRTM_SOLVER_SINGLE}{XRTM\_SOLVER\_SINGLE} $\mid$ \xref{XRTM_SOLVER_TWO_OS}{XRTM\_SOLVER\_TWO\_OS}}.
+\end{list}
+
+\vspace{-10pt}
+\begin{description}
+
+\xlabel{XRTM_SOLVER_DOUB_ADD}
+\item[\source{XRTM\_SOLVER\_DOUB\_ADD}] \hfill \\
+Doubling/Adding: Use doubling to get global reflection and transmission matrices for each layer.  Then use adding to get global reflection and transmission matrices for the entire atmosphere \citep{grant_i_p_1969a, de_haan_j_f_1987, liou_k_n_2002}.
+
+\xlabel{XRTM_SOLVER_EIG_ADD}
+\item[\source{XRTM\_SOLVER\_EIG\_ADD}] \hfill \\
+Eigenmatrix/Adding: Use the Eigenvalue problem to get global reflection and transmission matrices for each layer.  Then use adding to get global reflection and transmission matrices for the entire atmosphere \citep{aronson_raphael_1972, nakajima_t_1986, voronovich_alexander_g_2004, spurr_r_j_d_2007}.
+
+\xlabel{XRTM_SOLVER_EIG_BVP}
+\item[\source{XRTM\_SOLVER\_EIG\_BVP}] \hfill \\
+Eigenmatrix/BVP (a.k.a. the Discrete Ordinate Method): Use the Eigenvalue problem to obtain the layer homogeneous solution.  Then solve a boundary value problem for the entire atmosphere \citep{liou_kuo-nan_1973, stamnes_knut_1988b, siewert_c_e_2000a, spurr_r_j_d_2001}.
+
+\xlabel{XRTM_SOLVER_MEM_BVP}
+\item[\source{XRTM\_SOLVER\_MEM\_BVP}] \hfill \\
+Matrix exponential by eigenmatrix / BVP: A variant of the Discrete Ordinate Method with a matrix exponential formulation \citep{doicu_a_2009a, doicu_a_2009b}.
+
+\xlabel{XRTM_SOLVER_PADE_ADD}
+\item[\source{XRTM\_SOLVER\_PADE\_ADD}] \hfill \\
+Matrix exponential by Pad\'{e} approximation / Adding (A.K.A. PARTM): Use the Pad\'{e} approximation to the matrix exponential to get global reflection and transmission matrices for each layer.  Then use adding to get global reflection and transmission matrices for the entire atmosphere \citep{mcgarragh_greg_2010}.
+
+\xlabel{XRTM_SOLVER_SINGLE}
+\item[\source{XRTM\_SOLVER\_SINGLE}] \hfill \\
+Includes only first order scattering from the atmosphere and surface.
+
+\xlabel{XRTM_SOLVER_SOS}
+\item[\source{XRTM\_SOLVER\_SOS}] \hfill \\
+Successive orders of scattering using an approximate integration in optical thickness \citep{fymat_a_l_1974a, min_qilong_2004b, lenoble_j_2007}.
+
+\xlabel{XRTM_SOLVER_TWO_OS}
+\item[\source{XRTM\_SOLVER\_TWO\_OS}] \hfill \\
+Second order scattering with the typical numerical integration over zenith and azimuth but with an analytical integration in optical thickness.
+\citep{kawabata_kiyoshi_1988, natraj_vijay_2007a}
+
+\end{description}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmsubsection{BRDF kernels}
+\label{xrtm_c_interface_configuration_constants_brdf_kernels}
+
+\citep{spurr_r_j_d_2004}
+
+\begin{description}
+
+\xlabel{XRTM_KERNEL_LAMBERTIAN}
+\item[\source{XRTM\_KERNEL\_LAMBERTIAN}] \hfill \\
+
+\xlabel{XRTM_KERNEL_ROUJEAN}
+\item[\source{XRTM\_KERNEL\_ROUJEAN}] \hfill \\
+\citep{roujean_jean-louis_1992}
+
+\xlabel{XRTM_KERNEL_LI_SPARSE}
+\item[\source{XRTM\_KERNEL\_LI\_SPARSE}] \hfill \\
+\citep{wanner_w_1995}
+
+\xlabel{XRTM_KERNEL_LI_DENSE}
+\item[\source{XRTM\_KERNEL\_LI\_DENSE}] \hfill \\
+\citep{wanner_w_1995}
+
+\xlabel{XRTM_KERNEL_ROSS_THIN}
+\item[\source{XRTM\_KERNEL\_ROSS\_THIN}] \hfill \\
+\citep{wanner_w_1995}
+
+\xlabel{XRTM_KERNEL_ROSS_THICK}
+\item[\source{XRTM\_KERNEL\_ROSS\_THICK}] \hfill \\
+\citep{wanner_w_1995}
+
+\xlabel{XRTM_KERNEL_HAPKE}
+\item[\source{XRTM\_KERNEL\_HAPKE}] \hfill \\
+\citep{hapke_bruce_1981a, hapke_bruce_1981b}
+
+\xlabel{XRTM_KERNEL_RAHMAN}
+\item[\source{XRTM\_KERNEL\_RAHMAN}] \hfill \\
+\citep{rahman_hafizur_1993b}
+
+\xlabel{XRTM_KERNEL_COX_MUNK}
+\item[\source{XRTM\_KERNEL\_COX\_MUNK}] \hfill \\
+\citep{cox_charles_1954}
+
+\end{description}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmsubsection{Solutions}
+\label{xrtm_c_interface_configuration_constants_solutions}
+
+\begin{description}
+
+\xlabel{XRTM_OUTPUT_RADIANCE}
+\item[\source{XRTM\_OUTPUT\_RADIANCE}] \hfill \\
+
+\xlabel{XRTM_OUTPUT_RADIANCE_MEAN}
+\item[\source{XRTM\_OUTPUT\_RADIANCE\_MEAN}] \hfill \\
+
+\xlabel{XRTM_OUTPUT_FLUX}
+\item[\source{XRTM\_OUTPUT\_FLUX}] \hfill \\
+
+\xlabel{XRTM_OUTPUT_FLUX_DIVERGENCE}
+\item[\source{XRTM\_OUTPUT\_FLUX\_DIVERGENCE}] \hfill \\
+
+\end{description}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmsection{Initiating and destroying XRTM}
+\label{xrtm_c_interface_inititiating_xrtm}
+
+\begin{prototype}{xrtm_create}
+\proto{\texttt{int \textbf{xrtm\_create}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{options}, int~\textbf{solvers}, int~\textbf{max\_coef}, int~\textbf{n\_quad}, int~\textbf{n\_stokes}, int~\textbf{n\_derivs}, int~\textbf{n\_layers}, int~\textbf{n\_kernels}, int~\textbf{n\_kernel\_quad}, int~*\textbf{kernels}, int~\textbf{n\_out\_levels}, int~\textbf{n\_out\_thetas}})}}
+\end{prototype}
+
+\funcdesc{
+Create a new XRTM instance.  When finished with the instance created, \xref{xrtm_destroy}{\sourcenamefunc{xrtm\_destroy}} must be called to free memory allocated by \sourcenamefunc{xrtm\_create}.
+}{
+\arg{d}              {the \sourcearg{xrtm\_data} structure which will represent the instance created}
+\arg{options}        {bit mask of XRTM configuration \xref{xrtm_c_interface_configuration_constants_options}{\source{options}}}
+\arg{solvers}        {bit mask of XRTM \xref{xrtm_c_interface_configuration_constants_solvers}{\source{solvers}} that will be used}
+\arg{max\_coef}      {maximum number of phase function Legendre expansion coefficients that will be used}
+\arg{n\_quad}        {number of quadrature points in one hemisphere}
+\arg{n\_stokes}      {size of the stokes vector to calculate (set to one for scalar mode)}
+\arg{n\_derivs}      {number of derivatives to calculate}
+\arg{n\_layers}      {number of plane parallel layers in the atmosphere}
+\arg{n\_kernels}     {number of BRDF kernels to use for the BRDF}
+\arg{n\_kernel\_quad}{number of quadrature points to use for BRDF integration}
+\arg{kernels}        {array of \xref{xrtm_c_interface_configuration_constants_brdf_kernels}{BRDF kernels} to use (of length \sourcenamearg{n\_kernels})}
+\arg{n\_out\_levels} {number of user defined output levels}
+\arg{n\_out\_thetas} {number of user defined output zenith angles}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_destroy}
+\proto{\texttt{void \textbf{xrtm\_destroy}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Destroy an XRTM instance which includes freeing all memory allocated by \xref{xrtm_create}{\sourcenamefunc{xrtm\_create}}.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+none
+}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmsection{Setting and getting inputs}
+\label{xrtm_c_interface_setting_and_getting_inputs}
+
+\begin{prototype}{xrtm_get_options}
+\proto{\texttt{int \textbf{xrtm\_get\_options}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the bit mask of XRTM options with which this instance was created.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\interror{The bit mask of XRTM options with which this instance was created}
+}
+
+
+\begin{prototype}{xrtm_get_solvers}
+\proto{\texttt{int \textbf{xrtm\_get\_solvers}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the bit mask of XRTM solvers for which this instance has been created to use.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\interror{The bit mask of XRTM solvers for which this instance has been created to use}
+}
+
+
+\begin{prototype}{xrtm_get_max_coef}
+\proto{\texttt{int \textbf{xrtm\_get\_max\_coef}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the maximum number of phase function Legendre expansion coefficients for which this XRTM instance has been created to handle.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\interror{The maximum number of phase function Legendre expansion coefficients for which this XRTM instance has been created to handle}
+}
+
+
+\begin{prototype}{xrtm_get_n_quad}
+\proto{\texttt{int \textbf{xrtm\_get\_n\_quad}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the number of quadrature points in one hemisphere used by this XRTM instance.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\interror{The number of quadrature points in one hemisphere used by this XRTM instance}
+}
+
+
+\begin{prototype}{xrtm_get_n_stokes}
+\proto{\texttt{int \textbf{xrtm\_get\_n\_stokes}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the size of the stokes vector for which this instance has been created to calculate.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\interror{The size of the stokes vector for which this instance has been created to calculate}
+}
+
+
+\begin{prototype}{xrtm_get_n_derivs}
+\proto{\texttt{int \textbf{xrtm\_get\_n\_derivs}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the number of derivatives for which this instance has been created to calculate.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\interror{The number of derivatives for which this instance has been created to calculate}
+}
+
+
+\begin{prototype}{xrtm_get_n_layers}
+\proto{\texttt{int \textbf{xrtm\_get\_n\_layers}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the number of plane parallel layers in the atmosphere modeled by this instance.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\interror{The number of plane parallel layers in the atmosphere modeled by this instance}
+}
+
+
+\begin{prototype}{xrtm_get_n_kernels}
+\proto{\texttt{int \textbf{xrtm\_get\_n\_kernels}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the number of BRDF kernels for which this instance has been created to use.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\interror{The number of BRDF kernels for which this instance has been created to use}
+}
+
+
+\begin{prototype}{xrtm_get_n_kernel_quad}
+\proto{\texttt{int \textbf{xrtm\_get\_n\_kernel\_quad}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the number of quadrature points for BRDF integration used by this instance.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\interror{The number of quadrature points for BRDF integration used by this instance}
+}
+
+
+\begin{prototype}{xrtm_get_kernel}
+\proto{\texttt{int \textbf{xrtm\_get\_kernel}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_kernel}})}}
+\end{prototype}
+
+\funcdesc{
+Get the kernel identifier for a given kernel index.  The kernel index is the index at which the kernel was given in the array \createarg{kernels} given as input to \xref{xrtm_create}{\sourcenamefunc{xrtm\_create}}.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_kernel}{the kernel index, where $0 \le \sourcenamearg{i\_kernel} \le \createarg{n\_kernels} - 1$}
+}{
+\interror{The kernel identifier for index \sourcenamearg{i\_kernel}}
+}
+
+
+\begin{prototype}{xrtm_get_n_out_levels}
+\proto{\texttt{int \textbf{xrtm\_get\_n\_out\_levels}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the number of levels at which this instance has been created to output.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\interror{The number of levels at which this instance has been created to output}
+}
+
+
+\begin{prototype}{xrtm_get_n_out_thetas}
+\proto{\texttt{int \textbf{xrtm\_get\_n\_out\_thetas}(\textit{xrtm\_data~*\textbf{d}})}
+\special{html:</p>}}
+\end{prototype}
+
+\funcdesc{
+Get the number of zenith angles at which this instance has been created to output.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\interror{The number of zenith angles at which this instance has been created to output}
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_doub_d_tau}
+\proto{\texttt{int \textbf{xrtm\_set\_doub\_d\_tau}(\textit{xrtm\_data~*\textbf{d}, double~\textbf{d\_tau}})}}
+\end{prototype}
+
+\funcdesc{
+Set the initial layer optical thickness $\Delta\tau$ for the doubling method.  To set this value XRTM must have been created to use at least one of the following solvers: \xref{XRTM_SOLVER_DOUB_ADD}{XRTM\_SOLVER\_DOUB\_ADD}, otherwise it is an error.
+}{
+\arg{d}     {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{d\_tau}{the initial layer optical thickness $\Delta\tau$, where $\sourcenamearg{d\_tau} > 0.0$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_doub_d_tau}
+\proto{\texttt{double \textbf{xrtm\_get\_doub\_d\_tau}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the initial layer optical thickness $\Delta\tau$ for the doubling method.  To get this value XRTM must have been created to use at least one of the following solvers: \xref{XRTM_SOLVER_DOUB_ADD}{XRTM\_SOLVER\_DOUB\_ADD}, otherwise it is an error.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\dblerror{The initial layer optical thickness $\Delta\tau$ for the doubling method}
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_pade_params}
+\proto{\texttt{int \textbf{xrtm\_set\_pade\_params}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{pade\_s}, int~\textbf{pade\_r}})}}
+\end{prototype}
+
+\funcdesc{
+Set the Pad\'{e} scaling power of two (number of doublings) $s$ and the degree of Pad\'{e} approximate $r$.  If either value is set to a value that is out of range then $s$ and $r$ are chosen automatically from a lookup table based on layer optical thickness $\tau$ and the maximum output zenith angle $\theta$.  To set these values, XRTM must have been created to use at least one of the following solvers: \xref{XRTM_SOLVER_PADE_ADD}{XRTM\_SOLVER\_PADE\_ADD}, otherwise it is an error.
+}{
+\arg{d}      {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{pade\_s}{Pad\'{e} scaling power of two $s$, where $\sourcenamearg{pade\_s} \ge 0$}
+\arg{pade\_r}{degree of Pad\'{e} approximate $r$, where $\sourcenamearg{pade\_r} > 0$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_pade_params}
+\proto{\texttt{int \textbf{xrtm\_get\_pade\_params}(\textit{xrtm\_data~*\textbf{d}, int~*\textbf{pade\_s}, int~*\textbf{pade\_r}})}}
+\end{prototype}
+
+\funcdesc{
+Get the Pad\'{e} scaling power of two (number of doublings) $s$ and the degree of Pad\'{e} approximate $r$.  To get these values, XRTM must have been created to use at least one of the following solvers: \xref{XRTM_SOLVER_PADE_ADD}{XRTM\_SOLVER\_PADE\_ADD}, otherwise it is an error.
+}{
+\arg{d}      {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{pade\_s}{(output) Pad\'{e} scaling power of two $s$}
+\arg{pade\_r}{(output) degree of Pad\'{e} approximate $r$}
+}{
+\interrornoret
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_sos_params}
+\proto{\texttt{int \textbf{xrtm\_set\_sos\_params}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{max\_os}, double~\textbf{max\_tau}, double~\textbf{sos\_tol}})}}
+\end{prototype}
+
+\funcdesc{
+Set parameters related to successive order of scattering.  They are the maximum order of scattering that will be computed, the maximum layer optical thickness used (all layers of a larger optical thickness are divided evenly into enough sub-layers so that each sub-layer has an optical thickness less than or equal to the maximum allowable value), and the successive order of scattering tolerance limit.  The tolerance limit is the minimum radiance contribution from any single quadrature angle with which the succession will continue to the next order of scattering.  If this limit is not met the succession will terminate.  To set these values, XRTM must have been created to use at least one of the following solvers: \xref{XRTM_SOLVER_PADE_ADD}{XRTM\_SOLVER\_SOS}, otherwise it is an error.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{max\_os} {maximum order of scattering, where $\sourcenamearg{max\_os} \ge 0$}
+\arg{max\_tau}{maximum layer optical thickness used, where $\sourcenamearg{max\_tau} > 0.0$}
+\arg{sos\_tol}{successive order of scattering tolerance limit, where $\sourcenamearg{sos\_tol} \ge 0.0$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_sos_params}
+\proto{\texttt{int \textbf{xrtm\_get\_sos\_params}(\textit{xrtm\_data~*\textbf{d}, int~*\textbf{max\_os}, double~*\textbf{max\_tau}, double~*\textbf{sos\_tol}})}}
+\end{prototype}
+
+\funcdesc{
+Get parameters related to successive order of scattering.  To get these values, XRTM must have been created to use at least one of the following solvers: \xref{XRTM_SOLVER_PADE_ADD}{XRTM\_SOLVER\_SOS}, otherwise it is an error.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{max\_os} {(output) maximum order of scattering}
+\arg{max\_tau}{(output) maximum layer optical thickness used}
+\arg{sos\_tol}{(output) successive order of scattering tolerance limit}
+}{
+\interrornoret
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_fourier_tol}
+\proto{\texttt{int \textbf{xrtm\_set\_fourier\_tol}(\textit{xrtm\_data~*\textbf{d}, double~\textbf{fourier\_tol}})}}
+\end{prototype}
+
+\funcdesc{
+Set the tolerance limit for the Fourier expansion in azimuth angle.  The tolerance limit is the minimum intensity contribution from any single output level and output angle with which the summation will continue to the next term.  If this limit is not met for \emph{all} of the output levels and output angles the summation will terminate.  If a single scattering correction is to be applied (\xref{XRTM_OPTION_N_T_TMS}{XRTM\_\-OPTION\_\-N\_\-T\_\-TMS}) then the series starts with the full (untruncated) single scattering contribution while each term includes only the truncated multiple scattering contribution.  If it is set to zero then the summation will include all terms ($2n$).
+}{
+\arg{d}           {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{fourier\_tol}{tolerance limit for the Fourier expansion in azimuth angle, where $\sourcenamearg{fourier\_tol} \ge 0.0$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_fourier_tol}
+\proto{\texttt{double \textbf{xrtm\_get\_fourier\_tol}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the tolerance limit for the Fourier expansion in azimuth angle.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\dblerror{The tolerance limit for the Fourier expansion in azimuth angle}
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+%\begin{prototype}{xrtm_set_lambda}
+%\proto{\texttt{int \textbf{xrtm\_set\_lambda}(\textit{xrtm\_data~*\textbf{d}, double~\textbf{lambda}})}}
+%\end{prototype}
+
+
+%\begin{prototype}{xrtm_get_lambda}
+%\proto{\texttt{double \textbf{xrtm\_get\_lambda}(\textit{xrtm\_data~*\textbf{d}})}}
+%\end{prototype}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_F_0}
+\proto{\texttt{int \textbf{xrtm\_set\_F\_0}(\textit{xrtm\_data~*\textbf{d}, double~\textbf{F\_0}})}}
+\end{prototype}
+
+\funcdesc{
+Set the intensity of the incident parallel beam at TOA $F_{0}$.  Setting $F_{0}$ to zero turns off the solar source.  If a thermal source is used (\xref{XRTM_OPTION_SOURCE_THERMAL}{XRTM\_\-OPTION\_\-SOURCE\_\-THERMAL}) then the units for $F_{0}$ and the TOA, BOA, and level Planck radiances must be the same.  Otherwise the units for $F_{0}$ are arbitrary.
+}{
+\arg{d}   {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{F\_0}{intensity of the incident parallel beam at TOA $F_{0}$, where $\sourcenamearg{F\_0} \ge 0.0$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_F_0}
+\proto{\texttt{double \textbf{xrtm\_get\_F\_0}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the intensity of the incident parallel beam at TOA $F_{0}$.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\dblerror{The intensity of the incident parallel beam at TOA $F_{0}$}
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_theta_0}
+\proto{\texttt{int \textbf{xrtm\_set\_theta\_0}(\textit{xrtm\_data~*\textbf{d}, double~\textbf{theta\_0}})}}
+\end{prototype}
+
+\funcdesc{
+Set the zenith angle for the incident parallel beam at TOA (the solar zenith angle) $\theta_{0}$.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{theta\_0}{zenith angle for the incident parallel beam at TOA $\theta_{0}$, where $0.0 \le \sourcenamearg{theta\_0} < 90.0$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_theta_0}
+\proto{\texttt{double \textbf{xrtm\_get\_theta\_0}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the zenith angle for the incident parallel beam at TOA (the solar zenith angle) $\theta_{0}$.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\dblerror{The zenith angle for incident parallel beam at TOA $\theta_{0}$}
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_phi_0}
+\proto{\texttt{int \textbf{xrtm\_set\_phi\_0}(\textit{xrtm\_data~*\textbf{d}, double~\textbf{phi\_0}})}}
+\end{prototype}
+
+\funcdesc{
+Set the azimuth angle for the incident parallel beam at TOA (the solar azimuth angle) $\phi_{0}$.
+}{
+\arg{d}     {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{phi\_0}{azimuth angle for the incident parallel beam at TOA $\phi_{0}$, where $0.0 \le \sourcenamearg{phi\_0} < 360.0$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_phi_0}
+\proto{\texttt{double \textbf{xrtm\_get\_phi\_0}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the azimuth angle for the incident parallel beam at TOA (the solar azimuth angle) $\phi_{0}$.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\dblerror{The azimuth angle for incident parallel beam at TOA $\phi_{0}$}
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_out_levels}
+\proto{\texttt{int \textbf{xrtm\_set\_out\_levels}(\textit{xrtm\_data~*\textbf{d}, int~*\textbf{out\_levels}})}}
+\end{prototype}
+
+\funcdesc{
+Set the levels at which to output results given an array of length \createarg{n\_out\_levels}.  Levels are defined at layer boundaries.  For example a 3 layer atmosphere would have 4 levels and TOA and BOA (the surface) would be levels 0 and 3, respectively.  Levels must be specified in ascending order.  To set this value XRTM must have been created with the option \xref{XRTM_OPTION_OUTPUT_AT_LEVELS}{XRTM\_\-OPTION\_\-OUTPUT\_\-AT\_\-LEVELS}, otherwise it is an error.
+}{
+\arg{d}          {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{out\_levels}{array of output level indices in ascending order, where $0 \le \sourcenameargarray{out\_levels}{[i]} \le \createarg{n\_layers}$ and $0 \le \source{i} \le \createarg{n\_out\_levels} - 1$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_out_levels}
+\proto{\texttt{int \textbf{xrtm\_get\_out\_levels}(\textit{xrtm\_data~*\textbf{d}, int~*\textbf{out\_levels}})}}
+\end{prototype}
+
+\funcdesc{
+Get the levels at which results are output at as an array of length \createarg{n\_out\_levels}.  To get this value XRTM must have been created with the option  \xref{XRTM_OPTION_OUTPUT_AT_LEVELS}{XRTM\_\-OPTION\_\-OUTPUT\_\-AT\_\-LEVELS}, otherwise it is an error. 
+}{
+\arg{d}          {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{out\_levels}{(output) array of output level indices in ascending order of length \createarg{n\_out\_levels}}
+}{
+\interrornoret
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_out_taus}
+\proto{\texttt{int \textbf{xrtm\_set\_out\_taus}(\textit{xrtm\_data~*\textbf{d}, double~*\textbf{out\_taus}})}}
+\end{prototype}
+
+\funcdesc{
+Set the optical depths at which to output results given an array of length \createarg{n\_out\_levels}.  Optical depths must be specified in ascending order.  To set this value XRTM must have been created with the option \xref{XRTM_OPTION_OUTPUT_AT_TAUS}{XRTM\_\-OPTION\_\-OUTPUT\_\-AT\_\-TAUS}, otherwise it is an error.
+}{
+\arg{d}        {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{out\_taus}{array of output optical depths in ascending order, where $0.0 \le \sourcenameargarray{out\_taus}{[i]} \le \tau_{s}$ and $0 \le \source{i} \le \createarg{n\_out\_levels} - 1$ and $\tau_{s}$ is the optical depth to the surface}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_out_taus}
+\proto{\texttt{int \textbf{xrtm\_get\_out\_taus}(\textit{xrtm\_data~*\textbf{d}, double~*\textbf{out\_taus}})}}
+\end{prototype}
+
+\funcdesc{
+Get the optical depths at which results are output at as an array of length \createarg{n\_out\_levels}.  To get this value XRTM must have been created with the option \xref{XRTM_OPTION_OUTPUT_AT_TAUS}{XRTM\_\-OPTION\_\-OUTPUT\_\-AT\_\-TAUS}, otherwise it is an error.
+}{
+\arg{d}        {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{out\_taus}{(output) array of output optical depths in ascending order of length \createarg{n\_out\_levels}}
+}{
+\interrornoret
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_out_thetas}
+\proto{\texttt{int \textbf{xrtm\_set\_out\_thetas}(\textit{xrtm\_data~*\textbf{d}, double~*\textbf{out\_thetas}})}}
+\end{prototype}
+
+\funcdesc{
+Set the zenith angles $\theta$ at which to output results given an array of length \createarg{n\_out\_thetas}.  To set this value XRTM must have been created with $\createarg{n\_out\_thetas} > 0$, otherwise it is an error.
+}{
+\arg{d}          {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{out\_thetas}{array of output zenith angles $\theta$, where $0.0 \le \sourcenameargarray{out\_thetas}{[i]} < 90.0$ and $0 \le \source{i} \le \createarg{n\_out\_thetas} - 1$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_out_thetas}
+\proto{\texttt{int \textbf{xrtm\_get\_out\_thetas}(\textit{xrtm\_data~*\textbf{d}, double~*\textbf{out\_thetas}})}}
+\end{prototype}
+
+\funcdesc{
+Get the zenith angles $\theta$ at which results are output at as an array of length \createarg{n\_out\_thetas}.  To set this value XRTM must have been created with $\createarg{n\_out\_thetas} > 0$, otherwise it is an error.  
+}{
+\arg{d}          {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{out\_thetas}{(output) array of output zenith angles $\theta$ of length \createarg{n\_out\_thetas}}
+}{
+\interrornoret
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_top_b}
+\proto{\texttt{int \textbf{xrtm\_set\_top\_b}(\textit{xrtm\_data~*\textbf{d}, double~\textbf{top\_b}})}}
+\end{prototype}
+
+\funcdesc{
+Set the intensity of the downward isotopic radiation at TOA.  Must be in the same units as $F_{0}$ and the BOA and level Planck radiances.  To set this value XRTM must have been created with the option \xref{XRTM_OPTION_SOURCE_THERMAL}{XRTM\_\-OPTION\_\-SOURCE\_\-THERMAL}, otherwise it is an error.
+}{
+\arg{d}     {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{top\_b}{intensity of the downward isotopic radiation at TOA, where $\sourcenamearg{top\_b} \ge 0.0$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_top_b}
+\proto{\texttt{double \textbf{xrtm\_get\_top\_b}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the intensity of the downward isotopic radiation at TOA.  To get this value XRTM must have been created with the option \xref{XRTM_OPTION_SOURCE_THERMAL}{XRTM\_\-OPTION\_\-SOURCE\_\-THERMAL}, otherwise it is an error. 
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\dblerror{The intensity of the downward isotopic radiation at TOA}
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_planet_r}
+\proto{\texttt{int \textbf{xrtm\_set\_planet\_r}(\textit{xrtm\_data~*\textbf{d}, double~\textbf{planet\_r}})}}
+\end{prototype}
+
+\funcdesc{
+Set the planetary radius for the point located at BOA.  The units for this value and the level heights must be the same.  To set this value XRTM must have been created with the option \xref{XRTM_OPTION_PSA}{XRTM\_\-OPTION\_\-PSA}, otherwise it is an error.
+}{
+\arg{d}        {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{planet\_r}{planetary radius, where $\sourcenamearg{planet\_r} \ge 0.0$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_planet_r}
+\proto{\texttt{double \textbf{xrtm\_get\_planet\_r}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the planetary radius for the point located at BOA.  To get this value XRTM must have been created with the option \xref{XRTM_OPTION_PSA}{XRTM\_\-OPTION\_\-PSA}, otherwise it is an error.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\dblerror{The planetary radius for the point located at BOA}
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_levels_z}
+\proto{\texttt{int \textbf{xrtm\_set\_levels\_z}(\textit{xrtm\_data~*\textbf{d}, double~*\textbf{levels\_z}})}}
+\end{prototype}
+
+\funcdesc{
+Set the level heights $z$ as an array of length $\createarg{n\_layers} + 1$.  The units for this value and the planetary radius must be the same.  To set this value XRTM must have been created with the option \xref{XRTM_OPTION_PSA}{XRTM\_\-OPTION\_\-PSA}, otherwise it is an error.
+}{
+\arg{d}        {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{levels\_z}{array of level heights $z$, where $\sourcenameargarray{levels\_z}{[i]} \ge 0.0$ and $0 \le \source{i} \le \createarg{n\_layers}$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_levels_z}
+\proto{\texttt{int \textbf{xrtm\_get\_levels\_z}(\textit{xrtm\_data~*\textbf{d}, double~*\textbf{levels\_z}})}}
+\end{prototype}
+
+\funcdesc{
+Get the level heights $z$ as an array of length $\createarg{n\_layers} + 1$.  To get this value XRTM must have been created with the option \xref{XRTM_OPTION_PSA}{XRTM\_\-OPTION\_\-PSA}, otherwise it is an error. 
+}{
+\arg{d}        {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{levels\_z}{(output) array of level heights $z$ of length $\createarg{n\_layers} + 1$}
+}{
+\interrornoret
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_levels_b}
+\proto{\texttt{int \textbf{xrtm\_set\_levels\_b}(\textit{xrtm\_data~*\textbf{d}, double~*\textbf{levels\_b}})}}
+\end{prototype}
+
+\funcdesc{
+Set the level Planck radiances $B$ as an array of length $\createarg{n\_layers} + 1$.  Must be in the same units as $F_{0}$ and the TOA and BOA Planck radiances.  To set this value XRTM must have been created with the option \xref{XRTM_OPTION_SOURCE_THERMAL}{XRTM\_\-OPTION\_\-SOURCE\_\-THERMAL}, otherwise it is an error.
+}{
+\arg{d}        {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{levels\_b}{array of level Planck radiances $B$, where $\sourcenameargarray{levels\_b}{[i]} \ge 0.0$ and $0 \le \source{i} \le \createarg{n\_layers}$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_levels_b}
+\proto{\texttt{int \textbf{xrtm\_get\_levels\_b}(\textit{xrtm\_data~*\textbf{d}, double~*\textbf{levels\_b}})}}
+\end{prototype}
+
+\funcdesc{
+Get the level Planck radiances $B$ as an array of length $\createarg{n\_layers} + 1$.  To get this value XRTM must have been created with the option \xref{XRTM_OPTION_SOURCE_THERMAL}{XRTM\_\-OPTION\_\-SOURCE\_\-THERMAL}, otherwise it is an error. 
+}{
+\arg{d}        {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{levels\_b}{(output) array of level Planck radiances $B$ of length $\createarg{n\_layers} + 1$}
+}{
+\interrornoret
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+%\begin{prototype}{xrtm_set_g_1}
+%\proto{\texttt{int \textbf{xrtm\_set\_g\_1}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, double~\textbf{g}})}}
+%\proto{\texttt{int \textbf{xrtm\_set\_g\_n}(\textit{xrtm\_data~*\textbf{d}, double~*\textbf{g}})}}
+%\end{prototype}
+
+%\begin{prototype}{xrtm_get_g}
+%\proto{\texttt{double \textbf{xrtm\_get\_g}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}})}}
+%\end{prototype}
+
+%\begin{prototype}{xrtm_set_g_l_11}
+%\proto{\texttt{int \textbf{xrtm\_set\_g\_l\_11}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, int~\textbf{i\_deriv}, double~\textbf{g\_l}})}}
+%\proto{\texttt{int \textbf{xrtm\_set\_g\_l\_n1}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_deriv}, double~*\textbf{g\_l}})}}
+%\proto{\texttt{int \textbf{xrtm\_set\_g\_l\_1n}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, double~*\textbf{g\_l}})}}
+%\proto{\texttt{int \textbf{xrtm\_set\_g\_l\_nn}(\textit{xrtm\_data~*\textbf{d}, double~**\textbf{g\_l}})}}
+%\end{prototype}
+
+%\begin{prototype}{xrtm_get_g_l}
+%\proto{\texttt{double \textbf{xrtm\_get\_g\_l}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, int~\textbf{i\_deriv}})}}
+%\end{prototype}
+
+%\begin{prototype}{xrtm_set_coef_1}
+%\proto{\texttt{int \textbf{xrtm\_set\_coef\_1}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, int~\textbf{n\_coef}, double~**\textbf{coef}})}}
+%\proto{\texttt{int \textbf{xrtm\_set\_coef\_n}(\textit{xrtm\_data~*\textbf{d}, int~*\textbf{n\_coef}, double~***\textbf{coef}})}}
+%\end{prototype}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_coef}
+\proto{\texttt{int \textbf{xrtm\_set\_coef\_1}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, int~\textbf{n\_coef}, double~**\textbf{coef}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_coef\_n}(\textit{xrtm\_data~*\textbf{d}, int~*\textbf{n\_coef}, double~***\textbf{coef}})}}
+\end{prototype}
+
+\funcdesc{
+Set layer phase matrix expansion coefficients $B_{ij,l}$, where $i,j = 1$ for scalar transport (\createarg{n\_stokes} = 1) and $1 \le i,j \le 4$ for vector transport (when option \xref{XRTM_OPTION_VECTOR}{XRTM\_\-OPTION\_\-VECTOR} has been specified and \createarg{n\_stokes} $>$ 1).  In the case of scalar transport a single element $B_{0,0,l}$ is given to XRTM which are the Legendre expansion coefficients $\beta_{l}$ in the equation for the phase function given by
+\[
+P(\cos{\Theta}) = \sum^{N}_{l = 0} \beta_{l} P_{l}(\cos{\Theta}),
+\]
+where $\Theta$ is single scattering angle, $P_{l}$ are Legendre polynomials of degree $l$, and $N$ is the maximum degree term in the expansion.  In the case of vector transport 6 elements are given to XRTM, the so ``Greek constants'' \citep{siewert_c_e_1982a} of the matrix
+\[
+\mathbf{B}_{l} =
+\left[
+\begin{array}{cccc}
+\beta_{l} & \gamma_{l} & 0 & 0 \\
+\gamma_{l} & \alpha_{l} & 0 & 0 \\
+0 & 0 & \zeta_{l} & -\varepsilon_{l} \\
+0 & 0 & \varepsilon_{l} & \delta_{l}
+\end{array}
+\right],
+\]
+which are the coefficients for expansion in terms of generalized spherical functions of the phase matrix
+\[
+\mathbf{F}(\Theta) =
+\left[
+\begin{array}{cccc}
+a_{1}(\Theta) & b_{1}(\Theta) & 0 & 0 \\
+b_{1}(\Theta) & a_{2}(\Theta) & 0 & 0 \\
+0 & 0 & a_{3}(\Theta) & b_{2}(\Theta) \\
+0 & 0 & -b_{2}(\Theta) & a_{4}(\Theta)
+\end{array}
+\right],
+\]
+where
+\begin{eqnarray*}
+a_{1}(\Theta) &=& \sum^{N}_{l = 0} \beta_{l} P^{l}_{0,0}(\cos{\Theta}), \\
+a_{2}(\Theta) + a_{3}(\Theta) &=& \sum^{N}_{l = 2} (\alpha_{l} + \zeta_{l}) P^{l}_{2,2}(\cos{\Theta}), \\
+a_{3}(\Theta) - a_{3}(\Theta) &=& \sum^{N}_{l = 2} (\alpha_{l} - \zeta_{l}) P^{l}_{2,-2}(\cos{\Theta}), \\
+a_{4}(\Theta) &=& \sum^{N}_{l = 0} \delta_{l} P^{l}_{0,0}(\cos{\Theta}), \\
+b_{1}(\Theta) &=& \sum^{N}_{l = 0} \gamma_{l} P^{l}_{0,2}(\cos{\Theta}), \\
+b_{2}(\Theta) &=& \sum^{N}_{l = 0} \varepsilon_{l} P^{l}_{0,2}(\cos{\Theta}).
+\end{eqnarray*}
+The ``Greek constants'' are given to XRTM as a $(6 \times \sourcenamearg{n\_coef})$ array of arrays according to the mapping
+\begin{eqnarray*}
+\sourcenameargarray{coef}{[0][l]} &=& \beta_{l} \\
+\sourcenameargarray{coef}{[1][l]} &=& \alpha_{l} \\
+\sourcenameargarray{coef}{[2][l]} &=& \zeta_{l} \\
+\sourcenameargarray{coef}{[3][l]} &=& \delta_{l} \\
+\sourcenameargarray{coef}{[4][l]} &=& -\gamma_{l} \\
+\sourcenameargarray{coef}{[5][l]} &=& -\varepsilon_{l},
+\end{eqnarray*}
+where as explanined below, \sourcenamearg{n\_coef} is the number of coefficients, \sourcenamearg{coef} is the input array, and $0 \le \source{l} \le \sourcenamearg{n\_coef}$.
+
+Any number of phase matrix coeffieicents may be supplied by the user for each layer with the restriction that the number must be less than or equal to \createarg{max\_coef} which is set when an XRTM instance is created. (It is up to the user to set \createarg{max\_coef} to the maximum number of coefficients to be supplied for all layers.)  It is important that the user is aware of the optimal choice in different cases.  With \xref{XRTM_OPTION_DELTA_M}{XRTM\_\-OPTION\_\-DELTA\_\-M} turned off $2 * \createarg{n\_quad} - 1$ coeffieicents will be used so if your phase function has less than or equal to as many coeffieicents then supply them all, otherwise you only need to supply a maximum of $2 * \createarg{n\_quad} - 1$.  If \xref{XRTM_OPTION_DELTA_M}{XRTM\_\-OPTION\_\-DELTA\_\-M} is turned on then an additional coefficient must be supplied for a total of $2 * \createarg{n\_quad}$.  If your phase function has less than as many coeffieicents then it does not need to be delta-M  scaled and will not be affected by delta-M scaling.  If \xref{XRTM_OPTION_DELTA_M}{XRTM\_\-OPTION\_\-N\_\-T\_\-TMS} is turned on (which requires  \xref{XRTM_OPTION_DELTA_M}{XRTM\_\-OPTION\_\-DELTA\_\-M} to be turned on) then the all the coefficients required to represent the \emph{full} phase matrix should be supplied.
+
+A choice of two functions are provided for this purpose of setting these elements.  \sourcenamefunc{xrtm\_\-set\_\-coef\_1} sets the values for a given layer index \sourcenamearg{i\_layer} given an $(\sourcenamearg{n\_elem} \times \sourcenamearg{n\_coef})$ array of arrays, where \sourcenamearg{n\_coef} is the number of coefficients given for the layer.  \sourcenamefunc{xrtm\_\-set\_\-coef\_n} sets the values for all layers given an $(\createarg{n\_layers} \times \sourcenamearg{n\_elem} \times \sourcenameargarray{n\_coef}{[i]}, 0 \le \source{i} \le \createarg{n\_layers} - 1)$ array of arrays of arrays where \sourcenamearg{n\_coef} is an array of length \createarg{n\_layers} giving the number of coefficients for each layer.  In both cases $\sourcenamearg{n\_elem} = 1$ for scalar mode and $\sourcenamearg{n\_elem} = 6$ when option \xref{XRTM_OPTION_VECTOR}{XRTM\_\-OPTION\_\-VECTOR} has been specified.
+}{
+\arg{d}             {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_layer}      {index of layer to set, where $0 \le \sourcenamearg{i\_layer} \le \createarg{n\_layers} - 1$}
+\arg{n\_coef}{number of coefficients given as a scalar (\sourcename{\_1}) or an array (\sourcename{\_n}) of length \createarg{n\_layers}, depending on the function called, where $0 \le \sourcenamearg{n\_coef}, \sourcenameargarray{n\_coef}{[i]} \le \createarg{max\_coef}$}
+\arg{coef}          {phase matrix expansion coefficients $\beta_{ij}$ as an array of arrays (\sourcename{\_1}) or an array of arrays of arrays (\sourcename{\_1}), depending on the function called, where $-\infty \le \sourcenameargarray{coef}{[i][j]},\sourcenameargarray{coef}{[i][j][k]} \le \infty$, except that $\sourcenameargarray{coef}{[0][0]},\sourcenameargarray{coef}{[i][0][0]} = 1$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_n_coef}
+\proto{\texttt{int \textbf{xrtm\_get\_n\_coef}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}})}}
+\end{prototype}
+
+\funcdesc{
+Get the number of phase matrix expansion coefficients for layer index \sourcenamearg{i\_layer}.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_layer}{index of layer to get, where $0 \le \sourcenamearg{i\_layer} \le \createarg{n\_layers} - 1$}
+}{
+\interror{The number of phase matrix expansion coefficients for layer index \sourcenamearg{i\_layer}}
+}
+
+
+\begin{prototype}{xrtm_get_coef}
+\proto{\texttt{double \textbf{xrtm\_get\_coef}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, int~\textbf{i\_elem}, int~\textbf{i\_coef}})}}
+\end{prototype}
+
+\funcdesc{
+Get the phase matrix expansion coefficient for layer index \sourcenamearg{i\_layer}, matrix element index \sourcenamearg{i\_elem}, and coefficient index \sourcenamearg{i\_coef}.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_layer}{index of layer to get, where $0 \le \sourcenamearg{i\_layer} \le \createarg{n\_layers} - 1$}
+\arg{i\_elem} {index of phase matrix element to get, where $0 \le \sourcenamearg{i\_elem} \le \sourcenamearg{n\_elem}$ and $\sourcenamearg{n\_elem} = 0$ for scalar mode and $\sourcenamearg{n\_elem} = 6$ when option \xref{XRTM_OPTION_VECTOR}{XRTM\_\-OPTION\_\-VECTOR} has been specified}
+\arg{i\_coef} {index of phase matrix coefficient to get, where $0 \le \sourcenamearg{i\_coef} \le \createarg{n\_coef}\source{[i]} - 1$ and $0 \le \source{i} \le \createarg{n\_layers} - 1$}
+}{
+\dblerror{The phase matrix expansion coefficient (\sourcenamearg{i\_elem}, \sourcenamearg{i\_coef}) for layer index \sourcenamearg{i\_layer}}
+}
+
+
+\begin{prototype}{xrtm_set_coef_l_11}
+\proto{\texttt{int \textbf{xrtm\_set\_coef\_l\_11}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, int~\textbf{i\_deriv}, double~**\textbf{coef\_l}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_coef\_l\_n1}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_deriv}, double~***\textbf{coef\_l}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_coef\_l\_1n}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, double~***\textbf{coef\_l}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_coef\_l\_nn}(\textit{xrtm\_data~*\textbf{d}, double~****\textbf{coef\_l}})}}
+\end{prototype}
+
+\funcdesc{
+Set layer linearized phase matrix expansion coefficients $\partial \beta_{ij} / \partial x$.  A choice of four functions are provided for this purpose.  \sourcenamefunc{xrtm\_\-set\_\-coef\_l\_11} sets the values for a given layer index \sourcenamearg{i\_layer} and a given derivative index \sourcenamearg{i\_deriv} given an $(\sourcenamearg{n\_elem} \times \sourcenamearg{n\_coef})$ array of arrays.  \sourcenamefunc{xrtm\_\-set\_\-coef\_l\_n1} sets the values for all layers for a given derivative index \sourcenamearg{i\_deriv} given an $(\createarg{n\_layers} \times \sourcenamearg{n\_elem} \times \sourcenameargarray{n\_coef}{[i]}, 0 \le \source{i} \le \createarg{n\_layers} - 1)$ array of arrays of arrays.  \sourcenamefunc{xrtm\_\-set\_\-coef\_l\_1n} sets the values for all derivatives for a given layer index \sourcenamearg{i\_layer} given an $(\createarg{n\_derivs} \times \sourcenamearg{n\_elem} \times \sourcenamearg{n\_coef})$ array of arrays of arrays.  Finally, \sourcenamefunc{xrtm\_\-set\_\-coef\_l\_nn} sets the values for all layers and all derivatives given an $(\createarg{n\_layers} \times \createarg{n\_derivs} \times \sourcenamearg{n\_elem} \times \sourcenameargarray{n\_coef}{[i]}, 0 \le \source{i} \le \createarg{n\_layers} - 1)$ array of arrays of arrays of arrays.  In all cases $\sourcenamearg{n\_elem} = 1$ for scalar mode and $\sourcenamearg{n\_elem} = 6$ when option \xref{XRTM_OPTION_VECTOR}{XRTM\_\-OPTION\_\-VECTOR} has been specified and \sourcenamearg{n\_coef} is defined for each layer by \xref{xrtm_set_coef}{xrtm\_set\_coef()}.  To set these values XRTM must have been created with the option \xref{XRTM_OPTION_OUTPUT_AT_LEVELS}{XRTM\_\-CALC\_\-DERIVS}, otherwise it is an error.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_layer}{index of layer to set, where $0 \le \sourcenamearg{i\_layer} \le \createarg{n\_layers} - 1$}
+\arg{i\_deriv}{index of derivative to set, where $0 \le \sourcenamearg{i\_deriv} \le \createarg{n\_derivs} - 1$}
+\arg{coef\_l}{linearized phase matrix expansion coefficients $\partial \beta_{ij} / \partial x$ as an array of arrays (\sourcename{\_11}), an array of arrays of arrays (\sourcename{\_n1} or \sourcename{\_1n}), or an array of arrays of arrays of arrays (\sourcename{\_nn}), depending on the function called, where $-\infty \le \sourcenameargarray{coef\_l}{[i][j]},\sourcenameargarray{coef\_l}{[i][j][k]},\sourcenameargarray{coef\_l}{[i][j][k][l]} \le \infty$, except that $\sourcenameargarray{coef\_l}{[0][0]},\sourcenameargarray{coef\_l}{[i][0][0]},\sourcenameargarray{coef\_l}{[i][j][0][0]} = 0$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_coef_l}
+\proto{\texttt{double \textbf{xrtm\_get\_coef\_l}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, int~\textbf{i\_deriv}, int~\textbf{i\_elem}, int~\textbf{i\_coef}})}}
+\end{prototype}
+
+\funcdesc{
+Get the linearized phase matrix expansion coefficient for layer index \sourcenamearg{i\_layer}, derivative index \sourcenamearg{i\_deriv}, matrix element index \sourcenamearg{i\_elem}, and coefficient index \sourcenamearg{i\_coef}.  To get these values XRTM must have been created with the option \xref{XRTM_OPTION_OUTPUT_AT_LEVELS}{XRTM\_\-CALC\_\-DERIVS}, otherwise it is an error.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_layer}{index of layer to get, where $0 \le \sourcenamearg{i\_layer} \le \createarg{n\_layers} - 1$}
+\arg{i\_deriv}{index of derivative to get, where $0 \le \sourcenamearg{i\_deriv} \le \createarg{n\_derivs} - 1$}
+\arg{i\_elem} {index of phase matrix element to get, where $0 \le \sourcenamearg{i\_elem} \le \sourcenamearg{n\_elem}$ and $\sourcenamearg{n\_elem} = 0$ for scalar mode and $\sourcenamearg{n\_elem} = 6$ when option \xref{XRTM_OPTION_VECTOR}{XRTM\_\-OPTION\_\-VECTOR} has been specified}
+\arg{i\_coef} {index of phase matrix coefficient to get, where $0 \le \sourcenamearg{i\_coef} \le \createarg{n\_coef}\source{[i]} - 1$ and $0 \le \source{i} \le \createarg{n\_layers} - 1$}
+}{
+\dblerror{The linearized phase matrix expansion coefficient (\sourcenamearg{i\_elem}, \sourcenamearg{i\_coef}) for layer index \sourcenamearg{i\_layer} and derivative index \sourcenamearg{i\_deriv}}
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_omega_1}
+\proto{\texttt{int \textbf{xrtm\_set\_omega\_1}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, double~\textbf{omega}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_omega\_n}(\textit{xrtm\_data~*\textbf{d}, double~*\textbf{omega}})}}
+\end{prototype}
+
+\funcdesc{
+Set layer single scattering albedo $\omega$.  A choice of two functions are provided for this purpose.  \sourcenamefunc{xrtm\_\-set\_\-omega\_1} sets the value for a given layer index \sourcenamearg{i\_layer} given a scalar value.  \sourcenamefunc{xrtm\_\-set\_\-omega\_n} sets the values for all layers given an array of length \createarg{n\_layers}.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_layer}{index of layer to set, where $0 \le \sourcenamearg{i\_layer} \le \createarg{n\_layers} - 1$}
+\arg{omega}   {single scattering albedo $\omega$ as a scalar (\sourcename{\_1}) or an array (\sourcename{\_n}), depending on the function called, where $0.0 \le \sourcenamearg{omega},\sourcenameargarray{omega}{[i]} \le 1.0$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_omega}
+\proto{\texttt{double \textbf{xrtm\_get\_omega}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}})}}
+\end{prototype}
+
+\funcdesc{
+Get single scattering albedo $\omega$ for layer index \sourcenamearg{i\_layer}.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_layer}{index of layer to get, where $0 \le \sourcenamearg{i\_layer} \le \createarg{n\_layers} - 1$}
+}{
+\dblerror{The single scattering albedo $\omega$ for layer index \sourcenamearg{i\_layer}}
+}
+
+
+\begin{prototype}{xrtm_set_omega_l_11}
+\proto{\texttt{int \textbf{xrtm\_set\_omega\_l\_11}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, int~\textbf{i\_deriv}, double~\textbf{omega\_l}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_omega\_l\_n1}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_deriv}, double~*\textbf{omega\_l}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_omega\_l\_1n}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, double~*\textbf{omega\_l}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_omega\_l\_nn}(\textit{xrtm\_data~*\textbf{d}, double~**\textbf{omega\_l}})}}
+\end{prototype}
+
+\funcdesc{
+Set layer linearized single scattering albedo $\partial \omega / \partial x$.  A choice of four functions are provided for this purpose.  \sourcenamefunc{xrtm\_\-set\_\-omega\_l\_11} sets the value for a given layer index \sourcenamearg{i\_layer} and a given derivative index \sourcenamearg{i\_deriv} given a scalar value.  \sourcenamefunc{xrtm\_\-set\_\-omega\_l\_n1} sets the values for all layers for a given derivative index \sourcenamearg{i\_deriv} given an array of length \createarg{n\_layers}.  \sourcenamefunc{xrtm\_\-set\_\-omega\_l\_1n} sets the values for all derivatives for a given layer index \sourcenamearg{i\_layer} given an array of length \createarg{n\_derivs}.  Finally, \sourcenamefunc{xrtm\_\-set\_\-omega\_l\_nn} sets the values for all layers and all derivatives given an $(\createarg{n\_layers} \times \createarg{n\_derivs})$ array of arrays.  To set these values XRTM must have been created with the option \xref{XRTM_OPTION_OUTPUT_AT_LEVELS}{XRTM\_\-CALC\_\-DERIVS}, otherwise it is an error.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_layer}{index of layer to set, where $0 \le \sourcenamearg{i\_layer} \le \createarg{n\_layers} - 1$}
+\arg{i\_deriv}{index of derivative to set, where $0 \le \sourcenamearg{i\_deriv} \le \createarg{n\_derivs} - 1$}
+\arg{omega\_l}{linearized single scattering albedo $\partial \omega / \partial x$ as a scalar (\sourcename{\_1}), an array (\sourcename{\_n1} or \sourcename{\_1n}), or an array of arrays (\sourcename{\_nn}), depending on the function called, where $-\infty \le \sourcenamearg{omega\_l},\sourcenameargarray{omega\_l}{[i]},\sourcenameargarray{omega\_l}{[i][j]} \le \infty$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_omega_l}
+\proto{\texttt{double \textbf{xrtm\_get\_omega\_l}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, int~\textbf{i\_deriv}})}}
+\end{prototype}
+
+\funcdesc{
+Get linearized single scattering albedo $\partial \omega / \partial x$ for layer index \sourcenamearg{i\_layer} and derivative index \sourcenamearg{i\_deriv}.  To get these values XRTM must have been created with the option \xref{XRTM_OPTION_OUTPUT_AT_LEVELS}{XRTM\_\-CALC\_\-DERIVS}, otherwise it is an error.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_layer}{index of layer to get, where $0 \le \sourcenamearg{i\_layer} \le \createarg{n\_layers} - 1$}
+\arg{i\_deriv}{index of derivative to get, where $0 \le \sourcenamearg{i\_deriv} \le \createarg{n\_derivs} - 1$}
+}{
+\dblerror{The linearized single scattering albedo $\partial \omega / \partial x$ for layer index \sourcenamearg{i\_layer} and derivative index \sourcenamearg{i\_deriv}}
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_ltau_1}
+\proto{\texttt{int \textbf{xrtm\_set\_ltau\_1}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, double~\textbf{ltau}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_ltau\_n}(\textit{xrtm\_data~*\textbf{d}, double~*\textbf{ltau}})}}
+\end{prototype}
+
+\funcdesc{
+Set layer optical thickness $\tau$.  A choice of two functions are provided for this purpose.  \sourcenamefunc{xrtm\_\-set\_\-ltau\_1} sets the value for a given layer index \sourcenamearg{i\_layer} given a scalar value.  \sourcenamefunc{xrtm\_\-set\_\-ltau\_n} sets the values for all layers given an array of length \createarg{n\_layers}.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_layer}{index of layer to set, where $0 \le \sourcenamearg{i\_layer} \le \createarg{n\_layers} - 1$}
+\arg{ltau}    {optical thickness $\tau$ as a scalar (\sourcename{\_1}) or an array (\sourcename{\_n}), depending on the function called, where $\sourcenamearg{ltau},\sourcenamearg{ltau}{[i]} \ge 0.0$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_ltau}
+\proto{\texttt{double \textbf{xrtm\_get\_ltau}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}})}}
+\end{prototype}
+
+\funcdesc{
+Get optical thickness $\tau$ for layer index \sourcenamearg{i\_layer}.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_layer}{index of layer to get, where $0 \le \sourcenamearg{i\_layer} \le \createarg{n\_layers} - 1$}
+}{
+\dblerror{The optical thickness $\tau$ for layer index \sourcenamearg{i\_layer}}
+}
+
+
+\begin{prototype}{xrtm_set_ltau_l_11}
+\proto{\texttt{int \textbf{xrtm\_set\_ltau\_l\_11}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, int~\textbf{i\_deriv}, double~\textbf{ltau\_l}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_ltau\_l\_n1}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_deriv}, double~*\textbf{ltau\_l}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_ltau\_l\_1n}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, double~*\textbf{ltau\_l}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_ltau\_l\_nn}(\textit{xrtm\_data~*\textbf{d}, double~**\textbf{ltau\_l}})}}
+\end{prototype}
+
+\funcdesc{
+Set linearized layer optical thickness $\partial \tau / \partial x$.  A choice of four functions are provided for this purpose.  \sourcenamefunc{xrtm\_\-set\_\-ltau\_l\_11} sets the value for a given layer index \sourcenamearg{i\_layer} and a given derivative index \sourcenamearg{i\_deriv} given a scalar value.  \sourcenamefunc{xrtm\_\-set\_\-ltau\_l\_n1} sets the values for all layers for a given derivative index \sourcenamearg{i\_deriv} given an array of length \createarg{n\_layers}.  \sourcenamefunc{xrtm\_\-set\_\-ltau\_l\_1n} sets the values for all derivatives for a given layer index \sourcenamearg{i\_layer} given an array of length \createarg{n\_derivs}.  Finally, \sourcenamefunc{xrtm\_\-set\_\-ltau\_l\_nn} sets the values for all layers and all derivatives given an $(\createarg{n\_layers} \times \createarg{n\_derivs})$ array of arrays.  To set these values XRTM must have been created with the option \xref{XRTM_OPTION_OUTPUT_AT_LEVELS}{XRTM\_\-CALC\_\-DERIVS}, otherwise it is an error.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_layer}{index of layer to set, where $0 \le \sourcenamearg{i\_layer} \le \createarg{n\_layers} - 1$}
+\arg{i\_deriv}{index of derivative to set, where $0 \le \sourcenamearg{i\_deriv} \le \createarg{n\_derivs} - 1$}
+\arg{ltau\_l} {linearized optical thickness $\partial \tau / \partial x$ as a scalar (\sourcename{\_11}), an array (\sourcename{\_n1} and \sourcename{\_1n}), or an array of arrays (\sourcename{\_nn}), depending on the function called, where $-\infty \le \sourcenamearg{ltau\_l}, \sourcenamearg{ltau\_l}{[i]},\sourcenamearg{ltau\_l}{[i][j]} \le \infty$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_ltau_l}
+\proto{\texttt{double \textbf{xrtm\_get\_ltau\_l}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_layer}, int~\textbf{i\_deriv}})}}
+\end{prototype}
+
+\funcdesc{
+Get linearized optical thickness $\partial \tau / \partial x$ for layer index \sourcenamearg{i\_layer} and derivative index \sourcenamearg{i\_deriv}.  To get these values XRTM must have been created with the option \xref{XRTM_OPTION_OUTPUT_AT_LEVELS}{XRTM\_\-CALC\_\-DERIVS}, otherwise it is an error.
+}{
+\arg{d}       {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_layer}{index of layer to get, where $0 \le \sourcenamearg{i\_layer} \le \createarg{n\_layers} - 1$}
+\arg{i\_deriv}{index of derivative to get, where $0 \le \sourcenamearg{i\_deriv} \le \createarg{n\_derivs} - 1$}
+}{
+\dblerror{The linearized optical thickness $\partial \tau / \partial x$ for layer index \sourcenamearg{i\_layer} and derivative index \sourcenamearg{i\_deriv}}
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_surface_b}
+\proto{\texttt{int \textbf{xrtm\_set\_surface\_b}(\textit{xrtm\_data~*\textbf{d}, double~\textbf{surface\_b}})}}
+\end{prototype}
+
+\funcdesc{
+Set the surface Planck radiance.  Must be in the same units as $F_{0}$ and the TOA and level Planck radiances.  To set this value XRTM must have been created with the option \xref{XRTM_OPTION_SOURCE_THERMAL}{XRTM\_\-OPTION\_\-SOURCE\_\-THERMAL}, otherwise it is an error.
+}{
+\arg{d}         {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{surface\_b}{surface Planck radiance, where $\sourcenamearg{surface\_b} \ge 0.0$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_surface_b}
+\proto{\texttt{double \textbf{xrtm\_get\_surface\_b}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+Get the surface Planck radiance.  To get this value XRTM must have been created with the option \xref{XRTM_OPTION_SOURCE_THERMAL}{XRTM\_\-OPTION\_\-SOURCE\_\-THERMAL}, otherwise it is an error. 
+}{
+\arg{d}          {the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\dblerror{The surface Planck radiance}
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_set_kernel_ampfac}
+\proto{\texttt{int \textbf{xrtm\_set\_kernel\_ampfac}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_kernel}, double~\textbf{ampfac}})}}
+\end{prototype}
+
+\funcdesc{
+Set the amplitude factor for kernel index \sourcenamearg{i\_kernel}.  The kernel index is the index at which the kernel was given in the array \createarg{kernels} given as input to \xref{xrtm_create}{\sourcenamefunc{xrtm\_create}}.  To set this value XRTM must have been created with $\createarg{n\_kernels} > 0$, otherwise it is an error.
+}{
+\arg{d}        {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_kernel}{index of kernel to set, where $0 \le \sourcenamearg{i\_kernel} \le \createarg{n\_kernels} - 1$}
+\arg{ampfac}   {the amplitude factor for kernel \sourcenamearg{i\_kernel}, where $0.0 \le \sourcenamearg{ampfac} \le 1.0$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_kernel_ampfac}
+\proto{\texttt{double \textbf{xrtm\_get\_kernel\_ampfac}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_kernel}})}}
+\end{prototype}
+
+\funcdesc{
+Get the amplitude factor for kernel index \sourcenamearg{i\_kernel}.  The kernel index is the index at which the kernel was given in the array \createarg{kernels} given as input to \xref{xrtm_create}{\sourcenamefunc{xrtm\_create}}.
+}{
+\arg{d}        {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_kernel}{index of kernel to get, where $0 \le \sourcenamearg{i\_kernel} \le \createarg{n\_kernels} - 1$}
+}{
+\dblerror{The amplitude factor for kernel index \sourcenamearg{i\_kernel}}
+}
+
+
+\begin{prototype}{xrtm_set_kernel_params_1}
+\proto{\texttt{int \textbf{xrtm\_set\_kernel\_params\_1}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_kernel}, int~\textbf{i\_param}, double~\textbf{param}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_kernel\_params\_n}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_kernel}, double~*\textbf{params}})}}
+\end{prototype}
+
+\funcdesc{
+Set the kernel parameters for kernel index \sourcenamearg{i\_kernel}.  The kernel index is the index at which the kernel was given in the array \createarg{kernels} given as input to \xref{xrtm_create}{\sourcenamefunc{xrtm\_create}}.  A choice of two functions are provided for this purpose.  \sourcenamefunc{xrtm\_\-set\_\-kernel\_\-params\_1} sets the value for a given parameter index \sourcenamearg{i\_param} given a scalar value.  \sourcenamefunc{xrtm\_\-set\_\-kernel\_\-params\_n} sets the values for all parameters given an array of length \sourcenamearg{n\_params}, where \sourcenamearg{n\_params} is the number of parameters required for kernel \sourcenamearg{i\_kernel}.  The number of parameters and a description of each parameter is given for each kernel in section~\ref{xrtm_c_interface_configuration_constants_brdf_kernels}.
+}{
+\arg{d}        {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_kernel}{index of kernel to set, where $0 \le \sourcenamearg{i\_kernel} \le \createarg{n\_kernels} - 1$}
+\arg{i\_param} {index of parameter to set, where $0 \le \sourcenamearg{i\_param} \le \sourcenamearg{n\_params} - 1$}
+\arg{param}    {kernel parameter as a scalar (\sourcename{\_1}) or an array (\sourcename{\_n}), depending on the function called, where $-\infty \le \sourcenamearg{param},\sourcenamearg{param}{[i]} \le \infty$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_kernel_params}
+\proto{\texttt{double \textbf{xrtm\_get\_kernel\_params}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_kernel}, int~\textbf{i\_param}})}}
+\end{prototype}
+
+\funcdesc{
+Get the kernel parameter for kernel index \sourcenamearg{i\_kernel} and parameter index \sourcenamearg{i\_param}.  The kernel index is the index at which the kernel was given in the array \createarg{kernels} given as input to \xref{xrtm_create}{\sourcenamefunc{xrtm\_create}}.  The parameter indices are described for each kernel in section~\ref{xrtm_c_interface_configuration_constants_brdf_kernels}.
+}{
+\arg{d}        {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_kernel}{index of kernel to get, where $0 \le \sourcenamearg{i\_kernel} \le \createarg{n\_kernels} - 1$}
+\arg{i\_param} {index of parameter to set, where $0 \le \sourcenamearg{i\_param} \le \sourcenamearg{n\_params} - 1$}
+}{
+\dblerror{The kernel parameter for kernel index \sourcenamearg{i\_kernel} and parameter index \sourcenamearg{i\_param}}
+}
+
+
+\begin{prototype}{xrtm_set_kernel_ampfac_l_1}
+\proto{\texttt{int \textbf{xrtm\_set\_kernel\_ampfac\_l\_1}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_kernel}, int~\textbf{i\_deriv}, double~\textbf{ampfac\_l}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_kernel\_ampfac\_l\_n}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_kernel}, double~*\textbf{ampfac\_l}})}}
+\end{prototype}
+
+\funcdesc{
+Set the linearized amplitude factor for kernel index \sourcenamearg{i\_kernel}.  The kernel index is the index at which the kernel was given in the array \createarg{kernels} given as input to \xref{xrtm_create}{\sourcenamefunc{xrtm\_create}}.  A choice of two functions are provided for this purpose.  \sourcenamefunc{xrtm\_\-set\_\-kernel\_\-ampfac\_l\_1} sets the value for a given derivative index \sourcenamearg{i\_deriv} given a scalar value.  \sourcenamefunc{xrtm\_\-set\_\-kernel\_\-ampfac\_l\_n} sets the values for all derivatives given an array of length \sourcenamearg{n\_derivs}.  To set this value XRTM must have been created with $\createarg{n\_kernels} > 0$, otherwise it is an error.  To set these values XRTM must have been created with the option \xref{XRTM_OPTION_OUTPUT_AT_LEVELS}{XRTM\_\-CALC\_\-DERIVS}, otherwise it is an error.
+}{
+\arg{d}        {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_kernel}{index of kernel to set, where $0 \le \sourcenamearg{i\_kernel} \le \createarg{n\_kernels} - 1$}
+\arg{i\_deriv} {index of derivative to set, where $0 \le \sourcenamearg{i\_deriv} \le \createarg{n\_derivs} - 1$}
+\arg{ampfac\_l}{the linearized amplitude factor for kernel \sourcenamearg{i\_kernel}, where $-\infty \le \sourcenamearg{ampfac},\sourcenameargarray{ampfac}{[i]} \le \infty$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_kernel_ampfac_l}
+\proto{\texttt{double \textbf{xrtm\_get\_kernel\_ampfac\_l}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_kernel}, int~\textbf{i\_deriv}})}}
+\end{prototype}
+
+\funcdesc{
+Get the linearized amplitude factor for kernel index \sourcenamearg{i\_kernel} and derivative index \sourcenamearg{i\_deriv} .  The kernel index is the index at which the kernel was given in the array \createarg{kernels} given as input to \xref{xrtm_create}{\sourcenamefunc{xrtm\_create}}.  To get these values XRTM must have been created with the option \xref{XRTM_OPTION_OUTPUT_AT_LEVELS}{XRTM\_\-CALC\_\-DERIVS}, otherwise it is an error.
+}{
+\arg{d}        {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_kernel}{index of kernel to get, where $0 \le \sourcenamearg{i\_kernel} \le \createarg{n\_kernels} - 1$}
+\arg{i\_deriv} {index of derivative to get, where $0 \le \sourcenamearg{i\_deriv} \le \createarg{n\_derivs} - 1$}
+}{
+\dblerror{The linearized amplitude factor for kernel index \sourcenamearg{i\_kernel}}
+}
+
+
+\begin{prototype}{xrtm_set_kernel_params_l_11}
+\proto{\texttt{int \textbf{xrtm\_set\_kernel\_params\_l\_11}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_kernel}, int~\textbf{i\_deriv}, int~\textbf{i\_param}, double~\textbf{param\_l}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_kernel\_params\_l\_1n}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_kernel}, int~\textbf{i\_deriv}, double~*\textbf{params\_l}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_kernel\_params\_l\_n1}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_kernel}, int~\textbf{i\_param}, double~*\textbf{params\_l}})}}
+\proto{\texttt{int \textbf{xrtm\_set\_kernel\_params\_l\_nn}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_kernel}, double~**\textbf{params\_l}})}}
+\end{prototype}
+
+\funcdesc{
+Set the linearized kernel parameters for kernel index \sourcenamearg{i\_kernel}.  The kernel index is the index at which the kernel was given in the array \createarg{kernels} given as input to \xref{xrtm_create}{\sourcenamefunc{xrtm\_create}}.  A choice of four functions are provided for this purpose.  \sourcenamefunc{xrtm\_\-set\_\-kernel\_\-params\_l\_11} sets the value for a given derivative index \sourcenamearg{i\_deriv} and a given parameter index \sourcenamearg{i\_param} given a scalar value.  \sourcenamefunc{xrtm\_\-set\_\-kernel\_\-params\_l\_1n} sets the value for all parameters given a derivative index \sourcenamearg{i\_deriv} given an array of length \sourcenamearg{n\_params}.  \sourcenamefunc{xrtm\_\-set\_\-kernel\_\-params\_l\_n1} sets the value for all derivatives given a parameter index \sourcenamearg{i\_param} given an array of length \sourcenamearg{n\_derivs}.  \sourcenamefunc{xrtm\_\-set\_\-kernel\_\-params\_l\_nn} sets the value for all derivatives given and all parameters given a ($\createarg{n\_derivs} \times \sourcenamearg{n\_params}$) array of arrays.  \sourcenamearg{n\_params} is the number of parameters required for kernel \sourcenamearg{i\_kernel}.  The number of parameters and a description of each parameter is given for each kernel in section~\ref{xrtm_c_interface_configuration_constants_brdf_kernels}.  To set these values XRTM must have been created with the option \xref{XRTM_OPTION_OUTPUT_AT_LEVELS}{XRTM\_\-CALC\_\-DERIVS}, otherwise it is an error.
+}{
+\arg{d}        {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_kernel}{index of kernel to set, where $0 \le \sourcenamearg{i\_kernel} \le \createarg{n\_kernels} - 1$}
+\arg{i\_deriv} {index of derivative to set, where $0 \le \sourcenamearg{i\_deriv} \le \createarg{n\_derivs} - 1$}
+\arg{i\_param} {index of parameter to set, where $0 \le \sourcenamearg{i\_param} \le \sourcenamearg{n\_params} - 1$}
+\arg{param\_l} {the linearized kernel parameter for kernel \sourcenamearg{i\_kernel}, where $-\infty \le \sourcenamearg{param\_l},\sourcenameargarray{param\_l}{[i]},\sourcenameargarray{param\_l}{[i][j]} \le \infty$}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_get_kernel_params_l}
+\proto{\texttt{double \textbf{xrtm\_get\_kernel\_params\_l}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_kernel}, int~\textbf{i\_deriv}, int~\textbf{i\_param}})}}
+\end{prototype}
+
+\funcdesc{
+Get the linearized kernel parameter for kernel index \sourcenamearg{i\_kernel}, derivative index \sourcenamearg{i\_deriv}, and parameter index \sourcenamearg{i\_param}.  The kernel index is the index at which the kernel was given in the array \createarg{kernels} given as input to \xref{xrtm_create}{\sourcenamefunc{xrtm\_create}}.  The parameter indices are described for each kernel in section~\ref{xrtm_c_interface_configuration_constants_brdf_kernels}.  To get these values XRTM must have been created with the option \xref{XRTM_OPTION_OUTPUT_AT_LEVELS}{XRTM\_\-CALC\_\-DERIVS}, otherwise it is an error.
+}{
+\arg{d}        {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{i\_kernel}{index of kernel to get, where $0 \le \sourcenamearg{i\_kernel} \le \createarg{n\_kernels} - 1$}
+\arg{i\_deriv} {index of derivative to get, where $0 \le \sourcenamearg{i\_deriv} \le \createarg{n\_derivs} - 1$}
+\arg{i\_param} {index of parameter to set, where $0 \le \sourcenamearg{i\_param} \le \sourcenamearg{n\_params} - 1$}
+}{
+\dblerror{The linearized kernel parameter for kernel index \sourcenamearg{i\_kernel} and parameter index \sourcenamearg{i\_param}}
+}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmsection{Running the model and getting output}
+\label{xrtm_c_interface_running_the_model_and_getting_output}
+
+\begin{prototype}{xrtm_update_varied_layers}
+\proto{\texttt{int \textbf{xrtm\_update\_varied\_layers}(\textit{xrtm\_data~*\textbf{d}})}}
+\end{prototype}
+
+\funcdesc{
+This function must be called every time the set of layers that vary, including the surface, changes.  A layer ``varies'' if at least one of the linearized values associated with that layer is nonzero.  For example, if at least one of the linearized values for a particular layer has been set to a nonzero value where before all the values for that layer were zero then that layer has been added to the set of layers that varies and \sourcenamefunc{xrtm\_update\_varied\_layers} must be called.  Equivalently, If all the linearized values for a layer are set to zero where before at least one of the values was nonzero then that layer has been removed from the set of layers that vary so \sourcenamefunc{xrtm\_update\_varied\_layers} must be called.  On the other hand, if the values of nonzero linearized values are only changed to other nonzero values then \sourcenamefunc{xrtm\_update\_varied\_layers} does not need to be called.  For efficiency, it is a good idea to call the function once, after all changes to all layers and all values have been changed just before running the model.  Calling this function is only valid when XRTM has been created with the option \xref{XRTM_OPTION_OUTPUT_AT_LEVELS}{XRTM\_\-CALC\_\-DERIVS}, otherwise it is an error.
+}{
+\arg{d}{the \sourcearg{xrtm\_data} structure which represents the instance created}
+}{
+\interrornoret
+}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+%\begin{prototype}{xrtm_qx}
+%\proto{\texttt{int \textbf{xrtm\_qx}(\textit{xrtm\_data~*\textbf{d}, double~*\textbf{qx}})}}
+%\end{prototype}
+
+%\begin{prototype}{xrtm_qw}
+%\proto{\texttt{int \textbf{xrtm\_qw}(\textit{xrtm\_data~*\textbf{d}, double~*\textbf{qw}})}}
+%\end{prototype}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+%\begin{prototype}{xrtm_pade_params}
+%\proto{\texttt{int \textbf{xrtm\_pade\_params}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_four}, int~\textbf{i\_layer}, int~*\textbf{pade\_s}, int~*\textbf{pade\_r}})}}
+%\end{prototype}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+%\begin{prototype}{xrtm_local_r_t_u_w}
+%\proto{\texttt{int \textbf{xrtm\_local\_r\_t\_u\_w}(\textit{xrtm\_data~*\textbf{d}, int~\textbf{i\_four}, int~\textbf{i\_layer}, double~**\textbf{r\_p\_}, double~**\textbf{t\_p\_}, double~**\textbf{r\_m\_}, double~**\textbf{t\_m\_}, double~***\textbf{u\_p\_}, double~***\textbf{w\_p\_}, double~***\textbf{u\_m\_}, double~***\textbf{w\_m\_}})}}
+%\end{prototype}
+
+
+%-------------------------------------------------------------------------------
+%
+%-------------------------------------------------------------------------------
+\begin{prototype}{xrtm_solution}
+\proto{\texttt{int \textbf{xrtm\_solution}(\textit{xrtm\_data~*\textbf{d}, enum xrtm\_solver\_mask~\textbf{solver}, int~\textbf{solutions}, int~\textbf{n\_out\_phis}, double~**\textbf{out\_phis}, double~****\textbf{I\_p}, double~****\textbf{I\_m}, double~*****\textbf{I\_p\_l}, double~*****\textbf{I\_m\_l}, double~*\textbf{mean\_p}, double~*\textbf{mean\_m}, double~**\textbf{mean\_p\_l}, double~**\textbf{mean\_m\_l}, double~*\textbf{flux\_p}, double~*\textbf{flux\_m}, double~**\textbf{flux\_p\_l}, double~**\textbf{flux\_m\_l}, double~*\textbf{flux\_div}, double~**\textbf{flux\_div\_l}})}}
+\end{prototype}
+
+\funcdesc{
+Run XRTM using a specified solver and return various result types.
+}{
+\arg{d}           {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{solver}      {bit mask for the \xref{xrtm_c_interface_configuration_constants_solvers}{\source{solver}} to be used}
+\arg{solutions}   {bit mask for the \xref{xrtm_c_interface_configuration_constants_solutions}{\source{solutions}} to return results for}
+\arg{n\_out\_phis}{number azimuth angles $\phi$ to return results for}
+\arg{out\_phis}   {array of arrays of output azimuth angles with dimensions (\createarg{n\_out\_thetas}, \sourcenamearg{n\_out\_phis}), where $0.0 \le \sourcenameargarray{out\_phis}{[i][j]} \le 360.0$}
+\arg{I\_p}        {(output) array of arrays of arrays of arrays of upward radiances with dimensions (\createarg{n\_out\_levels}, \createarg{n\_out\_thetas}, \createarg{n\_out\_phis}, \createarg{n\_stokes})}
+\arg{I\_m}        {(output) array of arrays of arrays of arrays of downward radiances with dimen-sions (\createarg{n\_out\_levels}, \createarg{n\_out\_thetas}, \createarg{n\_out\_phis}, \createarg{n\_stokes})}
+\arg{I\_p\_l}     {(output) array of arrays of arrays of arrays of arrays of upward radi-ance derivatives with dimensions (\createarg{n\_out\_levels}, \createarg{n\_derivs}, \createarg{n\_out\_thetas}, \createarg{n\_out\_phis}, \createarg{n\_stokes})}
+\arg{I\_m\_l}     {(output) array of arrays of arrays of arrays of arrays of downward radiance derivatives with dimensions (\createarg{n\_out\_levels}, \createarg{n\_derivs}, \createarg{n\_out\_thetas}, \createarg{n\_out\_phis}, \createarg{n\_stokes})}
+\arg{mean\_p}     {(output) array of arrays of upward mean radiances with dimensions (\createarg{n\_out\_levels}, \createarg{n\_stokes})}
+\arg{mean\_m}     {(output) array of arrays of downward mean radiances with dimensions (\createarg{n\_out\_levels}, \createarg{n\_stokes})}
+\arg{mean\_p\_l}  {(output) array of arrays of arrays of upward mean radiance derivatives with dimensions (\createarg{n\_out\_levels}, \createarg{n\_derivs}, \createarg{n\_stokes})}
+\arg{mean\_m\_l}  {(output) array of arrays of arrays of downward mean radiance derivatives with dimensions (\createarg{n\_out\_levels}, \createarg{n\_derivs}, \createarg{n\_stokes})}
+\arg{flux\_p}     {(output) array of arrays of upward fluxes with dimensions (\createarg{n\_out\_levels}, \createarg{n\_stokes})}
+\arg{flux\_m}     {(output) array of arrays of downward fluxes with dimensions (\createarg{n\_out\_levels}, \createarg{n\_stokes})}
+\arg{flux\_p\_l}  {(output) array of arrays of arrays of upward flux derivatives with dimen- \linebreak sions (\createarg{n\_out\_levels}, \createarg{n\_derivs}, \createarg{n\_stokes})}
+\arg{flux\_m\_l}  {(output) array of arrays of arrays of downward flux derivatives with dimensions (\createarg{n\_out\_levels}, \createarg{n\_derivs}, \createarg{n\_stokes})}
+\arg{flux\_div}   {(output) array of arrays of flux divergence with dimensions (\createarg{n\_out\_levels}, \createarg{n\_stokes})}
+\arg{flux\_div\_l}{(output) array of arrays of arrays of flux divergence derivatives with dimensions (\createarg{n\_out\_levels}, \createarg{n\_derivs}, \createarg{n\_stokes})}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_radiance}
+\proto{\texttt{int \textbf{xrtm\_radiance}(\textit{xrtm\_data~*\textbf{d}, enum xrtm\_solver\_mask~\textbf{solver}, int~\textbf{n\_out\_phis}, double~**\textbf{out\_phis}, double~****\textbf{I\_p}, double~****\textbf{I\_m}, double~*****\textbf{I\_p\_l}, double~*****\textbf{I\_m\_l}})}}
+\end{prototype}
+
+\funcdesc{
+Run XRTM using a specified solver and return radiance results.
+}{
+\arg{d}           {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{solver}      {bit mask for the \xref{xrtm_c_interface_configuration_constants_solvers}{\source{solver}} to be used}
+\arg{n\_out\_phis}{number azimuth angles $\phi$ to return results for}
+\arg{out\_phis}   {array of arrays of output azimuth angles with dimensions (\createarg{n\_out\_thetas}, \sourcenamearg{n\_out\_phis}), where $0.0 \le \sourcenameargarray{out\_phis}{[i][j]} \le 360.0$}
+\arg{I\_p}        {(output) array of arrays of arrays of arrays of upward radiances with dimensions (\createarg{n\_out\_levels}, \createarg{n\_out\_thetas}, \createarg{n\_out\_phis}, \createarg{n\_stokes})}
+\arg{I\_m}        {(output) array of arrays of arrays of arrays of downward radiances with dimen-sions (\createarg{n\_out\_levels}, \createarg{n\_out\_thetas}, \createarg{n\_out\_phis}, \createarg{n\_stokes})}
+\arg{I\_p\_l}     {(output) array of arrays of arrays of arrays of arrays of upward radi-ance derivatives with dimensions (\createarg{n\_out\_levels}, \createarg{n\_derivs}, \createarg{n\_out\_thetas}, \createarg{n\_out\_phis}, \createarg{n\_stokes})}
+\arg{I\_m\_l}     {(output) array of arrays of arrays of arrays of arrays of downward radiance derivatives with dimensions (\createarg{n\_out\_levels}, \createarg{n\_derivs}, \createarg{n\_out\_thetas}, \createarg{n\_out\_phis}, \createarg{n\_stokes})}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_mean_radiance}
+\proto{\texttt{int \textbf{xrtm\_mean\_radiance}(\textit{xrtm\_data~*\textbf{d}, enum xrtm\_solver\_mask~\textbf{solver}, double~*\textbf{mean\_p}, double~*\textbf{mean\_m}, double~**\textbf{mean\_p\_l}, double~**\textbf{mean\_m\_l}})}}
+\end{prototype}
+
+\funcdesc{
+Run XRTM using a specified solver and return mean radiance results.
+}{
+\arg{d}           {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{solver}      {bit mask for the \xref{xrtm_c_interface_configuration_constants_solvers}{\source{solver}} to be used}
+\arg{mean\_p}     {(output) array of arrays of upward mean radiances with dimensions (\createarg{n\_out\_levels}, \createarg{n\_stokes})}
+\arg{mean\_m}     {(output) array of arrays of downward mean radiances with dimensions (\createarg{n\_out\_levels}, \createarg{n\_stokes})}
+\arg{mean\_p\_l}  {(output) array of arrays of arrays of upward mean radiance derivatives with dimensions (\createarg{n\_out\_levels}, \createarg{n\_derivs}, \createarg{n\_stokes})}
+\arg{mean\_m\_l}  {(output) array of arrays of arrays of downward mean radiance derivatives with dimensions (\createarg{n\_out\_levels}, \createarg{n\_derivs}, \createarg{n\_stokes})}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_flux}
+\proto{\texttt{int \textbf{xrtm\_flux}(\textit{xrtm\_data~*\textbf{d}, enum xrtm\_solver\_mask~\textbf{solver}, double~*\textbf{flux\_p}, double~*\textbf{flux\_m}, double~**\textbf{flux\_p\_l}, double~**\textbf{flux\_m\_l}})}}
+\end{prototype}
+
+\funcdesc{
+Run XRTM using a specified solver and return flux results.
+}{
+\arg{d}           {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{solver}      {bit mask for the \xref{xrtm_c_interface_configuration_constants_solvers}{\source{solver}} to be used}
+\arg{flux\_p}     {(output) array of arrays of upward fluxes with dimensions (\createarg{n\_out\_levels}, \createarg{n\_stokes})}
+\arg{flux\_m}     {(output) array of arrays of downward fluxes with dimensions (\createarg{n\_out\_levels}, \createarg{n\_stokes})}
+\arg{flux\_p\_l}  {(output) array of arrays of arrays of upward flux derivatives with dimen- \linebreak sions (\createarg{n\_out\_levels}, \createarg{n\_derivs}, \createarg{n\_stokes})}
+\arg{flux\_m\_l}  {(output) array of arrays of arrays of downward flux derivatives with dimensions (\createarg{n\_out\_levels}, \createarg{n\_derivs}, \createarg{n\_stokes})}
+}{
+\interrornoret
+}
+
+
+\begin{prototype}{xrtm_flux_divergence}
+\proto{\texttt{int \textbf{xrtm\_flux\_divergence}(\textit{xrtm\_data~*\textbf{d}, enum xrtm\_solver\_mask~\textbf{solver}, double~*\textbf{flux\_div}, double~**\textbf{flux\_div\_l}})}}
+\end{prototype}
+
+\funcdesc{
+Run XRTM using a specified solver and return flux divergence results.
+}{
+\arg{d}           {the \sourcearg{xrtm\_data} structure which represents the instance created}
+\arg{solver}      {bit mask for the \xref{xrtm_c_interface_configuration_constants_solvers}{\source{solver}} to be used}
+\arg{flux\_div}   {(output) array of arrays of flux divergence with dimensions (\createarg{n\_out\_levels}, \createarg{n\_stokes})}
+\arg{flux\_div\_l}{(output) array of arrays of arrays of flux divergence derivatives with dimensions (\createarg{n\_out\_levels}, \createarg{n\_derivs}, \createarg{n\_stokes})}
+}{
+\interrornoret
+}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmsection{Miscellaneous functions}
+\label{xrtm_c_interface_miscellaneous_functions}
+
+\begin{prototype}{xrtm_get_version}
+\proto{\texttt{const char *\textbf{xrtm\_get\_version}()}}
+\end{prototype}
+
+\funcdesc{
+Get the XRTM version sstring.
+}{
+None.
+}{
+Pointer to the XRTM version string.
+}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmsection{Error Handling}
+\label{xrtm_c_interface_error_handling}
+
+All functions in the XRTM C interface return either an \source{int} or a \source{double}.  If an error occurs when calling these functions then the return value will be set to one of the follwing error constants depending on the function's return type:
+
+\begin{description}
+\xlabel{XRTM_INT_ERROR}
+\item[\source{XRTM\_\-INT\_\-ERROR}] \hfill \\
+Returned from functions returning an \source{int} when an error has occurred while calling the function.
+
+\xlabel{XRTM_DBL_ERROR}
+\item[\source{XRTM\_DBL\_ERROR}] \hfill \\
+Returned from functions returning a \source{double} when an error has occurred while calling the function.
+
+\end{description}
+
+\noindent
+When an error occurs XRTM will print an error message followed by a function call stack to the standard error (\source{stderr}) stream.
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmsection{Example C program using XRTM}
+\label{xrtm_c_interface_example_c_program_using_xrtm}
+
+An example program using the C interface is at
+\begin{verbatim}
+     examples/example_c.c
+\end{verbatim}
+and when the XRTM code is compiled properly the C example program should be compiled as
+\begin{verbatim}
+     examples/example_c
+\end{verbatim}
+
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmchapter{XRTM Utilities}
+\label{xrtm_utilities}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmsection{Test suite: testxrtm}
+\label{xrtm_utilities_test_suite_testxrtms}
+
+\xrtmsubsection{Testxrtm options}
+\label{xrtm_utilities_stand_alone_execution_callxrtm_testxrtm_options}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\xrtmsection{Stand alone execution: callxrtm}
+\label{xrtm_utilities_stand_alone_execution_callxrtm}
+
+\texttt{callxrtm} is a command line program  that takes inputs, either from the command line or from an input file, runs the model, and outputs results.  \texttt{callxrtm} was created primarily as a development and testing tool.  Although it is not recommended for production use (it is recommended that the API be used instead) it can also be useful for running XRTM for small studies.
+
+\noindent
+The path to \texttt{callxrtm} is 
+\begin{verbatim}
+     utils/callxrtm
+\end{verbatim}
+or when using Visual Studio
+\begin{verbatim}
+     $(SolutionDir)/$(ConfigurationName)/callxrtm.exe
+\end{verbatim}
+where the variable \texttt{\$(SolutionDir)} is \texttt{msvs\_2005}, \texttt{msvs\_2008}, or \texttt{msvs\_2010} and the variable \texttt{\$(ConfigurationName)} is \texttt{Debug} or \texttt{Release}.
+
+\noindent
+An example run of \texttt{callxrtm} is contained in the following test text file:
+\begin{verbatim}
+     examples/callxrtm.txt
+\end{verbatim}
+Two cases are given.  One that runs \texttt{callxrtm} using the command line to set all the inputs and another that uses the following XRTM input file (\texttt{.xif}) to set the inputs
+\begin{verbatim}
+     examples/example.xif
+\end{verbatim}
+Please see text file for more details about the example run.  The \texttt{callxrtm} input format for the command line and an input file is outlined in the next section.
+
+
+\xrtmsubsection{Callxrtm options}
+\label{xrtm_utilities_stand_alone_execution_callxrtm_callxrtm_options}
+
+
+\xrtmsubsection{Callxrtm input format}
+\label{xrtm_utilities_stand_alone_execution_callxrtm_callxrtm_input_format}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\bibliography{xrtm.bib}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+%\chapter*{GNU Free Documentation License}
+%\label{gnu_free_documentation_license}
+%\addcontentsline{toc}{chapter}{GNU Free Documentation License}
+
+%\input{fdl.tex}
+
+
+\end{document}
