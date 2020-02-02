@@ -1,0 +1,5 @@
+#!/bin/tcsh
+
+setenv PYTHONPATH ${HOME}/xrtm/interfaces:${PYTHONPATH}
+
+${HOME}/xrtm/examples/example_py.py

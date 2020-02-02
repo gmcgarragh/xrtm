@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -63,17 +63,17 @@ void FORWARD_SAVE_SOLVE_BVP_FREE(FORWARD_SAVE_SOLVE_BVP_DATA *d) {
  ******************************************************************************/
 static void SOLVE_BVP_A(int n_quad, int n_stokes, int n_layers,
             double *ltau, double *ltau_a,
-            double **Rs_qq, double **Rs_qq_a, 
+            double **Rs_qq, double **Rs_qq_a,
             double *atran, double *atran_a,
             TYPE **nu, TYPE ***X_p, TYPE ***X_m,
-            double **F_p, double **F_m,
-            double **F0_p, double **F0_m, double **F1_p, double **F1_m,
+            double **Ft_p, double **Ft_m,
+            double **Ft0_p, double **Ft0_m, double **Ft1_p, double **Ft1_m,
             TYPE **nu_a, TYPE ***X_p_a, TYPE ***X_m_a,
-            double **F_p_a, double **F_m_a,
-            double **F0_p_a, double **F0_m_a, double **F1_p_a, double **F1_m_a,
+            double **Ft_p_a, double **Ft_m_a,
+            double **Ft0_p_a, double **Ft0_m_a, double **Ft1_p_a, double **Ft1_m_a,
             TYPE *B, TYPE *B_a,
             double *I1_m, double *I1_m_a, double *In_p, double *In_p_a,
-            int surface, int thermal, uchar *derivs_h, uchar *derivs_p,
+            int surface, int thermal, uchar *derivs_layers, uchar *derivs_beam,
             save_tree_data save_tree, work_data work) {
 
      int i;
@@ -138,7 +138,7 @@ static void SOLVE_BVP_A(int n_quad, int n_stokes, int n_layers,
      xgbtrs_("T", &n_comp, &n_diags, &n_diags, &nrhs, *(save->A), &m_comp,
              save->ipiv, B_a, &n_comp, &info);
      if (info) {
-          eprintf("ERROR: xgbtrs() info = %d\n", info);
+          fprintf(stderr, "ERROR: xgbtrs() info = %d\n", info);
           exit(1);
      }
 
@@ -147,7 +147,7 @@ static void SOLVE_BVP_A(int n_quad, int n_stokes, int n_layers,
       *
       *-----------------------------------------------------------------------*/
      for (i = 0; i < n_layers; ++i) {
-          if (derivs_h[i]) {
+          if (derivs_layers[i]) {
                for (j = 0; j < n_quad_v; ++j) {
                     lambda_a[i][j] = 0.;
                }
@@ -161,9 +161,9 @@ static void SOLVE_BVP_A(int n_quad, int n_stokes, int n_layers,
      for (i = 0; i < n_quad_v; ++i) {
           a = B_a[i];
 
-          if (derivs_p[0])
-               F_m_a[0][i] -= XREAL(a);
-          if (derivs_h[0]) {
+          if (derivs_beam[0])
+               Ft_m_a[0][i] -= XREAL(a);
+          if (derivs_layers[0]) {
                for (j = 0; j < n_quad_v; ++j) {
                     X_m_a[0][i][j] += a * save->B[j];
 
@@ -180,21 +180,21 @@ static void SOLVE_BVP_A(int n_quad, int n_stokes, int n_layers,
           for (j = 0; j < n_quad_v; ++j) {
                a = B_a[iii++];
 
-               if (derivs_p[i  ]) {
-                    F_p_a[i][j] -= XREAL(a) * atran[i];
+               if (derivs_beam[i  ]) {
+                    Ft_p_a[i][j] -= XREAL(a) * atran[i];
 
-                    atran_a [i] -= XREAL(a) * F_p[i][j];
+                    atran_a [i] -= XREAL(a) * Ft_p[i][j];
                }
-               if (derivs_p[i+1])
-                    F_p_a[i+1][j] += XREAL(a);
+               if (derivs_beam[i+1])
+                    Ft_p_a[i+1][j] += XREAL(a);
 
                for (k = 0; k < n_quad_v; ++k) {
-                    if (derivs_h[i  ]) {
+                    if (derivs_layers[i  ]) {
                          lambda_a[i][k] -= a * save->B[ii + k] * X_p[i][j][k];
                          X_p_a[i][j][k] -= a * save->B[ii + k] * save->lambda[i][k];
                          X_m_a[i][j][k] -= a * save->B[ii + k + n_quad_v];
                     }
-                    if (derivs_h[i+1]) {
+                    if (derivs_layers[i+1]) {
                          lambda_a[i+1][k] += a * save->B[ii + k + n_quad_v3] * X_m[i+1][j][k];
                          X_m_a[i+1][j][k] += a * save->B[ii + k + n_quad_v3] * save->lambda[i+1][k];
                          X_p_a[i+1][j][k] += a * save->B[ii + k + n_quad_v2];
@@ -205,21 +205,21 @@ static void SOLVE_BVP_A(int n_quad, int n_stokes, int n_layers,
           for (j = 0; j < n_quad_v; ++j) {
                a = B_a[iii++];
 
-               if (derivs_p[i  ]) {
-                    F_m_a[i][j] -= XREAL(a) * atran[i];
+               if (derivs_beam[i  ]) {
+                    Ft_m_a[i][j] -= XREAL(a) * atran[i];
 
-                    atran_a [i] -= XREAL(a) * F_m[i][j];
+                    atran_a [i] -= XREAL(a) * Ft_m[i][j];
                }
-               if (derivs_p[i+1])
-                    F_m_a[i+1][j] += XREAL(a);
+               if (derivs_beam[i+1])
+                    Ft_m_a[i+1][j] += XREAL(a);
 
                for (k = 0; k < n_quad_v; ++k) {
-                    if (derivs_h[i  ]) {
+                    if (derivs_layers[i  ]) {
                          lambda_a[i][k] += a * save->B[ii + k] * X_m[i][j][k];
                          X_m_a[i][j][k] += a * save->B[ii + k] * save->lambda[i][k];
                          X_p_a[i][j][k] += a * save->B[ii + k + n_quad_v];
                     }
-                    if (derivs_h[i+1]) {
+                    if (derivs_layers[i+1]) {
                          lambda_a[i+1][k] -= a * save->B[ii + k + n_quad_v3] * X_p[i+1][j][k];
                          X_p_a[i+1][j][k] -= a * save->B[ii + k + n_quad_v3] * save->lambda[i+1][k];
                          X_m_a[i+1][j][k] -= a * save->B[ii + k + n_quad_v2];
@@ -236,30 +236,30 @@ static void SOLVE_BVP_A(int n_quad, int n_stokes, int n_layers,
      for (j = 0; j < n_quad_v; ++j) {
           b = B_a[n_comp - n_quad_v + j];
 
-          if (derivs_p[i]) {
-               F_p_a[i][j] -= XREAL(b) * atran[i];
+          if (derivs_beam[i]) {
+               Ft_p_a[i][j] -= XREAL(b) * atran[i];
 
-               atran_a [i] -= XREAL(b) * F_p[i][j];
+               atran_a [i] -= XREAL(b) * Ft_p[i][j];
           }
 
           if (surface) {
                c = b;
 
                for (k = 0; k < n_quad_v; ++k) {
-                    if (derivs_p[i  ])  {
-                         F_m_a[i][k] += XREAL(c) * Rs_qq[j][k] * atran[i];
-                         atran_a[i]  += XREAL(c) * Rs_qq[j][k] * F_m[i][k];
+                    if (derivs_beam[i  ])  {
+                         Ft_m_a[i][k] += XREAL(c) * Rs_qq[j][k] * atran[i];
+                         atran_a[i]  += XREAL(c) * Rs_qq[j][k] * Ft_m[i][k];
                     }
-                    if (derivs_h[i+1])
-                         Rs_qq_a[j][k] += XREAL(c) * F_m[i][k] * atran[i];
+                    if (derivs_layers[i+1])
+                         Rs_qq_a[j][k] += XREAL(c) * Ft_m[i][k] * atran[i];
                }
 
-               if (derivs_p[i+1])
+               if (derivs_beam[i+1])
                     In_p_a[j] += XREAL(b);
           }
 
           for (k = 0; k < n_quad_v; ++k) {
-               if (derivs_h[i]) {
+               if (derivs_layers[i]) {
                     lambda_a[i][k] -= b * save->B[ii + k] * X_p[i][j][k];
                     X_p_a[i][j][k] -= b * save->B[ii + k] * save->lambda[i][k];
                     X_m_a[i][j][k] -= b * save->B[ii + k + n_quad_v];
@@ -270,7 +270,7 @@ static void SOLVE_BVP_A(int n_quad, int n_stokes, int n_layers,
                    for (l = 0; l < n_quad_v; ++l)
                          c += Rs_qq[j][l] * -X_m[i][l][k];
 
-                    if (derivs_h[i])
+                    if (derivs_layers[i])
                          lambda_a[i][k] -= b * B[ii + k] * -      c;
 /*
                          lambda_a[i][k] -= b * B[ii + k] * -save->c[j][k];
@@ -279,11 +279,11 @@ static void SOLVE_BVP_A(int n_quad, int n_stokes, int n_layers,
                     e = b * B[ii + k + n_quad_v];
 
                     for (l = 0; l < n_quad_v; ++l) {
-                         if (derivs_h[i  ]) {
+                         if (derivs_layers[i  ]) {
                               X_m_a[i][l][k] -= Rs_qq[j][l] * d;
                               X_p_a[i][l][k] -= Rs_qq[j][l] * e;
                          }
-                         if (derivs_h[i+1]) {
+                         if (derivs_layers[i+1]) {
                               Rs_qq_a[j][l] -= XREAL(X_m[i][l][k] * d);
                               Rs_qq_a[j][l] -= XREAL(X_p[i][l][k] * e);
                          }
@@ -297,7 +297,7 @@ static void SOLVE_BVP_A(int n_quad, int n_stokes, int n_layers,
       *
       *-----------------------------------------------------------------------*/
      for (i = 0; i < n_layers; ++i) {
-          if (derivs_h[i]) {
+          if (derivs_layers[i]) {
                for (j = 0; j < n_quad_v; ++j) {
                     nu_a[i][j] -=       lambda_a[i][j] * ltau[i] * save->lambda[i][j];
 
@@ -342,14 +342,14 @@ static void CALC_RADIANCE_LEVELS_A(int n_quad, int n_layers, int n_ulevels,
                        int *ulevels, double *ltau, double *ltau_a,
                        double *atran, double *atran_a,
                        TYPE **nu, TYPE ***X_p, TYPE ***X_m,
-                       double **F_p, double **F_m,
-                       double **F0_p, double **F0_m, double **F1_p, double **F1_m,
+                       double **Ft_p, double **Ft_m,
+                       double **Ft0_p, double **Ft0_m, double **Ft1_p, double **Ft1_m,
                        TYPE **nu_a, TYPE ***X_p_a, TYPE ***X_m_a,
-                       double **F_p_a, double **F_m_a,
-                       double **F0_p_a, double **F0_m_a, double **F1_p_a, double **F1_m_a,
+                       double **Ft_p_a, double **Ft_m_a,
+                       double **Ft0_p_a, double **Ft0_m_a, double **Ft1_p_a, double **Ft1_m_a,
                        TYPE *B, TYPE *B_a,
                        double **I_p, double **I_m, double **I_p_a, double **I_m_a,
-                       uchar *derivs_h, uchar *derivs_p, int thermal,
+                       uchar *derivs_layers, uchar *derivs_beam, int thermal,
                        save_tree_data save_tree, work_data work) {
 
      int i;
@@ -388,7 +388,7 @@ static void CALC_RADIANCE_LEVELS_A(int n_quad, int n_layers, int n_ulevels,
       *
       *-----------------------------------------------------------------------*/
      for (i = 0; i < n_layers; ++i) {
-          if (derivs_h[i]) {
+          if (derivs_layers[i]) {
                for (j = 0; j < n_quad; ++j) {
                     lambda_a[i][j] = 0.;
                }
@@ -411,15 +411,15 @@ if (ii != n_layers) {
                     B_a[iii + k         ] += a * X_p[ii][j][k];
                     B_a[iii + k + n_quad] += a * X_m[ii][j][k] * save->lambda[ii][k];
 
-                    if (derivs_h[ii]) {
+                    if (derivs_layers[ii]) {
                          X_p_a[ii][j][k] += a * B[iii + k         ];
                          X_m_a[ii][j][k] += a * B[iii + k + n_quad] * save->lambda[ii][k];
                          lambda_a[ii][k] += a * B[iii + k + n_quad] * X_m[ii][j][k];
                     }
                }
 
-               if (derivs_p[ii])
-                    F_p_a[ii][j] += I_p_a[i][j];
+               if (derivs_beam[ii])
+                    Ft_p_a[ii][j] += I_p_a[i][j];
           }
 
           for (j = 0; j < n_quad; ++j) {
@@ -429,15 +429,15 @@ if (ii != n_layers) {
                     B_a[iii + k         ] -= a * X_m[ii][j][k];
                     B_a[iii + k + n_quad] -= a * X_p[ii][j][k] * save->lambda[ii][k];
 
-                    if (derivs_h[ii]) {
+                    if (derivs_layers[ii]) {
                          X_m_a[ii][j][k] -= a * B[iii + k         ];
                          X_p_a[ii][j][k] -= a * B[iii + k + n_quad] * save->lambda[ii][k];
                          lambda_a[ii][k] -= a * B[iii + k + n_quad] * X_p[ii][j][k];
                     }
                }
 
-               if (derivs_p[ii])
-                    F_m_a[ii][j] += I_m_a[i][j];
+               if (derivs_beam[ii])
+                    Ft_m_a[ii][j] += I_m_a[i][j];
           }
 }
 else {
@@ -452,16 +452,16 @@ else {
                     B_a[iii + k         ] += a * X_p[ii][j][k] * save->lambda[ii][k];
                     B_a[iii + k + n_quad] += a * X_m[ii][j][k];
 
-                    if (derivs_h[ii]) {
+                    if (derivs_layers[ii]) {
                          X_p_a[ii][j][k] += a * B[iii + k         ] * save->lambda[ii][k];
                          lambda_a[ii][k] += a * B[iii + k         ] * X_p[ii][j][k];
                          X_m_a[ii][j][k] += a * B[iii + k + n_quad];
                     }
                }
 
-               if (derivs_p[ii]) {
-                    F_p_a[ii][j] += I_p_a[i][j] * atran[ii];
-                    atran_a[ii]  += I_p_a[i][j] * F_p[ii][j];
+               if (derivs_beam[ii]) {
+                    Ft_p_a[ii][j] += I_p_a[i][j] * atran[ii];
+                    atran_a[ii]   += I_p_a[i][j] * Ft_p[ii][j];
                }
           }
 
@@ -472,16 +472,16 @@ else {
                     B_a[iii + k         ] -= a * X_m[ii][j][k] * save->lambda[ii][k];
                     B_a[iii + k + n_quad] -= a * X_p[ii][j][k];
 
-                    if (derivs_h[ii]) {
+                    if (derivs_layers[ii]) {
                          X_m_a[ii][j][k] -= a * B[iii + k         ] * save->lambda[ii][k];
                          lambda_a[ii][k] -= a * B[iii + k         ] * X_m[ii][j][k];
                          X_p_a[ii][j][k] -= a * B[iii + k + n_quad];
                     }
                }
 
-               if (derivs_p[ii]) {
-                    F_m_a[ii][j] += I_m_a[i][j] * atran[ii];
-                    atran_a[ii]  += I_m_a[i][j] * F_m[ii][j];
+               if (derivs_beam[ii]) {
+                    Ft_m_a[ii][j] += I_m_a[i][j] * atran[ii];
+                    atran_a[ii]   += I_m_a[i][j] * Ft_m[ii][j];
                }
           }
 }
@@ -492,7 +492,7 @@ else {
       *
       *-----------------------------------------------------------------------*/
      for (i = 0; i < n_layers; ++i) {
-          if (derivs_h[i]) {
+          if (derivs_layers[i]) {
                for (j = 0; j < n_quad; ++j) {
                     nu_a[i][j] -=       lambda_a[i][j] * ltau[i]  * save->lambda[i][j];
                     ltau_a[i]  -= XREAL(lambda_a[i][j] * nu[i][j] * save->lambda[i][j]);
@@ -510,12 +510,12 @@ static void CALC_RADIANCE_TAUS_A(int n_quad, int n_layers, int n_ulevels,
                      int *ulevels, double *utaus, double *ltau, double *ltau_a,
                      double *as_0, double *as_0_a, double *atran, double *atran_a,
                      TYPE **nu, TYPE ***X_p, TYPE ***X_m,
-                     double **F_p, double **F_m,
+                     double **Ft_p, double **Ft_m,
                      TYPE **nu_a, TYPE ***X_p_a, TYPE ***X_m_a,
-                     double **F_p_a, double **F_m_a,
+                     double **Ft_p_a, double **Ft_m_a,
                      TYPE *B, TYPE *B_aa,
                      double **I_p, double **I_m, double **I_p_a, double **I_m_a,
-                     uchar *derivs_h, uchar *derivs_p,
+                     uchar *derivs_layers, uchar *derivs_beam,
                      save_tree_data save_tree, work_data work) {
 
 }

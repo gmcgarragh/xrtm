@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -11,6 +11,7 @@
 #include <gmath_matrix.h>
 
 #include "xrtm.h"
+#include "xrtm_derivs.h"
 #include "xrtm_sos.h"
 
 
@@ -32,7 +33,7 @@ int rtm_sos(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
             double **I_p, double **I_m, double ***I_p_l, double ***I_m_l,
             int max_os, double max_tau, double sos_tol,
             int sfi, int surface, int utau_output, int vector,
-            uchar **derivs_h, uchar **derivs_p, work_data work) {
+            derivs_data *derivs, work_data work) {
 
      int i;
      int ii;
@@ -45,6 +46,8 @@ int rtm_sos(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
      int n_quad_v;
 
      int n_layers2;
+
+     int i_last_ulevel;
 
      int i_os;
 
@@ -215,12 +218,18 @@ int rtm_sos(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
+i_last_ulevel = n_ulevels - 1;
+
+if (ulevels[0] == 0)
      init_array1_d(I_m[0], n_quad_v, 0.);
-     init_array1_d(I_p[1], n_quad_v, 0.);
+if (ulevels[i_last_ulevel] == n_layers)
+     init_array1_d(I_p[i_last_ulevel], n_quad_v, 0.);
 
      if (n_derivs > 0) {
+if (ulevels[0            ] == 0)
           init_array2_d(I_m_l[0], n_derivs, n_quad_v, 0.);
-          init_array2_d(I_p_l[1], n_derivs, n_quad_v, 0.);
+if (ulevels[i_last_ulevel] == n_layers)
+          init_array2_d(I_p_l[i_last_ulevel], n_derivs, n_quad_v, 0.);
      }
 
 
@@ -247,16 +256,16 @@ int rtm_sos(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
                for (l = 0; l < n_quad_v; ++l) {
                     i_p_l[0][j][k][l] = W[j][k][l] * i_p[0][j+1][l] + T[j][l] * i_p_l[0][j+1][k][l] + (b_l * E[j][l] + b * F[j][k][l]) * P_q0_pm[jj][l];
 
-                    if (derivs_h[jj][k])
+                    if (derivs->layers[jj][k])
                          i_p_l[0][j][k][l] += b * E[j][l] * P_q0_pm_l[jj][k][l];
                }
           }
      }
-
+if (ulevels[0] == 0) {
      dvec_copy(I_p[0], i_p[0][0], n_quad_v);
      if (n_derivs > 0)
           dmat_copy(I_p_l[0], i_p_l[0][0], n_derivs, n_quad_v);
-
+}
 
      dvec_copy(i_m[0][0], I1_m, n_quad_v);
      if (n_derivs > 0)
@@ -276,16 +285,16 @@ int rtm_sos(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
                for (l = 0; l < n_quad_v; ++l) {
                     i_m_l[0][j+1][k][l] = W[j][k][l] * i_m[0][j][l] + T[j][l] * i_m_l[0][j][k][l] + (b_l * E[j][l] + b * F[j][k][l]) * P_q0_mm[jj][l];
 
-                    if (derivs_h[jj][k])
+                    if (derivs->layers[jj][k])
                          i_m_l[0][j+1][k][l] += b * E[j][l] * P_q0_mm_l[jj][k][l];
                }
           }
      }
-
-     dvec_copy(I_m[1], i_m[0][n_layers2], n_quad_v);
+if (ulevels[i_last_ulevel] == n_layers) {
+     dvec_copy(I_m[i_last_ulevel], i_m[0][n_layers2], n_quad_v);
      if (n_derivs > 0)
-          dmat_copy(I_m_l[1], i_m_l[0][n_layers2], n_derivs, n_quad_v);
-
+          dmat_copy(I_m_l[i_last_ulevel], i_m_l[0][n_layers2], n_derivs, n_quad_v);
+}
 
      /*-------------------------------------------------------------------------
       *
@@ -340,13 +349,13 @@ int rtm_sos(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
                dvec_scale(b_l, qw_v, v2, n_quad_v);
 
                dmat_mul_diag(P_qq_mp[ii], v2, r_p_l[i][j], n_quad_v, n_quad_v);
-               if (derivs_h[ii][j]) {
+               if (derivs->layers[ii][j]) {
                     dmat_mul_diag(P_qq_mp_l[ii][j], v1, w1, n_quad_v, n_quad_v);
                     dmat_add(r_p_l[i][j], w1, r_p_l[i][j], n_quad_v, n_quad_v);
                }
 
                dmat_mul_diag(P_qq_pp[ii], v2, t_p_l[i][j], n_quad_v, n_quad_v);
-               if (derivs_h[ii][j]) {
+               if (derivs->layers[ii][j]) {
                     dmat_mul_diag(P_qq_pp_l[ii][j], v1, w1, n_quad_v, n_quad_v);
                     dmat_add(t_p_l[i][j], w1, t_p_l[i][j], n_quad_v, n_quad_v);
                }
@@ -363,13 +372,13 @@ int rtm_sos(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
                     dvec_scale(b_l, qw_v, v2, n_quad_v);
 
                     dmat_mul_diag(P_qq_pm[ii], v2, r_m_l[i][j], n_quad_v, n_quad_v);
-                    if (derivs_h[ii][j]) {
+                    if (derivs->layers[ii][j]) {
                          dmat_mul_diag(P_qq_pm_l[ii][j], v1, w1, n_quad_v, n_quad_v);
                          dmat_add(r_m_l[i][j], w1, r_m_l[i][j], n_quad_v, n_quad_v);
                     }
 
                     dmat_mul_diag(P_qq_mm[ii], v2, t_m_l[i][j], n_quad_v, n_quad_v);
-                    if (derivs_h[ii][j]) {
+                    if (derivs->layers[ii][j]) {
                          dmat_mul_diag(P_qq_mm_l[ii][j], v1, w1, n_quad_v, n_quad_v);
                          dmat_add(t_m_l[i][j], w1, t_m_l[i][j], n_quad_v, n_quad_v);
                     }
@@ -395,7 +404,7 @@ int rtm_sos(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
                for (j = 0; j < n_derivs; ++j) {
                     dm_v_mul(Rs_qq, i_m_l[1-i][n_layers2][j], n_quad_v, n_quad_v, i_p_l[i][n_layers2][j]);
 
-                    if (derivs_h[n_layers][j]) {
+                    if (derivs->layers[n_layers][j]) {
                          dm_v_mul(Rs_qq_l[j], i_m[1-i][n_layers2], n_quad_v, n_quad_v, v1);
                          dvec_add(i_p_l[i][n_layers2][j], v1, i_p_l[i][n_layers2][j], n_quad_v);
                     }
@@ -447,6 +456,7 @@ int rtm_sos(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
                     b = i_p[i][0][jj];
                jj += n_stokes;
           }
+if (ulevels[0] == 0) {
 /*
           dvec_copy(I_p[0], i_p[i][0], n_quad_v);
           if (n_derivs > 0)
@@ -455,7 +465,7 @@ int rtm_sos(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
           dvec_add(I_p[0], i_p[i][0], I_p[0], n_quad_v);
           if (n_derivs > 0)
                dmat_add(I_p_l[0], i_p_l[i][0], I_p_l[0], n_derivs, n_quad_v);
-
+}
           dvec_copy(i_m[i][0], I1_m, n_quad_v);
           if (n_derivs > 0)
                dmat_copy(i_m_l[i][0], I1_m_l, n_derivs, n_quad_v);
@@ -507,15 +517,16 @@ int rtm_sos(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
           }
 
           a = MIN(a, MAX(b, c));
+if (ulevels[i_last_ulevel] == n_layers) {
 /*
-          dvec_copy(I_m[1], i_m[i][n_layers2], n_quad_v);
+          dvec_copy(I_m[i_last_ulevel], i_m[i][n_layers2], n_quad_v);
           if (n_derivs > 0)
-               dmat_copy(I_m_l[1], i_m_l[i][n_layers2], n_derivs, n_quad_v);
+               dmat_copy(I_m_l[i_last_ulevel], i_m_l[i][n_layers2], n_derivs, n_quad_v);
 */
-          dvec_add(I_m[1], i_m[i][n_layers2], I_m[1], n_quad_v);
+          dvec_add(I_m[i_last_ulevel], i_m[i][n_layers2], I_m[i_last_ulevel], n_quad_v);
           if (n_derivs > 0)
-               dmat_add(I_m_l[1], i_m_l[i][n_layers2], I_m_l[1], n_derivs, n_quad_v);
-
+               dmat_add(I_m_l[i_last_ulevel], i_m_l[i][n_layers2], I_m_l[i_last_ulevel], n_derivs, n_quad_v);
+}
           if (a < sos_tol)
                break;
 
@@ -523,7 +534,7 @@ int rtm_sos(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
      }
 /*
      if (i == max_os) {
-          eprintf("ERROR: order of scattering not converging on %e\n", 1.e-4);
+          fprintf(stderr, "ERROR: order of scattering not converging on %e\n", 1.e-4);
           return -1;
      }
 */

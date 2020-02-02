@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -14,65 +14,110 @@
 
 #include "input_util.h"
 
+#include "test_result.h"
+#include "test_xrtm.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
-#include "../config.h"
-
-
 #define MAX_PFS				5
 
-#define MAX_N_QUAD_POWER_SCALER		5
-#define MAX_N_QUAD_POWER_VECTOR		3
-/*
-#define MAX_N_QUAD_POWER_SCALER		8
-#define MAX_N_QUAD_POWER_VECTOR		6
-*/
-#define MAX_N_DERIV_POWER		8
-
-#define MAX_N_LAYER_POWER		8
-
-#define MAX_N_LEVEL_POWER		8
-
-#define MAX_N_THETA_POWER		5
-/*
-#define MAX_N_THETA_POWER		8
-*/
-
-#define DEFAULT_N_QUAD_SCALER		8
-#define DEFAULT_N_QUAD_VECTOR		4
 
 #define DEFAULT_DOUB_D_TAU		1.e-8
 
 #define DEFAULT_SOS_PARAMS_MAX_OS	128
-
 #define DEFAULT_SOS_PARAMS_MAX_TAU	.05
-/*
-#define DEFAULT_SOS_PARAMS_MAX_TAU	.005
-*/
 #define DEFAULT_SOS_PARAMS_SOS_TOL	1.e-9
 
 #define DEFAULT_FOURIER_TOL		1.e-9
+
+#define DEFAULT_PLANET_R		6371.0071823
+
+#define DEFAULT_F_0			1.
+#define DEFAULT_PHI_0			0.
+
+#define DEFAULT_F_ISO_TOP		0.
+#define DEFAULT_F_ISO_BOT		0.
+
 
 #define DEF_TOL				1.e-4
 #define DEF_TOL_L			1.e-3
 
 
+#define MAX_COMMAND_LENGTH		8192
+
+
+enum test_bound_type {
+     TEST_BOUND_SIMPLE,
+     TEST_BOUND_BOUNDS,
+
+     N_TEST_BOUNDS
+};
+
+
+enum test_stack_type {
+     TEST_STACK_ONE_LAYER,
+     TEST_STACK_SMALL_STACK,
+     TEST_STACK_LARGE_STACK,
+
+     N_TEST_STACKS
+};
+
+
+enum test_derivs_type {
+     TEST_DERIVS_NO_DERIVS,
+     TEST_DERIVS_ONE_DERIVS,
+     TEST_DERIVS_BOUND_DERIVS,
+
+     N_TEST_DERIVS
+};
+
+
+enum test_output_at_levels_type {
+     TEST_OUTPUT_AT_LEVELS_TOP,
+     TEST_OUTPUT_AT_LEVELS_BOTTOM,
+     TEST_OUTPUT_AT_LEVELS_TOP_AND_BOTTOM,
+     TEST_OUTPUT_AT_LEVELS_ALL_LEVELS,
+
+     N_TEST_OUTPUT_AT_LEVELS
+};
+
+
+enum test_output_at_taus_type {
+     TEST_OUTPUT_AT_TAUS_TWO_END_MIDDLES,
+     TEST_OUTPUT_AT_TAUS_BOUNDS_AND_MIDDLES,
+
+     N_TEST_OUTPUT_AT_TAUS
+};
+
+
 typedef struct {
      int index;
 
-     int check_diffs;
-     int on_failed_diff_write_xrtm_cmd;
-     int on_failed_diff_stop;
-     int quick_run;
-     int on_regression_write_xrtm_cmd;
-     int on_regression_stop;
-     int write_results;
-     int write_xrtm_cmd;
+     int core_check_diffs;
+     int core_dont_execute;
+     int core_echo_xrtm_cmd;
+     int core_fill_blanks;
+     int core_include_dev_solvers;
+     int core_on_failed_diff_write_xrtm_cmd;
+     int core_on_failed_diff_stop_with_error;
+     int core_write_results_bin;
+     int core_write_results_text;
+     int core_write_xrtm_cmd;
+     int core_zero_solar_source;
+     int core_zero_thermal_source;
 
      int n_threads;
+
+     int exact_options;
+     int required_options;
+     int unwanted_options;
+
+     int exact_solvers;
+     int required_solvers;
+     int unwanted_solvers;
 
      int max_coef;
 
@@ -88,8 +133,26 @@ typedef struct {
      double **lc[MAX_PFS];
      double **lc_l[MAX_PFS];
 
-     FILE *fp_results;
-     FILE *fp_xrtm_cmd;
+     int n_quad;
+     int n_stokes;
+     int n_out_thetas;
+     int n_out_phis;
+
+     enum test_bound_type bound_type;
+     enum test_stack_type stack_type;
+
+     enum test_derivs_type derivs_type;
+
+     enum test_output_at_levels_type output_at_levels_type;
+     enum test_output_at_taus_type   output_at_taus_type;
+
+     FILE *fp_core_results_bin;
+     FILE *fp_core_results_bin_w_deltas;
+     FILE *fp_core_results_text;
+     FILE *fp_core_results_text_w_deltas;
+     FILE *fp_core_xrtm_cmd;
+
+     test_xrtm_data test_xrtm_list;
 } test_data;
 
 
@@ -110,16 +173,9 @@ typedef struct {
 #define DEV_RANGE_OVER_N_OUT_THETAS		(0)
 #define DEV_RANGE_OVER_OPTICAL_PROPERTY_INPUTS	(0)
 #define DEV_RANGE_OVER_EIGEN_SOVERS		(0)
-#define DEV_OPT_OUT_RANGE_OVER_OPTIONS(MASK)	
+#define DEV_OPT_OUT_RANGE_OVER_OPTIONS(MASK)
 #define DEV_RANGE_OVER_SAVING_OPTIONS		(0)
 #endif
-
-
-int test_core(test_data *t);
-
-int test_errors(test_data *t);
-
-int test_execute(xrtm_data *gd, misc_data *md, test_data *td, int index, int n_solvers, enum xrtm_solver_mask *solvers, int n_phis, double *phis, double *tol, double *tol_l, int n_ignore_index_solver, int *ignore_index_solver_list, int *ignore_index_solver_mask, int ignore_solver_mask_ref, int ignore_solver_mask_tran, int n_ignore_deriv, int *ignore_deriv_list, int *ignore_deriv_mask, void *mutex);
 
 
 #ifdef __cplusplus

@@ -1,0 +1,272 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{Discrete ordinate method}
+\label{sec:dom}
+
+
+\subsection{Layer quantities}
+\label{sec:dom-layer_quantities}
+
+\subsubsection{Homogeneous solution}
+\label{sec:dom-layer_quantities-homogeneous_solution}
+
+
+\paragraph{Forward}
+\label{sec:dom-layer_quantities-homogeneous_solution-forward}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Tangent linear}
+\label{sec:dom-layer_quantities-homogeneous_solution-tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Adjoint of tangent linear}
+\label{sec:dom-layer_quantities-homogeneous_solution-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Particular solution}
+\label{sec:dom-layer_quantities-particular_solution}
+
+
+\paragraph{Forward}
+\label{sec:dom-layer_quantities-particular_solution-forward}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Tangent linear}
+\label{sec:dom-layer_quantities-particular_solution-tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Adjoint of tangent linear}
+\label{sec:dom-layer_quantities-particular_solution-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Boundary value problem}
+\label{sec:dom-bvp}
+
+
+\subsubsection{Forward}
+\label{sec:dom-forward}
+
+\begin{equation}
+\Lambda_{k} = \mathrm{diag}(e^{-\nu_{i,k} \opticalthickness_{k}})
+\label{eq:eigen_bvp-forward-Lambda}
+\end{equation}
+
+\begin{equation}
+U^{\pm}_{k} = X^{\pm}_{k} \Lambda_{k}
+\label{eq:eigen_bvp-forward-U}
+\end{equation}
+
+\begin{equation}
+V^{\pm}_{k} = X^{\pm}_{k} - X^{\mp}_{k} R_{s}
+\label{eq:eigen_bvp-forward-V}
+\end{equation}
+
+\begin{equation}
+W^{\pm}_{k} = V^{\pm}_{k} \Lambda_{k}
+\label{eq:eigen_bvp-forward-W}
+\end{equation}
+
+\begin{adjustwidth}{-.5in}{-.5in}
+\begin{equation}
+\footnotesize
+\mathbf{A} =
+\left[
+\begin{array}{ccccccccccccc}
+          -X^{-}_{1} &           -U^{+}_{1} &            0         &            0         &            0         &            0         &            0         &            0         & \cdots &            0         &            0         &            0         &            0 \\
+\phantom{+}U^{+}_{1} & \phantom{+}X^{-}_{1} &           -X^{+}_{2} &           -U^{-}_{2} &            0         &            0         &            0         &            0         & \cdots &            0         &            0         &            0         &            0 \\
+          -U^{-}_{1} &           -X^{+}_{1} & \phantom{+}X^{-}_{2} & \phantom{+}U^{+}_{2} &            0         &            0         &            0         &            0         & \cdots &            0         &            0         &            0         &            0 \\
+           0         &            0         & \phantom{+}U^{+}_{2} & \phantom{+}X^{-}_{2} &           -X^{+}_{3} &           -U^{-}_{3} &            0         &            0         & \cdots &            0         &            0         &            0         &            0 \\
+           0         &            0         &           -U^{-}_{2} &           -X^{+}_{2} & \phantom{+}X^{-}_{3} & \phantom{+}U^{+}_{3} &            0         &            0         & \cdots &            0         &            0         &            0         &            0 \\
+           0         &            0         &            0         &            0         & \phantom{+}U^{+}_{3} & \phantom{+}X^{-}_{3} &           -X^{+}_{4} &           -U^{-}_{4} & \cdots &            0         &            0         &            0         &            0 \\
+           0         &            0         &            0         &            0         &           -U^{-}_{3} &           -X^{+}_{3} & \phantom{+}X^{-}_{4} & \phantom{+}U^{+}_{4} & \cdots &            0         &            0         &            0         &            0 \\
+           \vdots    &            \vdots    &            \vdots    &            \vdots    &            \vdots    &            \vdots    &            \vdots    &            \vdots    & \ddots &            \vdots    &            \vdots    &            \vdots    &            \vdots \\
+           0         &            0         &            0         &            0         &            0         &            0         &            0         &            0         & \cdots & \phantom{+}U^{+}_{4} & \phantom{+}X^{-}_{4} &           -X^{+}_{K} &           -U^{-}_{K} \\
+           0         &            0         &            0         &            0         &            0         &            0         &            0         &            0         & \cdots &           -U^{-}_{4} &           -X^{+}_{4} & \phantom{+}X^{-}_{K} & \phantom{+}U^{+}_{K} \\
+           0         &            0         &            0         &            0         &            0         &            0         &            0         &            0         & \cdots &            0         &            0         & \phantom{+}W^{+}_{K} & \phantom{+}V^{-}_{K}
+\end{array}
+\right]
+\label{eq:eigen_bvp-forward-A}
+\end{equation}
+\end{adjustwidth}
+
+\begin{equation}
+G^{+}_{k} = F^{+}_{K} - R_{s} F^{-}_{K}
+\label{eq:eigen_bvp-forward-G}
+\end{equation}
+
+\begin{equation}
+\footnotesize
+\mathbf{b} =
+\left[
+\begin{array}{c}
+I^{-}_{0} - F^{-}_{1} \\
+F^{+}_{2} - F^{+}_{1} \mathcal{X}_{b,1} \\
+F^{-}_{2} - F^{-}_{1} \mathcal{X}_{b,1} \\
+F^{+}_{3} - F^{+}_{2} \mathcal{X}_{b,2} \\
+F^{-}_{3} - F^{-}_{2} \mathcal{X}_{b,2} \\
+F^{+}_{4} - F^{+}_{3} \mathcal{X}_{b,3} \\
+F^{-}_{4} - F^{-}_{3} \mathcal{X}_{b,3} \\
+\vdots \\
+F^{+}_{K} - F^{+}_{K-1} \mathcal{X}_{b,K-1} \\
+F^{-}_{K} - F^{-}_{K-1} \mathcal{X}_{b,K-1} \\
+I^{+}_{K} - G^{+}_{K} \mathcal{X}_{b,K} \\
+\end{array}
+\right]
+\label{eq:eigen_bvp-forward-b}
+\end{equation}
+
+\begin{equation}
+\footnotesize
+\mathbf{x} =
+\left[
+\begin{array}{c}
+x^{+}_{1} \\
+x^{-}_{1} \\
+x^{+}_{2} \\
+x^{-}_{2} \\
+x^{+}_{3} \\
+x^{-}_{3} \\
+x^{+}_{4} \\
+x^{-}_{4} \\
+\vdots \\
+x^{+}_{K} \\
+x^{-}_{K}
+\end{array}
+\right]
+\label{eq:eigen_bvp-forward-x}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:dom-tangent_linear}
+
+\begin{equation}
+\mathcal{L}(\Lambda_{k}) = \mathrm{diag}\left[(-\mathcal{L}(\nu_{i,k}) \opticalthickness_{k} - \nu_{i,k} \mathcal{L}(\opticalthickness_{k})\right] e^{-\nu_{i,k} \opticalthickness_{k}})
+\label{eq:eigen_bvp-tangent_linear-Lambda}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(U^{\pm}) = \mathcal{L}(X^{\pm}_{k}) \Lambda_{k} + X^{\pm}_{k} \mathcal{L}(\Lambda_{k})
+\label{eq:eigen_bvp-tangent_linear-U}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(V^{\pm}) = \mathcal{L}(X^{\pm}_{k}) - \mathcal{L}(X^{\mp}_{k}) R_{s} - X^{\mp}_{k} \mathcal{L}(R_{s})
+\label{eq:eigen_bvp-tangent_linear-V}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(W^{\pm}) = \mathcal{L}(V^{\pm}_{k}) \Lambda_{k} + V^{\pm}_{k} \mathcal{L}(\Lambda_{k})
+\label{eq:eigen_bvp-tangent_linear-W}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(G^{\pm}) = \mathcal{L}(F^{+}_{K}) - \mathcal{L}(R_{s}) F^{-}_{K} - R_{s} \mathcal{L}(F^{-}_{K})
+\label{eq:eigen_bvp-tangent_linear-G}
+\end{equation}
+
+\begin{adjustwidth}{-.5in}{-.5in}
+\begin{equation}
+\footnotesize
+\mathcal{L}(\mathbf{b}) =
+\left[
+\begin{array}{c}
+\mathcal{L}(I^{-}_{0}) - \mathcal{L}(F^{-}_{1}) + \mathcal{L}(X^{-}_{1})x^{+}_{1} + \mathcal{L}(U^{+}_{1})x^{-}_{1}  \\
+\mathcal{L}(F^{+}_{2}) - \mathcal{L}(F^{+}_{1}) \mathcal{X}_{b,1} - F^{+}_{1} \mathcal{L}(\mathcal{X}_{b,1}) - \mathcal{L}(U^{+}_{1})x^{+}_{1} - \mathcal{L}(X^{-}_{1})x^{-}_{1} + \mathcal{L}(X^{+}_{2})x^{+}_{2} + \mathcal{L}(U^{-}_{2})x^{-}_{2} \\
+\mathcal{L}(F^{-}_{2}) - \mathcal{L}(F^{-}_{1}) \mathcal{X}_{b,1} - F^{-}_{1} \mathcal{L}(\mathcal{X}_{b,1}) + \mathcal{L}(U^{-}_{1})x^{+}_{1} + \mathcal{L}(X^{+}_{1})x^{-}_{1} - \mathcal{L}(X^{-}_{2})x^{+}_{2} - \mathcal{L}(U^{+}_{2})x^{-}_{2} \\
+\mathcal{L}(F^{+}_{3}) - \mathcal{L}(F^{+}_{2}) \mathcal{X}_{b,2} - F^{+}_{2} \mathcal{L}(\mathcal{X}_{b,2}) - \mathcal{L}(U^{+}_{2})x^{+}_{2} - \mathcal{L}(X^{-}_{2})x^{-}_{2} + \mathcal{L}(X^{+}_{3})x^{+}_{3} + \mathcal{L}(U^{-}_{3})x^{-}_{3} \\
+\mathcal{L}(F^{-}_{3}) - \mathcal{L}(F^{-}_{2}) \mathcal{X}_{b,2} - F^{-}_{2} \mathcal{L}(\mathcal{X}_{b,2}) + \mathcal{L}(U^{-}_{2})x^{+}_{2} + \mathcal{L}(X^{+}_{2})x^{-}_{2} - \mathcal{L}(X^{-}_{3})x^{+}_{3} - \mathcal{L}(U^{+}_{3})x^{-}_{3} \\
+\mathcal{L}(F^{+}_{4}) - \mathcal{L}(F^{+}_{3}) \mathcal{X}_{b,3} - F^{+}_{3} \mathcal{L}(\mathcal{X}_{b,3}) - \mathcal{L}(U^{+}_{3})x^{+}_{3} - \mathcal{L}(X^{-}_{3})x^{-}_{3} + \mathcal{L}(X^{+}_{4})x^{+}_{4} + \mathcal{L}(U^{-}_{4})x^{-}_{4} \\
+\mathcal{L}(F^{-}_{4}) - \mathcal{L}(F^{-}_{3}) \mathcal{X}_{b,3} - F^{-}_{3} \mathcal{L}(\mathcal{X}_{b,3}) + \mathcal{L}(U^{-}_{3})x^{+}_{3} + \mathcal{L}(X^{+}_{3})x^{-}_{3} - \mathcal{L}(X^{-}_{4})x^{+}_{4} - \mathcal{L}(U^{+}_{4})x^{-}_{4} \\
+\vdots \\
+\mathcal{L}(F^{+}_{K}) - \mathcal{L}(F^{+}_{K-1}) \mathcal{X}_{b,K-1} - F^{+}_{K-1} \mathcal{L}(\mathcal{X}_{b,K-1}) - \mathcal{L}(U^{+}_{K-1})x^{+}_{K-1} - \mathcal{L}(X^{-}_{K-1})x^{-}_{K-1} + \mathcal{L}(X^{+}_{K})x^{+}_{K} + \mathcal{L}(U^{-}_{K})x^{-}_{K} \\
+\mathcal{L}(F^{-}_{K}) - \mathcal{L}(F^{-}_{K-1}) \mathcal{X}_{b,K-1} - F^{-}_{K-1} \mathcal{L}(\mathcal{X}_{b,K-1}) + \mathcal{L}(U^{-}_{K-1})x^{+}_{K-1} + \mathcal{L}(X^{+}_{K-1})x^{-}_{K-1} - \mathcal{L}(X^{-}_{K})x^{+}_{K} - \mathcal{L}(U^{+}_{K})x^{-}_{K} \\
+\mathcal{L}(I^{+}_{K}) - \mathcal{L}(G^{+}_{K}) \mathcal{X}_{b,K} - G^{+}_{K} \mathcal{L}(\mathcal{X}_{b,K}) - \mathcal{L}(W^{+}_{K})x^{+}_{K} - \mathcal{L}(V^{-}_{K})x^{-}_{K} \\
+\end{array}
+\right]
+\label{eq:eigen_bvp-tangent_linear-b}
+\end{equation}
+\end{adjustwidth}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:dom-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Radiance}
+\label{sec:dom-radiance}
+
+
+\subsubsection{At levels}
+\label{sec:dom-radiance_at_levels}
+
+
+\paragraph{Forward}
+\label{sec:dom-radiance_at_levels-forward}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Tangent linear}
+\label{sec:dom-radiance_at_levels-tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Adjoint of tangent linear}
+\label{sec:dom-radiance_at_levels-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{At optical depth}
+\label{sec:dom-radiance_at_optical_depth}
+
+
+\paragraph{Forward}
+\label{sec:dom-radiance_at_optical_depth-forward}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Tangent linear}
+\label{sec:dom-radiance_at_optical_depth-tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Adjoint of tangent linear}
+\label{sec:dom-radiance_at_optical_depth-adjoint_of_tangent_linear}

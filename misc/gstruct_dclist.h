@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 1998-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 1998-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -84,7 +84,7 @@ struct dclist_node {
 };
 
 
-dclist *dclist_create();
+dclist *dclist_create(void);
 void dclist_empty(dclist *);
 void dclist_free(dclist *);
 void dclist_set_comp(dclist *, int (*)(const void *, const void *));
@@ -125,14 +125,14 @@ GSTRUCT_TYPE *dcelem_pointer(dcelem *);
 
 #ifdef IMPLEMENTATION
 
-dclist *dclist_create() {
+dclist *dclist_create(void) {
 
      dclist *list;
 
      list = (dclist *) malloc(sizeof(dclist));
 
      if (list == NULL)
-          eprintf("Memory allocation error: dclist_create()");
+          fprintf(stderr, "Memory allocation error: dclist_create()");
 
      list->comp   = NULL;
      list->free_  = NULL;
@@ -253,7 +253,7 @@ dcelem *dclist_insert(dclist *list, dcelem *pos, GSTRUCT_TYPE value) {
      tmp = (dcelem *) malloc(sizeof(dcelem));
 
      if (tmp == NULL)
-          eprintf("Memory allocation error: dclist_insert()");
+          fprintf(stderr, "Memory allocation error: dclist_insert()");
 
      tmp->value = value;
 

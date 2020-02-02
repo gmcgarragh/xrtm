@@ -2,11 +2,11 @@
 #undef xvec_copy
 #undef xvec_print
 #undef xvec_scale
-#undef xvec_add 
-#undef xvec_sub 
+#undef xvec_add
+#undef xvec_sub
 #undef xvec_lincmb
 #undef xvec_dot
-#undef xvec_mag 
+#undef xvec_mag
 #undef xvec_unit
 #undef xvec_cross
 #undef xvec_dyadic
@@ -43,6 +43,9 @@
 #undef xmat_pow_count
 #undef xmat_pow
 
+#undef xxmat_gxgxmx
+#undef xxmat_diag_mul
+
 #undef xmat_pocon
 #undef xmat_gecon
 #undef xmat_potrf
@@ -62,5 +65,8 @@
 #undef get_work_x2
 #undef get_work_x3
 
-#undef copy_to_band_storage_x
-#undef copy_to_band_storage2_x
+#undef insert_matrix_band1_x
+#undef insert_matrix_band2_x
+
+#undef insert_matrix_band_storage1_x
+#undef insert_matrix_band_storage2_x

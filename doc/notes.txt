@@ -1,0 +1,26 @@
+Order of set function description sentences:
+
+1) Specific description. (... as an array of length x)
+
+2) Specific requirements.
+
+3) To set this value XRTM must be created to use the option \xref{XRTM_OPTION_}{XRTM\_OPTION\_}, otherwise it is an error.
+
+4) To set this value XRTM must be created to use at least one of the following solvers: \xref{XRTM_SOLVER_}{XRTM\_SOLVER\_}, otherwise it is an error.
+
+5) To set this value XRTM must be created with $\texttt{\emph{\textbf{n\_out\_levels}}} > 0$
+
+6) Value range:
+
+
+Order of get function description sentences:
+
+1) Specific description. (... as an array of length x)
+
+2) Specific requirements.
+
+3) To get this value XRTM must be created to use the option \xref{XRTM_OPTION_}{XRTM\_OPTION\_}, otherwise it is an error.
+
+4) To get this value XRTM must be created to use at least one of the following solvers: \xref{XRTM_SOLVER_}{XRTM\_SOLVER\_}, otherwise it is an error.
+
+5) To get this value XRTM must be created with $\texttt{\emph{\textbf{n\_out\_levels}}} > 0$

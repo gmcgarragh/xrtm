@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -49,7 +49,7 @@
 #undef TYPE
 #undef TYPE_PREFIX
 #undef TYPE_POSTFIX
-#undef WORK_XX	
+#undef WORK_XX
 #undef WORK_XXX
 #undef XABS
 #undef XEXP
@@ -92,7 +92,7 @@
 #undef TYPE
 #undef TYPE_PREFIX
 #undef TYPE_POSTFIX
-#undef WORK_XX	
+#undef WORK_XX
 #undef WORK_XXX
 #undef XABS
 #undef XEXP
@@ -118,8 +118,8 @@ int forward_save_rtm_eig_rts_alloc(forward_save_rtm_eig_rts_data *d, int n_quad_
 
      d->flag  = flag;
 
-     d->F_p   = alloc_array1_d(n_quad_v);
-     d->F_m   = alloc_array1_d(n_quad_v);
+     d->Fs_p  = alloc_array1_d(n_quad_v);
+     d->Fs_m  = alloc_array1_d(n_quad_v);
 
      d->tpr   = alloc_array2_d(n_quad_v, n_quad_v);
      d->tmr   = alloc_array2_d(n_quad_v, n_quad_v);
@@ -143,8 +143,8 @@ int forward_save_rtm_eig_rts_alloc(forward_save_rtm_eig_rts_data *d, int n_quad_
 
 static void forward_save_rtm_eig_rts_free(forward_save_rtm_eig_rts_data *d) {
 
-     free_array1_d(d->F_p);
-     free_array1_d(d->F_m);
+     free_array1_d(d->Fs_p);
+     free_array1_d(d->Fs_m);
 
      free_array2_d(d->tpr);
      free_array2_d(d->tmr);
@@ -171,17 +171,17 @@ void rtm_eig_rts_a(int n_quad, int n_stokes, double F_0,
                    double *qx_v, double *qw_v, double planck0, double planck1,
                    double omega, double *omega_a, double ltau, double *ltau_a,
                    double as_0, double *as_0_a, double atran, double *atran_a,
-                   double *P_0p, double *P_0m,
+                   double *P_x0_p, double *P_x0_m,
                    double **r_p, double **t_p, double **r_m, double **t_m,
                    double **R_p, double **T_p, double **R_m, double **T_m,
                    double *S_p, double *S_m,
-                   double *P_0p_a, double *P_0m_a,
+                   double *P_x0_p_a, double *P_x0_m_a,
                    double **r_p_a, double **t_p_a, double **r_m_a, double **t_m_a,
                    double **R_p_a, double **T_p_a, double **R_m_a, double **T_m_a,
                    double *S_p_a, double *S_m_a,
                    int symmetric, int thermal, int vector,
                    int eigen_solver_real, int eigen_solver_complex,
-                   uchar derivs_h, uchar derivs_p,
+                   uchar derivs_layers, uchar derivs_beam,
                    save_tree_data save_tree, work_data work) {
 
      int n_quad_v;
@@ -194,11 +194,11 @@ void rtm_eig_rts_a(int n_quad, int n_stokes, double F_0,
      double **tpr_a;
      double **gamma_a;
 
-     double *F_p;
-     double *F_m;
+     double *Fs_p;
+     double *Fs_m;
 
-     double *F_p_a;
-     double *F_m_a;
+     double *Fs_p_a;
+     double *Fs_m_a;
 
      double *nu;
      double *nu_a;
@@ -242,8 +242,8 @@ void rtm_eig_rts_a(int n_quad, int n_stokes, double F_0,
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     F_p_a   = get_work1(&work, WORK_DX);
-     F_m_a   = get_work1(&work, WORK_DX);
+     Fs_p_a   = get_work1(&work, WORK_DX);
+     Fs_m_a   = get_work1(&work, WORK_DX);
 
      tmr_a   = get_work1(&work, WORK_DXX);
      tpr_a   = get_work1(&work, WORK_DXX);
@@ -264,8 +264,8 @@ void rtm_eig_rts_a(int n_quad, int n_stokes, double F_0,
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     F_p   = save->F_p;
-     F_m   = save->F_m;
+     Fs_p   = save->Fs_p;
+     Fs_m   = save->Fs_m;
 
      tpr   = save->tpr;
      tmr   = save->tmr;
@@ -286,8 +286,8 @@ void rtm_eig_rts_a(int n_quad, int n_stokes, double F_0,
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     dvec_zero(F_p_a, n_quad_v);
-     dvec_zero(F_m_a, n_quad_v);
+     dvec_zero(Fs_p_a, n_quad_v);
+     dvec_zero(Fs_m_a, n_quad_v);
 
      dmat_zero(tmr_a, n_quad_v, n_quad_v);
      dmat_zero(tpr_a, n_quad_v, n_quad_v);
@@ -308,15 +308,15 @@ void rtm_eig_rts_a(int n_quad, int n_stokes, double F_0,
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-if (derivs_p) {
+if (derivs_beam) {
      if (! vector)
-          build_global_source_a(n_quad_v, atran, atran_a, R_p, T_p, F_p, F_m, S_p, S_m, R_p_a, T_p_a, F_p_a, F_m_a, S_p_a, S_m_a, work);
+          build_global_source_a(n_quad_v, atran, atran_a, R_p, T_p, Fs_p, Fs_m, S_p, S_m, R_p_a, T_p_a, Fs_p_a, Fs_m_a, S_p_a, S_m_a, work);
      else
-          build_global_source_a2(n_quad_v, atran, atran_a, R_p, T_p, R_m, T_m, F_p, F_m, S_p, S_m, R_p_a, T_p_a, R_m_a, T_m_a, F_p_a, F_m_a, S_p_a, S_m_a, work);
+          build_global_source_a2(n_quad_v, atran, atran_a, R_p, T_p, R_m, T_m, Fs_p, Fs_m, S_p, S_m, R_p_a, T_p_a, R_m_a, T_m_a, Fs_p_a, Fs_m_a, S_p_a, S_m_a, work);
 
-     build_source_vectors_1n_a(n_quad, n_stokes, qx_v, F_0, omega, omega_a, as_0, as_0_a, P_0p, P_0m, tpr, tmr, gamma, F_p, F_m, P_0p_a, P_0m_a, tpr_a, tmr_a, gamma_a, F_p_a, F_m_a, save_tree, work);
+     build_source_vectors_1n_a(n_quad, n_stokes, qx_v, F_0, omega, omega_a, as_0, as_0_a, P_x0_p, P_x0_m, tpr, tmr, gamma, Fs_p, Fs_m, P_x0_p_a, P_x0_m_a, tpr_a, tmr_a, gamma_a, Fs_p_a, Fs_m_a, save_tree, work);
 }
-if (derivs_h) {
+if (derivs_layers) {
      if (! vector) {
           calc_global_r_and_t_a(n_quad_v, ltau, ltau_a, nu, X_p, X_m, R_p, T_p, nu_a, X_p_a, X_m_a, R_p_a, T_p_a, symmetric, save_tree, work);
 

@@ -7,110 +7,124 @@ c***********************************************************************
 c
 c***********************************************************************
       integer XRTM_OPTION_CALC_DERIVS
-      parameter (XRTM_OPTION_CALC_DERIVS = 1)
+      parameter (XRTM_OPTION_CALC_DERIVS = 1_8)
       integer XRTM_OPTION_REVERSE_DERIVS
-      parameter (XRTM_OPTION_REVERSE_DERIVS = 2)
+      parameter (XRTM_OPTION_REVERSE_DERIVS = 2_8)
       integer XRTM_OPTION_DELTA_M
-      parameter (XRTM_OPTION_DELTA_M = 4)
+      parameter (XRTM_OPTION_DELTA_M = 4_8)
       integer XRTM_OPTION_N_T_TMS
-      parameter (XRTM_OPTION_N_T_TMS = 8)
+      parameter (XRTM_OPTION_N_T_TMS = 8_8)
       integer XRTM_OPTION_FOUR_CONV_OLD
-      parameter (XRTM_OPTION_FOUR_CONV_OLD = 16)
+      parameter (XRTM_OPTION_FOUR_CONV_OLD = 16_8)
       integer XRTM_OPTION_FOUR_CONV_NEW
-      parameter (XRTM_OPTION_FOUR_CONV_NEW = 32)
+      parameter (XRTM_OPTION_FOUR_CONV_NEW = 32_8)
       integer XRTM_OPTION_NO_AZIMUTHAL
-      parameter (XRTM_OPTION_NO_AZIMUTHAL = 64)
+      parameter (XRTM_OPTION_NO_AZIMUTHAL = 64_8)
       integer XRTM_OPTION_OUTPUT_AT_LEVELS
-      parameter (XRTM_OPTION_OUTPUT_AT_LEVELS = 128)
+      parameter (XRTM_OPTION_OUTPUT_AT_LEVELS = 128_8)
       integer XRTM_OPTION_OUTPUT_AT_TAUS
-      parameter (XRTM_OPTION_OUTPUT_AT_TAUS = 256)
+      parameter (XRTM_OPTION_OUTPUT_AT_TAUS = 256_8)
+      integer XRTM_OPTION_PART_SOL_CLASSICAL
+      parameter (XRTM_OPTION_PART_SOL_CLASSICAL = 512_8)
+      integer XRTM_OPTION_PART_SOL_GREENS
+      parameter (XRTM_OPTION_PART_SOL_GREENS = 1024_8)
       integer XRTM_OPTION_PHASE_SCALAR
-      parameter (XRTM_OPTION_PHASE_SCALAR = 512)
+      parameter (XRTM_OPTION_PHASE_SCALAR = 2048_8)
       integer XRTM_OPTION_PHASE_MATRIX_GC
-      parameter (XRTM_OPTION_PHASE_MATRIX_GC = 1024)
+      parameter (XRTM_OPTION_PHASE_MATRIX_GC = 4096_8)
       integer XRTM_OPTION_PHASE_MATRIX_LC
-      parameter (XRTM_OPTION_PHASE_MATRIX_LC = 2048)
+      parameter (XRTM_OPTION_PHASE_MATRIX_LC = 8192_8)
       integer XRTM_OPTION_PSA
-      parameter (XRTM_OPTION_PSA = 4096)
+      parameter (XRTM_OPTION_PSA = 16384_8)
       integer XRTM_OPTION_QUAD_NORM_GAUS_LEG
-      parameter (XRTM_OPTION_QUAD_NORM_GAUS_LEG = 8192)
+      parameter (XRTM_OPTION_QUAD_NORM_GAUS_LEG = 32768_8)
       integer XRTM_OPTION_QUAD_DOUB_GAUS_LEG
-      parameter (XRTM_OPTION_QUAD_DOUB_GAUS_LEG = 16384)
+      parameter (XRTM_OPTION_QUAD_DOUB_GAUS_LEG = 65536_8)
       integer XRTM_OPTION_QUAD_LOBATTO
-      parameter (XRTM_OPTION_QUAD_LOBATTO = 32768)
+      parameter (XRTM_OPTION_QUAD_LOBATTO = 131072_8)
       integer XRTM_OPTION_SAVE_LEG_POLYS
-      parameter (XRTM_OPTION_SAVE_LEG_POLYS = 65536)
+      parameter (XRTM_OPTION_SAVE_LEG_POLYS = 262144_8)
       integer XRTM_OPTION_SAVE_PHASE_MATS
-      parameter (XRTM_OPTION_SAVE_PHASE_MATS = 131072)
+      parameter (XRTM_OPTION_SAVE_PHASE_MATS = 524288_8)
       integer XRTM_OPTION_SAVE_LOCAL_R_T
-      parameter (XRTM_OPTION_SAVE_LOCAL_R_T = 262144)
+      parameter (XRTM_OPTION_SAVE_LOCAL_R_T = 1048576_8)
       integer XRTM_OPTION_SAVE_LAYER_R_T_S
-      parameter (XRTM_OPTION_SAVE_LAYER_R_T_S = 524288)
+      parameter (XRTM_OPTION_SAVE_LAYER_R_T_S = 2097152_8)
       integer XRTM_OPTION_SAVE_TOTAL_R_T_S
-      parameter (XRTM_OPTION_SAVE_TOTAL_R_T_S = 1048576)
+      parameter (XRTM_OPTION_SAVE_TOTAL_R_T_S = 4194304_8)
       integer XRTM_OPTION_SFI
-      parameter (XRTM_OPTION_SFI = 2097152)
+      parameter (XRTM_OPTION_SFI = 8388608_8)
       integer XRTM_OPTION_SOURCE_SOLAR
-      parameter (XRTM_OPTION_SOURCE_SOLAR = 4194304)
+      parameter (XRTM_OPTION_SOURCE_SOLAR = 16777216_8)
       integer XRTM_OPTION_SOURCE_THERMAL
-      parameter (XRTM_OPTION_SOURCE_THERMAL = 8388608)
+      parameter (XRTM_OPTION_SOURCE_THERMAL = 33554432_8)
       integer XRTM_OPTION_STACK_REUSE_ADDING
-      parameter (XRTM_OPTION_STACK_REUSE_ADDING = 16777216)
+      parameter (XRTM_OPTION_STACK_REUSE_ADDING = 67108864_8)
       integer XRTM_OPTION_TOP_DOWN_ADDING
-      parameter (XRTM_OPTION_TOP_DOWN_ADDING = 33554432)
+      parameter (XRTM_OPTION_TOP_DOWN_ADDING = 134217728_8)
       integer XRTM_OPTION_BOTTOM_UP_ADDING
-      parameter (XRTM_OPTION_BOTTOM_UP_ADDING = 67108864)
+      parameter (XRTM_OPTION_BOTTOM_UP_ADDING = 268435456_8)
       integer XRTM_OPTION_UPWELLING_OUTPUT
-      parameter (XRTM_OPTION_UPWELLING_OUTPUT = 134217728)
+      parameter (XRTM_OPTION_UPWELLING_OUTPUT = 536870912_8)
       integer XRTM_OPTION_DOWNWELLING_OUTPUT
-      parameter (XRTM_OPTION_DOWNWELLING_OUTPUT = 268435456)
+      parameter (XRTM_OPTION_DOWNWELLING_OUTPUT = 1073741824_8)
       integer XRTM_OPTION_VECTOR
-      parameter (XRTM_OPTION_VECTOR = 536870912)
+      parameter (XRTM_OPTION_VECTOR = -2147483648_8)
 
       integer XRTM_SOLVER_DOUB_ADD
-      parameter (XRTM_SOLVER_DOUB_ADD = 1)
+      parameter (XRTM_SOLVER_DOUB_ADD = 1_8)
       integer XRTM_SOLVER_EIG_ADD
-      parameter (XRTM_SOLVER_EIG_ADD = 2)
+      parameter (XRTM_SOLVER_EIG_ADD = 2_8)
       integer XRTM_SOLVER_EIG_BVP
-      parameter (XRTM_SOLVER_EIG_BVP = 4)
+      parameter (XRTM_SOLVER_EIG_BVP = 4_8)
+      integer XRTM_SOLVER_FOUR_STREAM
+      parameter (XRTM_SOLVER_FOUR_STREAM = 8_8)
       integer XRTM_SOLVER_MEM_BVP
-      parameter (XRTM_SOLVER_MEM_BVP = 8)
+      parameter (XRTM_SOLVER_MEM_BVP = 16_8)
       integer XRTM_SOLVER_PADE_ADD
-      parameter (XRTM_SOLVER_PADE_ADD = 16)
+      parameter (XRTM_SOLVER_PADE_ADD = 32_8)
       integer XRTM_SOLVER_SINGLE
-      parameter (XRTM_SOLVER_SINGLE = 32)
+      parameter (XRTM_SOLVER_SINGLE = 64_8)
+      integer XRTM_SOLVER_SIX_STREAM
+      parameter (XRTM_SOLVER_SIX_STREAM = 128_8)
       integer XRTM_SOLVER_SOS
-      parameter (XRTM_SOLVER_SOS = 64)
+      parameter (XRTM_SOLVER_SOS = 256_8)
       integer XRTM_SOLVER_TWO_OS
-      parameter (XRTM_SOLVER_TWO_OS = 128)
+      parameter (XRTM_SOLVER_TWO_OS = 512_8)
+      integer XRTM_SOLVER_TWO_STREAM
+      parameter (XRTM_SOLVER_TWO_STREAM = 1024_8)
 
       integer XRTM_OUTPUT_RADIANCE
-      parameter (XRTM_OUTPUT_RADIANCE = 1)
+      parameter (XRTM_OUTPUT_RADIANCE = 1_8)
       integer XRTM_OUTPUT_RADIANCE_MEAN
-      parameter (XRTM_OUTPUT_RADIANCE_MEAN = 2)
+      parameter (XRTM_OUTPUT_RADIANCE_MEAN = 2_8)
       integer XRTM_OUTPUT_FLUX
-      parameter (XRTM_OUTPUT_FLUX = 4)
+      parameter (XRTM_OUTPUT_FLUX = 4_8)
       integer XRTM_OUTPUT_FLUX_DIVERGENCE
-      parameter (XRTM_OUTPUT_FLUX_DIVERGENCE = 8)
+      parameter (XRTM_OUTPUT_FLUX_DIVERGENCE = 8_8)
 
       integer XRTM_KERNEL_LAMBERTIAN
-      parameter (XRTM_KERNEL_LAMBERTIAN = 0)
+      parameter (XRTM_KERNEL_LAMBERTIAN = 0_8)
+      integer XRTM_KERNEL_DIRECT_AND_DIFFUSE
+      parameter (XRTM_KERNEL_DIRECT_AND_DIFFUSE = 1_8)
       integer XRTM_KERNEL_ROUJEAN
-      parameter (XRTM_KERNEL_ROUJEAN = 1)
+      parameter (XRTM_KERNEL_ROUJEAN = 2_8)
       integer XRTM_KERNEL_LI_SPARSE
-      parameter (XRTM_KERNEL_LI_SPARSE = 2)
+      parameter (XRTM_KERNEL_LI_SPARSE = 3_8)
       integer XRTM_KERNEL_LI_DENSE
-      parameter (XRTM_KERNEL_LI_DENSE = 3)
+      parameter (XRTM_KERNEL_LI_DENSE = 4_8)
       integer XRTM_KERNEL_ROSS_THIN
-      parameter (XRTM_KERNEL_ROSS_THIN = 4)
+      parameter (XRTM_KERNEL_ROSS_THIN = 5_8)
       integer XRTM_KERNEL_ROSS_THICK
-      parameter (XRTM_KERNEL_ROSS_THICK = 5)
+      parameter (XRTM_KERNEL_ROSS_THICK = 6_8)
       integer XRTM_KERNEL_HAPKE
-      parameter (XRTM_KERNEL_HAPKE = 6)
+      parameter (XRTM_KERNEL_HAPKE = 7_8)
       integer XRTM_KERNEL_RAHMAN
-      parameter (XRTM_KERNEL_RAHMAN = 7)
+      parameter (XRTM_KERNEL_RAHMAN = 8_8)
       integer XRTM_KERNEL_COX_MUNK
-      parameter (XRTM_KERNEL_COX_MUNK = 8)
+      parameter (XRTM_KERNEL_COX_MUNK = 9_8)
+      integer XRTM_KERNEL_USER_DEFINED
+      parameter (XRTM_KERNEL_USER_DEFINED = 10_8)
 
 
 
@@ -118,7 +132,7 @@ c***********************************************************************
 c
 c***********************************************************************
       integer N_BYTES_XRTM_TYPE
-      parameter (N_BYTES_XRTM_TYPE = 2000)
+      parameter (N_BYTES_XRTM_TYPE = 2248)
 
 
 

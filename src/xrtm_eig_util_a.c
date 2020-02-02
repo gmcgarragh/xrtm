@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -29,7 +29,13 @@ static void eigen_derivatives_real_a(int i, int n_quad, double **gamma, double *
      double a;
      double b;
 
+     if (is_trivial_eigenvector(i, n_quad, evecs))
+/*
      if (is_dummy_node_eigenvector(i, n_quad, evecs))
+*/
+          return;
+
+     if (is_degenerate_eigenvalue(i, n_quad, evals_r))
           return;
 if (! flag) {
      a = sqrt(evals_r[i]) * 2.;
@@ -47,10 +53,10 @@ if (! flag) {
 
      for (j = 0; j < n_quad; ++j)
           A[n_quad][j+1] = evecs[j][i];
-
+/*
      if (evals_i_a)
           perturb_zero_elems(n_quad + 1, A);
-
+*/
      dmat_getrf(A, n_quad + 1, n_quad + 1, ip);
 }
      B[0] = evals_r_a[i];
@@ -210,7 +216,7 @@ void eig_1n_gen_complex_a(int n_quad,
      for (i = 0; i < n_quad; ++i) {
           if (evals_i[i] == 0.)
                eigen_derivatives_real_a(i, n_quad, gamma, evals_r, evals_i, evecs, gamma_a, evals_r_a, evals_i_a, evecs_a,save->A[i], Br, save->ip[i], save->flag);
-          else 
+          else
           if (evals_i[i] > 0.) {
                i1 = i;
                i2 = i + 1;
@@ -571,9 +577,9 @@ static void forward_save_eig_2n_gen_real_free(forward_save_eig_2n_gen_real_data 
  ******************************************************************************/
 void eig_2n_gen_real_a(int n_quad,
                        double **tpr, double **tmr, double **gamma,
-                       double *nu, double **X_p, double **X_m, 
+                       double *nu, double **X_p, double **X_m,
                        double **tpr_a, double **tmr_a, double **gamma_a,
-                       double *nu_a, double **X_p_a, double **X_m_a, 
+                       double *nu_a, double **X_p_a, double **X_m_a,
                        save_tree_data save_tree, work_data work) {
 
      double *evals_a;
@@ -633,9 +639,9 @@ static void forward_save_eig_2n_gen_complex_free(forward_save_eig_2n_gen_complex
  ******************************************************************************/
 void eig_2n_gen_complex_a(int n_quad,
                           double  **tpr, double  **tmr, double  **gamma,
-                          dcomplex  *nu, dcomplex  **X_p, dcomplex  **X_m, 
+                          dcomplex  *nu, dcomplex  **X_p, dcomplex  **X_m,
                           double **tpr_a, double **tmr_a, double **gamma_a,
-                          dcomplex *nu_a, dcomplex **X_p_a, dcomplex **X_m_a, 
+                          dcomplex *nu_a, dcomplex **X_p_a, dcomplex **X_m_a,
                           save_tree_data save_tree, work_data work) {
 
      double *evals_r_a;

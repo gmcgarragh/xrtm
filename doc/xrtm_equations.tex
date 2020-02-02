@@ -1,0 +1,198 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\documentclass[letterpaper, 11pt]{article}
+
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+%\usepackage[absolute]{textpos}
+\usepackage{booktabs}
+%\usepackage{caption}
+%\captionsetup[table]{skip=5pt}
+\usepackage{chngpage}
+\usepackage{color}
+%\usepackage{colortbl}
+\usepackage{datetime}
+%\usepackage{fancyhdr}
+\usepackage{ifpdf}
+%\usepackage[landscape]{geometry}
+%\usepackage{longtable}
+%\usepackage{microtype}
+\usepackage{natbib}
+%\usepackage{pdflscape}
+%\usepackage{setspace}
+%\usepackage{tabularx}
+\usepackage{upgreek}
+%\usepackage{verbatim}
+%\usepackage{xkeyval}
+
+\ifpdf
+     \pdfcompresslevel = 9
+     \usepackage[pdftex]{graphicx}
+     \usepackage[pdftex,bookmarks=true]{hyperref}
+     \DeclareGraphicsExtensions{.pdf, .png}
+\else
+     \usepackage{graphicx}
+     \usepackage{hyperref}
+     \usepackage{pslatex}
+     \DeclareGraphicsExtensions{.eps, .ps}
+\fi
+
+\usepackage{doi}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+% portrait
+%\setlength{\voffset}		{0.75in}
+
+\setlength{\topmargin}		{0.0in}
+\setlength{\headheight}		{0.0in}
+\setlength{\headsep}		{0.0in}
+\setlength{\textheight}		{8.75in}
+%\setlength{\footskip}		{0.0in}
+\setlength{\oddsidemargin}	{0.15in}
+\setlength{\evensidemargin}	{0.15in}
+\setlength{\textwidth}		{6.2in}
+
+% landscape
+%\setlength{\voffset}		{-0.25in}
+
+%\setlength{\topmargin}		{0.0in}
+%\setlength{\headheight}	{0.0in}
+%\setlength{\headsep}		{0.0in}
+%\setlength{\textheight}	{7.0in}
+%\setlength{\footskip}		{0.0in}
+%\setlength{\oddsidemargin}	{0.15in}
+%\setlength{\evensidemargin}	{0.15in}
+%\setlength{\textwidth}		{8.7in}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+\definecolor{citescolor}{rgb}{0.0,0.5,0.0}
+\definecolor{linkscolor}{rgb}{0.5,0.0,0.0}
+\definecolor{urlcolor}{rgb}{0.0,0.0,1.0}
+
+%\onehalfspacing
+
+\hypersetup{bookmarks=true,colorlinks=true,citecolor=citescolor,linkcolor=linkscolor,urlcolor=urlcolor}
+
+
+\makeatletter
+\renewcommand\subparagraph{%
+ \@startsection {subparagraph}{5}{\z@ }{3.25ex \@plus 1ex
+ \@minus .2ex}{-1em}{\normalfont \normalsize \bfseries }}%
+\makeatother
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\newcommand\opticalthickness{x}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\title{XRTM: \\ Implementation optimized equations}
+\author{Greg McGarragh}
+\date{\usdate \today, \currenttime}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\begin{document}
+
+\setcounter{secnumdepth}{5}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\maketitle
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\tableofcontents
+\newpage
+
+%*******************************************************************************
+%
+%*******************************************************************************
+%\noindent
+%x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x
+
+\begin{table}
+%	\footnotesize
+	\center
+	\caption{Definitions of common variables}
+	\vspace{0.2cm}
+%	\begin{tabular}{ll}
+	\begin{tabular}{lp{.85\linewidth}}
+		\toprule
+		Variable & Definition \\
+		\midrule
+		$i$				& matrix row index \\
+		$j$				& matrix column index \\
+		$N$				& number of quadrature points \\
+		$k$				& layer index \\
+		$K$				& number of layers \\
+		$l$				& level index (number of levels is $K + 1$) \\
+		$l$				& associated Legendre polynomial index (degree of the polynomial) \\
+		$L$				& number of associated Legendre polynomials (maximum degree is $L - 1$) \\
+		$m$				& Fourier series expansion (azimuthal) term index and also the order of an associated Legendre polynomial) \\
+		$M$				& number of Fourier series expansion (azimuthal) terms (maximum order is $M - 1$) \\
+		$x_{k}$				& optical thickness of layer $k$ \\
+		$\tau_{l}$			& optical depth from TOA to level $l$ \\
+		$\upsilon_{k}$			& optical depth from the top of layer $k$ \\
+		$\omega$			& single scattering albedo \\
+		$\beta$				& phase function Legendre expansion coefficient \\
+		$\lambda_{k}$			& average secant of solar zenith angle for layer $k$ ($1 / \mu_{0}$ for plane-parallel) \\
+		$\mathcal{X}_{\mathrm{b},k}$	& transmission of the solar beam in layer $k$ \\
+		$\mathcal{T}_{\mathrm{b},l}$	& transmission of the solar beam from TOA to level $l$ \\
+		$b_{l}$				& planck radiance at level $l$ \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:common_variables}
+\end{table}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\input{equations/xrtm_common.tex}
+\input{equations/xrtm_delta_m_scaling.tex}
+\input{equations/xrtm_single_scattering.tex}
+\input{equations/xrtm_phase_matrices.tex}
+\input{equations/xrtm_local_r_and_t.tex}
+\input{equations/xrtm_doubling.tex}
+\input{equations/xrtm_eigen_problem.tex}
+\input{equations/xrtm_global_r_and_t.tex}
+\input{equations/xrtm_pade_approximation.tex}
+\input{equations/xrtm_solar_source.tex}
+\input{equations/xrtm_thermal_source.tex}
+\input{equations/xrtm_adding.tex}
+\input{equations/xrtm_radiance.tex}
+\input{equations/xrtm_discrete_ordinate_method.tex}
+\input{equations/xrtm_matrix_exponential_method.tex}
+\input{equations/xrtm_source_function_integration.tex}
+\input{equations/xrtm_sos.tex}
+\input{equations/xrtm_two_os.tex}
+\input{equations/xrtm_two_stream.tex}
+\input{equations/xrtm_four_stream.tex}
+\input{equations/xrtm_six_stream.tex}
+\input{equations/xrtm_brdf_kernels.tex}
+
+
+\end{document}

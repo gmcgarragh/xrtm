@@ -1,0 +1,139 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{Delta-M scaling}
+\label{sec:delta_m_scaling}
+
+
+\subsection{Forward}
+\label{sec:delta_m_scaling-forward}
+
+\begin{equation}
+a_{l} = 2 l + 1
+\label{eq:delta_m_scaling-forward-a}
+\end{equation}
+
+\begin{equation}
+\beta^{\prime}_{l} = \frac{\beta_{l} - a_{l}f}{1 - f}
+\label{eq:delta_m_scaling-forward-chi}
+\end{equation}
+
+\begin{equation}
+\omega^{\prime} = \frac{1 - f}{1 - {\omega}f}\omega
+\label{eq:delta_m_scaling-forward-omega}
+\end{equation}
+
+\begin{equation}
+\opticalthickness^{\prime} = (1 - {\omega}f)\opticalthickness
+\label{eq:delta_m_scaling-forward-tau}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Tangent linear}
+\label{sec:delta_m_scaling-tangent_linear}
+
+\begin{equation}
+\mathcal{L}(\beta^{\prime}_{l}) = \frac{\mathcal{L}(\beta_{l}) - a_{l}\mathcal{L}(f)}{1-f} + (\beta_{l} - a_{l}f) \frac{\mathcal{L}(f)}{(1-f)^{2}}
+\label{eq:delta_m_scaling-tangent_linear-chi_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\omega^{\prime}) = \frac{\mathcal{L}(\omega)(1 - f) - \omega\mathcal{L}(f)}{(1- {\omega}f)} + \omega(1 - f) \frac{\mathcal{L}(\omega)f + \omega\mathcal{L}(f)}{(1- {\omega}f)^{2}}
+\label{eq:delta_m_scaling-tangent_linear-omega_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\opticalthickness^{\prime}) = -\left[\mathcal{L}(\omega)f + \omega\mathcal{L}(f)\right]\opticalthickness + (1 - {\omega}f)\mathcal{L}(\opticalthickness)
+\label{eq:delta_m_scaling-tangent_linear-tau_l}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Adjoint of tangent linear}
+\label{sec:delta_m_scaling-adjoint_of_tangent_linear}
+
+\subsubsection{\texorpdfstring{$\beta^{\prime}_{l}$}{Beta}}
+\label{sec:delta_m_scaling-adjoint_of_tangent_linear-x_prime_l}
+
+\begin{equation}
+t_{l} = \frac{\mathcal{A}(\beta^{\prime}_{l})}{1 - f}
+\label{eq:delta_m_scaling-adjoint_of_tangent_linear-x_prime_l_t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\beta_{l}) = \mathcal{A}(\beta_{l}) + t_{l}
+\label{eq:delta_m_scaling-adjoint_of_tangent_linear-x_prime_l_chi_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(f) = \mathcal{A}(f) - a_{l}t_{l}
+\label{eq:delta_m_scaling-adjoint_of_tangent_linear-x_prime_l_f_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(f) = \mathcal{A}(f) + \mathcal{A}(\beta^{\prime}_{l}) \frac{\beta_{l} - a_{l}f}{(1 - f)^{2}}
+\label{eq:delta_m_scaling-adjoint_of_tangent_linear-f_a2}
+\end{equation}
+
+
+\subsubsection{\texorpdfstring{$\omega^{\prime}$}{Omega}}
+\label{sec:delta_m_scaling-adjoint_of_tangent_linear-omega_prime}
+
+\begin{equation}
+t = \frac{\mathcal{A}(\omega^{\prime})}{1 - \omega f}
+\label{eq:delta_m_scaling-adjoint_of_tangent_linear-omega_prime_t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\omega) = \mathcal{A}(\omega) + t (1 - f)
+\label{eq:delta_m_scaling-adjoint_of_tangent_linear-omega_prime_omega_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(f) = \mathcal{A}(f) - t \omega
+\label{eq:delta_m_scaling-adjoint_of_tangent_linear-omega_prime_f_a}
+\end{equation}
+
+\begin{equation}
+t = \mathcal{A}(\omega^{\prime})\frac{\omega (1 - f)}{(1 - \omega f)^{2}}
+\label{eq:delta_m_scaling-adjoint_of_tangent_linear-omega_prime_t2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\omega) = \mathcal{A}(\omega) + t f
+\label{eq:delta_m_scaling-adjoint_of_tangent_linear-omega_prime_omega_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(f) = \mathcal{A}(f) + t \omega
+\label{eq:delta_m_scaling-adjoint_of_tangent_linear-omega_prime_f_a2}
+\end{equation}
+
+
+\subsubsection{\texorpdfstring{$\opticalthickness^{\prime}$}{Tau}}
+\label{sec:delta_m_scaling-adjoint_of_tangent_linear-tau_prime}
+
+\begin{equation}
+t = -\mathcal{A}(\opticalthickness^{\prime})\opticalthickness
+\label{eq:delta_m_scaling-adjoint_of_tangent_linear-tau_prime_t2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\omega) = \mathcal{A}(\omega) + t f
+\label{eq:delta_m_scaling-adjoint_of_tangent_linear-tau_prime_omega_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(f) = \mathcal{A}(f) + t \omega
+\label{eq:delta_m_scaling-adjoint_of_tangent_linear-tau_prime_f_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\opticalthickness) = \mathcal{A}(\opticalthickness) + \mathcal{A}(\opticalthickness^{\prime})(1 - \omega f)
+\label{eq:delta_m_scaling-adjoint_of_tangent_linear-tau_prime_tau_a}
+\end{equation}

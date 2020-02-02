@@ -1,0 +1,1293 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{Adding}
+\label{sec:adding}
+
+\begin{equation}
+\mathcal{X}_{12} = e^{-\opticalthickness_{12} \lambda_{12}}
+\label{eq:adding-layer_trans}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Upward ($\mathbf{R}_{13}$, $\mathbf{T}_{31}$, $\mathbf{S}_{31}$)}
+\label{sec:adding-upward}
+
+\subsubsection{Forward}
+\label{sec:adding-upward-forward}
+
+\begin{equation}
+\mathbf{P}_{31} = (\mathbf{E} - \mathbf{R}_{23}\mathbf{R}_{21})^{-1}
+\label{eq:adding-upward-forward-P31}
+\end{equation}
+
+\begin{equation}
+\mathbf{A}_{31} = \mathbf{T}_{21}\mathbf{P}_{31}
+\label{eq:adding-upward-forward-B31}
+\end{equation}
+
+\begin{equation}
+\mathbf{B}_{13} = \mathbf{R}_{23}\mathbf{T}_{12}
+\label{eq:adding-upward-forward-B13}
+\end{equation}
+
+\begin{equation}
+\mathbf{C}_{31} = \mathbf{S}_{32}\mathcal{X}_{12} + \mathbf{R}_{23}\mathbf{S}_{12}
+\label{eq:adding-upward-forward-C31}
+\end{equation}
+
+\begin{equation}
+\mathbf{S}_{31} = \mathbf{S}_{21} + \mathbf{A}_{31}\mathbf{C}_{31}
+\label{eq:adding-upward-forward-S31}
+\end{equation}
+
+\begin{equation}
+\mathbf{a}_{31} = \mathbf{A}_{31}(\mathbf{R}_{23}\mathbf{a}_{12} + \mathbf{a}_{32}) + \mathbf{a}_{21}
+\label{eq:adding-upward-forward-a31}
+\end{equation}
+
+\begin{equation}
+\mathbf{Sl}_{31} = \mathbf{A}_{31}(\mathbf{R}_{23}\mathbf{Sl}_{12} + \mathbf{Sl}_{32} + \mathbf{a}_{31}f) + \mathbf{Sl}_{21}
+\label{eq:adding-upward-forward-Sl31}
+\end{equation}
+
+\begin{equation}
+\mathbf{R}_{13} = \mathbf{R}_{12} + \mathbf{A}_{31}\mathbf{B}_{13}
+\label{eq:adding-upward-forward-R13}
+\end{equation}
+
+\begin{equation}
+\mathbf{T}_{31} = \mathbf{A}_{31}\mathbf{T}_{32}
+\label{eq:adding-upward-forward-T31}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:adding-upward-tangent_linear}
+
+\begin{equation}
+\mathcal{L}(\mathcal{X}_{12}) = \left[-\mathcal{L}(\tau_{12}) \lambda_{12}\right]\mathcal{X}_{12}
+\label{eq:adding-trans_l}
+\end{equation}
+
+
+\paragraph{unlinearized + particular linearized}
+\label{sec:adding-upward-tangent_linear-unlinearized_p_particular_linearized}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{31}) = \mathbf{A}_{31}\mathcal{L}(\mathbf{S}_{32})\mathcal{X}_{12}
+\label{eq:adding-upward-tangent_linear-unlinearized_p_particular_linearized-V31}
+\end{equation}
+
+
+\paragraph{particular linearized + unlinearized}
+\label{sec:adding-upward-tangent_linear-particular_linearized_p_unlinearized}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{31}) = \mathcal{L}(\mathbf{S}_{21}) + \mathbf{A}_{31}\mathbf{R}_{23}\mathcal{L}(\mathbf{S}_{12})
+\label{eq:adding-upward-tangent_linear-particular_linearized_p_unlinearized-V31}
+\end{equation}
+
+
+\paragraph{particular linearized + particular linearized}
+\label{sec:adding-upward-tangent_linear-particular_linearized_particular_linearized}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{31}) = \mathcal{L}(\mathbf{S}_{21}) + \mathbf{A}_{31}(\mathcal{L}(\mathbf{S}_{32})\mathcal{X}_{12} + \mathbf{R}_{23}\mathcal{L}(\mathbf{S}_{12}))
+\label{eq:adding-upward-tangent_linear-particular_linearized_particular_linearized-V31}
+\end{equation}
+
+
+\paragraph{unlinearized + homogeneous linearized}
+\label{sec:adding-upward-tangent_linear-unlinearized_p_homogeneous_linearized}
+
+\begin{equation}
+\mathbf{D}_{31} = \mathbf{A}_{31}\mathcal{L}(\mathbf{R}_{23})
+\label{eq:adding-upward-tangent_linear-unlinearized_p_homogeneous_linearized-D31}
+\end{equation}
+
+\begin{equation}
+\mathbf{E}_{31} = \mathbf{D}_{31}\mathbf{R}_{21}\mathbf{P}_{31}
+\label{eq:adding-upward-tangent_linear-unlinearized_p_homogeneous_linearized-E31}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{31}) = \mathbf{E}_{31}\mathbf{C}_{31} + \mathbf{A}_{31}(\mathcal{L}(\mathbf{S}_{32})\mathcal{X}_{12} + \mathcal{L}(\mathbf{R}_{23})\mathbf{S}_{12})
+\label{eq:adding-upward-tangent_linear-unlinearized_p_homogeneous_linearized-V31}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{R}_{13}) = \mathbf{E}_{31}\mathbf{B}_{13} + \mathbf{D}_{31}\mathbf{T}_{12}
+\label{eq:adding-upward-tangent_linear-unlinearized_p_homogeneous_linearized-U13}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{T}_{31}) = \mathbf{E}_{31}\mathbf{T}_{32} + \mathbf{A}_{31}\mathcal{L}(\mathbf{T}_{32})
+\label{eq:adding-upward-tangent_linear-unlinearized_p_homogeneous_linearized-W31}
+\end{equation}
+
+
+\paragraph{homogeneous linearized + unlinearized}
+\label{sec:adding-upward-tangent_linear-homogeneous_linearized_p_unlinearized}
+
+\begin{equation}
+\mathbf{D}_{31} = \mathbf{A}_{31}\mathbf{R}_{23}
+\label{eq:adding-upward-tangent_linear-homogeneous_linearized_p_unlinearized-D31}
+\end{equation}
+
+\begin{equation}
+\mathbf{E}_{31} = \left[\mathcal{L}(\mathbf{T}_{21}) + \mathbf{D}_{31}\mathcal{L}(\mathbf{R}_{21})\right]\mathbf{P}_{31}
+\label{eq:adding-upward-tangent_linear-homogeneous_linearized_p_unlinearized-E31}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{31}) = \mathcal{L}(\mathbf{S}_{21}) + \mathbf{E}_{31}\mathbf{C}_{31} + \mathbf{A}_{31}(\mathbf{S}_{32}\mathcal{L}(\mathcal{X}_{12}) + \mathbf{R}_{23}\mathcal{L}(\mathbf{S}_{12}))
+\label{eq:adding-upward-tangent_linear-homogeneous_linearized_p_unlinearized-V31}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{R}_{13}) = \mathcal{L}(\mathbf{R}_{12}) + \mathbf{E}_{31}\mathbf{B}_{13} + \mathbf{D}_{31}\mathcal{L}(\mathbf{T}_{12})
+\label{eq:adding-upward-tangent_linear-homogeneous_linearized_p_unlinearized-U13}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{T}_{31}) = \mathbf{E}_{31}\mathbf{T}_{32}
+\label{eq:adding-upward-tangent_linear-homogeneous_linearized_p_unlinearized-W31}
+\end{equation}
+
+
+\paragraph{particular linearized + homogeneous linearized}
+\label{sec:adding-upward-tangent_linear-particular_linearized_p_homogeneous_linearized}
+
+\begin{equation}
+\mathbf{D}_{31} = \mathbf{A}_{31}\mathcal{L}(\mathbf{R}_{23})
+\label{eq:adding-upward-tangent_linear-particular_linearized_p_homogeneous_linearized-D31}
+\end{equation}
+
+\begin{equation}
+\mathbf{E}_{31} = \mathbf{D}_{31}\mathbf{R}_{21}\mathbf{P}_{31}
+\label{eq:adding-upward-tangent_linear-particular_linearized_p_homogeneous_linearized-E31}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{31}) = \mathcal{L}(\mathbf{S}_{21}) + \mathbf{E}_{31}\mathbf{C}_{31} + \mathbf{A}_{31}(\mathcal{L}(\mathbf{S}_{32})\mathcal{X}_{12} + \mathcal{L}(\mathbf{R}_{23})\mathbf{S}_{12} + \mathbf{R}_{23}\mathcal{L}(\mathbf{S}_{12}))
+\label{eq:adding-upward-tangent_linear-particular_linearized_p_homogeneous_linearized-V31}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{R}_{13}) = \mathbf{E}_{31}\mathbf{B}_{13} + \mathbf{D}_{31}\mathbf{T}_{12}
+\label{eq:adding-upward-tangent_linear-particular_linearized_p_homogeneous_linearized-U13}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{T}_{31}) = \mathbf{E}_{31}\mathbf{T}_{32} + \mathbf{A}_{31}\mathcal{L}(\mathbf{T}_{32})
+\label{eq:adding-upward-tangent_linear-particular_linearized_p_homogeneous_linearized-W31}
+\end{equation}
+
+
+\paragraph{homogeneous linearized + particular linearized}
+\label{sec:adding-upward-tangent_linear-homogeneous_linearized_p_particular_linearized}
+
+\begin{equation}
+\mathbf{D}_{31} = \mathbf{A}_{31}\mathbf{R}_{23}
+\label{eq:adding-upward-tangent_linear-homogeneous_linearized_p_particular_linearized-D31}
+\end{equation}
+
+\begin{equation}
+\mathbf{E}_{31} = (\mathcal{L}(\mathbf{T}_{21}) +\mathbf{D}_{31}\mathcal{L}(\mathbf{R}_{21}))\mathbf{P}_{31}
+\label{eq:adding-upward-tangent_linear-homogeneous_linearized_p_particular_linearized-E31}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{31}) = \mathcal{L}(\mathbf{S}_{21}) + \mathbf{E}_{31}\mathbf{C}_{31} + \mathbf{A}_{31}(\mathcal{L}(\mathbf{S}_{32})\mathcal{X}_{12} + \mathbf{S}_{32}\mathcal{L}(\mathcal{X}_{12}) + \mathbf{R}_{23}\mathcal{L}(\mathbf{S}_{12}))
+\label{eq:adding-upward-tangent_linear-homogeneous_linearized_p_particular_linearized-V31}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{R}_{13}) = \mathcal{L}(\mathbf{R}_{12}) + \mathbf{E}_{31}\mathbf{B}_{13} + \mathbf{D}_{31}\mathcal{L}(\mathbf{T}_{12})
+\label{eq:adding-upward-tangent_linear-homogeneous_linearized_p_particular_linearized-U13}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{T}_{31}) = \mathbf{E}_{31}\mathbf{T}_{32}
+\label{eq:adding-upward-tangent_linear-homogeneous_linearized_p_particular_linearized-W31}
+\end{equation}
+
+
+\paragraph{homogeneous linearized + homogeneous linearized}
+\label{sec:adding-upward-tangent_linear-homogeneous_linearized_p_homogeneous_linearized}
+
+\begin{equation}
+\mathbf{D}_{31} = \left[\mathcal{L}(\mathbf{T}_{21}) + \mathbf{A}_{31}(\mathcal{L}(\mathbf{R}_{23})\mathbf{R}_{21} + \mathbf{R}_{23}\mathcal{L}(\mathbf{R}_{21}))\right]\mathbf{P}_{31}
+\label{eq:adding-upward-tangent_linear-homogeneous_linearized_p_homogeneous_linearized-D31}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{31}) = \mathcal{L}(\mathbf{S}_{21}) + \mathbf{D}_{31}\mathbf{C}_{31} + \mathbf{A}_{31}(\mathcal{L}(\mathbf{S}_{32})\mathcal{X}_{12} + \mathbf{S}_{32}\mathcal{L}(\mathcal{X}_{12}) + \mathcal{L}(\mathbf{R}_{23})\mathbf{S}_{12} + \mathbf{R}_{23}\mathcal{L}(\mathbf{S}_{12}))
+\label{eq:adding-upward-tangent_linear-homogeneous_linearized_p_homogeneous_linearized-V31}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{R}_{13}) = \mathcal{L}(\mathbf{R}_{12}) + \mathbf{D}_{31}\mathbf{B}_{13} + \mathbf{A}_{31}(\mathcal{L}(\mathbf{R}_{23})\mathbf{T}_{12} + \mathbf{R}_{23}\mathcal{L}(\mathbf{T}_{12}))
+\label{eq:adding-upward-tangent_linear-homogeneous_linearized_p_homogeneous_linearized-U13}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{T}_{31}) = \mathbf{D}_{31}\mathbf{T}_{32} + \mathbf{A}_{31}\mathcal{L}(\mathbf{T}_{32})
+\label{eq:adding-upward-tangent_linear-homogeneous_linearized_p_homogeneous_linearized-W31}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:adding-upward-adjoint_of_tangent_linear}
+
+\paragraph{unlinearized + particular linearized}
+\label{sec:adding-upward-adjoint_of_tangent_linear-unlinearized_p_particular_linearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{32}) = \mathbf{A}_{31}^{T}\mathcal{A}(\mathbf{S}_{31})\mathcal{X}_{12}
+\label{eq:adding-upward-adjoint_of_tangent_linear-unlinearized_p_particular_linearized-S32_a}
+\end{equation}
+
+
+\paragraph{particular linearized + unlinearized}
+\label{sec:adding-upward-adjoint_of_tangent_linear-particular_linearized_p_unlinearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{21}) = \mathcal{A}(\mathbf{S}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_p_unlinearized-S21_a}
+\end{equation}
+
+
+\paragraph{particular linearized + particular linearized}
+\label{sec:adding-upward-adjoint_of_tangent_linear-particular_linearized_particular_linearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{21}) = \mathcal{A}(\mathbf{S}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_particular_linearized-S21_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathbf{A}_{31}^{T}\mathcal{A}(\mathbf{S}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_particular_linearized-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{32}) = \mathbf{t}\mathcal{X}_{12}
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_particular_linearized-S32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{12}) = \mathbf{R}^{T}_{23}\mathbf{t}
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_particular_linearized-S12_a}
+\end{equation}
+
+
+\paragraph{unlinearized + homogeneous linearized}
+\label{sec:adding-upward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{31}) = \mathcal{A}(\mathbf{T}_{31})\mathbf{T}_{32}^{T}
+\label{eq:adding-upward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-E13_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{32}) = \mathbf{A}_{31}^{T}\mathcal{A}(\mathbf{T}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-T32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{31}) = \mathcal{A}(\mathbf{E}_{31}) + \mathcal{A}(\mathbf{R}_{13})\mathbf{B}_{13}^{T}
+\label{eq:adding-upward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-E31_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{D}_{31}) = \mathcal{A}(\mathbf{R}_{13})\mathbf{T}_{12}^{T}
+\label{eq:adding-upward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-D31_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{31}) = \mathcal{A}(\mathbf{E}_{31}) + \mathcal{A}(\mathbf{S}_{31})\mathbf{C}_{31}^{T}
+\label{eq:adding-upward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-E31_a3}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathbf{A}^{T}_{31}\mathcal{A}(\mathbf{S}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{32}) = \mathbf{t}\mathcal{X}_{12}
+\label{eq:adding-upward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-S32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{32}) = \mathbf{t}\mathbf{S}^{T}_{12}
+\label{eq:adding-upward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-R32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{D}_{31}) = \mathcal{A}(\mathbf{D}_{31}) + \mathcal{A}(\mathbf{E}_{31})\mathbf{P}^{T}_{31}\mathbf{R}^{T}_{21}
+\label{eq:adding-upward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-D31_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{23}) = \mathbf{A}^{T}_{31}\mathcal{A}(\mathbf{D}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-R23_a}
+\end{equation}
+
+
+\paragraph{homogeneous linearized + unlinearized}
+\label{sec:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{31}) = \mathcal{A}(\mathbf{T}_{31})\mathbf{T}^{T}_{32}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-E31_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{12}) = \mathcal{A}(\mathbf{R}_{13})
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-R12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{31}) = \mathcal{A}(\mathbf{E}_{31}) + \mathcal{A}(\mathbf{R}_{13})\mathbf{B}^{T}_{13}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-E31_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{12}) = \mathbf{D}^{T}_{31}\mathcal{A}(\mathbf{R}_{13})
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-T12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{21}) = \mathcal{A}(\mathbf{S}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-S21_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{31}) = \mathcal{A}(\mathbf{E}_{31}) + \mathcal{A}(\mathbf{S}_{31})\mathbf{C}^{T}_{31}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-E31_a3}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathbf{A}^{T}_{31}\mathcal{A}(\mathbf{S}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathcal{X}_{12}) = \mathbf{S}^{T}_{32}\mathbf{t}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-t12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{12}) = \mathbf{R}^{T}_{23}\mathbf{t}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-S12_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathcal{A}(\mathbf{E}_{31})\mathbf{P}^{T}_{31}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-t2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{21}) = \mathbf{t}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-T21_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{21}) = \mathbf{D}^{T}_{31}\mathbf{t}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-R21_a}
+\end{equation}
+
+
+\paragraph{particular linearized + homogeneous linearized}
+\label{sec:adding-upward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{31}) = \mathcal{A}(\mathbf{T}_{31})\mathbf{T}^{T}_{32}
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-E31_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{32}) = \mathbf{A}^{T}_{31}\mathcal{A}(\mathbf{T}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-T32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{31}) = \mathcal{A}(\mathbf{E}_{31}) + \mathcal{A}(\mathbf{R}_{13})\mathbf{B}^{T}_{13}
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-E31_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{D}_{31}) = \mathcal{A}(\mathbf{R}_{13})\mathbf{T}^{T}_{12}
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-D31_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{21}) = \mathcal{A}(\mathbf{S}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-S31_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{31}) = \mathcal{A}(\mathbf{E}_{31}) + \mathcal{A}(\mathbf{S}_{31})\mathbf{C}^{T}_{31}
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-E31_a3}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathbf{A}^{T}_{31}\mathcal{A}(\mathbf{S}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{32}) = \mathbf{t}\mathcal{X}_{12}
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-S32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{23}) = \mathbf{t}\mathbf{S}^{T}_{12}
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-R23_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{12}) = \mathbf{R}^{T}_{23}\mathbf{t}
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-S12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{D}_{31}) = \mathcal{A}(\mathbf{E}_{31})\mathbf{P}^{T}_{31}\mathbf{R}^{T}_{21}
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-D31_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{23}) = \mathbf{A}^{T}_{31}\mathcal{A}(\mathbf{D}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-R23_a}
+\end{equation}
+
+
+\paragraph{homogeneous linearized + particular linearized}
+\label{sec:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{31}) = \mathcal{A}(\mathbf{T}_{31})\mathbf{T}^{T}_{32}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-E31_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{12}) = \mathcal{A}(\mathbf{R}_{13})
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-R12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{31}) = \mathcal{A}(\mathbf{E}_{31}) + \mathcal{A}(\mathbf{R}_{13})\mathbf{B}^{T}_{13}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-E31_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{12}) = \mathbf{D}^{T}_{31}\mathcal{A}(\mathbf{R}_{13})
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-T12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{21}) = \mathcal{A}(\mathbf{S}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-S21_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{31}) = \mathcal{A}(\mathbf{E}_{31}) + \mathcal{A}(\mathbf{S}_{31})\mathbf{C}^{T}_{31}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-E31_a3}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathbf{A}^{T}_{31}\mathcal{A}(\mathbf{S}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{32}) = \mathbf{t}\mathcal{X}_{12}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-S32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathcal{X}_{12}) = \mathbf{S}^{T}_{32}\mathbf{t}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-t12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{12}) = \mathbf{R}^{T}_{23}\mathbf{t}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-S12_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathcal{A}(\mathbf{E}_{31})\mathbf{P}^{T}_{31}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-t2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{21}) = \mathbf{t}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-T21_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{21}) = \mathbf{D}^{T}_{31}\mathbf{t}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-R21_a}
+\end{equation}
+
+
+\paragraph{homogeneous linearized + homogeneous linearized}
+\label{sec:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{D}_{31}) = \mathcal{A}(\mathbf{T}_{31})\mathbf{T}^{T}_{32}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-D31_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{32}) = \mathbf{A}^{T}_{31}\mathcal{A}(\mathbf{T}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-T32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{12}) = \mathcal{A}(\mathbf{R}_{13})
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-R12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{D}_{31}) = \mathcal{A}(\mathbf{D}_{31}) + \mathcal{A}(\mathbf{R}_{13})\mathbf{B}^{T}_{13}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-D31_a2}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathbf{A}^{T}_{31}\mathcal{A}(\mathbf{R}_{13})
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{23}) = \mathbf{t}\mathbf{T}^{T}_{12}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-R23_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{12}) = \mathbf{R}^{T}_{23}\mathbf{t}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-T12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{21}) = \mathcal{A}(\mathbf{S}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-S21_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{D}_{31}) = \mathcal{A}(\mathbf{D}_{31}) + \mathcal{A}(\mathbf{S}_{31})\mathbf{C}^{T}_{31}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-D31_a2}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathbf{A}^{T}_{31}\mathcal{A}(\mathbf{S}_{31})
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-t2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{32}) = \mathbf{t}\mathcal{X}_{12}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-S32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathcal{X}_{12}) = \mathbf{S}^{T}_{32}\mathbf{t}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-t12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{23}) = \mathbf{t}\mathbf{S}^{T}_{12}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-R23_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{12}) = \mathbf{R}^{T}_{23}\mathbf{t}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-S12_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathcal{A}(\mathbf{D}_{31})\mathbf{P}^{T}_{31}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-t3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{21}) = \mathbf{t}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-T21_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{t}_{2} = \mathbf{A}^{T}_{31}\mathbf{t}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-t_2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{23}) = \mathbf{t}_{2}\mathbf{R}^{T}_{21}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-T21_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{21}) = \mathbf{R}^{T}_{23}\mathbf{t}_{2}
+\label{eq:adding-upward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-R21_a}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Downward: ($\mathbf{R}_{31}$, $\mathbf{T}_{13}$, $\mathbf{S}_{13}$)}
+\label{sec:downward}
+
+\subsubsection{Forward}
+\label{sec:adding-downward-forward}
+
+\begin{equation}
+\mathbf{P}_{13} = (\mathbf{E} - \mathbf{R}_{21}\mathbf{R}_{23})^{-1}
+\label{eq:adding-downward-forward-P13}
+\end{equation}
+
+\begin{equation}
+\mathbf{A}_{13} = \mathbf{T}_{23}\mathbf{P}_{13}
+\label{eq:adding-downward-forward-B13}
+\end{equation}
+
+\begin{equation}
+\mathbf{B}_{31} = \mathbf{R}_{21}\mathbf{T}_{32}
+\label{eq:adding-downward-forward-B31}
+\end{equation}
+
+\begin{equation}
+\mathbf{C}_{13} = \mathbf{S}_{12} + \mathbf{R}_{21}\mathbf{S}_{32}\mathcal{X}_{12}
+\label{eq:adding-downward-forward-C13}
+\end{equation}
+
+\begin{equation}
+\mathbf{S}_{13} = \mathbf{S}_{23}\mathcal{X}_{12} + \mathbf{A}_{13}\mathbf{C}_{13}
+\label{eq:adding-downward-forward-S13}
+\end{equation}
+
+\begin{equation}
+\mathbf{a}_{13} = \mathbf{A}_{13}(\mathbf{R}_{21}\mathbf{a}_{32} + \mathbf{a}_{12}) + \mathbf{a}_{23}
+\label{eq:adding-up_a13}
+\end{equation}
+
+\begin{equation}
+\mathbf{Sl}_{13} = \mathbf{A}_{13}\left[\mathbf{R}_{21}(\mathbf{Sl}_{32} + \mathbf{a}_{32}f) + \mathbf{Sl}_{12}\right] + \mathbf{Sl}_{23} + \mathbf{a}_{23}f
+\label{eq:adding-downward-forward-Sl13}
+\end{equation}
+
+\begin{equation}
+\mathbf{R}_{31} = \mathbf{R}_{32} + \mathbf{A}_{13}\mathbf{B}_{31}
+\label{eq:adding-downward-forward-R31}
+\end{equation}
+
+\begin{equation}
+\mathbf{T}_{13} = \mathbf{A}_{13}\mathbf{T}_{12}
+\label{eq:adding-downward-forward-T13}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:adding-downward-tangent_linear}
+
+\paragraph{unlinearized + particular linearized}
+\label{sec:adding-downward-tangent_linear-unlinearized_p_particular_linearized}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{13}) = \mathcal{L}(\mathbf{S}_{23})\mathcal{X}_{12} + \mathbf{A}_{13}\mathbf{R}_{21}\mathcal{L}(\mathbf{S}_{32})\mathcal{X}_{12}
+\label{eq:adding-downward-tangent_linear-unlinearized_p_particular_linearized-V13}
+\end{equation}
+
+
+\paragraph{particular linearized + unlinearized}
+\label{sec:adding-downward-tangent_linear-particular_linearized_p_unlinearized}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{13}) = \mathbf{A}_{13}\mathcal{L}(\mathbf{S}_{12})
+\label{eq:adding-downward-tangent_linear-particular_linearized_p_unlinearized-V13}
+\end{equation}
+
+
+\paragraph{particular linearized + particular linearized}
+\label{sec:adding-downward-tangent_linear-particular_linearized_p_particular_linearized}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{13}) = \mathcal{L}(\mathbf{S}_{23})\mathcal{X}_{12} + \mathbf{A}_{13}\left[\mathcal{L}(\mathbf{S}_{12}) + \mathbf{R}_{21}\mathcal{L}(\mathbf{S}_{32})\mathcal{X}_{12}\right]
+\label{eq:adding-downward-tangent_linear-particular_linearized_p_particular_linearized-V13}
+\end{equation}
+
+
+\paragraph{unlinearized + homogeneous linearized}
+\label{sec:adding-downward-tangent_linear-unlinearized_p_homogeneous_linearized}
+
+\begin{equation}
+\mathbf{D}_{13} = \mathbf{A}_{13}\mathbf{R}_{21}
+\label{eq:adding-downward-tangent_linear-unlinearized_p_homogeneous_linearized-D13}
+\end{equation}
+
+\begin{equation}
+\mathbf{E}_{13} = (\mathcal{L}(\mathbf{T}_{23}) + \mathbf{D}_{13}\mathcal{L}(\mathbf{R}_{23}))\mathbf{P}_{13}
+\label{eq:adding-downward-tangent_linear-unlinearized_p_homogeneous_linearized-E13}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{13}) = \mathcal{L}(\mathbf{S}_{23})\mathcal{X}_{12} + \mathbf{E}_{13}\mathbf{C}_{13} + \mathbf{A}_{13}\mathbf{R}_{21}\mathcal{L}(\mathbf{S}_{32})\mathcal{X}_{12}
+\label{eq:adding-downward-tangent_linear-unlinearized_p_homogeneous_linearized-V13}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{R}_{31}) = \mathcal{L}(\mathbf{R}_{32}) + \mathbf{E}_{13}\mathbf{B}_{31} + \mathbf{D}_{13}\mathcal{L}(\mathbf{T}_{32})
+\label{eq:adding-downward-tangent_linear-unlinearized_p_homogeneous_linearized-U31}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{T}_{13}) = \mathbf{E}_{13}\mathbf{T}_{12}
+\label{eq:adding-downward-tangent_linear-unlinearized_p_homogeneous_linearized-W13}
+\end{equation}
+
+
+\paragraph{homogeneous linearized + unlinearized}
+\label{sec:adding-downward-tangent_linear-homogeneous_linearized_p_unlinearized}
+
+\begin{equation}
+\mathbf{D}_{13} = \mathbf{A}_{13}\mathcal{L}(\mathbf{R}_{21})
+\label{eq:adding-downward-tangent_linear-homogeneous_linearized_p_unlinearized-D13}
+\end{equation}
+
+\begin{equation}
+\mathbf{E}_{13} = \mathbf{D}_{13}\mathbf{R}_{23}\mathbf{P}_{13}
+\label{eq:adding-downward-tangent_linear-homogeneous_linearized_p_unlinearized-E13}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{13}) = \mathbf{S}_{23}\mathcal{L}(\mathcal{X}_{12}) + \mathbf{E}_{13}\mathbf{C}_{13} + \mathbf{A}_{13}\left[\mathcal{L}(\mathbf{S}_{12}) + \mathcal{L}(\mathbf{R}_{21})\mathbf{S}_{32}\mathcal{X}_{12} + \mathbf{R}_{21}\mathbf{S}_{32}\mathcal{L}(\mathcal{X}_{12})\right]
+\label{eq:adding-downward-tangent_linear-homogeneous_linearized_p_unlinearized-V13}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{R}_{31}) = \mathbf{E}_{13}\mathbf{B}_{31} + \mathbf{D}_{13}\mathbf{T}_{32}
+\label{eq:adding-downward-tangent_linear-homogeneous_linearized_p_unlinearized-U31}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{T}_{13}) = \mathbf{E}_{13}\mathbf{T}_{12} + \mathbf{A}_{13}\mathcal{L}(\mathbf{T}_{12})
+\label{eq:adding-downward-tangent_linear-homogeneous_linearized_p_unlinearized-W13}
+\end{equation}
+
+
+\paragraph{particular linearized + homogeneous linearized}
+\label{sec:adding-downward-tangent_linear-particular_linearized_p_homogeneous_linearized}
+
+\begin{equation}
+\mathbf{D}_{13} = \mathbf{A}_{13}\mathbf{R}_{21}
+\label{eq:adding-downward-tangent_linear-particular_linearized_p_homogeneous_linearized-D13}
+\end{equation}
+
+\begin{equation}
+\mathbf{E}_{13} = \left[\mathcal{L}(\mathbf{T}_{23}) + \mathbf{D}_{13}\mathcal{L}(\mathbf{R}_{23})\right]\mathbf{P}_{13}
+\label{eq:adding-downward-tangent_linear-particular_linearized_p_homogeneous_linearized-E13}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{13}) = \mathcal{L}(\mathbf{S}_{23})\mathcal{X}_{12} + \mathbf{E}_{13}\mathbf{C}_{13} + \mathbf{A}_{13}\left[\mathcal{L}(\mathbf{S}_{12}) + \mathbf{R}_{21}\mathcal{L}(\mathbf{S}_{32})\mathcal{X}_{12}\right]
+\label{eq:adding-downward-tangent_linear-particular_linearized_p_homogeneous_linearized-V13}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{R}_{31}) = \mathcal{L}(\mathbf{R}_{32}) + \mathbf{E}_{13}\mathbf{B}_{31} + \mathbf{D}_{13}\mathcal{L}(\mathbf{T}_{32})
+\label{eq:adding-downward-tangent_linear-particular_linearized_p_homogeneous_linearized-U31}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{T}_{13}) = \mathbf{E}_{13}\mathbf{T}_{12}
+\label{eq:adding-downward-tangent_linear-particular_linearized_p_homogeneous_linearized-W13}
+\end{equation}
+
+
+\paragraph{homogeneous linearized + particular linearized}
+\label{sec:adding-downward-tangent_linear-homogeneous_linearized_p_particular_linearized}
+
+\begin{equation}
+\mathbf{D}_{13} = \mathbf{A}_{13}\mathcal{L}(\mathbf{R}_{21})
+\label{eq:adding-downward-tangent_linear-homogeneous_linearized_p_particular_linearized-D13}
+\end{equation}
+
+\begin{equation}
+\mathbf{E}_{13} = \mathbf{D}_{13}\mathbf{R}_{23}\mathbf{P}_{13}
+\label{eq:adding-downward-tangent_linear-homogeneous_linearized_p_particular_linearized-E13}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{13}) = \mathcal{L}(\mathbf{S}_{23})\mathcal{X}_{12} + \mathbf{S}_{23}\mathcal{L}(\mathcal{X}_{12}) + \mathbf{E}_{13}\mathbf{C}_{13} + \mathbf{A}_{13}\left\{\mathcal{L}(\mathbf{S}_{12}) + \mathcal{L}(\mathbf{R}_{21})\mathbf{S}_{32}\mathcal{X}_{12} + \mathbf{R}_{21}\left[\mathcal{L}(\mathbf{S}_{32})\mathcal{X}_{12} + \mathbf{S}_{32}\mathcal{L}(\mathcal{X}_{12})\right]\right\}
+\label{eq:adding-downward-tangent_linear-homogeneous_linearized_p_particular_linearized-V13}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{R}_{31}) = \mathbf{E}_{13}\mathbf{B}_{31} + \mathbf{D}_{13}\mathbf{T}_{32}
+\label{eq:adding-downward-tangent_linear-homogeneous_linearized_p_particular_linearized-U31}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{T}_{13}) = \mathbf{E}_{13}\mathbf{T}_{12} + \mathbf{A}_{13}\mathcal{L}(\mathbf{T}_{12})
+\label{eq:adding-downward-tangent_linear-homogeneous_linearized_p_particular_linearized-W13}
+\end{equation}
+
+
+\paragraph{homogeneous linearized + homogeneous linearized}
+\label{sec:adding-downward-tangent_linear-homogeneous_linearized_p_homogeneous_linearized}
+
+\begin{equation}
+\mathbf{D}_{13} = \left[\mathcal{L}(\mathbf{T}_{23}) + \mathbf{A}_{13}(\mathcal{L}(\mathbf{R}_{21})\mathbf{R}_{23} + \mathbf{R}_{21}\mathcal{L}(\mathbf{R}_{23}))\right]\mathbf{P}_{13}
+\label{eq:adding-downward-tangent_linear-homogeneous_linearized_p_homogeneous_linearized-D13}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}_{13}) = \mathcal{L}(\mathbf{S}_{23})\mathcal{X}_{12} + \mathbf{S}_{23}\mathcal{L}(\mathcal{X}_{12}) + \mathbf{D}_{13}\mathbf{C}_{13} + \mathbf{A}_{13}\left[\mathcal{L}(\mathbf{S}_{12}) + \mathcal{L}(\mathbf{R}_{21})\mathbf{S}_{32}\mathcal{X}_{12} + \mathbf{R}_{21}(\mathcal{L}(\mathbf{S}_{32})\mathcal{X}_{12} + \mathbf{S}_{32}\mathcal{L}(\mathcal{X}_{12}))\right]
+\label{eq:adding-downward-tangent_linear-homogeneous_linearized_p_homogeneous_linearized-V13}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{R}_{31}) = \mathcal{L}(\mathbf{R}_{32}) + \mathbf{D}_{13}\mathbf{B}_{31} + \mathbf{A}_{13}(\mathcal{L}(\mathbf{R}_{21})\mathbf{T}_{32} + \mathbf{R}_{21}\mathcal{L}(\mathbf{T}_{32}))
+\label{eq:adding-downward-tangent_linear-homogeneous_linearized_p_homogeneous_linearized-U31}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{T}_{13}) = \mathbf{D}_{13}\mathbf{T}_{12} + \mathbf{A}_{13}\mathcal{L}(\mathbf{T}_{12})
+\label{eq:adding-downward-tangent_linear-homogeneous_linearized_p_homogeneous_linearized-W13}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:adding-downward-adjoint_of_tangent_linear}
+
+\paragraph{unlinearized + particular linearized}
+\label{sec:adding-downward-adjoint_of_tangent_linear-unlinearized_p_particular_linearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{23}) = \mathcal{A}(\mathbf{S}_{13})\mathcal{X}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-unlinearized_p_particular_linearized-S23_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{32}) = \mathbf{R}^{T}_{21}\mathbf{A}^{T}_{13}\mathcal{A}(\mathbf{S}_{13})\mathcal{X}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-unlinearized_p_particular_linearized-S32_a}
+\end{equation}
+
+
+\paragraph{particular linearized + unlinearized}
+\label{sec:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_unlinearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{12}) = \mathbf{A}^{T}_{13}\mathcal{A}(\mathbf{S}_{13})
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_unlinearized-S12_a}
+\end{equation}
+
+
+\paragraph{particular linearized + particular linearized}
+\label{sec:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_particular_linearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{23}) = \mathcal{A}(\mathbf{S}_{13})\mathcal{X}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_particular_linearized-S23_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathbf{A}^{T}_{13}\mathcal{A}(\mathbf{S}_{13})
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_particular_linearized-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{12}) = \mathbf{t}
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_particular_linearized-S12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{32}) = \mathbf{R}^{T}_{21}\mathcal{A}(\mathbf{S}_{13})\mathcal{X}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_particular_linearized-S32_a}
+\end{equation}
+
+
+\paragraph{unlinearized + homogeneous linearized}
+\label{sec:adding-downward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{13}) = \mathcal{A}(\mathbf{T}_{13})\mathbf{T}^{T}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-E13_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{32}) = \mathcal{A}(\mathbf{R}_{31})
+\label{eq:adding-downward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-U31_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{13}) = \mathcal{A}(\mathbf{E}_{13}) + \mathcal{A}(\mathbf{R}_{31})\mathbf{B}^{T}_{31}
+\label{eq:adding-downward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-E13_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{32}) = \mathbf{D}^{T}_{13}\mathcal{A}(\mathbf{R}_{31})
+\label{eq:adding-downward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-T32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{23}) = \mathcal{A}(\mathbf{S}_{13})\mathcal{X}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-S23_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{13}) = \mathcal{A}(\mathbf{E}_{13}) + \mathcal{A}(\mathbf{S}_{13})\mathbf{C}^{T}_{13}
+\label{eq:adding-downward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-E13_a3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{32}) = \mathbf{R}^{T}_{21}\mathbf{A}^{T}_{13}\mathcal{A}(\mathbf{S}_{13})t_{32}
+\label{eq:adding-downward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-S32_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathcal{A}(\mathbf{E}_{13})\mathbf{P}^{T}_{13}
+\label{eq:adding-downward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{23}) = \mathbf{t}
+\label{eq:adding-downward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-T23_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{23}) = \mathbf{D}^{T}_{13}\mathbf{t}
+\label{eq:adding-downward-adjoint_of_tangent_linear-unlinearized_p_homogeneous_linearized-R23_a}
+\end{equation}
+
+
+\paragraph{homogeneous linearized + unlinearized}
+\label{sec:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{13}) = \mathcal{A}(\mathbf{T}_{13})\mathbf{T}^{T}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-E13_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{12}) = \mathbf{A}^{T}_{13}\mathcal{A}(\mathbf{T}_{13})
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-W2_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{13}) = \mathcal{A}(\mathbf{E}_{13}) + \mathcal{A}(\mathbf{R}_{31})\mathbf{B}^{T}_{31}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-E13_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{D}_{13}) = \mathcal{A}(\mathbf{R}_{31})\mathbf{T}^{T}_{32}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-D13_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathcal{X}_{12}) = \mathbf{S}^{T}_{23}\mathcal{A}(\mathbf{S}_{13})
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-t12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{13}) = \mathcal{A}(\mathbf{E}_{13}) + \mathcal{A}(\mathbf{S}_{13})\mathbf{C}^{T}_{13}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-E13_a3}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathbf{A}^{T}_{13}\mathcal{A}(\mathbf{S}_{13})
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{12}) = \mathbf{t}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-S12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{12}) = \mathcal{A}(\mathbf{S}_{13})\mathbf{S}^{T}_{32}\mathcal{X}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-R12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathcal{X}_{12}) = \mathcal{A}(\mathcal{X}_{12}) + \mathbf{S}^{T}_{32}\mathbf{R}^{T}_{21}\mathcal{A}(\mathbf{S}_{13})
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-t12_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{D}_{13}) = \mathcal{A}(\mathbf{E}_{13})\mathbf{D}^{T}_{13}\mathbf{R}^{T}_{23}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-D13_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{21}) = \mathcal{A}(\mathbf{R}_{21}) + \mathbf{A}^{T}_{13}\mathcal{A}(\mathbf{D}_{13})
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_unlinearized-R21_a2}
+\end{equation}
+
+
+\paragraph{particular linearized + homogeneous linearized}
+\label{sec:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{13}) = \mathcal{A}(\mathbf{T}_{13})\mathbf{T}^{T}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-E13_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{32}) = \mathcal{A}(\mathbf{R}_{31})
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-R32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{13}) = \mathcal{A}(\mathbf{E}_{13}) + \mathcal{A}(\mathbf{R}_{31})\mathbf{B}^{T}_{31}
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-E13_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{32}) = \mathbf{D}^{T}_{13}\mathcal{A}(\mathbf{R}_{31})
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-T32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{23}) = \mathcal{A}(\mathbf{S}_{13})\mathcal{X}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-S23_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{13}) = \mathcal{A}(\mathbf{E}_{13}) + \mathcal{A}(\mathbf{S}_{13})\mathbf{C}^{T}_{13}
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-E31_a3}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathbf{A}^{T}_{13}\mathcal{A}(\mathbf{S}_{13})
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{12}) = \mathbf{t}
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-S12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{32}) = \mathbf{R}^{T}_{21}\mathcal{A}(\mathbf{S}_{13})\mathcal{X}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-S32_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathcal{A}(\mathbf{E}_{13})\mathbf{P}^{T}_{13}
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-t2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{23}) = \mathbf{t}
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-T23_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{23}) = \mathbf{D}^{T}_{13}\mathbf{t}
+\label{eq:adding-downward-adjoint_of_tangent_linear-particular_linearized_p_homogeneous_linearized-R23_a}
+\end{equation}
+
+
+\paragraph{homogeneous linearized + particular linearized}
+\label{sec:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{13}) = \mathcal{A}(\mathbf{T}_{13})\mathbf{T}^{T}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-E13_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{12}) = \mathbf{A}^{T}_{13}\mathcal{A}(\mathbf{T}_{13})
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-T12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{13}) = \mathcal{A}(\mathbf{E}_{13}) + \mathcal{A}(\mathbf{R}_{31})\mathbf{B}^{T}_{31}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-E13_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{D}_{13}) = \mathcal{A}(\mathbf{R}_{31})\mathbf{T}^{T}_{32}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-D13_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{23}) = \mathcal{A}(\mathbf{S}_{13})\mathcal{X}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-S23_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathcal{X}_{12}) = \mathbf{S}^{T}_{23}\mathcal{A}(\mathbf{S}_{13})
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-t12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{E}_{13}) = \mathcal{A}(\mathbf{E}_{13}) + \mathcal{A}(\mathbf{S}_{13})\mathbf{C}^{T}_{13}\
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-E13_a3}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathbf{A}^{T}_{13}\mathcal{A}(\mathbf{S}_{13})
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{12}) = \mathbf{t}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-S12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{21}) = \mathbf{t}\mathbf{S}^{T}_{32}\mathcal{X}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-R21_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{t}_{2} = \mathbf{R}^{T}_{21}\mathbf{t}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-t_2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{32}) = \mathbf{t}_{2}\mathcal{X}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-S32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathcal{X}_{12}) = \mathcal{A}(\mathcal{X}_{12}) + \mathbf{S}^{T}_{32}\mathbf{t}_{2}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-t12_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{D}_{13}) = \mathcal{A}(\mathbf{E}_{13})\mathbf{P}^{T}_{13}\mathbf{R}^{T}_{23}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-D13_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{21}) = \mathbf{A}^{T}_{31}\mathcal{A}(\mathbf{D}_{13})
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_particular_linearized-R21_a}
+\end{equation}
+
+
+\paragraph{homogeneous linearized + homogeneous linearized}
+\label{sec:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized}
+
+\begin{equation}
+\mathcal{A}(\mathbf{D}_{13}) = \mathcal{A}(\mathbf{T}_{13})\mathbf{T}^{T}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-D13_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{12}) = \mathbf{A}^{T}_{13}\mathcal{A}(\mathbf{T}_{13})
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-T12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{32}) = \mathcal{A}(\mathbf{R}_{31})
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-R32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{D}_{13}) = \mathcal{A}(\mathbf{D}_{13}) + \mathcal{A}(\mathbf{R}_{31})\mathbf{B}^{T}_{31}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-D13_a2}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathbf{A}^{T}_{13}\mathcal{A}(\mathbf{R}_{31})
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{21}) = \mathbf{t}\mathbf{T}^{T}_{32}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-R21_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{32}) = \mathbf{R}^{T}_{21}\mathbf{t}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-T32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{23}) = \mathcal{A}(\mathbf{S}_{13})\mathcal{X}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-S23_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathcal{X}_{12}) = \mathbf{S}^{T}_{23}\mathcal{A}(\mathbf{S}_{13})
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-t12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{D}_{13}) = \mathcal{A}(\mathbf{D}_{13}) + \mathcal{A}(\mathbf{S}_{13})\mathbf{C}^{T}_{13}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-D13_a3}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathbf{A}^{T}_{13}\mathcal{A}(\mathbf{S}_{13})
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-t2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{12}) = \mathbf{t}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-S12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{21}) = \mathcal{A}(\mathbf{R}_{21}) + \mathbf{t}\mathbf{S}^{T}_{32}\mathcal{X}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-R21_a2}
+\end{equation}
+
+\begin{equation}
+\mathbf{t}_{2} = \mathbf{R}^{T}_{21}\mathbf{t}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-t2_2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}_{32}) = \mathbf{t}_{2}\mathcal{X}_{12}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-S32_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathcal{X}_{12}) = \mathcal{A}(\mathcal{X}_{12}) + \mathbf{S}^{T}_{32}\mathbf{t}_{2}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-t12_a2}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathcal{A}(\mathbf{D}_{31})\mathbf{P}^{T}_{13}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-t3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}_{23}) = \mathbf{t}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-T23_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{t}_{2} = \mathbf{A}^{T}_{31}\mathbf{t}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-t3_2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{21}) = \mathcal{A}(\mathbf{R}_{21}) + \mathbf{t}_{2} \mathbf{R}^{T}_{23}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-R21_a3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}_{23}) = \mathbf{R}^{T}_{21}\mathbf{t}_{2}
+\label{eq:adding-downward-adjoint_of_tangent_linear-homogeneous_linearized_p_homogeneous_linearized-R23_a}
+\end{equation}

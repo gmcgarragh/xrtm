@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -54,7 +54,7 @@
 #undef TYPE
 #undef TYPE_PREFIX
 #undef TYPE_POSTFIX
-#undef WORK_XX	
+#undef WORK_XX
 #undef WORK_XXX
 #undef WORK_XLAYERS
 #undef XEXP
@@ -108,7 +108,7 @@
 #undef TYPE
 #undef TYPE_PREFIX
 #undef TYPE_POSTFIX
-#undef WORK_XX	
+#undef WORK_XX
 #undef WORK_XXX
 #undef WORK_XLAYERS
 #undef XEXP
@@ -144,16 +144,16 @@ int forward_save_rtm_eig_bvp_alloc(forward_save_rtm_eig_bvp_data *d, int n_layer
      d->tmr   = alloc_array3_d(n_layers, n_quad_v, n_quad_v);
      d->gamma = alloc_array3_d(n_layers, n_quad_v, n_quad_v);
 
-     d->F_p   = alloc_array2_d(n_layers, n_quad_v);
-     d->F_m   = alloc_array2_d(n_layers, n_quad_v);
-     d->F_p2  = alloc_array2_d(n_layers, n_quad_v);
-     d->F_m2  = alloc_array2_d(n_layers, n_quad_v);
+     d->Fs_p  = alloc_array2_d(n_layers, n_quad_v);
+     d->Fs_m  = alloc_array2_d(n_layers, n_quad_v);
+     d->Fs_p2 = alloc_array2_d(n_layers, n_quad_v);
+     d->Fs_m2 = alloc_array2_d(n_layers, n_quad_v);
 
      if (thermal) {
-          d->F0_p = alloc_array2_d(n_layers, n_quad_v);
-          d->F0_m = alloc_array2_d(n_layers, n_quad_v);
-          d->F1_p = alloc_array2_d(n_layers, n_quad_v);
-          d->F1_m = alloc_array2_d(n_layers, n_quad_v);
+          d->Ft0_p = alloc_array2_d(n_layers, n_quad_v);
+          d->Ft0_m = alloc_array2_d(n_layers, n_quad_v);
+          d->Ft1_p = alloc_array2_d(n_layers, n_quad_v);
+          d->Ft1_m = alloc_array2_d(n_layers, n_quad_v);
      }
 
      if (! vector) {
@@ -180,16 +180,16 @@ static void forward_save_rtm_eig_bvp_free(forward_save_rtm_eig_bvp_data *d, int 
      free_array3_d(d->tmr);
      free_array3_d(d->gamma);
 
-     free_array2_d(d->F_p);
-     free_array2_d(d->F_m);
-     free_array2_d(d->F_p2);
-     free_array2_d(d->F_m2);
+     free_array2_d(d->Fs_p);
+     free_array2_d(d->Fs_m);
+     free_array2_d(d->Fs_p2);
+     free_array2_d(d->Fs_m2);
 
      if (d->thermal) {
-          free_array2_d(d->F0_p);
-          free_array2_d(d->F0_m);
-          free_array2_d(d->F1_p);
-          free_array2_d(d->F1_m);
+          free_array2_d(d->Ft0_p);
+          free_array2_d(d->Ft0_m);
+          free_array2_d(d->Ft1_p);
+          free_array2_d(d->Ft1_m);
      }
 
      if (! d->vector) {
@@ -230,7 +230,7 @@ void rtm_eig_bvp_a(int i_four, int n_quad, int n_stokes, int n_layers,
        double **I_p, double **I_m, double **I_p_a, double **I_m_a,
        int sfi, int surface, int thermal, int upwelling,
        int downwelling, int utau_output, int vector,
-       uchar *derivs_h, uchar *derivs_p, save_tree_data save_tree, work_data work) {
+       uchar *derivs_layers, uchar *derivs_beam, save_tree_data save_tree, work_data work) {
 
      int i;
 
@@ -245,10 +245,10 @@ void rtm_eig_bvp_a(int i_four, int n_quad, int n_stokes, int n_layers,
      double **tpr_a;
      double **gamma_a;
 
-     double **F_p_a;
-     double **F_m_a;
-     double  *F_p_a2;
-     double  *F_m_a2;
+     double **Fs_p_a;
+     double **Fs_m_a;
+     double  *Fs_p_a2;
+     double  *Fs_m_a2;
 
      double *B_a;
 
@@ -292,10 +292,10 @@ void rtm_eig_bvp_a(int i_four, int n_quad, int n_stokes, int n_layers,
      tpr_a   = get_work1(&work, WORK_DXX);
      gamma_a = get_work1(&work, WORK_DXX);
 
-     F_p_a   = get_work2(&work, WORK_DX, WORK_LAYERS_V, NULL);
-     F_m_a   = get_work2(&work, WORK_DX, WORK_LAYERS_V, NULL);
-     F_p_a2  = get_work1(&work, WORK_DX);
-     F_m_a2  = get_work1(&work, WORK_DX);
+     Fs_p_a   = get_work2(&work, WORK_DX, WORK_LAYERS_V, NULL);
+     Fs_m_a   = get_work2(&work, WORK_DX, WORK_LAYERS_V, NULL);
+     Fs_p_a2  = get_work1(&work, WORK_DX);
+     Fs_m_a2  = get_work1(&work, WORK_DX);
 
      if (! vector) {
           B_a   = get_work_d1(&work, n_comp);
@@ -319,8 +319,8 @@ void rtm_eig_bvp_a(int i_four, int n_quad, int n_stokes, int n_layers,
       *
       *-----------------------------------------------------------------------*/
      for (i = 0; i < n_layers; ++i) {
-          dvec_zero(F_p_a [i], n_quad_v_x);
-          dvec_zero(F_m_a [i], n_quad_v_x);
+          dvec_zero(Fs_p_a [i], n_quad_v_x);
+          dvec_zero(Fs_m_a [i], n_quad_v_x);
 
           if (! vector) {
                dvec_zero(nu_a[i], n_quad_v_x);
@@ -354,19 +354,19 @@ void rtm_eig_bvp_a(int i_four, int n_quad, int n_stokes, int n_layers,
       *-----------------------------------------------------------------------*/
      if (! vector) {
           if (! utau_output)
-               calc_radiance_levels_a(n_quad_v_x, n_layers, n_ulevels, ulevels, ltau, ltau_a, atran, atran_a, save->nu, save->X_p, save->X_m, save->F_p2, save->F_m2, save->F0_p, save->F0_m, save->F1_p, save->F1_m, nu_a, X_p_a, X_m_a, F_p_a, F_m_a, NULL, NULL, NULL, NULL, save->B, B_a, I_p, I_m, I_p_a, I_m_a, derivs_h, derivs_p, thermal, save_tree, work);
+               calc_radiance_levels_a(n_quad_v_x, n_layers, n_ulevels, ulevels, ltau, ltau_a, atran, atran_a, save->nu, save->X_p, save->X_m, save->Fs_p2, save->Fs_m2, save->Ft0_p, save->Ft0_m, save->Ft1_p, save->Ft1_m, nu_a, X_p_a, X_m_a, Fs_p_a, Fs_m_a, NULL, NULL, NULL, NULL, save->B, B_a, I_p, I_m, I_p_a, I_m_a, derivs_layers, derivs_beam, thermal, save_tree, work);
           else
-               calc_radiance_taus_a  (n_quad_v_x, n_layers, n_ulevels, ulevels, utaus, ltau, ltau_a, as_0, as_0_a, atran, atran_a, save->nu, save->X_p, save->X_m, save->F_p2, save->F_m2, nu_a, X_p_a, X_m_a, F_p_a, F_m_a, save->B, B_a, I_p, I_m, I_p_a, I_m_a, derivs_h, derivs_p, save_tree, work);
+               calc_radiance_taus_a  (n_quad_v_x, n_layers, n_ulevels, ulevels, utaus, ltau, ltau_a, as_0, as_0_a, atran, atran_a, save->nu, save->X_p, save->X_m, save->Fs_p2, save->Fs_m2, nu_a, X_p_a, X_m_a, Fs_p_a, Fs_m_a, save->B, B_a, I_p, I_m, I_p_a, I_m_a, derivs_layers, derivs_beam, save_tree, work);
 
-          solve_bvp_a(n_quad_x, n_stokes, n_layers, ltau, ltau_a, Rs_qq, Rs_qq_a, atran, atran_a, save->nu, save->X_p, save->X_m, save->F_p2, save->F_m2, save->F0_p, save->F0_m, save->F1_p, save->F1_m, nu_a, X_p_a, X_m_a, F_p_a, F_m_a, NULL, NULL, NULL, NULL, save->B, B_a, I1_m, I1_m_a, In_p, In_p_a, surface, thermal, derivs_h, derivs_p, save_tree, work);
+          solve_bvp_a(n_quad_x, n_stokes, n_layers, ltau, ltau_a, Rs_qq, Rs_qq_a, atran, atran_a, save->nu, save->X_p, save->X_m, save->Fs_p2, save->Fs_m2, save->Ft0_p, save->Ft0_m, save->Ft1_p, save->Ft1_m, nu_a, X_p_a, X_m_a, Fs_p_a, Fs_m_a, NULL, NULL, NULL, NULL, save->B, B_a, I1_m, I1_m_a, In_p, In_p_a, surface, thermal, derivs_layers, derivs_beam, save_tree, work);
      }
      else {
           if (! utau_output)
-               calc_radiance_levels_a2(n_quad_v_x, n_layers, n_ulevels, ulevels, ltau, ltau_a, atran, atran_a, save->nu_c, save->X_p_c, save->X_m_c, save->F_p2, save->F_m2, save->F0_p, save->F0_m, save->F1_p, save->F1_m, nu_a_c, X_p_a_c, X_m_a_c, F_p_a, F_m_a, NULL, NULL, NULL, NULL, save->B_c, B_a_c, I_p, I_m, I_p_a, I_m_a, derivs_h, derivs_p, thermal, save_tree, work);
+               calc_radiance_levels_a2(n_quad_v_x, n_layers, n_ulevels, ulevels, ltau, ltau_a, atran, atran_a, save->nu_c, save->X_p_c, save->X_m_c, save->Fs_p2, save->Fs_m2, save->Ft0_p, save->Ft0_m, save->Ft1_p, save->Ft1_m, nu_a_c, X_p_a_c, X_m_a_c, Fs_p_a, Fs_m_a, NULL, NULL, NULL, NULL, save->B_c, B_a_c, I_p, I_m, I_p_a, I_m_a, derivs_layers, derivs_beam, thermal, save_tree, work);
           else
-               calc_radiance_taus_a2  (n_quad_v_x, n_layers, n_ulevels, ulevels, utaus, ltau, ltau_a, as_0, as_0_a, atran, atran_a, save->nu_c, save->X_p_c, save->X_m_c, save->F_p2, save->F_m2, nu_a_c, X_p_a_c, X_m_a_c, F_p_a, F_m_a, save->B_c, B_a_c, I_p, I_m, I_p_a, I_m_a, derivs_h, derivs_p, save_tree, work);
+               calc_radiance_taus_a2  (n_quad_v_x, n_layers, n_ulevels, ulevels, utaus, ltau, ltau_a, as_0, as_0_a, atran, atran_a, save->nu_c, save->X_p_c, save->X_m_c, save->Fs_p2, save->Fs_m2, nu_a_c, X_p_a_c, X_m_a_c, Fs_p_a, Fs_m_a, save->B_c, B_a_c, I_p, I_m, I_p_a, I_m_a, derivs_layers, derivs_beam, save_tree, work);
 
-          solve_bvp_a2(n_quad_x, n_stokes, n_layers, ltau, ltau_a, Rs_qq, Rs_qq_a, atran, atran_a, save->nu_c, save->X_p_c, save->X_m_c, save->F_p2, save->F_m2, save->F0_p, save->F0_m, save->F1_p, save->F1_m, nu_a_c, X_p_a_c, X_m_a_c, F_p_a, F_m_a, NULL, NULL, NULL, NULL, save->B_c, B_a_c, I1_m, I1_m_a, In_p, In_p_a, surface, thermal, derivs_h, derivs_p, save_tree, work);
+          solve_bvp_a2(n_quad_x, n_stokes, n_layers, ltau, ltau_a, Rs_qq, Rs_qq_a, atran, atran_a, save->nu_c, save->X_p_c, save->X_m_c, save->Fs_p2, save->Fs_m2, save->Ft0_p, save->Ft0_m, save->Ft1_p, save->Ft1_m, nu_a_c, X_p_a_c, X_m_a_c, Fs_p_a, Fs_m_a, NULL, NULL, NULL, NULL, save->B_c, B_a_c, I1_m, I1_m_a, In_p, In_p_a, surface, thermal, derivs_layers, derivs_beam, save_tree, work);
      }
 
 
@@ -378,25 +378,25 @@ void rtm_eig_bvp_a(int i_four, int n_quad, int n_stokes, int n_layers,
 
           save_tree_recode_i(&save_tree, i, i == 0);
 
-if (derivs_p[i]) {
-          dvec_zero(F_p_a2, n_quad_v_x);
-          dvec_zero(F_m_a2, n_quad_v_x);
-          scale_source_vectors_a(n_quad_v_x, btran[i], &btran_a[i], save->F_p[i], save->F_m[i], NULL, NULL, F_p_a2, F_m_a2, F_p_a[i], F_m_a[i], work2);
-          dvec_copy(F_p_a[i], F_p_a2, n_quad_v_x);
-          dvec_copy(F_m_a[i], F_m_a2, n_quad_v_x);
+if (derivs_beam[i]) {
+          dvec_zero(Fs_p_a2, n_quad_v_x);
+          dvec_zero(Fs_m_a2, n_quad_v_x);
+          scale_source_vectors_a(n_quad_v_x, btran[i], &btran_a[i], save->Fs_p[i], save->Fs_m[i], NULL, NULL, Fs_p_a2, Fs_m_a2, Fs_p_a[i], Fs_m_a[i], work2);
+          dvec_copy(Fs_p_a[i], Fs_p_a2, n_quad_v_x);
+          dvec_copy(Fs_m_a[i], Fs_m_a2, n_quad_v_x);
 }
-if (derivs_h[i]) {
+if (derivs_layers[i]) {
           dmat_zero(tmr_a, n_quad_v_x, n_quad_v_x);
           dmat_zero(tpr_a, n_quad_v_x, n_quad_v_x);
           dmat_zero(gamma_a, n_quad_v_x, n_quad_v_x);
 }
-if (derivs_p[i]) {
+if (derivs_beam[i]) {
           if (vector)
-               dm_v_mul_D_A(n_quad_x, n_stokes, F_m_a[i], F_m_a[i]);
+               dm_v_mul_D_A(n_quad_x, n_stokes, Fs_m_a[i], Fs_m_a[i]);
 
-          build_source_vectors_1n_a(n_quad_x, n_stokes, qx_v, F_0, omega[i], &omega_a[i], as_0[i], &as_0_a[i], P_q0_mm[i], P_q0_pm[i], save->tpr[i], save->tmr[i], save->gamma[i], NULL, NULL, P_q0_mm_a[i], P_q0_pm_a[i], tpr_a, tmr_a, gamma_a, F_p_a[i], F_m_a[i], save_tree, work2);
+          build_source_vectors_1n_a(n_quad_x, n_stokes, qx_v, F_0, omega[i], &omega_a[i], as_0[i], &as_0_a[i], P_q0_mm[i], P_q0_pm[i], save->tpr[i], save->tmr[i], save->gamma[i], NULL, NULL, P_q0_mm_a[i], P_q0_pm_a[i], tpr_a, tmr_a, gamma_a, Fs_p_a[i], Fs_m_a[i], save_tree, work2);
 }
-if (derivs_h[i]) {
+if (derivs_layers[i]) {
           /*--------------------------------------------------------------------
            *
            *------------------------------------------------------------------*/

@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -8,8 +8,7 @@
 *******************************************************************************/
 
 #include <gutil.h>
-
-#include <rtutil_support.h>
+#include <gindex_name_value.h>
 
 #include "xrtm_support.h"
 
@@ -17,45 +16,26 @@
 /*******************************************************************************
  *
  ******************************************************************************/
-static const char *kernel_names[] = {
-     "lambertian",
-     "roujean",
-     "li_sparse",
-     "li_dense",
-     "ross_thin",
-     "ross_thick",
-     "hapke",
-     "rahman",
-     "cox_munk",
-};
-
-int kernel_code(char *name) {
-     return name_to_code(name, kernel_names,
-                         N_XRTM_KERNEL_TYPES, "kernel type");
-}
-
-const char *kernel_name(enum xrtm_kernel_type code) {
-     return code_to_name(code, kernel_names,
-                         N_XRTM_KERNEL_TYPES, "kernel type");
-}
-
-
-
 static const char *eigen_solver_gen_real_names[] = {
      "asymtx",
      "eispack",
      "lapack"
 };
 
-int eigen_solver_gen_real_code(char *name) {
-     return name_to_code(name, eigen_solver_gen_real_names,
-          N_EIGEN_SOLVER_GEN_REAL_TYPES, "general real eigen solver types");
-}
+static long eigen_solver_gen_real_types[] = {
+#ifdef HAVE_FORTRAN_COMPILER
+     EIGEN_SOLVER_GEN_REAL_ASYMTX,
+#endif
+#ifdef HAVE_EISPACK_LIBRARY
+     EIGEN_SOLVER_GEN_REAL_EISPACK,
+#endif
+     EIGEN_SOLVER_GEN_REAL_LAPACK,
 
-const char *eigen_solver_gen_real_name(enum eigen_solver_gen_real_type code) {
-     return code_to_name(code, eigen_solver_gen_real_names,
-          N_EIGEN_SOLVER_GEN_REAL_TYPES, "general real eigen solver types");
-}
+     N_EIGEN_SOLVER_GEN_REAL_TYPES
+};
+
+
+GINDEX_NAME_VALUE_TEMPLATE(eigen_solver_gen_real, "eigen solver general real", N_EIGEN_SOLVER_GEN_REAL_TYPES)
 
 
 
@@ -64,15 +44,18 @@ static const char *eigen_solver_gen_complex_names[] = {
      "lapack"
 };
 
-int eigen_solver_gen_complex_code(char *name) {
-     return name_to_code(name, eigen_solver_gen_complex_names,
-          N_EIGEN_SOLVER_GEN_COMPLEX_TYPES, "general complex eigen solver types");
-}
+static long eigen_solver_gen_complex_types[] = {
+#ifdef HAVE_EISPACK_LIBRARY
+     EIGEN_SOLVER_GEN_COMPLEX_EISPACK,
+#endif
+     EIGEN_SOLVER_GEN_COMPLEX_LAPACK,
 
-const char *eigen_solver_gen_complex_name(enum eigen_solver_gen_complex_type code) {
-     return code_to_name(code, eigen_solver_gen_complex_names,
-          N_EIGEN_SOLVER_GEN_COMPLEX_TYPES, "general complex eigen solver types");
-}
+     N_EIGEN_SOLVER_GEN_COMPLEX_TYPES
+};
+
+
+GINDEX_NAME_VALUE_TEMPLATE(eigen_solver_gen_complex, "eigen solver general complex", N_EIGEN_SOLVER_GEN_COMPLEX_TYPES)
+
 
 
 
@@ -84,7 +67,7 @@ void *jalloc_array1(jmp_buf env, long m, int size) {
      void *x;
 
      if (! (x = alloc_array1(m, size))) {
-          eprintf("ERROR: alloc_array1_d(%ld)\n", m);
+          fprintf(stderr, "ERROR: alloc_array1_d(%ld)\n", m);
           longjmp(env, -1);
      }
 
@@ -98,7 +81,7 @@ void *jalloc_array2(jmp_buf env, long m, long n, int size) {
      void *x;
 
      if (! (x = alloc_array2(m, n, size))) {
-          eprintf("ERROR: alloc_array2_d(%ld, %ld)\n", m, n);
+          fprintf(stderr, "ERROR: alloc_array2_d(%ld, %ld)\n", m, n);
           longjmp(env, -1);
      }
 
@@ -112,7 +95,7 @@ void *jalloc_array3(jmp_buf env, long m, long n, long o, int size) {
      void *x;
 
      if (! (x = alloc_array3(m, n, o, size))) {
-          eprintf("ERROR: alloc_array3_d(%ld, %ld, %ld)\n", m, n, o);
+          fprintf(stderr, "ERROR: alloc_array3_d(%ld, %ld, %ld)\n", m, n, o);
           longjmp(env, -1);
      }
 
@@ -126,7 +109,7 @@ void *jalloc_array4(jmp_buf env, long m, long n, long o, long p, int size) {
      void *x;
 
      if (! (x = alloc_array4(m, n, o, p, size))) {
-          eprintf("ERROR: alloc_array4_d(%ld, %ld, %ld, %ld)\n", m, n, o, p);
+          fprintf(stderr, "ERROR: alloc_array4_d(%ld, %ld, %ld, %ld)\n", m, n, o, p);
           longjmp(env, -1);
      }
 
@@ -140,7 +123,7 @@ void *jalloc_array5(jmp_buf env, long m, long n, long o, long p, long q, int siz
      void *x;
 
      if (! (x = alloc_array5(m, n, o, p, q, size))) {
-          eprintf("ERROR: alloc_array5_d(%ld, %ld, %ld, %ld, %d)\n", m, n, o, p, q);
+          fprintf(stderr, "ERROR: alloc_array5_d(%ld, %ld, %ld, %ld, %ld)\n", m, n, o, p, q);
           longjmp(env, -1);
      }
 
@@ -159,7 +142,7 @@ int xrtm_set_layer_x(xrtm_data *d, double *x, double *x_, int i_layer, int n_lay
      for (i = i_layer; i < n_layers; ++i) {
           x[i] = x_[i - i_layer];
 
-          if (d->initial_inputs)
+          if (d->inputs_initialized)
                set_flags[i] = 1;
      }
 
@@ -194,7 +177,7 @@ int xrtm_set_layer_x_l(xrtm_data *d, double **x, void *x_, int i_layer, int n_la
                          break;
                     default:
 #ifdef DEBUG
-                         eprintf("ERROR: xrtm_set_layer_x_l(): end of switch\n");
+                         fprintf(stderr, "ERROR: xrtm_set_layer_x_l(): end of switch\n");
                          exit(1);
 #endif
                          break;

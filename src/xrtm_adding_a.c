@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -20,7 +20,7 @@
 
 
 /*******************************************************************************
- * 
+ *
  ******************************************************************************/
 static void add_ref_u_p_a(double **AXX, double **R23, double *S32_a, double *S31_a, int n, double atran, double *v1, double *v2, double **w1) {
 
@@ -268,7 +268,7 @@ static void add_ref_l_l_a(double **PXX, int *i1, double **AXX, double **BXX, dou
      dvec_scale(atran, v1, v2, n);
      dvec_add(S32_a, v2, S32_a, n);
 
-     *atran_a += dvec_dot(S32, v1, n);     
+     *atran_a += dvec_dot(S32, v1, n);
 
      dmat_vxvtmx(v1, S12, 1., R23_a, 1., n, n);
 /*
@@ -407,35 +407,35 @@ void layer_add_ref_a(double **R12, double **T12, double *S12,
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     if ((! flag && derivs == ADDING_U_P) || (flag && derivs == ADDING_P_U))
+     if ((! flag && derivs == ADDING_U_S) || (flag && derivs == ADDING_S_U))
           add_ref_u_p_a(AXX, R23, S32_a, S31_a, n, atran, v1, v2, w1);
      else
-     if ((! flag && derivs == ADDING_P_U) || (flag && derivs == ADDING_U_P))
+     if ((! flag && derivs == ADDING_S_U) || (flag && derivs == ADDING_U_S))
           add_ref_p_u_a(AXX, R23, S12_a, S21_a, S31_a, n, atran, v1, v2);
      else
-     if (derivs == ADDING_P_P)
+     if (derivs == ADDING_S_S)
           add_ref_p_p_a(AXX, R23, S12_a, S21_a, S32_a, S31_a, n, atran, v1, v2, w1);
      else
-     if ((! flag && derivs == ADDING_U_L) || (flag && derivs == ADDING_L_U))
+     if ((! flag && derivs == ADDING_U_B) || (flag && derivs == ADDING_B_U))
           add_ref_u_l_a(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, R23_a, S32_a, R13_a, S31_a, n, atran, v1, v2, w1, w2, work);
      else
-     if ((! flag && derivs == ADDING_L_U) || (flag && derivs == ADDING_U_L))
+     if ((! flag && derivs == ADDING_B_U) || (flag && derivs == ADDING_U_B))
           add_ref_l_u_a(PXX, i1, AXX, BXX, CXX, R23, S32, R12_a, T12_a, S12_a, R21_a, T21_a, S21_a, R13_a, S31_a, n, atran, atran_a, v1, v2, w1, w2, work);
      else
-     if ((! flag && derivs == ADDING_P_L) || (flag && derivs == ADDING_L_P))
+     if ((! flag && derivs == ADDING_S_B) || (flag && derivs == ADDING_B_S))
           add_ref_p_l_a(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, S12_a, S21_a, R23_a, S32_a, R13_a, S31_a, n, atran, v1, v2, w1, w2, work);
      else
-     if ((! flag && derivs == ADDING_L_P) || (flag && derivs == ADDING_P_L))
+     if ((! flag && derivs == ADDING_B_S) || (flag && derivs == ADDING_S_B))
           add_ref_l_p_a(PXX, i1, AXX, BXX, CXX, DXX, R23, S32, R12_a, T12_a, S12_a, R21_a, T21_a, S21_a, S32_a, R13_a, S31_a, n, atran, atran_a, v1, v2, w1, w2, work);
      else
-     if (derivs == ADDING_L_L)
+     if (derivs == ADDING_B_B)
           add_ref_l_l_a(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, S32, R12_a, T12_a, S12_a, R21_a, T21_a, S21_a, R23_a, S32_a, R13_a, S31_a, n, atran, atran_a, v1, v2, w1, w2, work);
 }
 
 
 
 /*******************************************************************************
- * 
+ *
  ******************************************************************************/
 /*
 static void add_all_u_p_up_a(double **AXX, double **R23, double *S23_a, double *S32_a, double *S31_a, int n, double atran, double *v1, double *v2, double **w1) {
@@ -584,7 +584,7 @@ static void add_all_l_u_up_a(double **PXX, int *i1, double **AXX, double **BXX, 
 */
      dmat_gxvxmx(1, AXX, S31_a, 1., v1, 0., n, n);
 
-     *atran_a += dvec_dot(S32, v1, n);     
+     *atran_a += dvec_dot(S32, v1, n);
 /*
      dmat_trans(R23, w1, n, n);
      dm_v_mul(w1, v1, n, n, v2);
@@ -813,7 +813,7 @@ static void add_all_l_l_up_a(double **PXX, int *i1, double **AXX, double **BXX, 
 
      dmat_gxvxmx(1, AXX, S31_a, 1., v1, 0., n, n);
 
-     *atran_a += dvec_dot(S32, v1, n);     
+     *atran_a += dvec_dot(S32, v1, n);
 
      dmat_vxvtmx(v1, S12, 1., R23_a, 1., n, n);
 /*
@@ -969,21 +969,21 @@ void layer_add_all_a(double **R12, double **T12, double *S12,
       *
       *-----------------------------------------------------------------------*/
 /*
-     if (derivs == ADDING_U_P)
+     if (derivs == ADDING_U_S)
           add_all_u_p_up_a(AXX, R23, S23_a, S32_a, S31_a, n, atran, v1, v2, w1);
      else
-     if (derivs == ADDING_P_P)
+     if (derivs == ADDING_S_S)
           add_all_p_p_up_a(AXX, R23, S12_a, S21_a, S23_a, S32_a, S31_a, n, atran, v1, v2, w1);
      else
 */
-     if (derivs == ADDING_U_L)
+     if (derivs == ADDING_U_B)
           add_all_u_l_up_a(PXX, i1, AXX, BXX, CXX, T12, S12, R21, T32, R23_a, T32_a, S32_a, R13_a, T31_a, S31_a, n, atran, v1, v2, w1, w2, work);
      else
-     if (derivs == ADDING_L_P)
+     if (derivs == ADDING_B_S)
           add_all_l_p_up_a(PXX, i1, AXX, BXX, CXX, DXX, R23, T32, S32, R12_a, T12_a, S12_a, R21_a, T21_a, S21_a, S32_a, R13_a, T31_a, S31_a, n, atran, atran_a, v1, v2, w1, w2, work);
      else
 /*
-     if (derivs == ADDING_L_L)
+     if (derivs == ADDING_B_B)
 */
           add_all_l_l_up_a(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, T32, S32, R12_a, T12_a, S12_a, R21_a, T21_a, S21_a, R23_a, T32_a, S32_a, R13_a, T31_a, S31_a, n, atran, atran_a, v1, v2, w1, w2, work);
 
@@ -1006,21 +1006,21 @@ void layer_add_all_a(double **R12, double **T12, double *S12,
       *
       *-----------------------------------------------------------------------*/
 /*
-     if (derivs == ADDING_U_P)
+     if (derivs == ADDING_U_S)
           add_all_p_u_up_a(AXX, R21, S32_a, S23_a, S13_a, n, atran, v1, v2);
      else
-     if (derivs == ADDING_P_P)
+     if (derivs == ADDING_S_S)
           add_all_p_p_up_a(AXX, R21, S32_a, S23_a, S21_a, S12_a, S13_a, n, atran, v1, v2, w1);
      else
 */
-     if (derivs == ADDING_U_L)
+     if (derivs == ADDING_U_B)
           add_all_l_u_up_a(PXX, i1, AXX, BXX, CXX, DXX, R21, T12, S12, R32_a, T32_a, S32_a, R23_a, T23_a, S23_a, R31_a, T13_a, S13_a, n, atran, atran_a, v1, v2, w1, w2, work);
      else
-     if (derivs == ADDING_L_P)
+     if (derivs == ADDING_B_S)
           add_all_p_l_up_a(PXX, i1, AXX, BXX, CXX, T32, S32, R23, R21, T12, S32_a, S23_a, R21_a, T12_a, S12_a, R31_a, T13_a, S13_a, n, atran, v1, v2, w1, w2, work);
      else
 /*
-     if (derivs == ADDING_L_L)
+     if (derivs == ADDING_B_B)
 */
           add_all_l_l_up_a(PXX, i1, AXX, BXX, CXX, T32, S32, R23, R21, T12, S12, R32_a, T32_a, S32_a, R23_a, T23_a, S23_a, R21_a, T12_a, S12_a, R31_a, T13_a, S13_a, n, atran, atran_a, v1, v2, w1, w2, work);
 }

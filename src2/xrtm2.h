@@ -1,0 +1,42 @@
+/*******************************************************************************
+**
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
+**
+**    This source code is licensed under the GNU General Public License (GPL),
+**    Version 3.  See the file COPYING for more details.
+**
+*******************************************************************************/
+
+/*
+#define USE_AD_FOR_TL_CALC_UPDATE_OPT_PROPS
+#define USE_AD_FOR_TL_CALC_BUILD_PHASE_MATS_SCALAR
+#define USE_AD_FOR_TL_CALC_BUILD_PHASE_VECS_VECTOR_GC
+#define USE_AD_FOR_TL_CALC_BUILD_PHASE_MATS_VECTOR_GC
+#define USE_AD_FOR_TL_CALC_BUILD_LOCAL_R_AND_T
+#define USE_AD_FOR_TL_CALC_BUILD_TXR
+#define USE_AD_FOR_TL_CALC_BUILD_GAMMA
+#define USE_AD_FOR_TL_CALC_EIG_1N_GEN_REAL
+#define USE_AD_FOR_TL_CALC_EIG_1N_GEN_COMPLEX
+#define USE_AD_FOR_TL_CALC_EIG_1N_TO_2N_REAL
+#define USE_AD_FOR_TL_CALC_EIG_1N_TO_2N_COMPLEX
+#define USE_AD_FOR_TL_CALC_SOLVE_BVP
+#define USE_AD_FOR_TL_CALC_RTM_EIG_BVP
+#define USE_AD_FOR_TL_CALC_CALC_GLOBAL_R_AND_T
+#define USE_AD_FOR_TL_CALC_BUILD_SOURCE_VECTORS_1N
+#define USE_AD_FOR_TL_CALC_BUILD_GLOBAL_SOURCE
+#define USE_AD_FOR_TL_CALC_RTM_EIG_RTS
+#define USE_AD_FOR_TL_LAYER_ADD_ALL
+#define USE_AD_FOR_TL_SSR_UP_LAYER
+#define USE_AD_FOR_TL_SINGLE_SCATTERED_RADIANCE_UP
+#define USE_AD_FOR_TL_SSR_DN_LAYER
+#define USE_AD_FOR_TL_SINGLE_SCATTERED_RADIANCE_DN
+#define USE_AD_FOR_TL_CALC_RADIANCE_SLAB
+#define USE_AD_FOR_TL_CALC_GET_LOCAL_R_T_U_W
+#define USE_AD_FOR_TL_CALC_GET_LAYER_R_T_S_U_W_V
+#define USE_AD_FOR_TL_CALC_GET_TOTAL_TOA_R_S_U_V
+#define USE_AD_FOR_TL_CALC_GET_TOTAL_R_T_S_U_W_V
+#define USE_AD_FOR_TL_CALC_GET_DIFF_BOUND_INPUT
+#define USE_AD_FOR_TL_CALC_GET_SINGLE
+#define USE_AD_FOR_TL_CALC_FOURIER_GET_ADD_BOTH_WAYS_A
+#define USE_AD_FOR_TL_CALC_GET_SOLUTION_INTERNAL
+*/

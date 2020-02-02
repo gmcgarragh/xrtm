@@ -1,0 +1,5 @@
+enumeration method_type,
+     METHOD_FORWARD            = 0,
+     METHOD_BACKWARD           = 1,
+     METHOD_CENTRAL            = 2;
+

@@ -1,13 +1,22 @@
 include ../make.inc
+include ../common.inc
 
-F90FLAGS += -fno-underscoring
+SUBDIRS =
 
-BINARIES = example_c example_cpp example_f77 example_f90
+OBJECTS =
+
+BINARIES = example_c example_brdf_c example_cpp example_f77 example_f90
+
+PRODUCTS =
 
 all: $(BINARIES)
 
 example_c: example_c.o ../src/libxrtm.a ../misc/libxrtm_misc.a
 	$(CFMIX_LD) $(CFMIX_LDFLAGS) -o example_c example_c.o ../src/libxrtm.a ../misc/libxrtm_misc.a \
+        $(LIBDIRS) $(INCDIRS) $(LINKS) $(CFMIX_LDLINKS)
+
+example_brdf_c: example_brdf_c.o ../src/libxrtm.a ../misc/libxrtm_misc.a
+	$(CFMIX_LD) $(CFMIX_LDFLAGS) -o example_brdf_c example_brdf_c.o ../src/libxrtm.a ../misc/libxrtm_misc.a \
         $(LIBDIRS) $(INCDIRS) $(LINKS) $(CFMIX_LDLINKS)
 
 example_cpp: example_cpp.o ../interfaces/libxrtm_interfaces.a ../src/libxrtm.a ../misc/libxrtm_misc.a
@@ -23,4 +32,4 @@ example_f90: example_f90.o ../interfaces/libxrtm_interfaces.a ../src/libxrtm.a .
         $(LIBDIRS) $(INCDIRS) $(LINKS) $(CFMIX_LDLINKS)
 
 
-include dep.inc
+include depend.inc

@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -44,43 +44,75 @@ extern "C" {
 #endif
 
 
-#define XRTM_SOLVERS_INTERNAL   (XRTM_SOLVER_DOUB_ADD | XRTM_SOLVER_EIG_ADD | \
-                                 XRTM_SOLVER_EIG_BVP | XRTM_SOLVER_MEM_BVP | \
-                                 XRTM_SOLVER_PADE_ADD | XRTM_SOLVER_SINGLE | \
-                                 XRTM_SOLVER_SOS | XRTM_SOLVER_TWO_OS)
+#define XRTM_SOLVERS_INTERNAL   (XRTM_SOLVER_DOUB_ADD | \
+                                 XRTM_SOLVER_EIG_ADD | \
+                                 XRTM_SOLVER_EIG_BVP | \
+                                 XRTM_SOLVER_FOUR_STREAM | \
+                                 XRTM_SOLVER_MEM_BVP | \
+                                 XRTM_SOLVER_PADE_ADD | \
+                                 XRTM_SOLVER_SINGLE | \
+                                 XRTM_SOLVER_SIX_STREAM | \
+                                 XRTM_SOLVER_SOS | \
+                                 XRTM_SOLVER_TWO_OS | \
+                                 XRTM_SOLVER_TWO_STREAM)
 
-#define XRTM_SOLVERS_ALL        (XRTM_SOLVERS_INTERNAL | XRTM_SOLVERS_EXT_EXTERNAL)
+#define XRTM_SOLVERS_ALL        (XRTM_SOLVERS_INTERNAL | \
+                                 XRTM_SOLVERS_EXT_EXTERNAL)
 
-#define XRTM_SOLVERS_VECTOR     (XRTM_SOLVER_DOUB_ADD | XRTM_SOLVER_EIG_ADD | \
-                                 XRTM_SOLVER_EIG_BVP | XRTM_SOLVER_MEM_BVP | \
-                                 XRTM_SOLVER_PADE_ADD | XRTM_SOLVER_SINGLE | \
-                                 XRTM_SOLVER_SOS | XRTM_SOLVER_TWO_OS | \
+#define XRTM_SOLVERS_VECTOR     (XRTM_SOLVER_DOUB_ADD | \
+                                 XRTM_SOLVER_EIG_ADD | \
+                                 XRTM_SOLVER_EIG_BVP | \
+                                 XRTM_SOLVER_MEM_BVP | \
+                                 XRTM_SOLVER_PADE_ADD | \
+                                 XRTM_SOLVER_SINGLE | \
+                                 XRTM_SOLVER_SOS | \
+                                 XRTM_SOLVER_TWO_OS | \
                                  XRTM_SOLVERS_EXT_VECTOR)
 
 #define XRTM_SOLVERS_USE_G      (XRTM_SOLVERS_EXT_USE_G)
 
-#define XRTM_SOLVERS_USE_COEF   (XRTM_SOLVER_DOUB_ADD | XRTM_SOLVER_EIG_ADD | \
-                                 XRTM_SOLVER_EIG_BVP | XRTM_SOLVER_MEM_BVP | \
-                                 XRTM_SOLVER_PADE_ADD | XRTM_SOLVER_SINGLE | \
-                                 XRTM_SOLVER_SOS | XRTM_SOLVER_TWO_OS | \
+#define XRTM_SOLVERS_USE_COEF   (XRTM_SOLVER_DOUB_ADD | \
+                                 XRTM_SOLVER_EIG_ADD | \
+                                 XRTM_SOLVER_EIG_BVP | \
+                                 XRTM_SOLVER_FOUR_STREAM | \
+                                 XRTM_SOLVER_MEM_BVP | \
+                                 XRTM_SOLVER_PADE_ADD | \
+                                 XRTM_SOLVER_SINGLE | \
+                                 XRTM_SOLVER_SIX_STREAM | \
+                                 XRTM_SOLVER_SOS | \
+                                 XRTM_SOLVER_TWO_OS | \
+                                 XRTM_SOLVER_TWO_STREAM | \
                                  XRTM_SOLVERS_EXT_USE_COEF)
 
-#define XRTM_SOLVERS_LINEARIZED (XRTM_SOLVER_DOUB_ADD | XRTM_SOLVER_EIG_ADD | \
-                                 XRTM_SOLVER_EIG_BVP | XRTM_SOLVER_MEM_BVP | \
-                                 XRTM_SOLVER_PADE_ADD | XRTM_SOLVER_SINGLE | \
-                                 XRTM_SOLVER_SOS | XRTM_SOLVER_TWO_OS | \
+#define XRTM_SOLVERS_LINEARIZED (XRTM_SOLVER_DOUB_ADD | \
+                                 XRTM_SOLVER_EIG_ADD | \
+                                 XRTM_SOLVER_EIG_BVP | \
+                                 XRTM_SOLVER_MEM_BVP | \
+                                 XRTM_SOLVER_PADE_ADD | \
+                                 XRTM_SOLVER_SINGLE | \
+                                 XRTM_SOLVER_SOS | \
+                                 XRTM_SOLVER_TWO_OS | \
                                  XRTM_SOLVERS_EXT_LINEARIZED)
 
-#define XRTM_SOLVERS_DOUBLING   (XRTM_SOLVER_DOUB_ADD | XRTM_SOLVERS_EXT_DOUBLING)
+#define XRTM_SOLVERS_DOUBLING   (XRTM_SOLVER_DOUB_ADD | \
+                                 XRTM_SOLVERS_EXT_DOUBLING)
 
-#define XRTM_SOLVERS_ADDING     (XRTM_SOLVER_DOUB_ADD | XRTM_SOLVER_EIG_ADD | \
-                                 XRTM_SOLVER_PADE_ADD | XRTM_SOLVERS_EXT_ADDING)
+#define XRTM_SOLVERS_ADDING     (XRTM_SOLVER_DOUB_ADD | \
+                                 XRTM_SOLVER_EIG_ADD | \
+                                 XRTM_SOLVER_PADE_ADD | \
+                                 XRTM_SOLVERS_EXT_ADDING)
 
-#define XRTM_SOLVERS_BVP        (XRTM_SOLVER_EIG_BVP | XRTM_SOLVER_MEM_BVP | \
-                                 XRTM_SOLVER_TWO_OS | XRTM_SOLVER_SOS | \
+#define XRTM_SOLVERS_BVP        (XRTM_SOLVER_EIG_BVP | \
+                                 XRTM_SOLVER_FOUR_STREAM | \
+                                 XRTM_SOLVER_MEM_BVP | \
+                                 XRTM_SOLVER_SIX_STREAM | \
+                                 XRTM_SOLVER_SOS | \
+                                 XRTM_SOLVER_TWO_OS | \
+                                 XRTM_SOLVER_TWO_STREAM | \
                                  XRTM_SOLVERS_EXT_BVP)
 
-#define XRTM_SOLVERS_HAS_SFI    (XRTM_SOLVER_EIG_BVP | XRTM_SOLVER_MEM_BVP | \
+#define XRTM_SOLVERS_HAS_SFI    (XRTM_SOLVER_EIG_BVP | \
+                                 XRTM_SOLVER_MEM_BVP | \
                                  XRTM_SOLVERS_EXT_HAS_SFI)
 
 
@@ -126,16 +158,16 @@ extern "C" {
 /*******************************************************************************
  *
  ******************************************************************************/
-#define CHECK_N_KERNESL_NOT_ZERO(D, R) do {					\
+#define CHECK_N_KERNELS_NOT_ZERO(D, R) do {					\
      if (D->n_kernels == 0) {							\
-          eprintf("ERROR: can't set/get brdf inputs if n_kernels = 0\n");	\
+          fprintf(stderr, "ERROR: can't set/get brdf inputs if n_kernels = 0\n");	\
           return R;								\
      }										\
 } while (0)
 
 #define CHECK_INIT_FOR_DERIVS() do {						\
      if (! (d->options & XRTM_OPTION_CALC_DERIVS)) {				\
-          eprintf("ERROR: can't set linearized inputs when model is "		\
+          fprintf(stderr, "ERROR: can't set linearized inputs when model is "		\
                   "not initialized to evaluate derivatives\n");			\
           return -1;								\
      }										\
@@ -143,22 +175,22 @@ extern "C" {
 
 #define CHECK_INDEX_RANGE(X, N, I_NAME, N_NAME, R) do {				\
      if (X < 0 || X >= N) {							\
-          eprintf("ERROR: invalid value for %s: %d, must "			\
+          fprintf(stderr, "ERROR: invalid value for %s: %d, must "			\
                   "be >= 0 and < %s\n", I_NAME, X, N_NAME);			\
           return R;								\
      }										\
 } while (0)
 
 #define GET_INPUTS_CHECK_SET_FLAGS(FLAGS, NAME, R) do {				\
-     if (d->initial_inputs && ! FLAGS) {					\
-          eprintf("ERROR: can't get %s until it is set\n", NAME);		\
+     if (d->inputs_initialized && ! FLAGS) {					\
+          fprintf(stderr, "ERROR: can't get %s until it is set\n", NAME);		\
           return R;								\
      }										\
 } while (0)
 
 #define SOLUTION_PREPROCESS()  do {						\
      if (solution_preprocess(d)) {						\
-          eprintf("ERROR: solution_preprocess()\n");				\
+          fprintf(stderr, "ERROR: solution_preprocess()\n");				\
           return -1;								\
      }										\
 } while (0)

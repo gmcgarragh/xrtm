@@ -1,14 +1,14 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
 **
 *******************************************************************************/
 
-#ifndef XRTM_SOLVERS_MODEL_A_H
-#define XRTM_SOLVERS_MODEL_A_H
+#ifndef XRTM_MODEL_A_H
+#define XRTM_MODEL_A_H
 
 #include "xrtm_interface.h"
 #include "xrtm_save_tree.h"
@@ -216,4 +216,4 @@ typedef struct {
 }
 #endif
 
-#endif /* XRTM_SOLVERS_MODEL_A_H */
+#endif /* XRTMMODEL_A_H */

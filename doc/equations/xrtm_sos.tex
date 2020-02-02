@@ -1,0 +1,79 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{Successive orders of scattering}
+\label{sec:sos}
+
+
+\subsubsection{Forward}
+\label{sec:sos-forward}
+
+\begin{equation}
+\boldsymbol{\mathcal{T}_{k}} = \mathrm{diag}(e^{-\opticalthickness_{k}/\mu_{i}})
+\label{eq:sos-forward-T}
+\end{equation}
+
+\begin{equation}
+\boldsymbol{\mathcal{E}}_{k} = \mathbf{E} - \boldsymbol{\mathcal{T}}_{k}
+\label{eq:sos-forward-E}
+\end{equation}
+
+\begin{equation}
+t_{k} = \frac{e^{-\tau_{k+1} \lambda_{k+1}} - e^{-\tau_{k} \lambda_{k}}}{2}
+\label{eq:sos-forward-btran_mean}
+\end{equation}
+
+\begin{equation}
+\mathbf{I}^{+}_{1}(\tau_{k}) = \boldsymbol{\mathcal{T}}_{k}\mathbf{I}^{+}_{1}(\tau_{k+1}) + \frac{F_{0}}{4\pi}(\boldsymbol{\mathcal{E}}_{k}\omega\mathbf{P}^{+}_{0}t)_{k}
+\label{eq:sos-forward-I_1_p}
+\end{equation}
+
+\begin{equation}
+\mathbf{I}^{-}_{1}(\tau_{k+1}) = \boldsymbol{\mathcal{T}}_{k}\mathbf{I}^{-}_{1}(\tau_{k}) + \frac{F_{0}}{4\pi}(\boldsymbol{\mathcal{E}}_{k}\omega\mathbf{P}^{-}_{0}t)_{k}
+\label{eq:sos-forward-I_1_m}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(t_{k}) = \frac{\left[-\mathcal{L}(\tau_{k+1}) \lambda_{k+1}\right] e^{-\tau_{k+1} \lambda_{k+1}} - \left[-\mathcal{L}(\tau_{k}) \lambda_{k}\right] e^{-\tau_{k} \lambda_{k}}}{2}
+\label{eq:sos-forward-btran_mean}
+\end{equation}
+
+\begin{eqnarray}
+\mathbf{K}^{+}_{1}(\tau_{k}) &=& \boldsymbol{\mathcal{W}}_{k}\mathbf{I}^{+}_{1}(\tau_{k+1}) + \boldsymbol{\mathcal{T}}_{k}\mathbf{K}^{+}_{1}(\tau_{k+1}) \nonumber \\
+                             &+& \frac{F_{0}}{4\pi} \left[ \boldsymbol{\mathcal{F}}\omega\mathbf{P}^{+}_{0}t + \boldsymbol{\mathcal{E}}\mathcal{L}(\omega)\mathbf{P}^{+}_{0}t + \boldsymbol{\mathcal{E}}\omega\mathbf{Q}^{+}_{0}t + \boldsymbol{\mathcal{L}}\omega\mathbf{P}^{+}_{0}\mathcal{L}(t) \right]_{k}
+\label{eq:sos-forward-K_1_p}
+\end{eqnarray}
+
+\begin{eqnarray}
+\mathbf{K}^{-}_{1}(\tau_{k+1}) &=& \boldsymbol{\mathcal{W}}_{k}\mathbf{I}^{-}_{1}(\tau_{k}) + \boldsymbol{\mathcal{T}}_{k}\mathbf{K}^{-}_{1}(\tau_{k}) \nonumber \\
+                               &+& \frac{F_{0}}{4\pi} \left[ \boldsymbol{\mathcal{F}}\omega\mathbf{P}^{-}_{0}t + \boldsymbol{\mathcal{E}}\mathcal{L}(\omega)\mathbf{P}^{-}_{0}t + \boldsymbol{\mathcal{E}}\omega\mathbf{Q}^{-}_{0}t + \boldsymbol{\mathcal{L}}\omega\mathbf{P}^{-}_{0}\mathcal{L}(t) \right]_{k}
+\label{eq:sos-forward-K_1_m}
+\end{eqnarray}
+
+\begin{equation}
+\boldsymbol{\mathcal{W}_{k}} = \mathrm{diag}(w_{i})
+\label{eq:sos-forward-W}
+\end{equation}
+
+\begin{equation}
+\mathbf{I}(\tau_{k+0.5}) = \frac{\left[\mathbf{I}(\tau_{k}) + \mathbf{I}(\tau_{k+1})\right]}{2}
+\label{eq:sos-forward-I_k_p_0_5}
+\end{equation}
+
+\begin{equation}
+\mathbf{I}^{+}_{j}(\tau_{k}) = \boldsymbol{\mathcal{T}}_{k}\mathbf{I}^{+}_{j}(\tau_{k+1}) + (1 + \delta_{0,m}) \frac{1}{4}\boldsymbol{\mathcal{E}}_{k}\omega_{k}\left[\mathbf{P}^{++}_{k}\mathbf{I}^{+}_{n-1}(\tau_{k+0.5}) + \mathbf{P}^{-+}_{k}\mathbf{I}^{-}_{n-1}(\tau_{k+0.5})\right]\mathbf{W}
+\label{eq:sos-forward-I_j_p}
+\end{equation}
+
+\begin{equation}
+\mathbf{I}^{-}_{j}(\tau_{k+1}) = \boldsymbol{\mathcal{T}}_{k}\mathbf{I}^{-}_{j}(\tau_{k}) + (1 + \delta_{0,m}) \frac{1}{4}\boldsymbol{\mathcal{E}}_{k}\omega_{k}\left[\mathbf{P}^{--}_{k}\mathbf{I}^{-}_{n-1}(\tau_{k+0.5}) + \mathbf{P}^{+-}_{k}\mathbf{I}^{+}_{n-1}(\tau_{k+0.5})\right]\mathbf{W}
+\label{eq:sos-forward-I_j_m}
+\end{equation}
+
+
+\subsubsection{Tangent linear}
+\label{sec:sos-tangent_linear}
+
+
+\subsubsection{Adjoint of tangent linear}
+\label{sec:sos-adjoint_of_tangent_linear}

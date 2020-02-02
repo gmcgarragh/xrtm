@@ -1,0 +1,210 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{BRDF Kernels}
+\label{sec:brdf_kernels}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Lambertian}
+\label{sec:brdf_kernels-lambertian}
+
+\subsubsection{Forward}
+\label{sec:brdf_kernels-lambertian-forward}
+
+\begin{equation}
+f(\theta_{i}, \theta_{r}, \phi) = 1
+\label{eq:brdf_kernels-lambertian-forward-f}
+\end{equation}
+
+
+\subsubsection{Tangent linear}
+\label{sec:brdf_kernels-lambertian-tangent_linear}
+
+\begin{equation}
+\mathcal{L}\left[f(\theta_{i}, \theta_{r}, \phi)\right] = 0
+\label{eq:brdf_kernels-lambertian-tangent_linear-f}
+\end{equation}
+
+
+\subsubsection{Adjoint of tangent linear}
+\label{sec:brdf_kernels-lambertian-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Roujean}
+\label{sec:brdf_kernels-roujean}
+
+\subsubsection{Forward}
+\label{sec:brdf_kernels-roujean-forward}
+
+\begin{equation}
+a = \tan \theta_{i} + \tan \theta_{r}
+\label{eq:brdf_kernels-roujean-forward-a}
+\end{equation}
+
+\begin{equation}
+b = \tan^{2} \theta_{i} + \tan^{2} \theta_{r}
+\label{eq:brdf_kernels-roujean-forward-b}
+\end{equation}
+
+\begin{equation}
+t = \tan \theta_{i} \tan \theta_{r}
+\label{eq:brdf_kernels-roujean-forward-t}
+\end{equation}
+
+\begin{equation}
+c = 2 t
+\label{eq:brdf_kernels-roujean-forward-c}
+\end{equation}
+
+\begin{equation}
+d = \frac{t}{2 \pi}
+\label{eq:brdf_kernels-roujean-forward-d}
+\end{equation}
+
+\begin{equation}
+t = \left\{
+\begin{array}{cc}
+-1 & \mbox{if $\phi < 0$} \\
++1 & \mbox{otherwise} \\
+\end{array}
+\right.
+\label{eq:brdf_kernels-roujean-forward-t2}
+\end{equation}
+
+\begin{equation}
+f(\theta_{i}, \theta_{r}, \phi) = \left[(\pi - t\phi) \cos\phi + \sin\phi\right] d - \frac{1}{\pi} (a + \sqrt{b - c \cos\phi})
+\label{eq:brdf_kernels-roujean-forward-f}
+\end{equation}
+
+
+\subsubsection{Tangent linear}
+\label{sec:brdf_kernels-roujean-tangent_linear}
+
+\begin{equation}
+\mathcal{L}\left[f(\theta_{i}, \theta_{r}, \phi)\right] = 0
+\label{eq:brdf_kernels-roujean-tangent_linear-f}
+\end{equation}
+
+
+\subsubsection{Adjoint of tangent linear}
+\label{sec:brdf_kernels-roujean-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Li-common}
+\label{sec:brdf_kernels-li_common}
+
+\subsubsection{Forward}
+\label{sec:brdf_kernels-li_common-forward}
+
+\begin{equation}
+\tan\theta^{\prime}_{i} = x\tan\theta_{i}
+\label{eq:brdf_kernels-li_common-forward-tan_theta_i_prime}
+\end{equation}
+
+\begin{equation}
+\tan\theta^{\prime}_{r} = x\tan\theta_{r}
+\label{eq:brdf_kernels-li_common-forward-tan_theta_r_prime}
+\end{equation}
+
+\begin{equation}
+a = \cos\theta^{\prime}_{i} \cos\theta^{\prime}_{r}
+\label{eq:brdf_kernels-li_common-forward-a}
+\end{equation}
+
+\begin{equation}
+b = \sin\theta^{\prime}_{i} \sin\theta^{\prime}_{r}
+\label{eq:brdf_kernels-li_common-forward-b}
+\end{equation}
+
+\begin{equation}
+c = \tan^{2}\theta^{\prime}_{i} + \tan^{2}\theta^{\prime}_{r}
+\label{eq:brdf_kernels-li_common-forward-c}
+\end{equation}
+
+\begin{equation}
+d = 2 \tan\theta^{\prime}_{i} \tan\theta^{\prime}_{r}
+\label{eq:brdf_kernels-li_common-forward-d}
+\end{equation}
+
+\begin{equation}
+e = \tan^{2}\theta^{\prime}_{i} \tan^{2}\theta^{\prime}_{r}
+\label{eq:brdf_kernels-li_common-forward-e}
+\end{equation}
+
+\begin{equation}
+r = 1 / \cos\theta^{\prime}_{i} + 1 / \sin\theta^{\prime}_{i}
+\label{eq:brdf_kernels-li_common-forward-r}
+\end{equation}
+
+\begin{equation}
+g = y / r
+\label{eq:brdf_kernels-li_common-forward-g}
+\end{equation}
+
+\begin{equation}
+f(\theta_{i}, \theta_{r}, \phi) =
+\label{eq:brdf_kernels-li_common-forward-f}
+\end{equation}
+
+
+\subsubsection{Tangent linear}
+\label{sec:brdf_kernels-li_common-tangent_linear}
+
+
+\subsubsection{Adjoint of tangent linear}
+\label{sec:brdf_kernels-li_common-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Li-sparse}
+\label{sec:brdf_kernels-li_sparse}
+
+\subsubsection{Forward}
+\label{sec:brdf_kernels-li_sparse-forward}
+
+\begin{equation}
+f(\theta_{i}, \theta_{r}, \phi) =
+\label{eq:brdf_kernels-li_sparse-forward-f}
+\end{equation}
+
+
+\subsubsection{Tangent linear}
+\label{sec:brdf_kernels-li_sparse-tangent_linear}
+
+
+\subsubsection{Adjoint of tangent linear}
+\label{sec:brdf_kernels-li_sparse-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Li-dense}
+\label{sec:brdf_kernels-li_dense}
+
+\subsubsection{Forward}
+\label{sec:brdf_kernels-li_dense-forward}
+
+\begin{equation}
+f(\theta_{i}, \theta_{r}, \phi) =
+\label{eq:brdf_kernels-li_dense-forward-f}
+\end{equation}
+
+
+\subsubsection{Tangent linear}
+\label{sec:brdf_kernels-li_dense-tangent_linear}
+
+
+\subsubsection{Adjoint of tangent linear}
+\label{sec:brdf_kernels-li_dense-adjoint_of_tangent_linear}

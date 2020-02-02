@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -39,12 +39,31 @@ void radiance_slab(int n_quad, int n_derivs,
      dvec_add(I1_p, S_p, I1_p, n_quad);
 
      for (i = 0; i < n_derivs; ++i) {
-          if (! derivs[i]) {
+          if (! (derivs[i] & DERIV_TOP_S) && ! (derivs[i] & DERIV_TOP_L)) {
                dm_v_mul(R_m, I1_m_l[i], n_quad, n_quad, I1_p_l[i]);
                dm_v_mul(T_p, I2_p_l[i], n_quad, n_quad, v1);
                dvec_add(I1_p_l[i], v1, I1_p_l[i], n_quad);
           }
-          else {
+          else
+          if (  (derivs[i] & DERIV_TOP_S) && ! (derivs[i] & DERIV_TOP_L)) {
+               dm_v_mul(R_m, I1_m_l[i], n_quad, n_quad, I1_p_l[i]);
+               dm_v_mul(T_p, I2_p_l[i], n_quad, n_quad, v1);
+               dvec_add(I1_p_l[i], v1, I1_p_l[i], n_quad);
+
+               dvec_add(I1_p_l[i], S_p_l[i], I1_p_l[i], n_quad);
+          }
+          else
+          if (! (derivs[i] & DERIV_TOP_S) &&   (derivs[i] & DERIV_TOP_L)) {
+               dm_v_mul(R_m_l[i], I1_m, n_quad, n_quad, I1_p_l[i]);
+               dm_v_mul(R_m, I1_m_l[i], n_quad, n_quad, v1);
+               dvec_add(I1_p_l[i], v1, I1_p_l[i], n_quad);
+               dm_v_mul(T_p_l[i], I2_p, n_quad, n_quad, v1);
+               dvec_add(I1_p_l[i], v1, I1_p_l[i], n_quad);
+               dm_v_mul(T_p, I2_p_l[i], n_quad, n_quad, v1);
+               dvec_add(I1_p_l[i], v1, I1_p_l[i], n_quad);
+          }
+          else
+          if (  (derivs[i] & DERIV_TOP_S) &&   (derivs[i] & DERIV_TOP_L)) {
                dm_v_mul(R_m_l[i], I1_m, n_quad, n_quad, I1_p_l[i]);
                dm_v_mul(R_m, I1_m_l[i], n_quad, n_quad, v1);
                dvec_add(I1_p_l[i], v1, I1_p_l[i], n_quad);
@@ -55,6 +74,12 @@ void radiance_slab(int n_quad, int n_derivs,
 
                dvec_add(I1_p_l[i], S_p_l[i], I1_p_l[i], n_quad);
           }
+#ifdef DEBUG
+          else {
+               fprintf(stderr, "ERROR: radiance_slab(), invalid adding combination: %d\n", derivs[i]);
+               exit(1);
+          }
+#endif
      }
 #ifdef USE_AD_FOR_TL_CALC_RADIANCE_SLAB
      radiance_slab_tl_with_ad(n_quad, n_derivs,
@@ -86,15 +111,34 @@ void radiance_toa_ref(int n_quad, int n_derivs,
      dvec_add(I1_p, S_p, I1_p, n_quad);
 
      for (i = 0; i < n_derivs; ++i) {
-          if (! derivs[i])
+          if (! (derivs[i] & DERIV_TOP_S || derivs[i] & DERIV_BOTTOM_S) && ! (derivs[i] & DERIV_TOP_L || derivs[i] & DERIV_BOTTOM_L))
                dm_v_mul(R_m, I1_m_l[i], n_quad, n_quad, I1_p_l[i]);
-          else {
+          else
+          if (  (derivs[i] & DERIV_TOP_S || derivs[i] & DERIV_BOTTOM_S) && ! (derivs[i] & DERIV_TOP_L || derivs[i] & DERIV_BOTTOM_L)) {
+               dm_v_mul(R_m, I1_m_l[i], n_quad, n_quad, I1_p_l[i]);
+
+               dvec_add(I1_p_l[i], S_p_l[i], I1_p_l[i], n_quad);
+          }
+          else
+          if (! (derivs[i] & DERIV_TOP_S || derivs[i] & DERIV_BOTTOM_S) &&   (derivs[i] & DERIV_TOP_L || derivs[i] & DERIV_BOTTOM_L)) {
+               dm_v_mul(R_m_l[i], I1_m, n_quad, n_quad, I1_p_l[i]);
+               dm_v_mul(R_m, I1_m_l[i], n_quad, n_quad, v1);
+               dvec_add(I1_p_l[i], v1, I1_p_l[i], n_quad);
+          }
+          else
+          if (  (derivs[i] & DERIV_TOP_S || derivs[i] & DERIV_BOTTOM_S) &&   (derivs[i] & DERIV_TOP_L || derivs[i] & DERIV_BOTTOM_L)) {
                dm_v_mul(R_m_l[i], I1_m, n_quad, n_quad, I1_p_l[i]);
                dm_v_mul(R_m, I1_m_l[i], n_quad, n_quad, v1);
                dvec_add(I1_p_l[i], v1, I1_p_l[i], n_quad);
 
                dvec_add(I1_p_l[i], S_p_l[i], I1_p_l[i], n_quad);
           }
+#ifdef DEBUG
+          else {
+               fprintf(stderr, "ERROR: radiance_slab(), invalid adding combination: %d\n", derivs[i]);
+               exit(1);
+          }
+#endif
      }
 }
 
@@ -155,7 +199,7 @@ void radiance_boa_ref(int n_quad, int n_derivs,
                     dvec_add(I2_p_l[i], I3_p_l[i], I2_p_l[i], n_quad);
                }
                else
-               if (derivs[i] == ADDING_U_L) {
+               if (derivs[i] == ADDING_U_L || derivs[i] == ADDING_U_B) {
                     dmat_mul(R12_p, R23_m_l[i], n_quad, n_quad, n_quad, w2);
 
                     dm_v_mul(w2, I2_m, n_quad, n_quad, v1);
@@ -172,7 +216,45 @@ void radiance_boa_ref(int n_quad, int n_derivs,
                     dvec_add(I2_p_l[i], I3_p_l[i], I2_p_l[i], n_quad);
                }
                else
-               if (derivs[i] == ADDING_L_P) {
+               if (derivs[i] == ADDING_L_U) {
+                    dmat_mul(R12_p_l[i], R23_m, n_quad, n_quad, n_quad, w2);
+
+                    dm_v_mul(w2, I2_m, n_quad, n_quad, v1);
+
+                    dm_v_mul(R12_p_l[i], I3_p, n_quad, n_quad, v2);
+                    dvec_add(v1, v2, v1, n_quad);
+                    dm_v_mul(R12_p, I3_p_l[i], n_quad, n_quad, v2);
+                    dvec_add(v1, v2, I2_m_l[i], n_quad);
+
+                    dmat_getrs(w1, &I2_m_l[i], n_quad, 1, i1);
+
+                    dm_v_mul(R23_m, I2_m_l[i], n_quad, n_quad, I2_p_l[i]);
+
+                    dvec_add(I2_p_l[i], I3_p_l[i], I2_p_l[i], n_quad);
+               }
+               else
+               if (derivs[i] == ADDING_L_L) {
+                    dmat_mul(R12_p_l[i], R23_m, n_quad, n_quad, n_quad, w2);
+                    dmat_mul(R12_p, R23_m_l[i], n_quad, n_quad, n_quad, w3);
+                    dmat_add(w2, w3, w2,  n_quad, n_quad);
+
+                    dm_v_mul(w2, I2_m, n_quad, n_quad, v1);
+
+                    dm_v_mul(R12_p_l[i], I3_p, n_quad, n_quad, v2);
+                    dvec_add(v1, v2, v1, n_quad);
+                    dm_v_mul(R12_p, I3_p_l[i], n_quad, n_quad, v2);
+                    dvec_add(v1, v2, I2_m_l[i], n_quad);
+
+                    dmat_getrs(w1, &I2_m_l[i], n_quad, 1, i1);
+
+                    dm_v_mul(R23_m_l[i], I2_m, n_quad, n_quad, v1);
+                    dm_v_mul(R23_m, I2_m_l[i], n_quad, n_quad, v2);
+                    dvec_add(v1, v2, I2_p_l[i], n_quad);
+
+                    dvec_add(I2_p_l[i], I3_p_l[i], I2_p_l[i], n_quad);
+               }
+               else
+               if (derivs[i] == ADDING_B_U || derivs[i] == ADDING_B_S) {
                     dmat_mul(R12_p_l[i], R23_m, n_quad, n_quad, n_quad, w2);
 
                     dm_v_mul(w2, I2_m, n_quad, n_quad, v1);
@@ -190,7 +272,7 @@ void radiance_boa_ref(int n_quad, int n_derivs,
                     dvec_add(I2_p_l[i], I3_p_l[i], I2_p_l[i], n_quad);
                }
                else
-               if (derivs[i] == ADDING_L_L) {
+               if (derivs[i] == ADDING_B_L || derivs[i] == ADDING_B_B) {
                     dmat_mul(R12_p_l[i], R23_m, n_quad, n_quad, n_quad, w2);
                     dmat_mul(R12_p, R23_m_l[i], n_quad, n_quad, n_quad, w3);
                     dmat_add(w2, w3, w2,  n_quad, n_quad);
@@ -211,6 +293,12 @@ void radiance_boa_ref(int n_quad, int n_derivs,
 
                     dvec_add(I2_p_l[i], I3_p_l[i], I2_p_l[i], n_quad);
                }
+#ifdef DEBUG
+               else {
+                    fprintf(stderr, "ERROR: radiance_boa_ref(), invalid adding combination: %d\n", derivs[i]);
+                    exit(1);
+               }
+#endif
           }
 /*
      }
@@ -317,7 +405,7 @@ void radiance_boa_all(int n_quad, int n_derivs,
           w3 = get_work1(&work, WORK_DXX);
 
           for (i = 0; i < n_derivs; ++i) {
-               if (derivs[i] == ADDING_U_U) {
+               if (derivs[i] == ADDING_U_U || derivs[i] == ADDING_U_S) {
                     dm_v_mul(R12_p, I3_p_l[i], n_quad, n_quad, v1);
                     dm_v_mul(T12_m, I1_m_l[i], n_quad, n_quad, v2);
                     dvec_add(v1, v2, I2_m_l[i], n_quad);
@@ -329,7 +417,7 @@ void radiance_boa_all(int n_quad, int n_derivs,
                     dvec_add(I2_p_l[i], I3_p_l[i], I2_p_l[i], n_quad);
                }
                else
-               if (derivs[i] == ADDING_U_L) {
+               if (derivs[i] == ADDING_U_L || derivs[i] == ADDING_U_B) {
                     dmat_mul(R12_p, R23_m_l[i], n_quad, n_quad, n_quad, w2);
 
                     dm_v_mul(w2, I2_m, n_quad, n_quad, v1);
@@ -348,7 +436,78 @@ void radiance_boa_all(int n_quad, int n_derivs,
                     dvec_add(I2_p_l[i], I3_p_l[i], I2_p_l[i], n_quad);
                }
                else
-               if (derivs[i] == ADDING_L_P) {
+               if (derivs[i] == ADDING_S_U) {
+/*
+                    dmat_mul(R12_p_l[i], R23_m, n_quad, n_quad, n_quad, w2);
+
+                    dm_v_mul(w2, I2_m, n_quad, n_quad, v1);
+
+                    dm_v_mul(R12_p_l[i], I3_p, n_quad, n_quad, v2);
+                    dvec_add(v1, v2, v1, n_quad);
+                    dm_v_mul(R12_p, I3_p_l[i], n_quad, n_quad, v2);
+                    dvec_add(v1, v2, v1, n_quad);
+                    dm_v_mul(T12_m_l[i], I1_m, n_quad, n_quad, v2);
+                    dvec_add(v1, v2, v1, n_quad);
+                    dm_v_mul(T12_m, I1_m_l[i], n_quad, n_quad, v2);
+                    dvec_add(v1, v2, v1, n_quad);
+                    dvec_add(v1, S12_m_l[i], I2_m_l[i], n_quad);
+
+                    dmat_getrs(w1, &I2_m_l[i], n_quad, 1, i1);
+
+                    dm_v_mul(R23_m, I2_m_l[i], n_quad, n_quad, I2_p_l[i]);
+
+                    dvec_add(I2_p_l[i], I3_p_l[i], I2_p_l[i], n_quad);
+*/
+                    dvec_copy(I2_m_l[i], S12_m_l[i], n_quad);
+
+                    dmat_getrs(w1, &I2_m_l[i], n_quad, 1, i1);
+
+                    dm_v_mul(R23_m, I2_m_l[i], n_quad, n_quad, I2_p_l[i]);
+               }
+               else
+               if (derivs[i] == ADDING_L_U) {
+                    dmat_mul(R12_p_l[i], R23_m, n_quad, n_quad, n_quad, w2);
+
+                    dm_v_mul(w2, I2_m, n_quad, n_quad, v1);
+
+                    dm_v_mul(R12_p_l[i], I3_p, n_quad, n_quad, v2);
+                    dvec_add(v1, v2, v1, n_quad);
+                    dm_v_mul(R12_p, I3_p_l[i], n_quad, n_quad, v2);
+                    dvec_add(v1, v2, v1, n_quad);
+                    dm_v_mul(T12_m_l[i], I1_m, n_quad, n_quad, v2);
+                    dvec_add(v1, v2, v1, n_quad);
+                    dm_v_mul(T12_m, I1_m_l[i], n_quad, n_quad, v2);
+                    dvec_add(v1, v2, I2_m_l[i], n_quad);
+
+                    dmat_getrs(w1, &I2_m_l[i], n_quad, 1, i1);
+
+                    dm_v_mul(R23_m, I2_m_l[i], n_quad, n_quad, I2_p_l[i]);
+
+                    dvec_add(I2_p_l[i], I3_p_l[i], I2_p_l[i], n_quad);
+               }
+               else
+               if (derivs[i] == ADDING_L_L) {
+                    dmat_mul(R12_p_l[i], R23_m, n_quad, n_quad, n_quad, w2);
+                    dmat_mul(R12_p, R23_m_l[i], n_quad, n_quad, n_quad, w3);
+                    dmat_add(w2, w3, w2,  n_quad, n_quad);
+
+                    dm_v_mul(w2, I2_m, n_quad, n_quad, v1);
+
+                    dm_v_mul(R12_p_l[i], I3_p, n_quad, n_quad, v2);
+                    dvec_add(v1, v2, v1, n_quad);
+                    dm_v_mul(T12_m_l[i], I1_m, n_quad, n_quad, v2);
+                    dvec_add(v1, v2, v1, n_quad);
+                    dm_v_mul(T12_m, I1_m_l[i], n_quad, n_quad, v2);
+                    dvec_add(v1, v2, I2_m_l[i], n_quad);
+
+                    dmat_getrs(w1, &I2_m_l[i], n_quad, 1, i1);
+
+                    dm_v_mul(R23_m_l[i], I2_m, n_quad, n_quad, v1);
+                    dm_v_mul(R23_m, I2_m_l[i], n_quad, n_quad, v2);
+                    dvec_add(v1, v2, I2_p_l[i], n_quad);
+               }
+               else
+               if (derivs[i] == ADDING_B_U || derivs[i] == ADDING_B_S) {
                     dmat_mul(R12_p_l[i], R23_m, n_quad, n_quad, n_quad, w2);
 
                     dm_v_mul(w2, I2_m, n_quad, n_quad, v1);
@@ -370,7 +529,7 @@ void radiance_boa_all(int n_quad, int n_derivs,
                     dvec_add(I2_p_l[i], I3_p_l[i], I2_p_l[i], n_quad);
                }
                else
-               if (derivs[i] == ADDING_L_L) {
+               if (derivs[i] == ADDING_B_L || derivs[i] == ADDING_B_B) {
                     dmat_mul(R12_p_l[i], R23_m, n_quad, n_quad, n_quad, w2);
                     dmat_mul(R12_p, R23_m_l[i], n_quad, n_quad, n_quad, w3);
                     dmat_add(w2, w3, w2,  n_quad, n_quad);
@@ -395,6 +554,12 @@ void radiance_boa_all(int n_quad, int n_derivs,
 
                     dvec_add(I2_p_l[i], I3_p_l[i], I2_p_l[i], n_quad);
                }
+#ifdef DEBUG
+               else {
+                    fprintf(stderr, "ERROR: radiance_boa_all(), invalid adding combination: %d\n", derivs[i]);
+                    exit(1);
+               }
+#endif
           }
 /*
      }

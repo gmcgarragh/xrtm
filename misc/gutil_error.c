@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 1998-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 1998-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -8,23 +8,6 @@
 *******************************************************************************/
 
 #include "gutil.h"
-
-
-
-/*******************************************************************************
- *
- ******************************************************************************/
-void eprintf(const char *fmt, ...) {
-
-     va_list ap;
-
-     va_start(ap, fmt);
-
-     vfprintf(stderr, fmt, ap);
-
-     va_end(ap);
-}
-
 
 
 /*******************************************************************************
@@ -54,7 +37,7 @@ int strtoi_errmsg(const char *string, const char *name, int *value) {
           return -1;
      }
 
-     if (string == '\0') {
+     if (string == NULL) {
           fprintf(stderr, "ERROR: invalid value for %s: empty string\n", name);
           return -1;
      }
@@ -110,7 +93,7 @@ long strtol_errmsg(const char *string, const char *name, long *value) {
           exit(1);
      }
 
-     if (string == '\0') {
+     if (string == NULL) {
           fprintf(stderr, "ERROR: invalid value for %s: empty string\n", name);
           exit(1);
      }
@@ -166,7 +149,7 @@ double strtod_errmsg(const char *string, const char *name, double *value) {
           exit(1);
      }
 
-     if (string == '\0') {
+     if (string == NULL) {
           fprintf(stderr, "ERROR: invalid value for %s: empty string\n", name);
           exit(1);
      }

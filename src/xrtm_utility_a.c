@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -174,7 +174,7 @@ void n_t_tms_scaling_a(double f, double *f_a, double omega0, double omega_tms, d
  *
  ******************************************************************************/
 static void build_local_r_or_t_mat_a(int i_four, int n_quad,
-                                     double *v1, double *qw_v, double a, 
+                                     double *v1, double *qw_v, double a,
                                      double omega, double *omega_a,
                                      double **P_m, double **P_m_a,
                                      double **r, double **r_a,
@@ -219,7 +219,7 @@ void build_local_r_and_t_a(int i_four, int n_quad,
 
      v1 = get_work1(&work, WORK_DX);
 
-     dvec_inv(qx_v, v1, n_quad);
+     dvec_inv_elem(qx_v, v1, n_quad);
 
      build_local_r_or_t_mat_a(i_four, n_quad, v1, qw_v,  1.,
                               omega, omega_a, P_p, P_p_a, t, t_a, work);

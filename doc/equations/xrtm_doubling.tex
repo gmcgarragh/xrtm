@@ -1,0 +1,224 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{Doubling}
+\label{sec:doubling}
+
+
+\subsection{Forward}
+\label{sec:doubling-forward}
+
+\begin{equation}
+\mathcal{T}_{0} = e^{-d\tau \lambda}
+\label{eq:doubling-forward-script_T}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathcal{T}_{0}) = \left[-\mathcal{L}(d\tau) \lambda \right] \mathcal{T}_{0}
+\label{eq:doubling-forward-script_T_l}
+\end{equation}
+
+
+\begin{equation}
+f_{0} = (b_{l+1} / b_{l} - 1) / n_{\mathrm{doub}}^{2}
+\label{eq:doubling-forward-f}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(f_{0}) = (\mathcal{L}(b_{l+1}) - b_{l+1}\mathcal{L}(b_{l}) / b_{l}) / b_{l} / n_{\mathrm{doub}}^{2}
+\label{eq:doubling-forward-f_l}
+\end{equation}
+
+
+\begin{equation}
+\mathbf{P}_{n} = (\mathbf{E} - \mathbf{R}_{n}\mathbf{R}_{n})^{-1}
+\label{eq:doubling-forward-P}
+\end{equation}
+
+\begin{equation}
+\mathbf{A}_{n} = \mathbf{T}_{n}\mathbf{P}_{n}
+\label{eq:doubling-forward-A}
+\end{equation}
+
+\begin{equation}
+\mathbf{B}_{n} = \mathbf{R}_{n}\mathbf{T}_{n}
+\label{eq:doubling-forward-B}
+\end{equation}
+
+\begin{equation}
+\mathbf{a}_{n} = \mathbf{R}_{n}\mathbf{Se}^{-}_{n} + \mathbf{Se}^{+}_{n}\mathcal{T}_{n}
+\label{eq:doubling-forward-a}
+\end{equation}
+
+\begin{equation}
+\mathbf{b}_{n} = \mathbf{R}_{n}\mathbf{Se}^{+}_{n}\mathcal{T}_{n} + \mathbf{Se}^{-}_{n}
+\label{eq:doubling-forward-b}
+\end{equation}
+
+\begin{equation}
+\mathbf{c}_{n} = \mathbf{R}_{n}\mathbf{L}^{-}_{n} + \mathbf{L}^{+}_{n}
+\label{eq:doubling-forward-c}
+\end{equation}
+
+\begin{equation}
+\mathbf{d}_{n} = \mathbf{R}_{n}\mathbf{L}^{+}_{n} + \mathbf{L}^{-}_{n}
+\label{eq:doubling-forward-d}
+\end{equation}
+
+\begin{equation}
+\mathbf{e}_{n} = \mathbf{R}_{n}\mathbf{Sl}^{-}_{n} + \mathbf{Sl}^{+}_{n} + \mathbf{L}^{+}_{n}f
+\label{eq:doubling-forward-e}
+\end{equation}
+
+\begin{equation}
+\mathbf{f}_{n} = \mathbf{R}_{n}(\mathbf{Sl}^{+}_{n} + \mathbf{L}^{+}_{n}f) + \mathbf{Sl}^{-}_{n}
+\label{eq:doubling-forward-f}
+\end{equation}
+
+
+\begin{equation}
+\mathcal{T}_{n+1} = \mathcal{T}_{n}^{2}
+\label{eq:doubling-forward-script_T_n_p_1}
+\end{equation}
+
+\begin{equation}
+f_{n+1} = 2f_{n}
+\label{eq:doubling-forward-f_n_p_1}
+\end{equation}
+
+\begin{equation}
+\mathbf{Se}^{+}_{n+1} = \mathbf{A}_{n}\mathbf{a}_{n} + \mathbf{Se}^{+}_{n}
+\label{eq:doubling-forward-Se_p}
+\end{equation}
+
+\begin{equation}
+\mathbf{Se}^{-}_{n+1} = \mathbf{A}_{n}\mathbf{b}_{n} + \mathbf{Se}^{-}_{n}\mathcal{T}_{n}
+\label{eq:doubling-forward-Se_m}
+\end{equation}
+
+\begin{equation}
+\mathbf{L}^{+}_{n+1} = \mathbf{A}_{n}\mathbf{c}_{n} + \mathbf{L}^{+}_{n}
+\label{eq:doubling-forward-a_p}
+\end{equation}
+
+\begin{equation}
+\mathbf{L}^{-}_{n+1} = \mathbf{A}_{n}\mathbf{d}_{n} + \mathbf{L}^{-}_{n}
+\label{eq:doubling-forward-a_m}
+\end{equation}
+
+\begin{equation}
+\mathbf{Sl}^{+}_{n+1} = \mathbf{A}_{n}\mathbf{e}_{n} + \mathbf{Sl}^{+}_{n}
+\label{eq:doubling-forward-Sl_p}
+\end{equation}
+
+\begin{equation}
+\mathbf{Sl}^{-}_{n+1} = \mathbf{A}_{n}\mathbf{f}_{n} + \mathbf{Sl}^{-}_{n} + \mathbf{L}^{-}_{n}f
+\label{eq:doubling-forward-Sl_m}
+\end{equation}
+
+\begin{equation}
+\mathbf{R}_{n+1} = \mathbf{R}_{n} + \mathbf{A}_{n}\mathbf{B}_{n}
+\label{eq:doubling-forward-R}
+\end{equation}
+
+\begin{equation}
+\mathbf{T}_{n+1} = \mathbf{A}_{n}\mathbf{T}_{n}
+\label{eq:doubling-forward-T}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Tangent linear}
+\label{sec:doubling-tangent_linear}
+
+\begin{equation}
+\mathcal{L}(\mathcal{T}_{n+1}) = 2 \mathcal{L}(\mathcal{T}_{n}) \mathcal{T}_{n}
+\label{eq:doubling-tangent_linear-script_T_l_n_p_1}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(f_{n+1}) = 2\mathcal{L}(f_{n})
+\label{eq:doubling-tangent_linear-f_l_n_p_1}
+\end{equation}
+
+
+\begin{equation}
+\mathcal{L}(\mathbf{A}_{n}) = \mathcal{L}(\mathbf{T}_{n})\mathbf{P}_{n} + \mathbf{A}_{n}(\mathcal{L}(\mathbf{R}_{n})\mathbf{R}_{n} + \mathbf{R}_{n}\mathcal{L}(\mathbf{R}_{n}))\mathbf{P}_{n}
+\label{eq:doubling-tangent_linear-A_l}
+\end{equation}
+
+
+\begin{equation}
+\mathcal{L}(\mathbf{Se}^{+}_{n+1}) = \mathcal{L}(\mathbf{A}_{n})\mathbf{a} + \mathbf{A}_{n}(\mathcal{L}(\mathbf{R}_{n})\mathbf{Se}^{-}_{n} + \mathbf{R}_{n}\mathcal{L}(\mathbf{Se}^{-}_{n}) + \mathcal{L}(\mathbf{Se}^{+}_{n})\mathcal{T}_{n} + \mathbf{Se}^{+}_{n}\mathcal{L}(\mathcal{T}_{n})) + \mathcal{L}(\mathbf{Se}^{+}_{n})
+\label{eq:doubling-tangent_linear-Se_p_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{Se}^{-}_{n+1}) = \mathcal{L}(\mathbf{A}_{n})\mathbf{b}_{n} + \mathbf{A}_{n}[\mathcal{L}(\mathbf{R}_{n})\mathbf{Se}^{+}_{n}\mathcal{T}_{n} + \mathbf{R}_{n}(\mathcal{L}(\mathbf{Se}^{+}_{n})\mathcal{T}_{n} + \mathbf{Se}^{+}_{n}\mathcal{L}(\mathcal{T}_{n})) + \mathcal{L}(\mathbf{Se}^{-}_{n})] + \mathcal{L}(\mathbf{Se}^{-}_{n})\mathcal{T}_{n} + \mathbf{Se}^{-}_{n}\mathcal{L}(\mathcal{T}_{n})
+\label{eq:doubling-tangent_linear-Se_m_l}
+\end{equation}
+
+
+\begin{equation}
+\mathcal{L}(\mathbf{L}^{+}_{n+1}) = \mathbf{A}_{n}\left[\mathcal{L}(\mathbf{R}_{n}\mathcal{L}(\mathbf{L}^{-}_{n}) + \mathcal{L}(\mathbf{L}^{+}_{n})\right] + \mathcal{L}(\mathbf{L}^{+}_{n})
+\label{eq:doubling-tangent_linear-L_p_l_thermal}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{L}^{-}_{n+1}) = \mathbf{A}_{n}\left[\mathcal{L}(\mathbf{R}_{n}\mathcal{L}(\mathbf{L}^{+}_{n}) + \mathcal{L}(\mathbf{L}^{-}_{n})\right] + \mathcal{L}(\mathbf{L}^{-}_{n})
+\label{eq:doubling-tangent_linear-L_m_l_thermal}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{L}^{+}_{n+1}) = \mathcal{L}(\mathbf{A}_{n})\mathbf{c}_{n} + \mathbf{A}_{n}\left[\mathcal{L}(\mathbf{R}_{n})\mathbf{L}^{-}_{n} + \mathbf{R}_{n}\mathcal{L}(\mathbf{L}^{-}_{n}) + \mathcal{L}(\mathbf{L}^{+}_{n})\right] + \mathcal{L}(\mathbf{L}^{+}_{n})
+\label{eq:doubling-tangent_linear-L_p_l_layers}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{L}^{-}_{n+1}) = \mathcal{L}(\mathbf{A}_{n})\mathbf{d}_{n} + \mathbf{A}_{n}\left[\mathcal{L}(\mathbf{R}_{n})\mathbf{L}^{+}_{n} + \mathbf{R}_{n}\mathcal{L}(\mathbf{L}^{+}_{n}) + \mathcal{L}(\mathbf{L}^{-}_{n})\right] + \mathcal{L}(\mathbf{L}^{-}_{n})
+\label{eq:doubling-tangent_linear-L_m_l_layers}
+\end{equation}
+
+\begin{adjustwidth}{-1in}{-1in}
+
+\begin{equation}
+\mathcal{L}(\mathbf{Sl}^{+}_{n+1}) =\mathbf{A}_{n}\left[\mathbf{R}_{n}\mathcal{L}(\mathbf{Sl}^{-}_{n}) + \mathcal{L}(\mathbf{Sl}^{+}_{n}) + \mathcal{L}(\mathbf{L}^{+}_{n})f + \mathbf{L}^{+}_{n}\mathcal{L}(f)\right] + \mathcal{L}(\mathbf{Sl}^{+}_{n})
+\label{eq:doubling-tangent_linear-Sl_p_l_thermal}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{Sl}^{-}_{n+1}) = \mathbf{A}_{n}\left[\mathbf{R}_{n}(\mathcal{L}(\mathbf{Sl}^{+}_{n}) + \mathcal{L}(\mathbf{L}^{+}_{n})f + \mathbf{L}^{+}_{n}\mathcal{L}(f)) + \mathcal{L}(\mathbf{Sl}^{-}_{n})\right] + \mathcal{L}(\mathbf{Sl}^{-}_{n}) + \mathcal{L}(\mathbf{L}^{-}_{n})f + \mathbf{L}^{-}_{n}\mathcal{L}(f)
+\label{eq:doubling-tangent_linear-Sl_m_l_thermal}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{Sl}^{+}_{n+1}) = \mathcal{L}(\mathbf{A}_{n})\mathbf{e}_{n} + \mathbf{A}_{n}\left[\mathcal{L}(\mathbf{R}_{n})\mathbf{Sl}^{-}_{n} + \mathbf{R}_{n}\mathcal{L}(\mathbf{Sl}^{-}_{n}) + \mathcal{L}(\mathbf{Sl}^{+}_{n}) + \mathcal{L}(\mathbf{L}^{+}_{n})f + \mathbf{L}^{+}_{n}\mathcal{L}(f)\right] + \mathcal{L}(\mathbf{Sl}^{+}_{n})
+\label{eq:doubling-tangent_linear-Sl_p_l_layers}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{Sl}^{-}_{n+1}) = \mathcal{L}(\mathbf{A}_{n})\mathbf{f}_{n} + \mathbf{A}_{n}\left[\mathcal{L}(\mathbf{R}_{n})(\mathbf{Sl}^{+}_{n} + \mathbf{L}^{+}_{n}f) + \mathbf{R}_{n}(\mathcal{L}(\mathbf{Sl}^{+}_{n}) + \mathcal{L}(\mathbf{L}^{+}_{n})f + \mathbf{L}^{+}_{n}\mathcal{L}(f)) + \mathcal{L}(\mathbf{Sl}^{-}_{n})\right] + \mathcal{L}(\mathbf{Sl}^{-}_{n}) + \mathcal{L}(\mathbf{L}^{-}_{n})f + \mathbf{L}^{-}_{n}\mathcal{L}(f)
+\label{eq:doubling-tangent_linear-Sl_m_l_layers}
+\end{equation}
+
+\end{adjustwidth}
+
+
+\begin{equation}
+\mathcal{L}(\mathbf{R}_{n+1}) = \mathcal{L}(\mathbf{R}_{n}) + \mathcal{L}(\mathbf{A}_{n})\mathbf{B}_{n} + \mathbf{A}_{n}(\mathcal{L}(\mathbf{R}_{n})\mathbf{T}_{n} + \mathbf{R}_{n}\mathcal{L}(\mathbf{T}_{n}))
+\label{eq:doubling-tangent_linear-R_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{T}_{n+1}) = \mathcal{L}(\mathbf{A}_{n})\mathbf{T}_{n} + \mathbf{A}_{n}\mathcal{L}(\mathbf{T}_{n})
+\label{eq:doubling-tangent_linear-T_l}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Adjoint of tangent linear}
+\label{sec:doubling-adjoint_of_tangent_linear}

@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -24,6 +24,8 @@
  ******************************************************************************/
 int layer_add_aux_alloc(layer_add_aux_data *d, int n) {
 
+     d->i13 = alloc_array1_i(n);
+     d->i31 = alloc_array1_i(n);
      d->P13 = alloc_array2_d(n, n);
      d->P31 = alloc_array2_d(n, n);
      d->A13 = alloc_array2_d(n, n);
@@ -32,7 +34,7 @@ int layer_add_aux_alloc(layer_add_aux_data *d, int n) {
      d->B31 = alloc_array2_d(n, n);
 
      if (! (d->P13 && d->P31 && d->A13 && d->A31 && d->B13 && d->B31)) {
-          eprintf("ERROR: alloc_array2_d(%d, %d)\n", n, n);
+          fprintf(stderr, "ERROR: alloc_array2_d(%d, %d)\n", n, n);
           return -1;
      }
 
@@ -40,7 +42,7 @@ int layer_add_aux_alloc(layer_add_aux_data *d, int n) {
      d->C31 = alloc_array1_d(n);
 
      if (! (d->C13 && d->C31)) {
-          eprintf("ERROR: alloc_array1_d(%d)\n", n);
+          fprintf(stderr, "ERROR: alloc_array1_d(%d)\n", n);
           return -1;
      }
 
@@ -51,6 +53,8 @@ int layer_add_aux_alloc(layer_add_aux_data *d, int n) {
 
 void layer_add_aux_free(layer_add_aux_data *d) {
 
+     free_array1_i(d->i13);
+     free_array1_i(d->i31);
      free_array2_d(d->P13);
      free_array2_d(d->P31);
      free_array2_d(d->A13);
@@ -80,7 +84,7 @@ void layer_zero_ref(double **R_m, double *S_p,
  ******************************************************************************/
 void layer_zero_ref_l(double **R_m, double *S_p,
                       double ***R_m_l, double **S_p_l,
-                      int n, int n_derivs, uchar *derivs_h, uchar *derivs_p) {
+                      int n, int n_derivs, uchar *derivs_layers, uchar *derivs_sources) {
 
      int i;
 
@@ -88,9 +92,9 @@ void layer_zero_ref_l(double **R_m, double *S_p,
      dvec_zero(S_p, n);
 
      for (i = 0; i < n_derivs; ++i) {
-          if (derivs_h[i])
+          if (derivs_layers[i])
                dmat_zero(R_m_l[i], n, n);
-          if (derivs_p[i])
+          if (derivs_sources[i])
                dvec_zero(S_p_l[i], n);
      }
 }
@@ -117,7 +121,7 @@ void layer_copy_ref_l(double **R_m2, double *S_p2,
                       double **R_m1, double *S_p1,
                       double ***R_m_l2, double **S_p_l2,
                       double ***R_m_l1, double **S_p_l1,
-                      int n, int n_derivs, uchar *derivs_h, uchar *derivs_p) {
+                      int n, int n_derivs, uchar *derivs_layers, uchar *derivs_sources) {
 
      int i;
 
@@ -125,9 +129,9 @@ void layer_copy_ref_l(double **R_m2, double *S_p2,
      dvec_copy(S_p2, S_p1, n);
 
      for (i = 0; i < n_derivs; ++i) {
-          if (derivs_h[i])
+          if (derivs_layers[i])
                dmat_copy(R_m_l2[i], R_m_l1[i], n, n);
-          if (derivs_p[i])
+          if (derivs_sources[i])
                dvec_copy(S_p_l2[i], S_p_l1[i], n);
      }
 }
@@ -135,20 +139,20 @@ void layer_copy_ref_l(double **R_m2, double *S_p2,
 
 
 /*******************************************************************************
- * 
+ *
  ******************************************************************************/
-static void add_ref_u_p(double **AXX, double **R23, double *S32_l, double *S31_l, int n, double atran, double *v1, double *v2) {
+static void add_ref_u_s(double **AXX, double **R23, double *S32_l, double *S31_l, int n, double atran, double *v1, double *v2) {
 
-     /* S31_l = A31 * S32_l * t12  */
+     /* S31_l = A31 * S32_l * t12 */
      dvec_scale(atran, S32_l, v1, n);
      dm_v_mul(AXX, v1, n, n, S31_l);
 }
 
 
 
-static void add_ref_p_u(double **AXX, double **R23, double *S12_l, double *S21_l, double *S31_l, int n, double atran, double *v1, double *v2) {
+static void add_ref_s_u(double **AXX, double **R23, double *S12_l, double *S21_l, double *S31_l, int n, double atran, double *v1, double *v2) {
 
-     /* S31_l = S21_l + A31 * R23 * S12_l  */
+     /* S31_l = S21_l + A31 * R23 * S12_l */
      dm_v_mul(R23, S12_l, n, n, v1);
 
      dm_v_mul(AXX, v1, n, n, v2);
@@ -158,9 +162,9 @@ static void add_ref_p_u(double **AXX, double **R23, double *S12_l, double *S21_l
 
 
 
-static void add_ref_p_p(double **AXX, double **R23, double *S12_l, double *S21_l, double *S32_l, double *S31_l, int n, double atran, double *v1, double *v2) {
+static void add_ref_s_s(double **AXX, double **R23, double *S12_l, double *S21_l, double *S32_l, double *S31_l, int n, double atran, double *v1, double *v2) {
 
-     /* S31_l = S21_l + A31 * (S32_l * t12 + R23 * S12_l)  */
+     /* S31_l = S21_l + A31 * (S32_l * t12 + R23 * S12_l) */
      dvec_scale(atran, S32_l, v1, n);
      dm_v_mul(R23, S12_l, n, n, v2);
      dvec_add(v1, v2, v1, n);
@@ -172,7 +176,83 @@ static void add_ref_p_p(double **AXX, double **R23, double *S12_l, double *S21_l
 
 
 
-static void add_ref_u_l(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double *S12, double **R21, double **R23, double **R23_l, double *S32_l, double **R13_l, double *S31_l, int n, double atran, double *v1, double *v2, double **w1, double **w2, work_data work) {
+static void add_ref_u_l(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double **R21, double **R23, double **R23_l, double **R13_l, int n, double **w1, double **w2, work_data work) {
+
+     double **DXX;
+     double **EXX;
+
+     DXX = get_work1(&work, WORK_DXX);
+     EXX = get_work1(&work, WORK_DXX);
+
+     /* D31 = A31 * R23_l */
+     dmat_mul(AXX, R23_l, n, n, n, DXX);
+
+     /* E31 = D31 * R21 * P31 */
+     dmat_mul(DXX, R21, n, n, n, EXX);
+     dmat_getrs(PXX, EXX, n, n, i1);
+
+     /* R13_l = E31 * B13 + D31 * T12 */
+     dmat_mul(EXX, BXX, n, n, n, w1);
+     dmat_mul(DXX, T12, n, n, n, w2);
+     dmat_add(w1, w2, R13_l, n, n);
+}
+
+
+
+static void add_ref_l_u(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **R23, double **R12_l, double **T12_l, double **R21_l, double **T21_l, double **R13_l, int n, double **w1, double **w2, work_data work) {
+
+     double **DXX;
+     double **EXX;
+
+     DXX = get_work1(&work, WORK_DXX);
+     EXX = get_work1(&work, WORK_DXX);
+
+     /* D31 = A31 * R23 */
+     dmat_mul(AXX, R23, n, n, n, DXX);
+
+     /* E31 = (T21_l + D31 * R21_l) * P31 */
+     dmat_mul(DXX, R21_l, n, n, n, EXX);
+     dmat_add(T21_l, EXX, EXX, n, n);
+     dmat_getrs(PXX, EXX, n, n, i1);
+
+     /* R13_l = R12_l + E31 * B13 + D31 * T12_l */
+     dmat_mul(EXX, BXX, n, n, n, w1);
+     dmat_mul(DXX, T12_l, n, n, n, w2);
+     dmat_add(w1, w2, w1, n, n);
+     dmat_add(R12_l, w1, R13_l, n, n);
+}
+
+
+
+static void add_ref_l_l(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double *S12, double **R21, double **R23, double *S32, double **R12_l, double **T12_l, double **R21_l, double **T21_l, double **R23_l, double **R13_l, double *S31_l, int n, double atran_l, double *v1, double *v2, double **w1, double **w2, work_data work) {
+
+     double **DXX;
+
+     DXX = get_work1(&work, WORK_DXX);
+
+     /* D31 = (T21_l + A31 * (R23_l * R21 + R23 * R21_l)) * P31 */
+     dmat_mul(R23_l, R21, n, n, n, w1);
+     dmat_mul(R23, R21_l, n, n, n, w2);
+     dmat_add(w1, w2, w1, n, n);
+     dmat_mul(AXX, w1, n, n, n, w2);
+
+     dmat_add(T21_l, w2, DXX, n, n);
+
+     dmat_getrs(PXX, DXX, n, n, i1);
+
+     /* R13_l = R12_l + D31 * B13 + A31 * (R23_l * T12 + R23 * T12_l) */
+     dmat_mul(R23_l, T12, n, n, n, w1);
+     dmat_mul(R23, T12_l, n, n, n, w2);
+     dmat_add(w1, w2, w1, n, n);
+     dmat_mul(AXX, w1, n, n, n, w2);
+     dmat_add(R12_l, w2, w1, n, n);
+     dmat_mul(DXX, BXX, n, n, n, w2);
+     dmat_add(w1, w2, R13_l, n, n);
+}
+
+
+
+static void add_ref_u_b(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double *S12, double **R21, double **R23, double **R23_l, double *S32_l, double **R13_l, double *S31_l, int n, double atran, double *v1, double *v2, double **w1, double **w2, work_data work) {
 
      double **DXX;
      double **EXX;
@@ -205,7 +285,7 @@ static void add_ref_u_l(double **PXX, int *i1, double **AXX, double **BXX, doubl
 
 
 
-static void add_ref_l_u(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **R23, double *S32, double **R12_l, double **T12_l, double *S12_l, double **R21_l, double **T21_l, double *S21_l, double **R13_l, double *S31_l, int n, double atran, double atran_l, double *v1, double *v2, double **w1, double **w2, work_data work) {
+static void add_ref_b_u(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **R23, double *S32, double **R12_l, double **T12_l, double *S12_l, double **R21_l, double **T21_l, double *S21_l, double **R13_l, double *S31_l, int n, double atran, double atran_l, double *v1, double *v2, double **w1, double **w2, work_data work) {
 
      double **DXX;
      double **EXX;
@@ -221,7 +301,7 @@ static void add_ref_l_u(double **PXX, int *i1, double **AXX, double **BXX, doubl
      dmat_add(T21_l, EXX, EXX, n, n);
      dmat_getrs(PXX, EXX, n, n, i1);
 
-     /* S31_l = S21_l + E31 * C31 + A31 * (S32 * L(t12) + R23 * S12_l)  */
+     /* S31_l = S21_l + E31 * C31 + A31 * (S32 * L(t12) + R23 * S12_l) */
      dvec_scale(atran_l, S32, v1, n);
      dm_v_mul(R23, S12_l, n, n, v2);
      dvec_add(v1, v2, v1, n);
@@ -242,7 +322,7 @@ static void add_ref_l_u(double **PXX, int *i1, double **AXX, double **BXX, doubl
 
 
 
-static void add_ref_p_l(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double *S12, double **R21, double **R23, double *S12_l, double *S21_l, double **R23_l, double *S32_l, double **R13_l, double *S31_l, int n, double atran, double *v1, double *v2, double **w1, double **w2, work_data work) {
+static void add_ref_s_b(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double *S12, double **R21, double **R23, double *S12_l, double *S21_l, double **R23_l, double *S32_l, double **R13_l, double *S31_l, int n, double atran, double *v1, double *v2, double **w1, double **w2, work_data work) {
 
      double **DXX;
      double **EXX;
@@ -257,7 +337,7 @@ static void add_ref_p_l(double **PXX, int *i1, double **AXX, double **BXX, doubl
      dmat_mul(DXX, R21, n, n, n, EXX);
      dmat_getrs(PXX, EXX, n, n, i1);
 
-     /* S31_l = S21_l + E31 * C31 + A31 * (S32_l * t12 + R23_l * S12 + R23 * S12_l)  */
+     /* S31_l = S21_l + E31 * C31 + A31 * (S32_l * t12 + R23_l * S12 + R23 * S12_l) */
      dvec_scale(atran, S32_l, v1, n);
      dm_v_mul(R23_l, S12, n, n, v2);
      dvec_add(v1, v2, v1, n);
@@ -279,7 +359,7 @@ static void add_ref_p_l(double **PXX, int *i1, double **AXX, double **BXX, doubl
 
 
 
-static void add_ref_l_p(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **R23, double *S32, double **R12_l, double **T12_l, double *S12_l, double **R21_l, double **T21_l, double *S21_l, double *S32_l, double **R13_l, double *S31_l, int n, double atran, double atran_l, double *v1, double *v2, double **w1, double **w2, work_data work) {
+static void add_ref_b_s(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **R23, double *S32, double **R12_l, double **T12_l, double *S12_l, double **R21_l, double **T21_l, double *S21_l, double *S32_l, double **R13_l, double *S31_l, int n, double atran, double atran_l, double *v1, double *v2, double **w1, double **w2, work_data work) {
 
      double **DXX;
      double **EXX;
@@ -318,8 +398,7 @@ static void add_ref_l_p(double **PXX, int *i1, double **AXX, double **BXX, doubl
 }
 
 
-
-static void add_ref_l_l(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double *S12, double **R21, double **R23, double *S32, double **R12_l, double **T12_l, double *S12_l, double **R21_l, double **T21_l, double *S21_l, double **R23_l, double *S32_l, double **R13_l, double *S31_l, int n, double atran, double atran_l, double *v1, double *v2, double **w1, double **w2, work_data work) {
+static void add_ref_b_l(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double *S12, double **R21, double **R23, double *S32, double **R12_l, double **T12_l, double *S12_l, double **R21_l, double **T21_l, double *S21_l, double **R23_l, double **R13_l, double *S31_l, int n, double atran, double atran_l, double *v1, double *v2, double **w1, double **w2, work_data work) {
 
      double **DXX;
 
@@ -335,7 +414,49 @@ static void add_ref_l_l(double **PXX, int *i1, double **AXX, double **BXX, doubl
 
      dmat_getrs(PXX, DXX, n, n, i1);
 
-     /* S31_l = S21_l + D31 * C31 + A31 * (S32_l * t12 + S32 * L(t12) + R23_l * S12 + R23 * S12_l)  */
+     /* S31_l = S21_l + D31 * C31 + A31 * (S32 * L(t12) + R23_l * S12 + R23 * S12_l) */
+     dvec_scale(atran_l, S32, v1, n);
+     dm_v_mul(R23_l, S12, n, n, v2);
+     dvec_add(v1, v2, v1, n);
+     dm_v_mul(R23, S12_l, n, n, v2);
+     dvec_add(v1, v2, v1, n);
+
+     dm_v_mul(AXX, v1, n, n, v2);
+
+     dvec_add(S21_l, v2, v1, n);
+
+     dm_v_mul(DXX, CXX, n, n, v2);
+     dvec_add(v1, v2, S31_l, n);
+
+     /* R13_l = R12_l + D31 * B13 + A31 * (R23_l * T12 + R23 * T12_l) */
+     dmat_mul(R23_l, T12, n, n, n, w1);
+     dmat_mul(R23, T12_l, n, n, n, w2);
+     dmat_add(w1, w2, w1, n, n);
+     dmat_mul(AXX, w1, n, n, n, w2);
+     dmat_add(R12_l, w2, w1, n, n);
+     dmat_mul(DXX, BXX, n, n, n, w2);
+     dmat_add(w1, w2, R13_l, n, n);
+}
+
+
+
+static void add_ref_b_b(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double *S12, double **R21, double **R23, double *S32, double **R12_l, double **T12_l, double *S12_l, double **R21_l, double **T21_l, double *S21_l, double **R23_l, double *S32_l, double **R13_l, double *S31_l, int n, double atran, double atran_l, double *v1, double *v2, double **w1, double **w2, work_data work) {
+
+     double **DXX;
+
+     DXX = get_work1(&work, WORK_DXX);
+
+     /* D31 = (T21_l + A31 * (R23_l * R21 + R23 * R21_l)) * P31 */
+     dmat_mul(R23_l, R21, n, n, n, w1);
+     dmat_mul(R23, R21_l, n, n, n, w2);
+     dmat_add(w1, w2, w1, n, n);
+     dmat_mul(AXX, w1, n, n, n, w2);
+
+     dmat_add(T21_l, w2, DXX, n, n);
+
+     dmat_getrs(PXX, DXX, n, n, i1);
+
+     /* S31_l = S21_l + D31 * C31 + A31 * (S32_l * t12 + S32 * L(t12) + R23_l * S12 + R23 * S12_l) */
      dvec_scale(atran, S32_l, v1, n);
      dvec_scale(atran_l, S32, v2, n);
      dvec_add(v1, v2, v1, n);
@@ -450,29 +571,55 @@ void layer_add_ref(double **R12, double **T12, double *S12,
      dvec_add(v1, v2, CXX, n);
 
      for (i = 0; i < n_derivs; ++i) {
-          if ((! flag && derivs[i] == ADDING_U_P) || (flag && derivs[i] == ADDING_P_U))
-               add_ref_u_p(AXX, R23, S32_l[i], S31_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_U)
+               ;
           else
-          if ((! flag && derivs[i] == ADDING_P_U) || (flag && derivs[i] == ADDING_U_P))
-               add_ref_p_u(AXX, R23, S12_l[i], S21_l[i], S31_l[i], n, atran, v1, v2);
+          if ((! flag && derivs[i] == ADDING_U_S) || (flag && derivs[i] == ADDING_S_U))
+               add_ref_u_s(AXX, R23, S32_l[i], S31_l[i], n, atran, v1, v2);
           else
-          if (derivs[i] == ADDING_P_P)
-               add_ref_p_p(AXX, R23, S12_l[i], S21_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
+          if ((! flag && derivs[i] == ADDING_S_U) || (flag && derivs[i] == ADDING_U_S))
+               add_ref_s_u(AXX, R23, S12_l[i], S21_l[i], S31_l[i], n, atran, v1, v2);
+          else
+          if (derivs[i] == ADDING_S_S)
+               add_ref_s_s(AXX, R23, S12_l[i], S21_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
           else
           if ((! flag && derivs[i] == ADDING_U_L) || (flag && derivs[i] == ADDING_L_U))
-               add_ref_u_l(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, R23_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, v1, v2, w1, w2, work);
+               add_ref_u_l(PXX, i1, AXX, BXX, CXX, T12, R21, R23, R23_l[i], R13_l[i], n, w1, w2, work);
           else
           if ((! flag && derivs[i] == ADDING_L_U) || (flag && derivs[i] == ADDING_U_L))
-               add_ref_l_u(PXX, i1, AXX, BXX, CXX, R23, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], R13_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
-          else
-          if ((! flag && derivs[i] == ADDING_P_L) || (flag && derivs[i] == ADDING_L_P))
-               add_ref_p_l(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, S12_l[i], S21_l[i], R23_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, v1, v2, w1, w2, work);
-          else
-          if ((! flag && derivs[i] == ADDING_L_P) || (flag && derivs[i] == ADDING_P_L))
-               add_ref_l_p(PXX, i1, AXX, BXX, CXX, R23, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+               add_ref_l_u(PXX, i1, AXX, BXX, CXX, R23, R12_l[i], T12_l[i], R21_l[i], T21_l[i], R13_l[i], n, w1, w2, work);
           else
           if (derivs[i] == ADDING_L_L)
-               add_ref_l_l(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], R23_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+               add_ref_l_l(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, S32, R12_l[i], T12_l[i], R21_l[i], T21_l[i], R23_l[i], R13_l[i], S31_l[i], n, atran_l[i], v1, v2, w1, w2, work);
+          else
+          if ((! flag && derivs[i] == ADDING_U_B) || (flag && derivs[i] == ADDING_B_U))
+               add_ref_u_b(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, R23_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, v1, v2, w1, w2, work);
+          else
+          if ((! flag && derivs[i] == ADDING_B_U) || (flag && derivs[i] == ADDING_U_B))
+               add_ref_b_u(PXX, i1, AXX, BXX, CXX, R23, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], R13_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          else
+          if ((! flag && derivs[i] == ADDING_S_B) || (flag && derivs[i] == ADDING_B_S))
+               add_ref_s_b(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, S12_l[i], S21_l[i], R23_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, v1, v2, w1, w2, work);
+          else
+          if ((! flag && derivs[i] == ADDING_B_S) || (flag && derivs[i] == ADDING_S_B))
+               add_ref_b_s(PXX, i1, AXX, BXX, CXX, R23, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_L_B) {
+               fprintf(stderr, "ERROR: layer_add_all(), adding combination not implemented: ADDING_L_B\n");
+               exit(1);
+          }
+          else
+          if (derivs[i] == ADDING_B_L)
+               add_ref_b_l(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], R23_l[i], R13_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_B_B)
+               add_ref_b_b(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], R23_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+#ifdef DEBUG
+          else {
+               fprintf(stderr, "ERROR: layer_add_ref(), invalid upward (relfectance only) adding up combination: %d\n", derivs[i]);
+               exit(1);
+          }
+#endif
      }
 if (flag2) {
      /* S31 = S21       + A31 * C31 */
@@ -529,8 +676,6 @@ void layer_add_ref2(double **R12, double **T12, double *S12,
      double **AXX;
      double **BXX;
 
-     i1  = get_work1(&work, WORK_IX);
-
      CXX = get_work1(&work, WORK_DX);
 
      v1  = get_work1(&work, WORK_DX);
@@ -541,6 +686,7 @@ void layer_add_ref2(double **R12, double **T12, double *S12,
      if (n_derivs > 0)
           w2  = get_work1(&work, WORK_DXX);
 if (! d) {
+     i1  = get_work1(&work, WORK_IX);
      PXX = get_work1(&work, WORK_DXX);
      AXX = get_work1(&work, WORK_DXX);
      BXX = get_work1(&work, WORK_DXX);
@@ -550,6 +696,7 @@ if (! d) {
       *
       *-----------------------------------------------------------------------*/
 if (d) {
+     i1  = d->i31;
      PXX = d->P31;
      AXX = d->A31;
      BXX = d->B13;
@@ -574,29 +721,48 @@ if (! d || flag3) {
      dvec_add(v1, v2, CXX, n);
 
      for (i = 0; i < n_derivs; ++i) {
-          if ((! flag && derivs[i] == ADDING_U_P) || (flag && derivs[i] == ADDING_P_U))
-               add_ref_u_p(AXX, R23, S32_l[i], S31_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_U)
+               ;
           else
-          if ((! flag && derivs[i] == ADDING_P_U) || (flag && derivs[i] == ADDING_U_P))
-               add_ref_p_u(AXX, R23, S12_l[i], S21_l[i], S31_l[i], n, atran, v1, v2);
+          if ((! flag && derivs[i] == ADDING_U_S) || (flag && derivs[i] == ADDING_S_U))
+               add_ref_u_s(AXX, R23, S32_l[i], S31_l[i], n, atran, v1, v2);
           else
-          if (derivs[i] == ADDING_P_P)
-               add_ref_p_p(AXX, R23, S12_l[i], S21_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
+          if ((! flag && derivs[i] == ADDING_S_U) || (flag && derivs[i] == ADDING_U_S))
+               add_ref_s_u(AXX, R23, S12_l[i], S21_l[i], S31_l[i], n, atran, v1, v2);
           else
-          if ((! flag && derivs[i] == ADDING_U_L) || (flag && derivs[i] == ADDING_L_U))
-               add_ref_u_l(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, R23_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, v1, v2, w1, w2, work);
+          if (derivs[i] == ADDING_S_S)
+               add_ref_s_s(AXX, R23, S12_l[i], S21_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
           else
-          if ((! flag && derivs[i] == ADDING_L_U) || (flag && derivs[i] == ADDING_U_L))
-               add_ref_l_u(PXX, i1, AXX, BXX, CXX, R23, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], R13_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          if ((! flag && derivs[i] == ADDING_U_B) || (flag && derivs[i] == ADDING_B_U))
+               add_ref_u_b(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, R23_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, v1, v2, w1, w2, work);
           else
-          if ((! flag && derivs[i] == ADDING_P_L) || (flag && derivs[i] == ADDING_L_P))
-               add_ref_p_l(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, S12_l[i], S21_l[i], R23_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, v1, v2, w1, w2, work);
+          if ((! flag && derivs[i] == ADDING_B_U) || (flag && derivs[i] == ADDING_U_B))
+               add_ref_b_u(PXX, i1, AXX, BXX, CXX, R23, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], R13_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
           else
-          if ((! flag && derivs[i] == ADDING_L_P) || (flag && derivs[i] == ADDING_P_L))
-               add_ref_l_p(PXX, i1, AXX, BXX, CXX, R23, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          if ((! flag && derivs[i] == ADDING_S_B) || (flag && derivs[i] == ADDING_B_S))
+               add_ref_s_b(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, S12_l[i], S21_l[i], R23_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, v1, v2, w1, w2, work);
           else
-          if (derivs[i] == ADDING_L_L)
-               add_ref_l_l(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], R23_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          if ((! flag && derivs[i] == ADDING_B_S) || (flag && derivs[i] == ADDING_S_B))
+               add_ref_b_s(PXX, i1, AXX, BXX, CXX, R23, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_L_B) {
+               fprintf(stderr, "ERROR: layer_add_all(), adding combination not implemented: ADDING_L_B\n");
+               exit(1);
+          }
+          else
+          if (derivs[i] == ADDING_B_L) {
+               fprintf(stderr, "ERROR: layer_add_all(), adding combination not implemented: ADDING_B_L\n");
+               exit(1);
+          }
+          else
+          if (derivs[i] == ADDING_B_B)
+               add_ref_b_b(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], R23_l[i], S32_l[i], R13_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+#ifdef DEBUG
+          else {
+               fprintf(stderr, "ERROR: layer_add_ref2(), invalid upward (relfectance only) adding up combination: %d\n", derivs[i]);
+               exit(1);
+          }
+#endif
      }
 if (flag2) {
      /* S31 = S21       + A31 * C31 */
@@ -697,35 +863,46 @@ void layer_copy_all_l(double **R_m2, double **T_m2, double *S_m2,
      dvec_copy(S_p2, S_p1, n);
 
      for (i = 0; i < n_derivs; ++i) {
-          if (! derivs[i])
-               continue;
-
-          dmat_copy(R_m_l2[i], R_m_l1[i], n, n);
-          dmat_copy(T_m_l2[i], T_m_l1[i], n, n);
-          dvec_copy(S_m_l2[i], S_m_l1[i], n);
-          dmat_copy(R_p_l2[i], R_p_l1[i], n, n);
-          dmat_copy(T_p_l2[i], T_p_l1[i], n, n);
-          dvec_copy(S_p_l2[i], S_p_l1[i], n);
+          if (derivs[i] == ADDING_U_S) {
+               dvec_copy(S_m_l2[i], S_m_l1[i], n);
+               dvec_copy(S_p_l2[i], S_p_l1[i], n);
+          }
+          else
+          if (derivs[i] == ADDING_U_L) {
+               dmat_copy(R_m_l2[i], R_m_l1[i], n, n);
+               dmat_copy(T_m_l2[i], T_m_l1[i], n, n);
+               dmat_copy(R_p_l2[i], R_p_l1[i], n, n);
+               dmat_copy(T_p_l2[i], T_p_l1[i], n, n);
+          }
+          else
+          if (derivs[i] == ADDING_U_B) {
+               dmat_copy(R_m_l2[i], R_m_l1[i], n, n);
+               dmat_copy(T_m_l2[i], T_m_l1[i], n, n);
+               dvec_copy(S_m_l2[i], S_m_l1[i], n);
+               dmat_copy(R_p_l2[i], R_p_l1[i], n, n);
+               dmat_copy(T_p_l2[i], T_p_l1[i], n, n);
+               dvec_copy(S_p_l2[i], S_p_l1[i], n);
+          }
      }
 }
 
 
 
 /*******************************************************************************
- * 
+ *
  ******************************************************************************/
-static void add_all_u_p_up(double **AXX, double **R23, double *S23_l, double *S32_l, double *S31_l, int n, double atran, double *v1, double *v2) {
+static void add_all_u_s_up(double **AXX, double **R23, double *S23_l, double *S32_l, double *S31_l, int n, double atran, double *v1, double *v2) {
 
-     /* S31_l = A31 * S32_l * t12  */
+     /* S31_l = A31 * S32_l * t12 */
      dvec_scale(atran, S32_l, v1, n);
      dm_v_mul(AXX, v1, n, n, S31_l);
 }
 
 
 
-static void add_all_p_u_up(double **AXX, double **R23, double *S12_l, double *S21_l, double *S31_l, int n, double atran, double *v1, double *v2) {
+static void add_all_s_u_up(double **AXX, double **R23, double *S12_l, double *S21_l, double *S31_l, int n, double atran, double *v1, double *v2) {
 
-     /* S31_l = S21_l + A31 * R23 * S12_l  */
+     /* S31_l = S21_l + A31 * R23 * S12_l */
      dm_v_mul(R23, S12_l, n, n, v1);
 
      dm_v_mul(AXX, v1, n, n, v2);
@@ -735,9 +912,9 @@ static void add_all_p_u_up(double **AXX, double **R23, double *S12_l, double *S2
 
 
 
-static void add_all_p_p_up(double **AXX, double **R23, double *S12_l, double *S21_l, double *S23_l, double *S32_l, double *S31_l, int n, double atran, double *v1, double *v2) {
+static void add_all_s_s_up(double **AXX, double **R23, double *S12_l, double *S21_l, double *S23_l, double *S32_l, double *S31_l, int n, double atran, double *v1, double *v2) {
 
-     /* S31_l = S21_l + A31 * (S32_l * t12 + R23 * S12_l)  */
+     /* S31_l = S21_l + A31 * (S32_l * t12 + R23 * S12_l) */
      dvec_scale(atran, S32_l, v1, n);
      dm_v_mul(R23, S12_l, n, n, v2);
      dvec_add(v1, v2, v1, n);
@@ -749,7 +926,99 @@ static void add_all_p_p_up(double **AXX, double **R23, double *S12_l, double *S2
 
 
 
-static void add_all_u_l_up(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double *S12, double **R21, double **T32, double **R23_l, double **T32_l, double *S32_l, double **R13_l, double **T31_l, double *S31_l, int n, double atran, double *v1, double *v2, double **w1, double **w2, work_data work) {
+static void add_all_u_l_up(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double **R21, double **T32, double **R23_l, double **T32_l, double **R13_l, double **T31_l, int n, double **w1, double **w2, work_data work) {
+
+     double **DXX;
+     double **EXX;
+
+     DXX = get_work1(&work, WORK_DXX);
+     EXX = get_work1(&work, WORK_DXX);
+
+     /* D31 = A31 * R23_l */
+     dmat_mul(AXX, R23_l, n, n, n, DXX);
+
+     /* E31 = D31 * R21 * P31 */
+     dmat_mul(DXX, R21, n, n, n, EXX);
+     dmat_getrs(PXX, EXX, n, n, i1);
+
+     /* R13_l = E31 * B13 + D31 * T12 */
+     dmat_mul(EXX, BXX, n, n, n, w1);
+     dmat_mul(DXX, T12, n, n, n, w2);
+     dmat_add(w1, w2, R13_l, n, n);
+
+     /* T31_l = E31 * T32 + A31 * T32_l */
+     dmat_mul(EXX, T32, n, n, n, w1);
+     dmat_mul(AXX, T32_l, n, n, n, w2);
+     dmat_add(w1, w2, T31_l, n, n);
+}
+
+
+
+static void add_all_l_u_up(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **DXX, double **R23, double **T32, double **R12_l, double **T12_l, double **R21_l, double **T21_l, double **R13_l, double **T31_l, int n, double **w1, double **w2, work_data work) {
+/*
+     double **DXX;
+*/
+     double **EXX;
+/*
+     DXX = get_work1(&work, WORK_DXX);
+*/
+     EXX = get_work1(&work, WORK_DXX);
+
+     /* D31 = A31 * R23 */
+/*
+     dmat_mul(AXX, R23, n, n, n, DXX);
+*/
+     /* E31 = (T21_l + D31 * R21_l) * P31 */
+     dmat_mul(DXX, R21_l, n, n, n, EXX);
+     dmat_add(T21_l, EXX, EXX, n, n);
+     dmat_getrs(PXX, EXX, n, n, i1);
+
+     /* R13_l = R12_l + E31 * B13 + D31 * T12_l */
+     dmat_mul(EXX, BXX, n, n, n, w1);
+     dmat_mul(DXX, T12_l, n, n, n, w2);
+     dmat_add(w1, w2, w1, n, n);
+     dmat_add(R12_l, w1, R13_l, n, n);
+
+     /* T31_l = E31 * T32 */
+     dmat_mul(EXX, T32, n, n, n, T31_l);
+}
+
+
+
+static void add_all_l_l_up(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double **R21, double **R23, double **T32, double **R12_l, double **T12_l, double **R21_l, double **T21_l, double **R23_l, double **T32_l, double **R13_l, double **T31_l, int n, double **w1, double **w2, work_data work) {
+
+     double **DXX;
+
+     DXX = get_work1(&work, WORK_DXX);
+
+     /* D31 = (T21_l + A31 * (R23_l * R21 + R23 * R21_l)) * P31 */
+     dmat_mul(R23_l, R21, n, n, n, w1);
+     dmat_mul(R23, R21_l, n, n, n, w2);
+     dmat_add(w1, w2, w1, n, n);
+     dmat_mul(AXX, w1, n, n, n, w2);
+
+     dmat_add(T21_l, w2, DXX, n, n);
+
+     dmat_getrs(PXX, DXX, n, n, i1);
+
+     /* R13_l = R12_l + D31 * B13 + A31 * (R23_l * T12 + R23 * T12_l) */
+     dmat_mul(R23_l, T12, n, n, n, w1);
+     dmat_mul(R23, T12_l, n, n, n, w2);
+     dmat_add(w1, w2, w1, n, n);
+     dmat_mul(AXX, w1, n, n, n, w2);
+     dmat_add(R12_l, w2, w1, n, n);
+     dmat_mul(DXX, BXX, n, n, n, w2);
+     dmat_add(w1, w2, R13_l, n, n);
+
+     /* T31_l = D31 * T32 + A31 * T32_l */
+     dmat_mul(DXX, T32, n, n, n, w1);
+     dmat_mul(AXX, T32_l, n, n, n, w2);
+     dmat_add(w1, w2, T31_l, n, n);
+}
+
+
+
+static void add_all_u_b_up(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double *S12, double **R21, double **T32, double **R23_l, double **T32_l, double *S32_l, double **R13_l, double **T31_l, double *S31_l, int n, double atran, double *v1, double *v2, double **w1, double **w2, work_data work) {
 
      double **DXX;
      double **EXX;
@@ -787,7 +1056,7 @@ static void add_all_u_l_up(double **PXX, int *i1, double **AXX, double **BXX, do
 
 
 
-static void add_all_l_u_up(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **DXX, double **R23, double **T32, double *S32, double **R12_l, double **T12_l, double *S12_l, double **R21_l, double **T21_l, double *S21_l, double **R13_l, double **T31_l, double *S31_l, int n, double atran, double atran_l, double *v1, double *v2, double **w1, double **w2, work_data work) {
+static void add_all_b_u_up(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **DXX, double **R23, double **T32, double *S32, double **R12_l, double **T12_l, double *S12_l, double **R21_l, double **T21_l, double *S21_l, double **R13_l, double **T31_l, double *S31_l, int n, double atran, double atran_l, double *v1, double *v2, double **w1, double **w2, work_data work) {
 /*
      double **DXX;
 */
@@ -806,7 +1075,7 @@ static void add_all_l_u_up(double **PXX, int *i1, double **AXX, double **BXX, do
      dmat_add(T21_l, EXX, EXX, n, n);
      dmat_getrs(PXX, EXX, n, n, i1);
 
-     /* S31_l = S21_l + E31 * C31 + A31 * (S32 * L(t12) + R23 * S12_l)  */
+     /* S31_l = S21_l + E31 * C31 + A31 * (S32 * L(t12) + R23 * S12_l) */
      dvec_scale(atran_l, S32, v1, n);
      dm_v_mul(R23, S12_l, n, n, v2);
      dvec_add(v1, v2, v1, n);
@@ -830,7 +1099,7 @@ static void add_all_l_u_up(double **PXX, int *i1, double **AXX, double **BXX, do
 
 
 
-static void add_all_p_l_up(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double *S12, double **R21, double **R23, double **T32, double *S12_l, double *S21_l, double **R23_l, double **T32_l, double *S32_l, double **R13_l, double **T31_l, double *S31_l, int n, double atran, double *v1, double *v2, double **w1, double **w2, work_data work) {
+static void add_all_s_b_up(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double *S12, double **R21, double **R23, double **T32, double *S12_l, double *S21_l, double **R23_l, double **T32_l, double *S32_l, double **R13_l, double **T31_l, double *S31_l, int n, double atran, double *v1, double *v2, double **w1, double **w2, work_data work) {
 
      double **DXX;
      double **EXX;
@@ -872,7 +1141,7 @@ static void add_all_p_l_up(double **PXX, int *i1, double **AXX, double **BXX, do
 
 
 
-static void add_all_l_p_up(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **DXX, double **R23, double **T32, double *S32, double **R12_l, double **T12_l, double *S12_l, double **R21_l, double **T21_l, double *S21_l, double *S32_l, double **R13_l, double **T31_l, double *S31_l, int n, double atran, double atran_l, double *v1, double *v2, double **w1, double **w2, work_data work) {
+static void add_all_b_s_up(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **DXX, double **R23, double **T32, double *S32, double **R12_l, double **T12_l, double *S12_l, double **R21_l, double **T21_l, double *S21_l, double *S32_l, double **R13_l, double **T31_l, double *S31_l, int n, double atran, double atran_l, double *v1, double *v2, double **w1, double **w2, work_data work) {
 /*
      double **DXX;
 */
@@ -918,7 +1187,7 @@ static void add_all_l_p_up(double **PXX, int *i1, double **AXX, double **BXX, do
 
 
 
-static void add_all_l_l_up(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double *S12, double **R21, double **R23, double **T32, double *S32, double **R12_l, double **T12_l, double *S12_l, double **R21_l, double **T21_l, double *S21_l, double **R23_l, double **T32_l, double *S32_l, double **R13_l, double **T31_l, double *S31_l, int n, double atran, double atran_l, double *v1, double *v2, double **w1, double **w2, work_data work) {
+static void add_all_b_b_up(double **PXX, int *i1, double **AXX, double **BXX, double *CXX, double **T12, double *S12, double **R21, double **R23, double **T32, double *S32, double **R12_l, double **T12_l, double *S12_l, double **R21_l, double **T21_l, double *S21_l, double **R23_l, double **T32_l, double *S32_l, double **R13_l, double **T31_l, double *S31_l, int n, double atran, double atran_l, double *v1, double *v2, double **w1, double **w2, work_data work) {
 
      double **DXX;
 
@@ -934,7 +1203,7 @@ static void add_all_l_l_up(double **PXX, int *i1, double **AXX, double **BXX, do
 
      dmat_getrs(PXX, DXX, n, n, i1);
 
-     /* S31_l = S21_l + D31 * C31 + A31 * (S32_l * t12 + S32 * L(t12) + R23_l * S12 + R23 * S12_l)  */
+     /* S31_l = S21_l + D31 * C31 + A31 * (S32_l * t12 + S32 * L(t12) + R23_l * S12 + R23 * S12_l) */
      dvec_scale(atran, S32_l, v1, n);
      dvec_scale(atran_l, S32, v2, n);
      dvec_add(v1, v2, v1, n);
@@ -1031,11 +1300,20 @@ if (flag) {
      dvec_add(v1, v2, CXX, n);
 }
      for (i = 0; i < n_derivs; ++i) {
-          if (derivs[i] == ADDING_U_P)
-               add_all_u_p_up(AXX, R23, S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_U)
+               ;
           else
-          if (derivs[i] == ADDING_P_P)
-               add_all_p_p_up(AXX, R23, S12_l[i], S21_l[i], S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_S)
+               add_all_u_s_up(AXX, R23, S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
+          else
+          if (derivs[i] == ADDING_S_S)
+               add_all_s_s_up(AXX, R23, S12_l[i], S21_l[i], S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
+#ifdef DEBUG
+          else {
+               fprintf(stderr, "ERROR: source_add_all(), invalid adding up combination: %d\n", derivs[i]);
+               exit(1);
+          }
+#endif
      }
 if (flag) {
      /* S31 = S21       + A31 * C31 */
@@ -1063,11 +1341,20 @@ if (flag) {
      dvec_add(S12, v1, CXX, n);
 }
      for (i = 0; i < n_derivs; ++i) {
-          if (derivs[i] == ADDING_U_P)
-               add_all_p_u_up(AXX, R21, S32_l[i], S23_l[i], S13_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_U)
+               ;
           else
-          if (derivs[i] == ADDING_P_P)
-               add_all_p_p_up(AXX, R21, S32_l[i], S23_l[i], S21_l[i], S12_l[i], S13_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_S)
+               add_all_s_u_up(AXX, R21, S32_l[i], S23_l[i], S13_l[i], n, atran, v1, v2);
+          else
+          if (derivs[i] == ADDING_S_S)
+               add_all_s_s_up(AXX, R21, S32_l[i], S23_l[i], S21_l[i], S12_l[i], S13_l[i], n, atran, v1, v2);
+#ifdef DEBUG
+          else {
+               fprintf(stderr, "ERROR: source_add_all(), invalid adding down combination: %d\n", derivs[i]);
+               exit(1);
+          }
+#endif
      }
 if (flag) {
      /* S13 = S23 * t12 + A13 * C13 */
@@ -1229,20 +1516,54 @@ void layer_add_all(double **R12, double **T12, double *S12,
           dmat_mul(AXX, R23, n, n, n, DXX);
 
      for (i = 0; i < n_derivs; ++i) {
-          if (derivs[i] == ADDING_U_P)
-               add_all_u_p_up(AXX, R23, S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_U)
+               ;
           else
-          if (derivs[i] == ADDING_P_P)
-               add_all_p_p_up(AXX, R23, S12_l[i], S21_l[i], S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_S)
+               add_all_u_s_up(AXX, R23, S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
+          else
+          if (derivs[i] == ADDING_S_S)
+               add_all_s_s_up(AXX, R23, S12_l[i], S21_l[i], S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
           else
           if (derivs[i] == ADDING_U_L)
-               add_all_u_l_up(PXX, i1, AXX, BXX, CXX, T12, S12, R21, T32, R23_l[i], T32_l[i], S32_l[i], R13_l[i], T31_l[i], S31_l[i], n, atran, v1, v2, w1, w2, work);
+               add_all_u_l_up(PXX, i1, AXX, BXX, CXX, T12, R21, T32, R23_l[i], T32_l[i], R13_l[i], T31_l[i], n, w1, w2, work);
           else
-          if (derivs[i] == ADDING_L_P)
-               add_all_l_p_up(PXX, i1, AXX, BXX, CXX, DXX, R23, T32, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], S32_l[i], R13_l[i], T31_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          if (derivs[i] == ADDING_L_U)
+               add_all_l_u_up(PXX, i1, AXX, BXX, CXX, DXX, R23, T32, R12_l[i], T12_l[i], R21_l[i], T21_l[i], R13_l[i], T31_l[i], n, w1, w2, work);
           else
           if (derivs[i] == ADDING_L_L)
-               add_all_l_l_up(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, T32, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], R23_l[i], T32_l[i], S32_l[i], R13_l[i], T31_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+               add_all_l_l_up(PXX, i1, AXX, BXX, CXX, T12, R21, R23, T32, R12_l[i], T12_l[i], R21_l[i], T21_l[i], R23_l[i], T32_l[i], R13_l[i], T31_l[i], n, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_U_B)
+               add_all_u_b_up(PXX, i1, AXX, BXX, CXX, T12, S12, R21, T32, R23_l[i], T32_l[i], S32_l[i], R13_l[i], T31_l[i], S31_l[i], n, atran, v1, v2, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_B_U)
+               add_all_b_u_up(PXX, i1, AXX, BXX, CXX, DXX, R23, T32, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], R13_l[i], T31_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_S_B)
+               add_all_s_b_up(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, T32, S12_l[i], S21_l[i], R23_l[i], T32_l[i], S32_l[i], R13_l[i], T31_l[i], S31_l[i], n, atran, v1, v2, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_B_S)
+               add_all_b_s_up(PXX, i1, AXX, BXX, CXX, DXX, R23, T32, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], S32_l[i], R13_l[i], T31_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_L_B) {
+               fprintf(stderr, "ERROR: layer_add_all(), adding combination not implemented: ADDING_L_B\n");
+               exit(1);
+          }
+          else
+          if (derivs[i] == ADDING_B_L) {
+               fprintf(stderr, "ERROR: layer_add_all(), adding combination not implemented: ADDING_B_L\n");
+               exit(1);
+          }
+          else
+          if (derivs[i] == ADDING_B_B)
+               add_all_b_b_up(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, T32, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], R23_l[i], T32_l[i], S32_l[i], R13_l[i], T31_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+#ifdef DEBUG
+          else {
+               fprintf(stderr, "ERROR: layer_add_all(), invalid adding up combination: %d\n", derivs[i]);
+               exit(1);
+          }
+#endif
      }
 if (flag) {
      /* S31 = S21       + A31 * C31 */
@@ -1294,20 +1615,56 @@ if (flag) {
           dmat_mul(AXX, R21, n, n, n, DXX);
 
      for (i = 0; i < n_derivs; ++i) {
-          if (derivs[i] == ADDING_U_P)
-               add_all_p_u_up(AXX, R21, S32_l[i], S23_l[i], S13_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_U)
+               ;
           else
-          if (derivs[i] == ADDING_P_P)
-               add_all_p_p_up(AXX, R21, S32_l[i], S23_l[i], S21_l[i], S12_l[i], S13_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_S)
+               add_all_s_u_up(AXX, R21, S32_l[i], S23_l[i], S13_l[i], n, atran, v1, v2);
+          else
+          if (derivs[i] == ADDING_S_S)
+               add_all_s_s_up(AXX, R21, S32_l[i], S23_l[i], S21_l[i], S12_l[i], S13_l[i], n, atran, v1, v2);
+
           else
           if (derivs[i] == ADDING_U_L)
-               add_all_l_u_up(PXX, i1, AXX, BXX, CXX, DXX, R21, T12, S12, R32_l[i], T32_l[i], S32_l[i], R23_l[i], T23_l[i], S23_l[i], R31_l[i], T13_l[i], S13_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+               add_all_l_u_up(PXX, i1, AXX, BXX, CXX, DXX, R21, T12, R32_l[i], T32_l[i], R23_l[i], T23_l[i], R31_l[i], T13_l[i], n, w1, w2, work);
           else
-          if (derivs[i] == ADDING_L_P)
-               add_all_p_l_up(PXX, i1, AXX, BXX, CXX, T32, S32, R23, R21, T12, S32_l[i], S23_l[i], R21_l[i], T12_l[i], S12_l[i], R31_l[i], T13_l[i], S13_l[i], n, atran, v1, v2, w1, w2, work);
+          if (derivs[i] == ADDING_L_U)
+               add_all_u_l_up(PXX, i1, AXX, BXX, CXX, T32, R23, T12, R21_l[i], T12_l[i], R31_l[i], T13_l[i], n, w1, w2, work);
           else
           if (derivs[i] == ADDING_L_L)
-               add_all_l_l_up(PXX, i1, AXX, BXX, CXX, T32, S32, R23, R21, T12, S12, R32_l[i], T32_l[i], S32_l[i], R23_l[i], T23_l[i], S23_l[i], R21_l[i], T12_l[i], S12_l[i], R31_l[i], T13_l[i], S13_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+               add_all_l_l_up(PXX, i1, AXX, BXX, CXX, T32, R23, R21, T12, R32_l[i], T32_l[i], R23_l[i], T23_l[i], R21_l[i], T12_l[i], R31_l[i], T13_l[i], n, w1, w2, work);
+
+          else
+          if (derivs[i] == ADDING_U_B)
+               add_all_b_u_up(PXX, i1, AXX, BXX, CXX, DXX, R21, T12, S12, R32_l[i], T32_l[i], S32_l[i], R23_l[i], T23_l[i], S23_l[i], R31_l[i], T13_l[i], S13_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_B_U)
+               add_all_u_b_up(PXX, i1, AXX, BXX, CXX, T32, S32, R23, T12, R21_l[i], T12_l[i], S12_l[i], R31_l[i], T13_l[i], S13_l[i], n, atran, v1, v2, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_S_B)
+               add_all_b_s_up(PXX, i1, AXX, BXX, CXX, DXX, R21, T12, S12, R32_l[i], T32_l[i], S32_l[i], R23_l[i], T23_l[i], S23_l[i], S12_l[i], R31_l[i], T13_l[i], S13_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_B_S)
+               add_all_s_b_up(PXX, i1, AXX, BXX, CXX, T32, S32, R23, R21, T12, S32_l[i], S23_l[i], R21_l[i], T12_l[i], S12_l[i], R31_l[i], T13_l[i], S13_l[i], n, atran, v1, v2, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_L_B) {
+               fprintf(stderr, "ERROR: layer_add_all(), adding combination not implemented: ADDING_L_B\n");
+               exit(1);
+          }
+          else
+          if (derivs[i] == ADDING_B_L) {
+               fprintf(stderr, "ERROR: layer_add_all(), adding combination not implemented: ADDING_B_L\n");
+               exit(1);
+          }
+          else
+          if (derivs[i] == ADDING_B_B)
+               add_all_b_b_up(PXX, i1, AXX, BXX, CXX, T32, S32, R23, R21, T12, S12, R32_l[i], T32_l[i], S32_l[i], R23_l[i], T23_l[i], S23_l[i], R21_l[i], T12_l[i], S12_l[i], R31_l[i], T13_l[i], S13_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+#ifdef DEBUG
+          else {
+               fprintf(stderr, "ERROR: layer_add_all(), invalid adding down combination: %d\n", derivs[i]);
+               exit(1);
+          }
+#endif
      }
 if (flag) {
      /* S13 = S23 * t12 + A13 * C13 */
@@ -1348,20 +1705,20 @@ if (flag) {
  *
  ******************************************************************************/
 void source_add_all2(double **R12, double **T12, double *S12,
-                   double **R21, double **T21, double *S21,
-                   double **R23, double **T23, double *S23,
-                   double **R32, double **T32, double *S32,
-                   double **R13, double **T13, double *S13,
-                   double **R31, double **T31, double *S31,
-                   double ***R12_l, double ***T12_l, double **S12_l,
-                   double ***R21_l, double ***T21_l, double **S21_l,
-                   double ***R23_l, double ***T23_l, double **S23_l,
-                   double ***R32_l, double ***T32_l, double **S32_l,
-                   double ***R13_l, double ***T13_l, double **S13_l,
-                   double ***R31_l, double ***T31_l, double **S31_l,
-                   int n, int n_derivs, double atran, double *atran_l,
-                   uchar *derivs, int flag, int flag2, work_data work,
-                   layer_add_aux_data *d) {
+                     double **R21, double **T21, double *S21,
+                     double **R23, double **T23, double *S23,
+                     double **R32, double **T32, double *S32,
+                     double **R13, double **T13, double *S13,
+                     double **R31, double **T31, double *S31,
+                     double ***R12_l, double ***T12_l, double **S12_l,
+                     double ***R21_l, double ***T21_l, double **S21_l,
+                     double ***R23_l, double ***T23_l, double **S23_l,
+                     double ***R32_l, double ***T32_l, double **S32_l,
+                     double ***R13_l, double ***T13_l, double **S13_l,
+                     double ***R31_l, double ***T31_l, double **S31_l,
+                     int n, int n_derivs, double atran, double *atran_l,
+                     uchar *derivs, int flag, int flag2, work_data work,
+                     layer_add_aux_data *d) {
 
      int i;
 
@@ -1377,8 +1734,6 @@ void source_add_all2(double **R12, double **T12, double *S12,
      double **PXX;
      double **AXX;
 
-     i1  = get_work1(&work, WORK_IX);
-
      CXX = get_work1(&work, WORK_DX);
 
      v1  = get_work1(&work, WORK_DX);
@@ -1386,6 +1741,7 @@ void source_add_all2(double **R12, double **T12, double *S12,
 
      w1  = get_work1(&work, WORK_DXX);
 if (! d) {
+     i1  = get_work1(&work, WORK_IX);
      PXX = get_work1(&work, WORK_DXX);
      AXX = get_work1(&work, WORK_DXX);
 }
@@ -1394,6 +1750,7 @@ if (! d) {
       *
       *-----------------------------------------------------------------------*/
 if (d) {
+     i1  = d->i31;
      PXX = d->P31;
      AXX = d->A31;
 }
@@ -1414,11 +1771,20 @@ if (! d || flag2) {
      dvec_add(v1, v2, CXX, n);
 
      for (i = 0; i < n_derivs; ++i) {
-          if (derivs[i] == ADDING_U_P)
-               add_all_u_p_up(AXX, R23, S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_U)
+               ;
           else
-          if (derivs[i] == ADDING_P_P)
-               add_all_p_p_up(AXX, R23, S12_l[i], S21_l[i], S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_S)
+               add_all_u_s_up(AXX, R23, S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
+          else
+          if (derivs[i] == ADDING_S_S)
+               add_all_s_s_up(AXX, R23, S12_l[i], S21_l[i], S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
+#ifdef DEBUG
+          else {
+               fprintf(stderr, "ERROR: source_add_all2(), invalid adding up combination: %d\n", derivs[i]);
+               exit(1);
+          }
+#endif
      }
 if (flag) {
      /* S31 = S21       + A31 * C31 */
@@ -1430,6 +1796,7 @@ if (flag) {
       *
       *-----------------------------------------------------------------------*/
 if (d) {
+     i1  = d->i13;
      PXX = d->P13;
      AXX = d->A13;
 }
@@ -1450,11 +1817,20 @@ if (! d || flag2) {
      dvec_add(S12, v1, CXX, n);
 
      for (i = 0; i < n_derivs; ++i) {
-          if (derivs[i] == ADDING_U_P)
-               add_all_p_u_up(AXX, R21, S32_l[i], S23_l[i], S13_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_U)
+               ;
           else
-          if (derivs[i] == ADDING_P_P)
-               add_all_p_p_up(AXX, R21, S32_l[i], S23_l[i], S21_l[i], S12_l[i], S13_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_S)
+               add_all_s_u_up(AXX, R21, S32_l[i], S23_l[i], S13_l[i], n, atran, v1, v2);
+          else
+          if (derivs[i] == ADDING_S_S)
+               add_all_s_s_up(AXX, R21, S32_l[i], S23_l[i], S21_l[i], S12_l[i], S13_l[i], n, atran, v1, v2);
+#ifdef DEBUG
+          else {
+               fprintf(stderr, "ERROR: source_add_all2(), invalid adding down combination: %d\n", derivs[i]);
+               exit(1);
+          }
+#endif
      }
 if (flag) {
      /* S13 = S23 * t12 + A13 * C13 */
@@ -1483,7 +1859,7 @@ void layer_add_all2(double **R12, double **T12, double *S12,
                    double ***R31_l, double ***T31_l, double **S31_l,
                    int n, int n_derivs, double atran, double *atran_l,
                    uchar *derivs, int flag, int flag2, work_data work,
-                  layer_add_aux_data *d) {
+                   layer_add_aux_data *d) {
 
      int i;
 
@@ -1500,8 +1876,7 @@ void layer_add_all2(double **R12, double **T12, double *S12,
      double **PXX;
      double **AXX;
      double **BXX;
-
-     i1  = get_work1(&work, WORK_IX);
+     double **DXX;
 
      CXX = get_work1(&work, WORK_DX);
 
@@ -1510,9 +1885,13 @@ void layer_add_all2(double **R12, double **T12, double *S12,
 
      w1  = get_work1(&work, WORK_DXX);
 
-     if (n_derivs > 0)
+     if (n_derivs > 0) {
           w2  = get_work1(&work, WORK_DXX);
+
+          DXX = get_work1(&work, WORK_DXX);
+     }
 if (! d) {
+     i1  = get_work1(&work, WORK_IX);
      PXX = get_work1(&work, WORK_DXX);
      AXX = get_work1(&work, WORK_DXX);
      BXX = get_work1(&work, WORK_DXX);
@@ -1522,6 +1901,7 @@ if (! d) {
       *
       *-----------------------------------------------------------------------*/
 if (d) {
+     i1  = d->i31;
      PXX = d->P31;
      AXX = d->A31;
      BXX = d->B13;
@@ -1545,21 +1925,35 @@ if (! d || flag2) {
      dm_v_mul(R23, S12, n, n, v2);
      dvec_add(v1, v2, CXX, n);
 
+     if (n_derivs > 0)
+          dmat_mul(AXX, R23, n, n, n, DXX);
+
      for (i = 0; i < n_derivs; ++i) {
-          if (derivs[i] == ADDING_U_P)
-               add_all_u_p_up(AXX, R23, S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_U) ;
           else
-          if (derivs[i] == ADDING_P_P)
-               add_all_p_p_up(AXX, R23, S12_l[i], S21_l[i], S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_S)
+               add_all_u_s_up(AXX, R23, S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
           else
-          if (derivs[i] == ADDING_U_L)
-               add_all_u_l_up(PXX, i1, AXX, BXX, CXX, T12, S12, R21, T32, R23_l[i], T32_l[i], S32_l[i], R13_l[i], T31_l[i], S31_l[i], n, atran, v1, v2, w1, w2, work);
+          if (derivs[i] == ADDING_S_S)
+               add_all_s_s_up(AXX, R23, S12_l[i], S21_l[i], S23_l[i], S32_l[i], S31_l[i], n, atran, v1, v2);
           else
-          if (derivs[i] == ADDING_L_P)
-               add_all_l_p_up(PXX, i1, AXX, BXX, CXX, NULL, R23, T32, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], S32_l[i], R13_l[i], T31_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          if (derivs[i] == ADDING_U_B)
+               add_all_u_b_up(PXX, i1, AXX, BXX, CXX, T12, S12, R21, T32, R23_l[i], T32_l[i], S32_l[i], R13_l[i], T31_l[i], S31_l[i], n, atran, v1, v2, w1, w2, work);
           else
-          if (derivs[i] == ADDING_L_L)
-               add_all_l_l_up(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, T32, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], R23_l[i], T32_l[i], S32_l[i], R13_l[i], T31_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          if (derivs[i] == ADDING_B_U)
+               add_all_b_u_up(PXX, i1, AXX, BXX, CXX, DXX, R23, T32, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], R13_l[i], T31_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_B_S)
+               add_all_b_s_up(PXX, i1, AXX, BXX, CXX, DXX, R23, T32, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], S32_l[i], R13_l[i], T31_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_B_B)
+               add_all_b_b_up(PXX, i1, AXX, BXX, CXX, T12, S12, R21, R23, T32, S32, R12_l[i], T12_l[i], S12_l[i], R21_l[i], T21_l[i], S21_l[i], R23_l[i], T32_l[i], S32_l[i], R13_l[i], T31_l[i], S31_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+#ifdef DEBUG
+          else {
+               fprintf(stderr, "ERROR: layer_add_all2(), invalid adding up combination: %d\n", derivs[i]);
+               exit(1);
+          }
+#endif
      }
 if (flag) {
      /* S31 = S21       + A31 * C31 */
@@ -1578,6 +1972,7 @@ if (flag) {
       *
       *-----------------------------------------------------------------------*/
 if (d) {
+     i1  = d->i13;
      PXX = d->P13;
      AXX = d->A13;
      BXX = d->B31;
@@ -1601,21 +1996,35 @@ if (! d || flag2) {
      dvec_scale(atran, v1, v1, n);
      dvec_add(S12, v1, CXX, n);
 
+     if (n_derivs > 0)
+          dmat_mul(AXX, R21, n, n, n, DXX);
+
      for (i = 0; i < n_derivs; ++i) {
-          if (derivs[i] == ADDING_U_P)
-               add_all_p_u_up(AXX, R21, S32_l[i], S23_l[i], S13_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_U) ;
           else
-          if (derivs[i] == ADDING_P_P)
-               add_all_p_p_up(AXX, R21, S32_l[i], S23_l[i], S21_l[i], S12_l[i], S13_l[i], n, atran, v1, v2);
+          if (derivs[i] == ADDING_U_S)
+               add_all_s_u_up(AXX, R21, S32_l[i], S23_l[i], S13_l[i], n, atran, v1, v2);
           else
-          if (derivs[i] == ADDING_U_L)
-               add_all_l_u_up(PXX, i1, AXX, BXX, CXX, NULL, R21, T12, S12, R32_l[i], T32_l[i], S32_l[i], R23_l[i], T23_l[i], S23_l[i], R31_l[i], T13_l[i], S13_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          if (derivs[i] == ADDING_S_S)
+               add_all_s_s_up(AXX, R21, S32_l[i], S23_l[i], S21_l[i], S12_l[i], S13_l[i], n, atran, v1, v2);
           else
-          if (derivs[i] == ADDING_L_P)
-               add_all_p_l_up(PXX, i1, AXX, BXX, CXX, T32, S32, R23, R21, T12, S32_l[i], S23_l[i], R21_l[i], T12_l[i], S12_l[i], R31_l[i], T13_l[i], S13_l[i], n, atran, v1, v2, w1, w2, work);
+          if (derivs[i] == ADDING_U_B)
+               add_all_b_u_up(PXX, i1, AXX, BXX, CXX, DXX, R21, T12, S12, R32_l[i], T32_l[i], S32_l[i], R23_l[i], T23_l[i], S23_l[i], R31_l[i], T13_l[i], S13_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
           else
-          if (derivs[i] == ADDING_L_L)
-               add_all_l_l_up(PXX, i1, AXX, BXX, CXX, T32, S32, R23, R21, T12, S12, R32_l[i], T32_l[i], S32_l[i], R23_l[i], T23_l[i], S23_l[i], R21_l[i], T12_l[i], S12_l[i], R31_l[i], T13_l[i], S13_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+          if (derivs[i] == ADDING_B_U)
+               add_all_u_b_up(PXX, i1, AXX, BXX, CXX, T32, S32, R23, T12, R21_l[i], T12_l[i], S12_l[i], R31_l[i], T13_l[i], S13_l[i], n, atran, v1, v2, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_B_S)
+               add_all_s_b_up(PXX, i1, AXX, BXX, CXX, T32, S32, R23, R21, T12, S32_l[i], S23_l[i], R21_l[i], T12_l[i], S12_l[i], R31_l[i], T13_l[i], S13_l[i], n, atran, v1, v2, w1, w2, work);
+          else
+          if (derivs[i] == ADDING_B_B)
+               add_all_b_b_up(PXX, i1, AXX, BXX, CXX, T32, S32, R23, R21, T12, S12, R32_l[i], T32_l[i], S32_l[i], R23_l[i], T23_l[i], S23_l[i], R21_l[i], T12_l[i], S12_l[i], R31_l[i], T13_l[i], S13_l[i], n, atran, atran_l[i], v1, v2, w1, w2, work);
+#ifdef DEBUG
+          else {
+               fprintf(stderr, "ERROR: layer_add_all2(), invalid adding down combination: %d\n", derivs[i]);
+               exit(1);
+          }
+#endif
      }
 if (flag) {
      /* S13 = S23 * t12 + A13 * C13 */

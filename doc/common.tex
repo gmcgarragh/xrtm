@@ -19,6 +19,7 @@
 \renewcommand{\ttdefault}{txtt}
 \usepackage{color}
 \usepackage{datetime}
+\usepackage[T1]{fontenc}
 \usepackage[pdftex]{graphicx}
 \usepackage[backref,pdftex]{hyperref}
 \usepackage{verbatim}
@@ -32,7 +33,7 @@
 %
 %*******************************************************************************
 \iftth\else
-\setlength{\voffset}{-.35in}
+\setlength{\voffset}{-0.35in}
 
 \setlength{\topmargin}		{0.0in}
 \setlength{\headheight}		{0.0in}
@@ -41,17 +42,26 @@
 %\setlength{\footskip}		{0.0in}
 \setlength{\oddsidemargin}	{0.0in}
 \setlength{\evensidemargin}	{0.0in}
-\setlength{\textwidth}		{6.50in}
+\setlength{\textwidth}		{6.5in}
 \fi
 
 
 %*******************************************************************************
 %
 %*******************************************************************************
+\newlength{\codeindent}
+\setlength{\codeindent}		{0.25in}
+\newlength{\funcdescindent}
+\setlength{\funcdescindent}	{0.25in}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
 \iftth\else
-\definecolor{citescolor}{rgb}{0,.5,0}
-\definecolor{linkscolor}{rgb}{.5,0,0}
-\definecolor{urlcolor}{rgb}{0,0.,1.}
+\definecolor{citescolor}{rgb}{0.0,0.5,0.0}
+\definecolor{linkscolor}{rgb}{0.5,0.0,0.0}
+\definecolor{urlcolor}{rgb}{0.0,0.0,1.0}
 
 \hypersetup{bookmarks=true,colorlinks=true,citecolor=citescolor,linkcolor=linkscolor,urlcolor=urlcolor}
 \fi
@@ -77,6 +87,79 @@
 %
 %*******************************************************************************
 \iftth
+\newcommand\xdocchapter[1]{\section{#1}}
+\newcommand\xdocsection[1]{\subsection{#1}}
+\newcommand\xdocsubsection[1]{\subsubsection{#1}}
+\else
+\newcommand\xdocchapter[1]{\chapter{#1}}
+\newcommand\xdocsection[1]{\section{#1}}
+\newcommand\xdocsubsection[1]{\subsection{#1}}
+\fi
+
+\iftth
+\newcommand\source[1]{\texttt{\special{html:<tt>}#1\special{html:</tt>}}}
+\newcommand\sourcename[1]{\texttt{\special{html:<tt><b>}#1\special{html:</b></tt>}}}
+\newcommand\sourcenamefunc[1]{\texttt{\special{html:<tt><b>}#1\special{html:</b>}()\special{html:</tt>}}}
+\newcommand\sourcearg[1]{\texttt{\special{html:<tt><i>}#1\special{html:</i></tt>}}}
+\newcommand\sourcenamearg[1]{\texttt{\special{html:<tt><i><b>}#1\special{html:</b></i></tt>}}}
+\newcommand\sourcenameargarray[2]{\texttt{\special{html:<tt><i><b>}#1\special{html:</b></i>}#2\special{html:</tt>}}}
+\else
+\newcommand\source[1]{\texttt{#1}}
+\newcommand\sourcename[1]{\texttt{\textbf{#1}}}
+\newcommand\sourcenamefunc[1]{\texttt{\textbf{#1}()}}
+\newcommand\sourcearg[1]{\texttt{\textit{#1}}}
+\newcommand\sourcenamearg[1]{\texttt{\textit{\textbf{#1}}}}
+\newcommand\sourcenameargarray[2]{\texttt{\textit{\textbf{#1}}#2}}
+\fi
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\newlength{\parindentsave}
+\setlength{\parindentsave}{\parindent}%
+
+\newenvironment{indentall}{%
+\begin{list}{}{%
+\setlength{\leftmargin}{\parindentsave}%
+}%
+\item[]%
+}{\end{list}}
+
+\newenvironment{changemargin}[4]{%
+\begin{list}{}{%
+\setlength{\topsep}{0.0pt}%
+\setlength{\parskip}{0.0pt}%
+\setlength{\partopsep}{0.0pt}%
+\setlength{\itemsep}{0.0pt}%
+\setlength{\parsep}{#3}%
+\setlength{\leftmargin}{#1}%
+\setlength{\rightmargin}{#2}%
+\setlength{\itemindent}{0.0pt}%
+\setlength{\listparindent}{#4}%
+}%
+\item[]%
+}{\end{list}}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\newcommand\structure[2]{
+\begin{changemargin}{0.0in}{0.0in}{0.0pt}{0.0pt}
+\texttt{typedef struct \{}
+\begin{changemargin}{\codeindent}{0.0in}{0.0pt}{\codeindent}
+{\ttfamily #2}
+\end{changemargin}
+\texttt{\} #1;}
+\end{changemargin}
+}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\iftth
 \newenvironment{prototype}[1]{
 \newcommand\proto[1]{
 \iftth
@@ -92,10 +175,10 @@
 }
 \else
 \newenvironment{prototype}[1]{
-\setlength{\parskip}{0pt}
+\setlength{\parskip}{0.0pt}
 \newcommand\proto[1]{
 \noindent
-\hangindent=.5in
+\hangindent=0.5in
 ##1
 
 }
@@ -110,32 +193,10 @@
 %*******************************************************************************
 %
 %*******************************************************************************
-\newlength{\parindentsave}
-\setlength{\parindentsave}{\parindent}%
-
-\newenvironment{changemargin}[4]{%
-\begin{list}{}{%
-\setlength{\topsep}{0pt}%
-\setlength{\parskip}{0pt}%
-\setlength{\partopsep}{0pt}%
-\setlength{\itemsep}{0pt}%
-\setlength{\parsep}{#3}%
-\setlength{\leftmargin}{#1}%
-\setlength{\rightmargin}{#2}%
-\setlength{\itemindent}{0pt}%
-\setlength{\listparindent}{#4}%
-}%
-\item[]%
-}{\end{list}}
-
-
-%*******************************************************************************
-%
-%*******************************************************************************
 \iftth
 \newenvironment{arguments}{%
-\renewcommand\arg[2]{\texttt{\emph{\textbf{##1}}} \hspace{.1in} & ##2 \\}%
-%\setlength{\tabcolsep}{0in}%
+\renewcommand\arg[2]{\texttt{\emph{\textbf{##1}}} \hspace{0.1in} & ##2 \\}%
+%\setlength{\tabcolsep}{0.0in}%
 \noindent%
 \begin{tabular}{ll}%
 }%
@@ -155,23 +216,23 @@
 
 
 \newcommand\funcdesc[3]{
-\begin{changemargin}{.25in}{0.in}{0pt}{0pt}
+\begin{changemargin}{\funcdescindent}{0.0in}{0.0pt}{0.0pt}
 \textbf{Description:}
-\begin{changemargin}{.25in}{0.in}{5pt}{\parindentsave}
+\begin{changemargin}{\funcdescindent}{0.0in}{5.0pt}{\parindentsave}
 #1
 \end{changemargin}
-\vspace{.10in}
+\vspace{0.10in}
 
 \textbf{Arguments:}
-\begin{changemargin}{.25in}{0.in}{0pt}{0pt}%
+\begin{changemargin}{\funcdescindent}{0.0in}{0.0pt}{0.0pt}%
 \begin{arguments}
 #2
 \end{arguments}
 \end{changemargin}%
-\vspace{.10in}
+\vspace{0.10in}
 
 \textbf{Return value:}
-\begin{changemargin}{.25in}{0.in}{0pt}{0pt}
+\begin{changemargin}{\funcdescindent}{0.0in}{0.0pt}{0.0pt}
 #3
 \end{changemargin}
 \end{changemargin}
@@ -179,15 +240,15 @@
 
 
 \newcommand\funcdescbreak[4]{
-\begin{changemargin}{.25in}{0.in}{0pt}{0pt}
+\begin{changemargin}{\funcdescindent}{0.0in}{0.0pt}{0.0pt}
 \textbf{Description:}
-\begin{changemargin}{.25in}{0.in}{5pt}{\parindent}
+\begin{changemargin}{\funcdescindent}{0.0in}{5.0pt}{\parindent}
 #1
 \end{changemargin}
-\vspace{.10in}
+\vspace{0.10in}
 
 \textbf{Arguments:}
-\begin{changemargin}{.25in}{0.in}{0pt}{0pt}%
+\begin{changemargin}{\funcdescindent}{0.0in}{0.0pt}{0.0pt}%
 \begin{arguments}
 #2
 \end{arguments}
@@ -195,11 +256,29 @@
 #3
 \end{arguments}
 \end{changemargin}%
-\vspace{.10in}
+\vspace{0.10in}
 
 \textbf{Return value:}
-\begin{changemargin}{.25in}{0.in}{0pt}{0pt}
+\begin{changemargin}{\funcdescindent}{0.0in}{0.0pt}{0.0pt}
 #4
 \end{changemargin}
 \end{changemargin}
+}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\newcommand\license[1]{
+#1 is licensed under the \href{http://www.gnu.org/licenses/gpl.html}{GNU General Public License (GPL), Version 3} a copy of which is in the file COPYING in the top level directory of the #1 source code distribution.
+}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\newcommand\conventions{
+Source code such as interface definitions and examples are typeset in \texttt{typewriter font}.  Source code identifiers such as variable names and function names are also typeset in bold, while function argument types, modifiers, and names, are also typeset in italics.  For example, a function name will be typeset in bold typewriter font as \sourcename{func\_name}, argument types in italic typewriter font as \sourcearg{int}, and argument names in bold italic typewriter font as \sourcenamearg{arg\_name}.
+
+Internet links are typeset in the standard color \textcolor{urlcolor}{blue}.  Links that are local to the manual are typeset in a \textcolor{linkscolor}{dark red} except for citations that link to their corresponding bibliography entries which are in a \textcolor{citescolor}{dark green}.
 }

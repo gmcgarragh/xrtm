@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -8,6 +8,7 @@
 *******************************************************************************/
 
 #include <gutil.h>
+#include <gindex_name_value.h>
 #include <gmath_matrix.h>
 
 #include <rtutil_math.h>
@@ -17,52 +18,13 @@
 
 #include "xrtm.h"
 #include "xrtm_brdf.h"
+#include "xrtm_derivs.h"
 #include "xrtm_interface.h"
 #include "xrtm_model.h"
 #include "xrtm_model_a.h"
 #include "xrtm_support.h"
 #include "xrtm_utility.h"
-
-
-/*******************************************************************************
- *
- ******************************************************************************/
-enum xrtm_input_type {
-     INPUT_DOUB_D_TAU = 1,
-     INPUT_PADE_PARAMS,
-     INPUT_SOS_PARAMS,
-     INPUT_FOURIER_TOL,
-     INPUT_LAMBDA,
-     INPUT_F_0,
-     INPUT_THETA_0,
-     INPUT_PHI_0,
-     INPUT_OUT_LEVELS,
-     INPUT_OUT_TAUS,
-     INPUT_OUT_THETAS,
-     INPUT_TOP_B,
-     INPUT_TOP_B_L,
-     INPUT_PLANET_R,
-     INPUT_LEVELS_Z,
-     INPUT_LEVELS_B,
-     INPUT_LEVELS_B_L,
-     INPUT_G,
-     INPUT_G_L,
-     INPUT_COEF,
-     INPUT_COEF_L,
-     INPUT_OMEGA,
-     INPUT_OMEGA_L,
-     INPUT_LTAU,
-     INPUT_LTAU_L,
-     INPUT_SURFACE_B,
-     INPUT_SURFACE_B_L,
-     INPUT_KERNEL_AMPFAC,
-     INPUT_KERNEL_AMPFAC_L,
-     INPUT_KERNEL_PARAMS,
-     INPUT_KERNEL_PARAMS_L,
-
-     N_INPUTS
-};
-
+#include "version.h"
 
 
 /*******************************************************************************
@@ -81,6 +43,8 @@ static const char *xrtm_option_names[] = {
      "no_azimuthal",
      "output_at_levels",
      "output_at_taus",
+     "part_sol_classical",
+     "part_sol_greens",
      "phase_scalar",
      "phase_matrix_gc",
      "phase_matrix_lc",
@@ -105,8 +69,7 @@ static const char *xrtm_option_names[] = {
 };
 
 
-
-static int xrtm_option_masks[] = {
+static long xrtm_option_masks[] = {
      XRTM_OPTION_CALC_DERIVS,
 /*
      XRTM_OPTION_FORWARD_DERIVS,
@@ -119,6 +82,8 @@ static int xrtm_option_masks[] = {
      XRTM_OPTION_NO_AZIMUTHAL,
      XRTM_OPTION_OUTPUT_AT_LEVELS,
      XRTM_OPTION_OUTPUT_AT_TAUS,
+     XRTM_OPTION_PART_SOL_CLASSICAL,
+     XRTM_OPTION_PART_SOL_GREENS,
      XRTM_OPTION_PHASE_SCALAR,
      XRTM_OPTION_PHASE_MATRIX_GC,
      XRTM_OPTION_PHASE_MATRIX_LC,
@@ -143,98 +108,46 @@ static int xrtm_option_masks[] = {
 };
 
 
-int xrtm_options_n() {
-
-     return N_XRTM_OPTIONS;
-}
-
-enum xrtm_option_mask xrtm_option_mask(int index) {
-
-     return (enum xrtm_option_mask) index_to_mask(index, xrtm_option_masks, N_XRTM_OPTIONS, "xrtm option");
-}
-
-enum xrtm_option_mask xrtm_option_mask2(const char *name) {
-
-     return (enum xrtm_option_mask) name_to_mask(name, xrtm_option_masks, xrtm_option_names, N_XRTM_OPTIONS, "xrtm option");
-}
-
-const char *xrtm_option_name(int index) {
-
-     return code_to_name(index, xrtm_option_names, N_XRTM_OPTIONS, "xrtm option");
-}
-
-const char *xrtm_option_name2(enum xrtm_option_mask mask) {
-
-     return mask_to_name(mask, xrtm_option_masks, xrtm_option_names, N_XRTM_OPTIONS, "xrtm option");
-}
-
-char *xrtm_option_list(int mask, char *s) {
-
-     return mask_to_list(mask, xrtm_option_masks, xrtm_option_names, N_XRTM_OPTIONS, s);
-}
-
+GINDEX_NAME_MASK_TEMPLATE(xrtm_option, "xrtm option", N_XRTM_OPTIONS)
 
 
 static const char *xrtm_solver_names[] = {
      "doub_add",
      "eig_add",
      "eig_bvp",
+     "four_stream",
      "mem_bvp",
      "pade_add",
      "single",
+     "six_stream",
      "sos",
      "two_os",
+     "two_stream",
 #ifdef INCLUDE_DEV_SOURCE
      XRTM_DEV_SOLVER_NAMES
 #endif
 };
 
 
-static int xrtm_solver_masks[] = {
+static long xrtm_solver_masks[] = {
      XRTM_SOLVER_DOUB_ADD,
      XRTM_SOLVER_EIG_ADD,
      XRTM_SOLVER_EIG_BVP,
+     XRTM_SOLVER_FOUR_STREAM,
      XRTM_SOLVER_MEM_BVP,
      XRTM_SOLVER_PADE_ADD,
      XRTM_SOLVER_SINGLE,
+     XRTM_SOLVER_SIX_STREAM,
      XRTM_SOLVER_SOS,
      XRTM_SOLVER_TWO_OS,
+     XRTM_SOLVER_TWO_STREAM,
 #ifdef INCLUDE_DEV_SOURCE
      XRTM_DEV_SOLVER_MASKS
 #endif
 };
 
 
-int xrtm_solvers_n() {
-
-     return N_XRTM_SOLVERS;
-}
-
-enum xrtm_solver_mask xrtm_solver_mask(int index) {
-
-     return (enum xrtm_solver_mask) index_to_mask(index, xrtm_solver_masks, N_XRTM_SOLVERS, "xrtm solver");
-}
-
-enum xrtm_solver_mask xrtm_solver_mask2(const char *name) {
-
-     return (enum xrtm_solver_mask) name_to_mask(name, xrtm_solver_masks, xrtm_solver_names, N_XRTM_SOLVERS, "xrtm solver");
-}
-
-const char *xrtm_solver_name(int index) {
-
-     return code_to_name(index, xrtm_solver_names, N_XRTM_SOLVERS, "xrtm solver");
-}
-
-const char *xrtm_solver_name2(enum xrtm_solver_mask mask) {
-
-     return mask_to_name(mask, xrtm_solver_masks, xrtm_solver_names, N_XRTM_SOLVERS, "xrtm solver");
-}
-
-char *xrtm_solver_list(int mask, char *s) {
-
-     return mask_to_list(mask, xrtm_solver_masks, xrtm_solver_names, N_XRTM_SOLVERS, s);
-}
-
+GINDEX_NAME_MASK_TEMPLATE(xrtm_solver, "xrtm solver", N_XRTM_SOLVERS)
 
 
 static const char *xrtm_input_names[] = {
@@ -244,18 +157,22 @@ static const char *xrtm_input_names[] = {
      "sos_params",
      "fourier_tol",
      "lambda",
-     "F_0",
-     "theta_0",
-     "phi_0",
+     "planet_r",
+     "levels_z",
      "out_levels",
      "out_taus",
      "out_thetas",
-     "top_b",
-     "top_b_l",
-     "planet_r",
-     "levels_z",
+     "F_iso_top",
+     "F_iso_top_l",
+     "F_iso_bot",
+     "F_iso_bot_l",
+     "F_0",
+     "theta_0",
+     "phi_0",
      "levels_b",
      "levels_b_l",
+     "surface_b",
+     "surface_b_l",
      "g",
      "g_l",
      "coef",
@@ -264,30 +181,118 @@ static const char *xrtm_input_names[] = {
      "omega_l",
      "ltau",
      "ltau_l",
-     "surface_b",
-     "surface_b_l",
      "kernel_ampfac",
      "kernel_ampfac_l",
      "kernel_params",
      "kernel_params_l"
+     "kernel_funcs"
 };
-/*
-static int xrtm_input_code(char *name) {
 
-     return name_to_code(name, xrtm_input_names, N_INPUTS, "xrtm input type");
-}
-*/
-static const char *xrtm_input_name(enum xrtm_input_type code) {
 
-     return code_to_name(code, xrtm_input_names, N_INPUTS, "xrtm input type");
-}
+enum xrtm_input_type {
+     INPUT_DOUB_D_TAU = 1,
+     INPUT_PADE_PARAMS,
+     INPUT_SOS_PARAMS,
+     INPUT_FOURIER_TOL,
+     INPUT_LAMBDA,
+     INPUT_PLANET_R,
+     INPUT_LEVELS_Z,
+     INPUT_OUT_LEVELS,
+     INPUT_OUT_TAUS,
+     INPUT_OUT_THETAS,
+     INPUT_F_ISO_TOP,
+     INPUT_F_ISO_TOP_L,
+     INPUT_F_ISO_BOT,
+     INPUT_F_ISO_BOT_L,
+     INPUT_F_0,
+     INPUT_THETA_0,
+     INPUT_PHI_0,
+     INPUT_LEVELS_B,
+     INPUT_LEVELS_B_L,
+     INPUT_SURFACE_B,
+     INPUT_SURFACE_B_L,
+     INPUT_G,
+     INPUT_G_L,
+     INPUT_COEF,
+     INPUT_COEF_L,
+     INPUT_OMEGA,
+     INPUT_OMEGA_L,
+     INPUT_LTAU,
+     INPUT_LTAU_L,
+     INPUT_KERNEL_AMPFAC,
+     INPUT_KERNEL_AMPFAC_L,
+     INPUT_KERNEL_PARAMS,
+     INPUT_KERNEL_PARAMS_L,
+     INPUT_KERNEL_FUNCS,
 
+     N_INPUTS
+};
+
+static long xrtm_input_types[] = {
+     INPUT_DOUB_D_TAU,
+     INPUT_PADE_PARAMS,
+     INPUT_SOS_PARAMS,
+     INPUT_FOURIER_TOL,
+     INPUT_LAMBDA,
+     INPUT_PLANET_R,
+     INPUT_LEVELS_Z,
+     INPUT_OUT_LEVELS,
+     INPUT_OUT_TAUS,
+     INPUT_OUT_THETAS,
+     INPUT_F_ISO_TOP,
+     INPUT_F_ISO_TOP_L,
+     INPUT_F_ISO_BOT,
+     INPUT_F_ISO_BOT_L,
+     INPUT_F_0,
+     INPUT_THETA_0,
+     INPUT_PHI_0,
+     INPUT_LEVELS_B,
+     INPUT_LEVELS_B_L,
+     INPUT_SURFACE_B,
+     INPUT_SURFACE_B_L,
+     INPUT_G,
+     INPUT_G_L,
+     INPUT_COEF,
+     INPUT_COEF_L,
+     INPUT_OMEGA,
+     INPUT_OMEGA_L,
+     INPUT_LTAU,
+     INPUT_LTAU_L,
+     INPUT_KERNEL_AMPFAC,
+     INPUT_KERNEL_AMPFAC_L,
+     INPUT_KERNEL_PARAMS,
+     INPUT_KERNEL_PARAMS_L
+};
+
+
+GINDEX_NAME_VALUE_TEMPLATE_STATIC(xrtm_input, "xrtm input", N_INPUTS)
+
+
+
+static const char *xrtm_output_names[] = {
+     "radiance",
+     "radiance_mean",
+     "flux",
+     "flux_divergence"
+};
+
+static long xrtm_output_masks[] = {
+     XRTM_OUTPUT_RADIANCE,
+     XRTM_OUTPUT_RADIANCE_MEAN,
+     XRTM_OUTPUT_FLUX,
+     XRTM_OUTPUT_FLUX_DIVERGENCE
+};
+
+
+GINDEX_NAME_MASK_TEMPLATE(xrtm_output, "xrtm output", N_XRTM_OUTPUTS)
 
 
 /*******************************************************************************
  *
  ******************************************************************************/
-static void misc_input_init(misc_input_data *d) {
+void xrtm_misc_input_init(misc_input_data *d) {
+
+     d->do_not_add_sfi_ss          = DO_NOT_ADD_SFI_SS;
 
      d->use_pade_check_condition   = USE_PADE_CHECK_CONDITION;
 
@@ -303,7 +308,7 @@ static void misc_input_init(misc_input_data *d) {
      d->threshold_mu_0_singlarity  = THRESHOLD_MU_0_SINGLARITY;
      d->threshold_omega_singlarity = THRESHOLD_OMEGA_SINGLARITY;
 #ifdef INCLUDE_DEV_SOURCE
-     misc_input_init_dev(d);
+     xrtm_misc_input_init_dev(d);
 #endif
 }
 
@@ -312,7 +317,7 @@ static void misc_input_init(misc_input_data *d) {
 /*******************************************************************************
  *
  ******************************************************************************/
-int check_solvers(int solvers, const char *option, ...) {
+int check_solvers(int solvers, int not_, int report, const char *type, const char *option, ...) {
 
      int i;
 
@@ -324,31 +329,12 @@ int check_solvers(int solvers, const char *option, ...) {
 
      for (i = 0; (solver = va_arg(ap, int)) != 0; ++i) {
           if (solvers & solver) {
-               eprintf("ERROR: solver \"%s\" does not support option \"%s\"\n", xrtm_solver_name2((enum xrtm_solver_mask) solver), option);
-               return -1;
-          }
-     }
-
-     va_end(ap);
-
-     return 0;
-}
-
-
-
-static int check_solvers2(xrtm_data *d, const char *option, ...) {
-
-     int i;
-
-     int solver;
-
-     va_list ap;
-
-     va_start(ap, option);
-
-     for (i = 0; (solver = va_arg(ap, int)) != 0; ++i) {
-          if (d->solvers & solver) {
-               eprintf("ERROR: solver \"%s\" does not support option \"%s\"\n", xrtm_solver_name2((enum xrtm_solver_mask) solver), option);
+               if (report) {
+                    if (not_)
+                         fprintf(stderr, "ERROR: solver \"%s\" requires %s \"%s\"\n", xrtm_solver_mask_to_name((enum xrtm_solver_mask) solver), type, option);
+                    else
+                         fprintf(stderr, "ERROR: solver \"%s\" does not support %s \"%s\"\n", xrtm_solver_mask_to_name((enum xrtm_solver_mask) solver), type, option);
+               }
                return -1;
           }
      }
@@ -377,7 +363,7 @@ static int xrtm_quad_to_quad_type(xrtm_data *d) {
           return QUAD_LOBATTO;
 #ifdef DEBUG
      else {
-         eprintf("ERROR: xrtm_quad_type_to_quad_type(): end of if / else if\n");
+         fprintf(stderr, "ERROR: xrtm_quad_type_to_quad_type(): end of if / else if\n");
          exit(1);
      }
 #endif
@@ -475,17 +461,308 @@ static void set_deps(xrtm_data *d, int dep, int i_layer, int n_layers) {
 /*******************************************************************************
  *
  ******************************************************************************/
-const char *xrtm_get_version() {
+const char *xrtm_get_build_sha_1() {
 
-     return VERSION;
+     return build_sha_1;
+}
+
+
+const char *xrtm_get_build_date() {
+
+     return build_date;
 }
 
 
 
 /*******************************************************************************
- * 
+ *
  ******************************************************************************/
-int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad, int n_stokes, int n_derivs, int n_layers, int n_kernels, int n_kernel_quad, enum xrtm_kernel_type *kernels, int n_out_levels, int n_out_thetas) {
+int xrtm_check_options(int options, int report) {
+/*
+     if (! (options & XRTM_OPTION_N_T_TMS) && (options & XRTM_OPTION_FOUR_CONV_NEW)) {
+          if (report) fprintf(stderr, "ERROR: option \"%s\" required for option \"%s\"\n", xrtm_option_mask_to_name(XRTM_OPTION_N_T_TMS), xrtm_option_mask_to_name(XRTM_OPTION_FOUR_CONV_NEW));
+          return XRTM_INT_ERROR;
+     }
+*/
+     if ((options & XRTM_OPTION_N_T_TMS) && (options & XRTM_OPTION_NO_AZIMUTHAL)) {
+          if (report) fprintf(stderr, "ERROR: options \"%s\" and \"%s\" cannot be used together\n", xrtm_option_mask_to_name(XRTM_OPTION_N_T_TMS), xrtm_option_mask_to_name(XRTM_OPTION_NO_AZIMUTHAL));
+          return XRTM_INT_ERROR;
+     }
+
+     if (! (options & (XRTM_OPTION_FOUR_CONV_OLD | XRTM_OPTION_FOUR_CONV_NEW))) {
+          if (report) fprintf(stderr, "ERROR: must specify a convergence type as an option\n");
+          return XRTM_INT_ERROR;
+     }
+
+     if ((options & XRTM_OPTION_FOUR_CONV_OLD) && (options & XRTM_OPTION_FOUR_CONV_NEW)) {
+          if (report) fprintf(stderr, "ERROR: options \"%s\" and \"%s\" cannot be used together\n", xrtm_option_mask_to_name(XRTM_OPTION_FOUR_CONV_OLD), xrtm_option_mask_to_name(XRTM_OPTION_FOUR_CONV_NEW));
+          return XRTM_INT_ERROR;
+     }
+
+     if (! (options & (XRTM_OPTION_OUTPUT_AT_LEVELS | XRTM_OPTION_OUTPUT_AT_TAUS))) {
+          if (report) fprintf(stderr, "ERROR: must specify an output level type (\"%s\" or \"%s\") as an option\n", xrtm_option_mask_to_name(XRTM_OPTION_OUTPUT_AT_LEVELS), xrtm_option_mask_to_name(XRTM_OPTION_OUTPUT_AT_TAUS));
+          return XRTM_INT_ERROR;
+     }
+
+     if ((options & XRTM_OPTION_OUTPUT_AT_LEVELS) && (options & XRTM_OPTION_OUTPUT_AT_TAUS)) {
+          if (report) fprintf(stderr, "ERROR: options \"%s\" and \"%s\" cannot be used together\n", xrtm_option_mask_to_name(XRTM_OPTION_OUTPUT_AT_LEVELS), xrtm_option_mask_to_name(XRTM_OPTION_OUTPUT_AT_TAUS));
+          return XRTM_INT_ERROR;
+     }
+
+     if (! (options & (XRTM_OPTION_PART_SOL_CLASSICAL | XRTM_OPTION_PART_SOL_GREENS))) {
+          if (report) fprintf(stderr, "ERROR: must specify a particular solution type (\"%s\" or \"%s\") as an option\n", xrtm_option_mask_to_name(XRTM_OPTION_PART_SOL_CLASSICAL), xrtm_option_mask_to_name(XRTM_OPTION_PART_SOL_GREENS));
+          return XRTM_INT_ERROR;
+     }
+
+     if ((options & XRTM_OPTION_PART_SOL_CLASSICAL) && (options & XRTM_OPTION_PART_SOL_GREENS)) {
+          if (report) fprintf(stderr, "ERROR: options \"%s\" and \"%s\" cannot be used together\n", xrtm_option_mask_to_name(XRTM_OPTION_PART_SOL_CLASSICAL), xrtm_option_mask_to_name(XRTM_OPTION_PART_SOL_GREENS));
+          return XRTM_INT_ERROR;
+     }
+
+     if (! (options & (XRTM_OPTION_PHASE_SCALAR | XRTM_OPTION_PHASE_MATRIX_GC | XRTM_OPTION_PHASE_MATRIX_LC))) {
+          if (report) fprintf(stderr, "ERROR: must specify a phase function type as an option\n");
+          return XRTM_INT_ERROR;
+     }
+
+     if (((options & XRTM_OPTION_PHASE_SCALAR)    && (options & XRTM_OPTION_PHASE_MATRIX_GC)) ||
+         ((options & XRTM_OPTION_PHASE_SCALAR)    && (options & XRTM_OPTION_PHASE_MATRIX_LC)) ||
+         ((options & XRTM_OPTION_PHASE_MATRIX_GC) && (options & XRTM_OPTION_PHASE_MATRIX_LC))) {
+          if (report) fprintf(stderr, "ERROR: options \"%s\", \"%s\", and \"%s\" cannot be used together\n", xrtm_option_mask_to_name(XRTM_OPTION_PHASE_SCALAR), xrtm_option_mask_to_name(XRTM_OPTION_PHASE_MATRIX_GC), xrtm_option_mask_to_name(XRTM_OPTION_PHASE_MATRIX_LC));
+          return XRTM_INT_ERROR;
+     }
+
+     if (! (options & (XRTM_OPTION_QUAD_NORM_GAUS_LEG | XRTM_OPTION_QUAD_DOUB_GAUS_LEG | XRTM_OPTION_QUAD_LOBATTO))) {
+          if (report) fprintf(stderr, "ERROR: must specify the quadrature type as an option\n");
+          return XRTM_INT_ERROR;
+     }
+
+     if (((options & XRTM_OPTION_QUAD_NORM_GAUS_LEG) && (options & XRTM_OPTION_QUAD_DOUB_GAUS_LEG)) ||
+         ((options & XRTM_OPTION_QUAD_NORM_GAUS_LEG) && (options & XRTM_OPTION_QUAD_LOBATTO)) ||
+         ((options & XRTM_OPTION_QUAD_DOUB_GAUS_LEG) && (options & XRTM_OPTION_QUAD_LOBATTO))) {
+          if (report) fprintf(stderr, "ERROR: options \"%s\", \"%s\", and \"%s\" cannot be used together\n", xrtm_option_mask_to_name(XRTM_OPTION_QUAD_NORM_GAUS_LEG), xrtm_option_mask_to_name(XRTM_OPTION_QUAD_DOUB_GAUS_LEG), xrtm_option_mask_to_name(XRTM_OPTION_QUAD_LOBATTO));
+          return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_SAVE_LAYER_R_T_S && options & XRTM_OPTION_STACK_REUSE_ADDING) {
+          if (report) fprintf(stderr, "ERROR: cannot use option \"%s\" with option \"%s\"\n", xrtm_option_mask_to_name(XRTM_OPTION_SAVE_LAYER_R_T_S), xrtm_option_mask_to_name(XRTM_OPTION_STACK_REUSE_ADDING));
+          return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_STACK_REUSE_ADDING && ! (options & XRTM_OPTION_CALC_DERIVS)) {
+          if (report) fprintf(stderr, "ERROR: option \"%s\" can only be used with \"%s\"\n", xrtm_option_mask_to_name(XRTM_OPTION_STACK_REUSE_ADDING), xrtm_option_mask_to_name(XRTM_OPTION_CALC_DERIVS));
+          return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_STACK_REUSE_ADDING && (options & XRTM_OPTION_TOP_DOWN_ADDING)) {
+          if (report) fprintf(stderr, "ERROR: cannot use option \"%s\" with option \"%s\"\n", xrtm_option_mask_to_name(XRTM_OPTION_STACK_REUSE_ADDING), xrtm_option_mask_to_name(XRTM_OPTION_TOP_DOWN_ADDING));
+          return XRTM_INT_ERROR;
+     }
+
+     if ((options & XRTM_OPTION_TOP_DOWN_ADDING) && (options & XRTM_OPTION_BOTTOM_UP_ADDING)) {
+          if (report) fprintf(stderr, "ERROR: options \"%s\" and \"%s\" cannot be used together\n", xrtm_option_mask_to_name(XRTM_OPTION_TOP_DOWN_ADDING), xrtm_option_mask_to_name(XRTM_OPTION_BOTTOM_UP_ADDING));
+          return XRTM_INT_ERROR;
+     }
+
+     if (! (options & (XRTM_OPTION_UPWELLING_OUTPUT | XRTM_OPTION_DOWNWELLING_OUTPUT))) {
+          if (report) fprintf(stderr, "ERROR: must specify an output direction (\"%s\" or \"%s\") as an option\n", xrtm_option_mask_to_name(XRTM_OPTION_UPWELLING_OUTPUT), xrtm_option_mask_to_name(XRTM_OPTION_DOWNWELLING_OUTPUT));
+          return XRTM_INT_ERROR;
+     }
+
+     if (! (options & XRTM_OPTION_VECTOR) &&
+         (options & (XRTM_OPTION_PHASE_MATRIX_GC | XRTM_OPTION_PHASE_MATRIX_LC))) {
+          if (report) fprintf(stderr, "ERROR: options \"%s\" or \"%s\" require option \"%s\"\n", xrtm_option_mask_to_name(XRTM_OPTION_PHASE_MATRIX_GC), xrtm_option_mask_to_name(XRTM_OPTION_PHASE_MATRIX_LC), xrtm_option_mask_to_name(XRTM_OPTION_VECTOR));
+          return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_VECTOR &&
+         ! (options & (XRTM_OPTION_PHASE_MATRIX_GC | XRTM_OPTION_PHASE_MATRIX_LC))) {
+          if (report) fprintf(stderr, "ERROR: option \"%s\" requires option \"%s\" or \"%s\"\n", xrtm_option_mask_to_name(XRTM_OPTION_VECTOR), xrtm_option_mask_to_name(XRTM_OPTION_PHASE_MATRIX_GC), xrtm_option_mask_to_name(XRTM_OPTION_PHASE_MATRIX_LC));
+          return XRTM_INT_ERROR;
+     }
+
+     return 0;
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+int xrtm_check_counts(int options, int max_coef, int n_quad, int n_stokes, int n_derivs, int n_layers, int n_theta_0s, int n_kernels, int n_kernel_quad, enum xrtm_kernel_type *kernels, int n_out_levels, int n_out_thetas, int report) {
+
+     if (! (options & XRTM_OPTION_CALC_DERIVS) && n_derivs > 0) {
+          if (report) fprintf(stderr, "ERROR: option \"%s\" required for n_derivs > 0\n", xrtm_option_mask_to_name(XRTM_OPTION_CALC_DERIVS));
+          return XRTM_INT_ERROR;
+     }
+
+     if ((options & XRTM_OPTION_CALC_DERIVS) && n_derivs == 0) {
+          if (report) fprintf(stderr, "ERROR: n_derivs > 0 required for option \"%s\"\n", xrtm_option_mask_to_name(XRTM_OPTION_CALC_DERIVS));
+          return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_DELTA_M && max_coef < 2 * n_quad + 1) {
+          if (report) fprintf(stderr, "ERROR: invalid value for max_coef: %d, must be >= (2 * n_quad + 1) = %d for \"%s\"\n", max_coef, 2 * n_quad + 1, xrtm_option_mask_to_name(XRTM_OPTION_DELTA_M));
+          return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_SFI && n_out_thetas == 0) {
+          if (report) fprintf(stderr, "ERROR: n_out_thetas cannot be zero with option \"%s\"\n", xrtm_option_mask_to_name(XRTM_OPTION_SFI));
+          return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_TOP_DOWN_ADDING && n_out_levels != 1) {
+          if (report) fprintf(stderr, "ERROR: option \"%s\" only works for n_out_levels == 1\n", xrtm_option_mask_to_name(XRTM_OPTION_TOP_DOWN_ADDING));
+          return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_BOTTOM_UP_ADDING && n_out_levels != 1) {
+          if (report) fprintf(stderr, "ERROR: option \"%s\" only works for n_out_levels == 1\n", xrtm_option_mask_to_name(XRTM_OPTION_BOTTOM_UP_ADDING));
+          return XRTM_INT_ERROR;
+     }
+
+     if (! (options & XRTM_OPTION_VECTOR) && n_stokes > 1) {
+          if (report) fprintf(stderr, "ERROR: option \"%s\" required for n_stokes > 1\n", xrtm_option_mask_to_name(XRTM_OPTION_VECTOR));
+          return XRTM_INT_ERROR;
+     }
+
+     return 0;
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+int xrtm_check_solvers(int options, int solvers, int max_coef, int n_quad, int n_stokes, int n_derivs, int n_layers, int n_theta_0s, int n_kernels, int n_kernel_quad, enum xrtm_kernel_type *kernels, int n_out_levels, int n_out_thetas, int report) {
+
+     if (n_quad != 1) {
+          if (check_solvers(solvers, 0, report, "option", "n_quad != 1", XRTM_SOLVER_TWO_STREAM, 0))
+              return XRTM_INT_ERROR;
+     }
+
+     if (n_quad != 2) {
+          if (check_solvers(solvers, 0, report, "option", "n_quad != 2", XRTM_SOLVER_FOUR_STREAM, 0))
+              return XRTM_INT_ERROR;
+     }
+
+     if (n_quad != 3) {
+          if (check_solvers(solvers, 0, report, "option", "n_quad != 3", XRTM_SOLVER_SIX_STREAM, 0))
+              return XRTM_INT_ERROR;
+     }
+
+     if (n_theta_0s != 1) {
+          if (check_solvers(solvers, 0, report, "option", "n_theta_0s != 1", XRTM_SOLVER_EIG_ADD, XRTM_SOLVER_EIG_BVP, XRTM_SOLVER_FOUR_STREAM, XRTM_SOLVER_MEM_BVP, XRTM_SOLVER_PADE_ADD, XRTM_SOLVER_SINGLE, XRTM_SOLVER_SIX_STREAM, XRTM_SOLVER_SOS, XRTM_SOLVER_TWO_OS, XRTM_SOLVER_TWO_STREAM, 0))
+              return XRTM_INT_ERROR;
+     }
+
+     if (n_out_levels > 2) {
+          if (check_solvers(solvers, 0, report, "option", "n_out_levels > 2", XRTM_SOLVER_DOUB_ADD, XRTM_SOLVER_EIG_ADD, XRTM_SOLVER_PADE_ADD, XRTM_SOLVER_SOS, XRTM_SOLVER_TWO_OS, 0))
+              return XRTM_INT_ERROR;
+     }
+
+     if (n_out_thetas > 0 && ! (options & XRTM_OPTION_SFI)) {
+          if (check_solvers(solvers, 0, report, "option", "n_out_thetas > 0 without sfi turned on", XRTM_SOLVER_TWO_STREAM, XRTM_SOLVER_FOUR_STREAM, XRTM_SOLVER_SIX_STREAM, 0))
+              return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_DELTA_M && ! (options & XRTM_OPTION_N_T_TMS)) {
+          if (check_solvers(solvers, 0, report, "option", "delta_m without n_t_tms", XRTM_SOLVER_SINGLE, 0))
+               return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_N_T_TMS) {
+          if (check_solvers(solvers, 0, report, "option", xrtm_option_mask_to_name(XRTM_OPTION_N_T_TMS), XRTM_SOLVER_TWO_OS, 0))
+               return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_NO_AZIMUTHAL) {
+          if (check_solvers(solvers, 0, report, "option", xrtm_option_mask_to_name(XRTM_OPTION_NO_AZIMUTHAL), XRTM_SOLVER_SINGLE, 0))
+               return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_OUTPUT_AT_TAUS) {
+          if (check_solvers(solvers, 0, report, "option", xrtm_option_mask_to_name(XRTM_OPTION_OUTPUT_AT_TAUS), XRTM_SOLVER_DOUB_ADD, XRTM_SOLVER_EIG_ADD, XRTM_SOLVER_PADE_ADD, XRTM_SOLVER_SOS, 0))
+               return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_QUAD_LOBATTO) {
+          if (check_solvers(solvers, 0, report, "option", xrtm_option_mask_to_name(XRTM_OPTION_QUAD_LOBATTO), XRTM_SOLVER_DOUB_ADD, XRTM_SOLVER_EIG_ADD, XRTM_SOLVER_EIG_BVP, XRTM_SOLVER_FOUR_STREAM, XRTM_SOLVER_MEM_BVP, XRTM_SOLVER_PADE_ADD, XRTM_SOLVER_SINGLE, XRTM_SOLVER_SIX_STREAM, XRTM_SOLVER_SOS, XRTM_SOLVER_TWO_OS, XRTM_SOLVER_TWO_STREAM, 0))
+               return -1;
+     }
+
+     if (options & XRTM_OPTION_SFI) {
+          if (check_solvers(solvers, 0, report, "option", xrtm_option_mask_to_name(XRTM_OPTION_SFI), XRTM_SOLVER_DOUB_ADD, XRTM_SOLVER_EIG_ADD, XRTM_SOLVER_MEM_BVP, XRTM_SOLVER_PADE_ADD, XRTM_SOLVER_SINGLE, XRTM_SOLVER_SOS, 0))
+               return XRTM_INT_ERROR;
+     }
+
+     if (! (options & XRTM_OPTION_SOURCE_SOLAR)) {
+          if (check_solvers(solvers, 0, report, "option", xrtm_option_mask_to_name(XRTM_OPTION_SOURCE_SOLAR), XRTM_SOLVER_MEM_BVP, XRTM_SOLVER_SINGLE, XRTM_SOLVER_SOS, XRTM_SOLVER_TWO_OS, 0))
+               return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_SOURCE_THERMAL) {
+          if (check_solvers(solvers, 0, report, "option", xrtm_option_mask_to_name(XRTM_OPTION_SOURCE_THERMAL), XRTM_SOLVER_FOUR_STREAM, XRTM_SOLVER_MEM_BVP, XRTM_SOLVER_SINGLE, XRTM_SOLVER_SIX_STREAM, XRTM_SOLVER_SOS, XRTM_SOLVER_TWO_OS, XRTM_SOLVER_TWO_STREAM, 0))
+               return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_STACK_REUSE_ADDING) {
+          if (check_solvers(solvers, 0, report, "option", xrtm_option_mask_to_name(XRTM_OPTION_STACK_REUSE_ADDING), XRTM_SOLVER_EIG_BVP, XRTM_SOLVER_MEM_BVP, XRTM_SOLVER_SINGLE, XRTM_SOLVER_SOS, XRTM_SOLVER_TWO_OS, 0))
+               return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_TOP_DOWN_ADDING) {
+          if (check_solvers(solvers, 0, report, "option", xrtm_option_mask_to_name(XRTM_OPTION_TOP_DOWN_ADDING), XRTM_SOLVER_EIG_BVP, XRTM_SOLVER_MEM_BVP, XRTM_SOLVER_SINGLE, XRTM_SOLVER_SOS, XRTM_SOLVER_TWO_OS, 0))
+               return XRTM_INT_ERROR;
+     }
+
+     if (options & XRTM_OPTION_BOTTOM_UP_ADDING) {
+          if (check_solvers(solvers, 0, report, "option", xrtm_option_mask_to_name(XRTM_OPTION_BOTTOM_UP_ADDING), XRTM_SOLVER_EIG_BVP, XRTM_SOLVER_MEM_BVP, XRTM_SOLVER_SINGLE, XRTM_SOLVER_SOS, XRTM_SOLVER_TWO_OS, 0))
+               return XRTM_INT_ERROR;
+     }
+#ifdef INCLUDE_DEV_SOURCE
+     if (check_dev_solvers_create(options, solvers, max_coef, n_quad, n_stokes, n_derivs, n_layers, n_theta_0s, n_kernels, n_kernel_quad, kernels, n_out_levels, n_out_thetas, report)) {
+          if (report) fprintf(stderr, "ERROR: check_dev_solvers_create()\n");
+          return XRTM_INT_ERROR;
+     }
+#endif
+     return 0;
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+static void update_n_four2(xrtm_data *d, int flag1, int flag2) {
+
+     if (d->options & XRTM_OPTION_NO_AZIMUTHAL ||
+        (! (d->options & XRTM_OPTION_SOURCE_SOLAR) && (d->options & XRTM_OPTION_SOURCE_THERMAL)) ||
+        (d->n_stokes == 1 && ((flag1 && d->mu_0_0 == 1.) || (flag2 && d->n_umus == 1 && d->umus[0] == 1.))))
+/*
+     if (d->options & XRTM_OPTION_NO_AZIMUTHAL || (! (d->options & XRTM_OPTION_SOURCE_SOLAR) && (d->options & XRTM_OPTION_SOURCE_THERMAL)) || (d->n_stokes == 1 && ((flag1 && d->mu_0_0 == 1.) || (flag2 && d->n_umus == 1 && d->umus[0] == 1.))) || ((flag1 && d->mu_0_0 == 1.) && (flag2 && d->n_umus == 1 && d->umus[*] != 1.)))
+*/
+          d->n_four2 = 1;
+     else
+          d->n_four2 = d->n_four;
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad, int n_stokes, int n_derivs, int n_layers, int n_theta_0s, int n_kernels, int n_kernel_quad, enum xrtm_kernel_type *kernels, int n_out_levels, int n_out_thetas) {
+
+     misc_input_data misc_input;
+
+     xrtm_misc_input_init(&misc_input);
+
+     return xrtm_create2(d, options, solvers, max_coef, n_quad, n_stokes, n_derivs, n_layers, n_theta_0s, n_kernels, n_kernel_quad, kernels, n_out_levels, n_out_thetas, &misc_input);
+}
+
+
+
+int xrtm_create2(xrtm_data *d, int options, int solvers, int max_coef, int n_quad, int n_stokes, int n_derivs, int n_layers, int n_theta_0s, int n_kernels, int n_kernel_quad, enum xrtm_kernel_type *kernels, int n_out_levels, int n_out_thetas, misc_input_data *misc_input) {
 
      int i;
      int ii;
@@ -499,7 +776,10 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
      jmp_buf env;
 
 
-     misc_input_init(&d->misc_input);
+     /*-------------------------------------------------------------------------
+      *
+      *-----------------------------------------------------------------------*/
+     memset(d, 0xffffffff, sizeof(xrtm_data));
 
 
      /*-------------------------------------------------------------------------
@@ -512,72 +792,81 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
      d->n_stokes      = n_stokes;
      d->n_derivs      = n_derivs;
      d->n_layers      = n_layers;
+     d->n_theta_0s    = n_theta_0s;
      d->n_kernels     = n_kernels;
      d->n_kernel_quad = n_kernel_quad;
      d->n_ulevels     = n_out_levels;
      d->n_umus        = n_out_thetas;
+
+     d->misc_input    = *misc_input;
 
 
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
      if (d->n_coef < 0) {
-          eprintf("ERROR: invalid value for max_coef: %d, must be > zero\n",
+          fprintf(stderr, "ERROR: invalid value for max_coef: %d, must be > zero\n",
                   d->n_coef);
           return XRTM_INT_ERROR;
      }
 
      if (d->n_quad <= 0) {
-          eprintf("ERROR: invalid value for n_quad: %d, must be > zero\n",
+          fprintf(stderr, "ERROR: invalid value for n_quad: %d, must be > zero\n",
                   d->n_quad);
           return XRTM_INT_ERROR;
      }
 
      if (d->n_stokes <= 0 || d->n_stokes > 4) {
-          eprintf("ERROR: invalid value for n_stokes: %d, must be > zero\n",
+          fprintf(stderr, "ERROR: invalid value for n_stokes: %d, must be > zero\n",
                   d->n_stokes);
           return XRTM_INT_ERROR;
      }
 
      if (d->n_derivs < 0) {
-          eprintf("ERROR: invalid value for n_derivs: %d, must be >= zero\n",
+          fprintf(stderr, "ERROR: invalid value for n_derivs: %d, must be >= zero\n",
                   d->n_stokes);
           return XRTM_INT_ERROR;
      }
 
      if (d->n_layers <= 0) {
-          eprintf("ERROR: invalid value for n_layers: %d, must be > zero\n",
+          fprintf(stderr, "ERROR: invalid value for n_layers: %d, must be > zero\n",
                   d->n_layers);
           return XRTM_INT_ERROR;
      }
 
+     if (d->n_theta_0s <= 0) {
+          fprintf(stderr, "ERROR: invalid value for n_theta_0s: %d, must be > zero\n",
+                  d->n_theta_0s);
+          return XRTM_INT_ERROR;
+     }
+
      if (d->n_kernels < 0) {
-          eprintf("ERROR: invalid value for n_kernels: %d, must be > zero\n",
+          fprintf(stderr, "ERROR: invalid value for n_kernels: %d, must be > zero\n",
                   d->n_kernels);
           return XRTM_INT_ERROR;
      }
 
      if (d->n_kernels > 0 && d->n_kernel_quad <= 0) {
-          eprintf("ERROR: invalid value for n_kernel_quad: %d, must be > zero\n",
+          fprintf(stderr, "ERROR: invalid value for n_kernel_quad: %d, must be > zero\n",
                   d->n_kernel_quad);
           return XRTM_INT_ERROR;
      }
 
      for (i = 0; i < d->n_kernels; ++i) {
           if (! kernel_is_valid(kernels[i])) {
-               eprintf("ERROR: i_kernel %d is invalid\n", i);
+               fprintf(stderr, "ERROR: i_kernel %d is invalid\n", i);
                return XRTM_INT_ERROR;
           }
      }
 
      if (d->n_ulevels <= 0) {
-          eprintf("ERROR: invalid value for n_out_levels: %d, must be > zero\n",
+          fprintf(stderr, "ERROR: invalid value for n_out_levels: %d, must be > zero\n",
                   d->n_ulevels);
           return XRTM_INT_ERROR;
      }
 
      if (d->n_umus < 0) {
-          eprintf("ERROR: invalid value for n_out_thetas: %d, must be >= zero\n",
+          fprintf(stderr, "ERROR: invalid value for n_out_thetas: %d, must be >= zero\n",
                   d->n_umus);
           return XRTM_INT_ERROR;
      }
@@ -589,17 +878,14 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
      if (d->n_stokes > 1)
           d->options |= XRTM_OPTION_VECTOR;
 
-     if (d->n_umus == 0)
-          d->options = d->options & (0xffffffff ^ XRTM_OPTION_SFI);
-
      if (d->options & XRTM_OPTION_N_T_TMS)
           d->options |= XRTM_OPTION_DELTA_M;
 
      if (! (d->options & (XRTM_OPTION_FOUR_CONV_OLD | XRTM_OPTION_FOUR_CONV_NEW)))
           d->options |= XRTM_OPTION_FOUR_CONV_NEW;
 
-     if (! (d->options & (XRTM_OPTION_OUTPUT_AT_LEVELS | XRTM_OPTION_OUTPUT_AT_TAUS)))
-          d->options |= XRTM_OPTION_OUTPUT_AT_LEVELS;
+     if (! (d->options & (XRTM_OPTION_PART_SOL_CLASSICAL | XRTM_OPTION_PART_SOL_GREENS)))
+          d->options |= XRTM_OPTION_PART_SOL_CLASSICAL;
 
      if (! (d->options & (XRTM_OPTION_PHASE_SCALAR | XRTM_OPTION_PHASE_MATRIX_GC | XRTM_OPTION_PHASE_MATRIX_LC))) {
           if (! (d->options & XRTM_OPTION_VECTOR))
@@ -616,111 +902,19 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
 
 
      /*-------------------------------------------------------------------------
-      * Check configuration settings.
+      * Check if options are valid.
       *-----------------------------------------------------------------------*/
-     if (! (d->options & XRTM_OPTION_CALC_DERIVS) && d->n_derivs > 0) {
-          eprintf("ERROR: option \"%s\" required for n_derivs > 0\n", xrtm_option_name2(XRTM_OPTION_CALC_DERIVS));
+     if (xrtm_check_options(d->options, 1)) {
+          fprintf(stderr, "ERROR: xrtm_check_options()\n");
           return XRTM_INT_ERROR;
      }
 
-     if ((d->options & XRTM_OPTION_CALC_DERIVS) && d->n_derivs == 0) {
-          eprintf("ERROR: n_derivs > 0 required for option \"%s\"\n", xrtm_option_name2(XRTM_OPTION_CALC_DERIVS));
-          return XRTM_INT_ERROR;
-     }
-/*
-     if (! (d->options & XRTM_OPTION_N_T_TMS) && (d->options & XRTM_OPTION_FOUR_CONV_NEW)) {
-          eprintf("ERROR: option \"%s\" required for option \"%s\"\n", xrtm_option_name2(XRTM_OPTION_N_T_TMS), xrtm_option_name2(XRTM_OPTION_FOUR_CONV_NEW));
-          return XRTM_INT_ERROR;
-     }
-*/
-     if ((d->options & XRTM_OPTION_N_T_TMS) && (d->options & XRTM_OPTION_NO_AZIMUTHAL)) {
-          eprintf("ERROR: options \"%s\" and \"%s\" cannot be used together\n", xrtm_option_name2(XRTM_OPTION_N_T_TMS), xrtm_option_name2(XRTM_OPTION_NO_AZIMUTHAL));
-          return XRTM_INT_ERROR;
-     }
 
-     if (! (d->options & (XRTM_OPTION_FOUR_CONV_OLD | XRTM_OPTION_FOUR_CONV_NEW))) {
-          eprintf("ERROR: must specify a convergence type as an option\n");
-          return XRTM_INT_ERROR;
-     }
-
-     if ((d->options & XRTM_OPTION_FOUR_CONV_OLD) && (d->options & XRTM_OPTION_FOUR_CONV_NEW)) {
-          eprintf("ERROR: options \"%s\" and \"%s\" cannot be used together\n", xrtm_option_name2(XRTM_OPTION_FOUR_CONV_OLD), xrtm_option_name2(XRTM_OPTION_FOUR_CONV_NEW));
-          return XRTM_INT_ERROR;
-     }
-
-     if (! (d->options & (XRTM_OPTION_OUTPUT_AT_LEVELS | XRTM_OPTION_OUTPUT_AT_TAUS))) {
-          eprintf("ERROR: must specify an output level type (\"%s\" or \"%s\") as an option\n", xrtm_option_name2(XRTM_OPTION_OUTPUT_AT_LEVELS), xrtm_option_name2(XRTM_OPTION_OUTPUT_AT_TAUS));
-          return XRTM_INT_ERROR;
-     }
-
-     if ((d->options & XRTM_OPTION_OUTPUT_AT_LEVELS) && (d->options & XRTM_OPTION_OUTPUT_AT_TAUS)) {
-          eprintf("ERROR: options \"%s\" and \"%s\" cannot be used together\n", xrtm_option_name2(XRTM_OPTION_OUTPUT_AT_LEVELS), xrtm_option_name2(XRTM_OPTION_OUTPUT_AT_TAUS));
-          return XRTM_INT_ERROR;
-     }
-
-     if (! (d->options & (XRTM_OPTION_PHASE_SCALAR | XRTM_OPTION_PHASE_MATRIX_GC | XRTM_OPTION_PHASE_MATRIX_LC))) {
-          eprintf("ERROR: must specify a phase function type as an option\n");
-          return XRTM_INT_ERROR;
-     }
-
-     if (((d->options & XRTM_OPTION_PHASE_SCALAR)    && (d->options & XRTM_OPTION_PHASE_MATRIX_GC)) ||
-         ((d->options & XRTM_OPTION_PHASE_SCALAR)    && (d->options & XRTM_OPTION_PHASE_MATRIX_LC)) ||
-         ((d->options & XRTM_OPTION_PHASE_MATRIX_GC) && (d->options & XRTM_OPTION_PHASE_MATRIX_LC))) {
-          eprintf("ERROR: options \"%s\", \"%s\", and \"%s\" cannot be used together\n", xrtm_option_name2(XRTM_OPTION_PHASE_SCALAR), xrtm_option_name2(XRTM_OPTION_PHASE_MATRIX_GC), xrtm_option_name2(XRTM_OPTION_PHASE_MATRIX_LC));
-          return XRTM_INT_ERROR;
-     }
-
-     if (! (d->options & (XRTM_OPTION_QUAD_NORM_GAUS_LEG | XRTM_OPTION_QUAD_DOUB_GAUS_LEG | XRTM_OPTION_QUAD_LOBATTO))) {
-          eprintf("ERROR: must specify the quadrature type as an option\n");
-          return XRTM_INT_ERROR;
-     }
-
-     if (((d->options & XRTM_OPTION_QUAD_NORM_GAUS_LEG) && (d->options & XRTM_OPTION_QUAD_DOUB_GAUS_LEG)) ||
-         ((d->options & XRTM_OPTION_QUAD_NORM_GAUS_LEG) && (d->options & XRTM_OPTION_QUAD_LOBATTO)) ||
-         ((d->options & XRTM_OPTION_QUAD_DOUB_GAUS_LEG) && (d->options & XRTM_OPTION_QUAD_LOBATTO))) {
-          eprintf("ERROR: options \"%s\", \"%s\", and \"%s\" cannot be used together\n", xrtm_option_name2(XRTM_OPTION_QUAD_NORM_GAUS_LEG), xrtm_option_name2(XRTM_OPTION_QUAD_DOUB_GAUS_LEG), xrtm_option_name2(XRTM_OPTION_QUAD_LOBATTO));
-          return XRTM_INT_ERROR;
-     }
-
-     if (d->options & XRTM_OPTION_SAVE_LAYER_R_T_S && d->options & XRTM_OPTION_STACK_REUSE_ADDING) {
-          eprintf("ERROR: cannot use option \"%s\" with option \"%s\"\n", xrtm_option_name2(XRTM_OPTION_SAVE_LAYER_R_T_S), xrtm_option_name2(XRTM_OPTION_STACK_REUSE_ADDING));
-          return XRTM_INT_ERROR;
-     }
-
-     if (d->options & XRTM_OPTION_STACK_REUSE_ADDING && ! (d->options & XRTM_OPTION_CALC_DERIVS)) {
-          eprintf("ERROR: option \"%s\" can only be used with \"%s\"\n", xrtm_option_name2(XRTM_OPTION_STACK_REUSE_ADDING), xrtm_option_name2(XRTM_OPTION_CALC_DERIVS));
-          return XRTM_INT_ERROR;
-     }
-
-     if (d->options & XRTM_OPTION_TOP_DOWN_ADDING && d->n_ulevels != 1) {
-          eprintf("ERROR: option \"%s\" only works for n_out_levels == 1\n", xrtm_option_name2(XRTM_OPTION_TOP_DOWN_ADDING));
-          return XRTM_INT_ERROR;
-     }
-
-     if (d->options & XRTM_OPTION_BOTTOM_UP_ADDING && d->n_ulevels != 1) {
-          eprintf("ERROR: option \"%s\" only works for n_out_levels == 1\n", xrtm_option_name2(XRTM_OPTION_BOTTOM_UP_ADDING));
-          return XRTM_INT_ERROR;
-     }
-
-     if (! (d->options & (XRTM_OPTION_UPWELLING_OUTPUT | XRTM_OPTION_DOWNWELLING_OUTPUT))) {
-          eprintf("ERROR: must specify an output direction (\"%s\" or \"%s\") as an option\n", xrtm_option_name2(XRTM_OPTION_UPWELLING_OUTPUT ), xrtm_option_name2(XRTM_OPTION_DOWNWELLING_OUTPUT));
-          return XRTM_INT_ERROR;
-     }
-
-     if (! (d->options & XRTM_OPTION_VECTOR) && d->n_stokes > 1) {
-          eprintf("ERROR: option \"%s\" required for n_stokes > 1\n", xrtm_option_name2(XRTM_OPTION_VECTOR));
-          return XRTM_INT_ERROR;
-     }
-
-     if (! (d->options & XRTM_OPTION_VECTOR) &&
-         (d->options & (XRTM_OPTION_PHASE_MATRIX_GC | XRTM_OPTION_PHASE_MATRIX_LC))) {
-          eprintf("ERROR: options \"%s\" or \"%s\" require option \"%s\"\n", xrtm_option_name2(XRTM_OPTION_PHASE_MATRIX_GC), xrtm_option_name2(XRTM_OPTION_PHASE_MATRIX_LC), xrtm_option_name2(XRTM_OPTION_VECTOR));
-          return XRTM_INT_ERROR;
-     }
-
-     if (d->options & XRTM_OPTION_VECTOR &&
-         ! (d->options & (XRTM_OPTION_PHASE_MATRIX_GC | XRTM_OPTION_PHASE_MATRIX_LC))) {
-          eprintf("ERROR: option \"%s\" requires option \"%s\" or \"%s\"\n", xrtm_option_name2(XRTM_OPTION_VECTOR), xrtm_option_name2(XRTM_OPTION_PHASE_MATRIX_GC), xrtm_option_name2(XRTM_OPTION_PHASE_MATRIX_LC));
+     /*-------------------------------------------------------------------------
+      * Check for count incompatibilities.
+      *-----------------------------------------------------------------------*/
+    if (xrtm_check_counts(d->options, d->n_coef, d->n_quad, d->n_stokes, d->n_derivs, d->n_layers, d->n_theta_0s, d->n_kernels, d->n_kernel_quad, kernels, d->n_ulevels, d->n_umus, 1)) {
+          fprintf(stderr, "ERROR: xrtm_check_counts()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -728,62 +922,9 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
      /*-------------------------------------------------------------------------
       * Check for solver incompatibilities.
       *-----------------------------------------------------------------------*/
-     if (d->n_ulevels > 2) {
-          if (check_solvers2(d, "n_out_levels > 2", XRTM_SOLVER_DOUB_ADD, XRTM_SOLVER_EIG_ADD, XRTM_SOLVER_PADE_ADD, XRTM_SOLVER_SOS, XRTM_SOLVER_TWO_OS, 0))
-              return XRTM_INT_ERROR;
-     }
-
-     if (d->options & XRTM_OPTION_DELTA_M && ! (d->options & XRTM_OPTION_N_T_TMS)) {
-          if (check_solvers2(d, "delta_m without n_t_tms", XRTM_SOLVER_SINGLE, 0))
-               return XRTM_INT_ERROR;
-     }
-
-     if (d->options & XRTM_OPTION_N_T_TMS) {
-          if (check_solvers2(d, xrtm_option_name2(XRTM_OPTION_N_T_TMS), XRTM_SOLVER_TWO_OS, 0))
-               return XRTM_INT_ERROR;
-     }
-
-     if (d->options & XRTM_OPTION_NO_AZIMUTHAL) {
-          if (check_solvers2(d, xrtm_option_name2(XRTM_OPTION_NO_AZIMUTHAL), XRTM_SOLVER_SINGLE, 0))
-               return XRTM_INT_ERROR;
-     }
-
-     if (d->options & XRTM_OPTION_OUTPUT_AT_TAUS) {
-          if (check_solvers2(d, xrtm_option_name2(XRTM_OPTION_OUTPUT_AT_TAUS), XRTM_SOLVER_DOUB_ADD, XRTM_SOLVER_EIG_ADD, XRTM_SOLVER_PADE_ADD, XRTM_SOLVER_SOS, 0))
-               return XRTM_INT_ERROR;
-     }
-
-     if (d->options & XRTM_OPTION_SFI) {
-          if (check_solvers2(d, xrtm_option_name2(XRTM_OPTION_SFI), XRTM_SOLVER_DOUB_ADD, XRTM_SOLVER_EIG_ADD, XRTM_SOLVER_MEM_BVP, XRTM_SOLVER_PADE_ADD, XRTM_SOLVER_SINGLE, XRTM_SOLVER_SOS, 0))
-               return XRTM_INT_ERROR;
-     }
-
-     if (d->options & XRTM_OPTION_TOP_DOWN_ADDING) {
-          if (check_solvers2(d, xrtm_option_name2(XRTM_OPTION_TOP_DOWN_ADDING), XRTM_SOLVER_EIG_BVP, XRTM_SOLVER_MEM_BVP, XRTM_SOLVER_SINGLE, XRTM_SOLVER_SOS, XRTM_SOLVER_TWO_OS, 0))
-               return XRTM_INT_ERROR;
-     }
-
-     if (d->options & XRTM_OPTION_BOTTOM_UP_ADDING) {
-          if (check_solvers2(d, xrtm_option_name2(XRTM_OPTION_BOTTOM_UP_ADDING), XRTM_SOLVER_EIG_BVP, XRTM_SOLVER_MEM_BVP, XRTM_SOLVER_SINGLE, XRTM_SOLVER_SOS, XRTM_SOLVER_TWO_OS, 0))
-               return XRTM_INT_ERROR;
-     }
-
-#ifdef INCLUDE_DEV_SOURCE
-     if (check_dev_solvers_create(d, kernels)) {
-          eprintf("ERROR: check_dev_solvers_create()\n");
+    if (xrtm_check_solvers(d->options, d->solvers, d->n_coef, d->n_quad, d->n_stokes, d->n_derivs, d->n_layers, d->n_theta_0s, d->n_kernels, d->n_kernel_quad, kernels, d->n_ulevels, d->n_umus, 1)) {
+          fprintf(stderr, "ERROR: xrtm_check_solvers()\n");
           return XRTM_INT_ERROR;
-     }
-#endif
-
-     /*-------------------------------------------------------------------------
-      * Check for n incompatibilities.
-      *-----------------------------------------------------------------------*/
-     if (d->options & XRTM_OPTION_DELTA_M) {
-          if (d->n_coef < 2 * d->n_quad + 1) {
-               eprintf("ERROR: invalid value for n_coef: %d, must be >= "
-                       " (2 * n_quad + 1) = %d for \"delta_m\"\n", d->n_coef, 2 * d->n_quad + 1);
-               return XRTM_INT_ERROR;
-          }
      }
 
 
@@ -821,7 +962,7 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
     defined USE_AD_FOR_TL_CALC_FOURIER_GET_ADD_BOTH_WAYS_A || \
     defined USE_AD_FOR_TL_CALC_GET_SOLUTION_INTERNAL
      if (! (d->options & XRTM_OPTION_CALC_DERIVS && d->options & XRTM_OPTION_REVERSE_DERIVS)) {
-          eprintf("ERROR: option \"%s\" can only be used with \"%s\"\n", xrtm_option_name2(XRTM_OPTION_CALC_DERIVS), xrtm_option_name2(XRTM_OPTION_REVERSE_DERIVS));
+          fprintf(stderr, "ERROR: option \"%s\" can only be used with \"%s\"\n", xrtm_option_mask_to_name(XRTM_OPTION_CALC_DERIVS), xrtm_option_mask_to_name(XRTM_OPTION_REVERSE_DERIVS));
           return XRTM_INT_ERROR;
      }
 #endif
@@ -834,6 +975,12 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
 
      if (   d->options & XRTM_OPTION_PHASE_MATRIX_LC)
           d->options |= XRTM_OPTION_SAVE_PHASE_MATS;
+
+
+     /*-------------------------------------------------------------------------
+      * Value implicitly set to defaults.
+      *-----------------------------------------------------------------------*/
+     d->phi_0 = 0.;
 
 
      /*-------------------------------------------------------------------------
@@ -863,6 +1010,8 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
      else
           d->n_elem = 6;
 
+     update_n_four2(d, 0, 0);
+
 
      /*-------------------------------------------------------------------------
       *
@@ -881,6 +1030,7 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
      if (d->n_kernels > 0) {
           d->set_flags_kernel_ampfac = ALLOC_ARRAY1_UC(d->n_kernels);
           d->set_flags_kernel_params = ALLOC_ARRAY2_UC(d->n_kernels, MAX_KERNEL_PARAMS);
+          d->set_flags_kernel_func   = ALLOC_ARRAY1_UC(d->n_kernels);
      }
 
 
@@ -946,11 +1096,12 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
 */
      else
      if (d->options & XRTM_OPTION_QUAD_LOBATTO) {
-
+          init_array1_d(d->qx, d->n_quad, -DBL_MAX);
+          init_array1_d(d->qw, d->n_quad, -DBL_MAX);
      }
 #ifdef DEBUG
      else {
-         eprintf("ERROR: xrtm_create(): end of if / else if\n");
+         fprintf(stderr, "ERROR: xrtm_create(): end of if / else if\n");
          exit(1);
      }
 #endif
@@ -1029,7 +1180,7 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
                d->kernel_qx[i] *= PI;
 
           if (brdf_aux_alloc(&d->kernel_aux, d->n_quad + d->n_umus, d->n_kernel_quad)) {
-               eprintf("ERROR: brdf_aux_alloc()\n");
+               fprintf(stderr, "ERROR: brdf_aux_alloc()\n");
                return XRTM_INT_ERROR;
           }
           brdf_aux_calc_base(&d->kernel_aux, d->n_quad, d->qx, d->n_kernel_quad, d->kernel_qx);
@@ -1039,6 +1190,9 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
+     if (d->options & XRTM_OPTION_PSA)
+          d->levels_z = ALLOC_ARRAY1_D(d->n_layers + 1);
+
      if (d->options & XRTM_OPTION_OUTPUT_AT_LEVELS) {
           d->ulevels = ALLOC_ARRAY1_I(d->n_ulevels);
           if (d->n_ulevels > 0)
@@ -1056,9 +1210,6 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
           else
                d->utaus20 = ALLOC_ARRAY1_D(d->n_ulevels);
      }
-
-     if (d->options & XRTM_OPTION_PSA)
-          d->levels_z = ALLOC_ARRAY1_D(d->n_layers + 1);
 
      if (d->options & XRTM_OPTION_SOURCE_THERMAL)
           d->levels_b = ALLOC_ARRAY1_D(d->n_layers + 1);
@@ -1105,8 +1256,8 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
                d->kernels[i] = kernels[i];
 
           d->kernel_ampfac = ALLOC_ARRAY1_D(d->n_kernels);
-
           d->kernel_params = ALLOC_ARRAY2_D(d->n_kernels, MAX_KERNEL_PARAMS);
+          d->kernel_func   = ALLOC_ARRAY1  (d->n_kernels, brdf_kernel_func_data);
      }
 
 
@@ -1114,8 +1265,10 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
       *
       *-----------------------------------------------------------------------*/
      if (d->options & XRTM_OPTION_CALC_DERIVS) {
+          d->F_iso_top_l = ALLOC_ARRAY1_D(d->n_derivs);
+          d->F_iso_bot_l = ALLOC_ARRAY1_D(d->n_derivs);
+
           if (d->options & XRTM_OPTION_SOURCE_THERMAL) {
-               d->top_b_l     = ALLOC_ARRAY1_D(d->n_derivs);
                d->levels_b_l  = ALLOC_ARRAY2_D(d->n_layers + 1, d->n_derivs);
                d->surface_b_l = ALLOC_ARRAY1_D(d->n_derivs);
           }
@@ -1192,30 +1345,72 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
       *
       *-----------------------------------------------------------------------*/
      if (d->options & XRTM_OPTION_CALC_DERIVS) {
-          d->derivs_h  = flags_alloc2(d->n_layers + 1, d->n_derivs);
-          d->derivs_s  = flags_alloc2(d->n_layers + 1, d->n_derivs);
-          d->derivs_u  = flags_alloc2(d->n_layers + 1, d->n_derivs);
-          d->derivs_d  = flags_alloc2(d->n_layers + 1, d->n_derivs);
+          d->derivs.layers        = flags_alloc2(d->n_layers + 1, d->n_derivs);
+          d->derivs.total         = flags_alloc2(              1, d->n_derivs);
+          d->derivs.stacks        = flags_alloc2(d->n_layers + 1, d->n_derivs);
+          d->derivs.sources       = flags_alloc2(d->n_layers + 1, d->n_derivs);
 
-          d->derivs_hm = flags_alloc2(d->n_layers + 1, d->n_derivs);
-          d->derivs_sm = flags_alloc2(d->n_layers + 1, d->n_derivs);
-          d->derivs_um = flags_alloc2(d->n_layers + 1, d->n_derivs);
-          d->derivs_dm = flags_alloc2(d->n_layers + 1, d->n_derivs);
+          d->derivs.adding_up     = flags_alloc2(d->n_layers + 1, d->n_derivs);
+          d->derivs.adding_down   = flags_alloc2(d->n_layers + 1, d->n_derivs);
 
-          if (! (d->derivs_h  && d->derivs_s  && d->derivs_u  && d->derivs_d &&
-                 d->derivs_hm && d->derivs_sm && d->derivs_um && d->derivs_dm)) {
-               eprintf("ERROR: flags_alloc2()\n");
+          d->derivs.beam          = (uchar **) 1;
+          if (d->options & XRTM_OPTION_SOURCE_SOLAR)
+               d->derivs.beam        = flags_alloc2(d->n_layers + 1, d->n_derivs);
+
+          d->derivs.thermal       = (uchar **) 1;
+          if (d->options & XRTM_OPTION_SOURCE_THERMAL)
+               d->derivs.thermal     = flags_alloc2(d->n_layers + 1, d->n_derivs);
+
+          d->derivs.layers_m      = flags_alloc2(d->n_layers + 1, d->n_derivs);
+          d->derivs.total_m       = flags_alloc2(              1, d->n_derivs);
+          d->derivs.stacks_m      = flags_alloc2(d->n_layers + 1, d->n_derivs);
+          d->derivs.sources_m     = flags_alloc2(d->n_layers + 1, d->n_derivs);
+
+          d->derivs.adding_up_m   = flags_alloc2(d->n_layers + 1, d->n_derivs);
+          d->derivs.adding_down_m = flags_alloc2(d->n_layers + 1, d->n_derivs);
+
+          d->derivs.beam_m        = (uchar **) 1;
+          if (d->options & XRTM_OPTION_SOURCE_SOLAR)
+               d->derivs.beam_m      = flags_alloc2(d->n_layers + 1, d->n_derivs);
+
+          d->derivs.thermal_m     = (uchar **) 1;
+          if (d->options & XRTM_OPTION_SOURCE_THERMAL)
+               d->derivs.thermal_m   = flags_alloc2(d->n_layers + 1, d->n_derivs);
+
+          if (0) {
+               fprintf(stderr, "ERROR: flags_alloc2()\n");
                return XRTM_INT_ERROR;
           }
      }
 
      if (d->options & XRTM_OPTION_REVERSE_DERIVS) {
-          d->derivs_h_union  = ALLOC_ARRAY1_UC(d->n_layers + 1);
-          d->derivs_u_union  = ALLOC_ARRAY1_UC(d->n_layers + 1);
-          d->derivs_d_union  = ALLOC_ARRAY1_UC(d->n_layers + 1);
+          d->derivs.layers_union        = ALLOC_ARRAY1_UC(d->n_layers + 1);
+          d->derivs.total_union         = ALLOC_ARRAY1_UC(d->n_layers + 1);
+          d->derivs.stacks_union        = ALLOC_ARRAY1_UC(d->n_layers + 1);
+          d->derivs.sources_union       = ALLOC_ARRAY1_UC(d->n_layers + 1);
 
-          d->derivs_dm_union = ALLOC_ARRAY1_UC(d->n_layers + 1);
-          d->derivs_um_union = ALLOC_ARRAY1_UC(d->n_layers + 1);
+          if (d->options & XRTM_OPTION_SOURCE_SOLAR)
+               d->derivs.beam_union        = ALLOC_ARRAY1_UC(d->n_layers + 1);
+
+          if (d->options & XRTM_OPTION_SOURCE_THERMAL)
+               d->derivs.thermal_union     = ALLOC_ARRAY1_UC(d->n_layers + 1);
+
+          d->derivs.adding_up_union     = ALLOC_ARRAY1_UC(d->n_layers + 1);
+          d->derivs.adding_down_union   = ALLOC_ARRAY1_UC(d->n_layers + 1);
+
+          d->derivs.layers_m_union      = ALLOC_ARRAY1_UC(d->n_layers + 1);
+          d->derivs.total_m_union       = ALLOC_ARRAY1_UC(d->n_layers + 1);
+          d->derivs.stacks_m_union      = ALLOC_ARRAY1_UC(d->n_layers + 1);
+          d->derivs.sources_m_union     = ALLOC_ARRAY1_UC(d->n_layers + 1);
+
+          if (d->options & XRTM_OPTION_SOURCE_SOLAR)
+               d->derivs.beam_m_union      = ALLOC_ARRAY1_UC(d->n_layers + 1);
+
+          if (d->options & XRTM_OPTION_SOURCE_THERMAL)
+               d->derivs.thermal_m_union   = ALLOC_ARRAY1_UC(d->n_layers + 1);
+
+          d->derivs.adding_up_m_union   = ALLOC_ARRAY1_UC(d->n_layers + 1);
+          d->derivs.adding_down_m_union = ALLOC_ARRAY1_UC(d->n_layers + 1);
      }
 
 
@@ -1378,7 +1573,7 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
 
           if (d->options & XRTM_OPTION_CALC_DERIVS && d->options & XRTM_OPTION_SAVE_PHASE_MATS) {
                d->P_qq_pp_l = ALLOC_ARRAY5_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
-               d->P_qq_mm_l = ALLOC_ARRAY5_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
+               d->P_qq_mp_l = ALLOC_ARRAY5_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
 
                d->P_q0_mm_l = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x);
                d->P_q0_pm_l = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x);
@@ -1399,7 +1594,7 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
 
           if (d->options & XRTM_OPTION_CALC_DERIVS && d->options & XRTM_OPTION_SAVE_PHASE_MATS &&
               d->options & XRTM_OPTION_VECTOR) {
-               d->P_qq_mp_l = ALLOC_ARRAY5_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
+               d->P_qq_mm_l = ALLOC_ARRAY5_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
                d->P_qq_pm_l = ALLOC_ARRAY5_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
 
                if (d->options & XRTM_OPTION_SFI && d->n_umus > 0) {
@@ -1427,43 +1622,55 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
           }
 
           if (d->options & XRTM_OPTION_SAVE_LAYER_R_T_S) {
-               d->Rl_p = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_quad_v_x, d->n_quad_v_x);
-               d->Tl_p = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_quad_v_x, d->n_quad_v_x);
-               d->Rl_m = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_quad_v_x, d->n_quad_v_x);
-               d->Tl_m = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_quad_v_x, d->n_quad_v_x);
+               d->Rl_p  = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_quad_v_x, d->n_quad_v_x);
+               d->Tl_p  = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_quad_v_x, d->n_quad_v_x);
+               d->Rl_m  = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_quad_v_x, d->n_quad_v_x);
+               d->Tl_m  = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_quad_v_x, d->n_quad_v_x);
 
-               d->Sl_p = ALLOC_ARRAY3_D(d->n_four, d->n_layers, d->n_quad_v_x);
-               d->Sl_m = ALLOC_ARRAY3_D(d->n_four, d->n_layers, d->n_quad_v_x);
+               d->Sl_p  = ALLOC_ARRAY3_D(d->n_four, d->n_layers, d->n_quad_v_x);
+               d->Sl_m  = ALLOC_ARRAY3_D(d->n_four, d->n_layers, d->n_quad_v_x);
+
+               d->Sll_p = ALLOC_ARRAY3_D(d->n_four, d->n_layers, d->n_quad_v_x);
+               d->Sll_m = ALLOC_ARRAY3_D(d->n_four, d->n_layers, d->n_quad_v_x);
           }
 
           if (d->options & XRTM_OPTION_SAVE_TOTAL_R_T_S) {
-               d->Ra_p = ALLOC_ARRAY3_D(d->n_four, d->n_quad_v_x, d->n_quad_v_x);
-               d->Ta_p = ALLOC_ARRAY3_D(d->n_four, d->n_quad_v_x, d->n_quad_v_x);
-               d->Ra_m = ALLOC_ARRAY3_D(d->n_four, d->n_quad_v_x, d->n_quad_v_x);
-               d->Ta_m = ALLOC_ARRAY3_D(d->n_four, d->n_quad_v_x, d->n_quad_v_x);
+               d->Ra_p  = ALLOC_ARRAY3_D(d->n_four, d->n_quad_v_x, d->n_quad_v_x);
+               d->Ta_p  = ALLOC_ARRAY3_D(d->n_four, d->n_quad_v_x, d->n_quad_v_x);
+               d->Ra_m  = ALLOC_ARRAY3_D(d->n_four, d->n_quad_v_x, d->n_quad_v_x);
+               d->Ta_m  = ALLOC_ARRAY3_D(d->n_four, d->n_quad_v_x, d->n_quad_v_x);
 
-               d->Sa_p = ALLOC_ARRAY2_D(d->n_four, d->n_quad_v_x);
-               d->Sa_m = ALLOC_ARRAY2_D(d->n_four, d->n_quad_v_x);
+               d->Sa_p  = ALLOC_ARRAY2_D(d->n_four, d->n_quad_v_x);
+               d->Sa_m  = ALLOC_ARRAY2_D(d->n_four, d->n_quad_v_x);
+
+               d->Sla_p = ALLOC_ARRAY2_D(d->n_four, d->n_quad_v_x);
+               d->Sla_m = ALLOC_ARRAY2_D(d->n_four, d->n_quad_v_x);
           }
 
           if (d->options & XRTM_OPTION_SAVE_LAYER_R_T_S && d->options & XRTM_OPTION_CALC_DERIVS) {
-               d->Rl_p_l = ALLOC_ARRAY5_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
-               d->Tl_p_l = ALLOC_ARRAY5_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
-               d->Rl_m_l = ALLOC_ARRAY5_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
-               d->Tl_m_l = ALLOC_ARRAY5_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
+               d->Rl_p_l  = ALLOC_ARRAY5_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
+               d->Tl_p_l  = ALLOC_ARRAY5_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
+               d->Rl_m_l  = ALLOC_ARRAY5_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
+               d->Tl_m_l  = ALLOC_ARRAY5_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
 
-               d->Sl_p_l = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x);
-               d->Sl_m_l = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x);
+               d->Sl_p_l  = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x);
+               d->Sl_m_l  = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x);
+
+               d->Sll_p_l = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x);
+               d->Sll_m_l = ALLOC_ARRAY4_D(d->n_four, d->n_layers, d->n_derivs, d->n_quad_v_x);
           }
 
           if (d->options & XRTM_OPTION_SAVE_TOTAL_R_T_S && d->options & XRTM_OPTION_CALC_DERIVS) {
-               d->Ra_p_l = ALLOC_ARRAY4_D(d->n_four, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
-               d->Ta_p_l = ALLOC_ARRAY4_D(d->n_four, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
-               d->Ra_m_l = ALLOC_ARRAY4_D(d->n_four, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
-               d->Ta_m_l = ALLOC_ARRAY4_D(d->n_four, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
+               d->Ra_p_l  = ALLOC_ARRAY4_D(d->n_four, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
+               d->Ta_p_l  = ALLOC_ARRAY4_D(d->n_four, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
+               d->Ra_m_l  = ALLOC_ARRAY4_D(d->n_four, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
+               d->Ta_m_l  = ALLOC_ARRAY4_D(d->n_four, d->n_derivs, d->n_quad_v_x, d->n_quad_v_x);
 
-               d->Sa_p_l = ALLOC_ARRAY3_D(d->n_four, d->n_derivs, d->n_quad_v_x);
-               d->Sa_m_l = ALLOC_ARRAY3_D(d->n_four, d->n_derivs, d->n_quad_v_x);
+               d->Sa_p_l  = ALLOC_ARRAY3_D(d->n_four, d->n_derivs, d->n_quad_v_x);
+               d->Sa_m_l  = ALLOC_ARRAY3_D(d->n_four, d->n_derivs, d->n_quad_v_x);
+
+               d->Sla_p_l = ALLOC_ARRAY3_D(d->n_four, d->n_derivs, d->n_quad_v_x);
+               d->Sla_m_l = ALLOC_ARRAY3_D(d->n_four, d->n_derivs, d->n_quad_v_x);
           }
      }
 
@@ -1485,7 +1692,7 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
      if (d->solvers & (XRTM_SOLVERS_INTERNAL | XRTM_SOLVERS_EXT_REQUIRES_WORK)) {
 #endif
           if (work_init(&d->work, d->n_quad, d->n_quad_x, d->n_stokes, d->n_derivs, d->n_layers, d->n_umus)) {
-               eprintf("ERROR: work_init()\n");
+               fprintf(stderr, "ERROR: work_init()\n");
                return XRTM_INT_ERROR;
           }
      }
@@ -1502,8 +1709,8 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     d->initial_inputs = 1;
-     d->initial_derivs = 1;
+     d->inputs_initialized = 1;
+     d->varied_layers_updated = 1;
 
 
      /*-------------------------------------------------------------------------
@@ -1514,15 +1721,16 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
      d->set_flags_sos_params  = 0;
      d->set_flags_fourier_tol = 0;
      d->set_flags_lambda      = 0;
-     d->set_flags_F_0         = 0;
-     d->set_flags_mu_0        = 0;
-     d->set_flags_phi_0       = 0;
+     d->set_flags_planet_r    = 0;
+     d->set_flags_levels_z    = 0;
      d->set_flags_ulevels     = 0;
      d->set_flags_utaus       = 0;
      d->set_flags_umus        = 0;
-     d->set_flags_top_b       = 0;
-     d->set_flags_planet_r    = 0;
-     d->set_flags_levels_z    = 0;
+     d->set_flags_F_iso_top   = 0;
+     d->set_flags_F_iso_bot   = 0;
+     d->set_flags_F_0         = 0;
+     d->set_flags_mu_0        = 0;
+     d->set_flags_phi_0       = 0;
      d->set_flags_levels_b    = 0;
      d->set_flags_surface_b   = 0;
 
@@ -1534,6 +1742,7 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
      if (d->n_kernels > 0) {
           init_array1_uc(d->set_flags_kernel_ampfac, d->n_kernels, 0);
           init_array2_uc(d->set_flags_kernel_params, d->n_kernels, MAX_KERNEL_PARAMS, 0);
+          init_array1_uc(d->set_flags_kernel_func ,  d->n_kernels, 0);
      }
 
 
@@ -1564,9 +1773,11 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
       *
       *-----------------------------------------------------------------------*/
      if (d->options & XRTM_OPTION_CALC_DERIVS) {
+          init_array1_d(d->F_iso_top_l, d->n_derivs, 0.);
+          init_array1_d(d->F_iso_bot_l, d->n_derivs, 0.);
+
           if (d->options & XRTM_OPTION_SOURCE_THERMAL) {
-               init_array1_d(d->top_b_l, d->n_derivs, 0.);
-               init_array2_d(d->levels_b_l, d->n_layers, d->n_derivs, 0.);
+               init_array2_d(d->levels_b_l, d->n_layers + 1, d->n_derivs, 0.);
                init_array1_d(d->surface_b_l, d->n_derivs, 0.);
 
           }
@@ -1619,7 +1830,7 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
 
 
 /*******************************************************************************
- * 
+ *
  ******************************************************************************/
 int xrtm_destroy(xrtm_data *d) {
 
@@ -1628,7 +1839,7 @@ int xrtm_destroy(xrtm_data *d) {
       *-----------------------------------------------------------------------*/
      if (d->solvers & (XRTM_SOLVERS_INTERNAL & XRTM_SOLVERS_ADDING)) {
           if (d->options & XRTM_OPTION_STACK_REUSE_ADDING) {
-              stack_chain_free(d->n_four, d->n_quad_v_x, d->n_derivs, d->n_layers, d->n_stacks, d->stack_chain, d->derivs_h, d->derivs_s, d->derivs_d);
+              stack_chain_free(d->n_four, d->n_quad_v_x, d->n_derivs, d->n_layers, d->n_stacks, d->stack_chain, d->derivs.layers, d->derivs.stacks, d->derivs.adding_down);
           }
      }
 
@@ -1636,7 +1847,7 @@ int xrtm_destroy(xrtm_data *d) {
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     if (d->initial_inputs) {
+     if (d->inputs_initialized) {
           free_array1_uc(d->set_flags_g);
           free_array1_uc(d->set_flags_coef);
           free_array1_uc(d->set_flags_omega);
@@ -1645,6 +1856,7 @@ int xrtm_destroy(xrtm_data *d) {
           if (d->n_kernels > 0) {
                free_array1_uc(d->set_flags_kernel_ampfac);
                free_array2_uc(d->set_flags_kernel_params);
+               free_array1_uc(d->set_flags_kernel_func);
           }
      }
 
@@ -1726,6 +1938,9 @@ int xrtm_destroy(xrtm_data *d) {
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
+     if (d->options & XRTM_OPTION_PSA)
+          free_array1_d(d->levels_z);
+
      if (d->options & XRTM_OPTION_OUTPUT_AT_LEVELS)
           free_array1_i(d->ulevels);
      else {
@@ -1736,9 +1951,6 @@ int xrtm_destroy(xrtm_data *d) {
           if (d->options & XRTM_OPTION_DELTA_M)
                free_array1_d(d->utaus20);
      }
-
-     if (d->options & XRTM_OPTION_PSA)
-          free_array1_d(d->levels_z);
 
      if (d->options & XRTM_OPTION_SOURCE_THERMAL)
           free_array1_d(d->levels_b);
@@ -1773,8 +1985,8 @@ int xrtm_destroy(xrtm_data *d) {
           free_array1_i((int *) d->kernels);
 
           free_array1_d(d->kernel_ampfac);
-
           free_array2_d(d->kernel_params);
+          free_array1  (d->kernel_func);
      }
 
 
@@ -1782,8 +1994,10 @@ int xrtm_destroy(xrtm_data *d) {
       *
       *-----------------------------------------------------------------------*/
      if (d->options & XRTM_OPTION_CALC_DERIVS) {
+          free_array1_d(d->F_iso_top_l);
+          free_array1_d(d->F_iso_bot_l);
+
           if (d->options & XRTM_OPTION_SOURCE_THERMAL) {
-               free_array1_d(d->top_b_l);
                free_array2_d(d->levels_b_l);
                free_array1_d(d->surface_b_l);
           }
@@ -1848,24 +2062,61 @@ int xrtm_destroy(xrtm_data *d) {
       *
       *-----------------------------------------------------------------------*/
      if (d->options & XRTM_OPTION_CALC_DERIVS) {
-          flags_free2(d->derivs_h);
-          flags_free2(d->derivs_s);
-          flags_free2(d->derivs_u);
-          flags_free2(d->derivs_d);
+          flags_free2(d->derivs.layers);
+          flags_free2(d->derivs.total);
+          flags_free2(d->derivs.stacks);
+          flags_free2(d->derivs.sources);
+          flags_free2(d->derivs.adding_down);
+          flags_free2(d->derivs.adding_up);
 
-          flags_free2(d->derivs_hm);
-          flags_free2(d->derivs_sm);
-          flags_free2(d->derivs_um);
-          flags_free2(d->derivs_dm);
+          if (d->options & XRTM_OPTION_SOURCE_SOLAR)
+               flags_free2(d->derivs.beam);
+
+          if (d->options & XRTM_OPTION_SOURCE_THERMAL)
+               flags_free2(d->derivs.thermal);
+
+          flags_free2(d->derivs.layers_m);
+          flags_free2(d->derivs.total_m);
+          flags_free2(d->derivs.stacks_m);
+          flags_free2(d->derivs.sources_m);
+          flags_free2(d->derivs.adding_down_m);
+          flags_free2(d->derivs.adding_up_m);
+
+          if (d->options & XRTM_OPTION_SOURCE_SOLAR)
+               flags_free2(d->derivs.beam_m);
+
+          if (d->options & XRTM_OPTION_SOURCE_THERMAL)
+               flags_free2(d->derivs.thermal_m);
      }
 
      if (d->options & XRTM_OPTION_REVERSE_DERIVS) {
-          free_array1_uc(d->derivs_h_union);
-          free_array1_uc(d->derivs_u_union);
-          free_array1_uc(d->derivs_d_union);
+          free_array1_uc(d->derivs.layers_union);
+          free_array1_uc(d->derivs.total_union);
+          free_array1_uc(d->derivs.stacks_union);
+          free_array1_uc(d->derivs.sources_union);
 
-          free_array1_uc(d->derivs_dm_union);
-          free_array1_uc(d->derivs_um_union);
+          if (d->options & XRTM_OPTION_SOURCE_SOLAR)
+               free_array1_uc(d->derivs.beam_union);
+
+          if (d->options & XRTM_OPTION_SOURCE_THERMAL)
+               free_array1_uc(d->derivs.thermal_union);
+
+          free_array1_uc(d->derivs.adding_up_union);
+          free_array1_uc(d->derivs.adding_down_union);
+
+          free_array1_uc(d->derivs.layers_m_union);
+          free_array1_uc(d->derivs.total_m_union);
+          free_array1_uc(d->derivs.stacks_m_union);
+          free_array1_uc(d->derivs.sources_m_union);
+
+          if (d->options & XRTM_OPTION_SOURCE_SOLAR)
+               free_array1_uc(d->derivs.beam_m_union);
+
+          if (d->options & XRTM_OPTION_SOURCE_THERMAL)
+               free_array1_uc(d->derivs.thermal_m_union);
+
+          free_array1_uc(d->derivs.adding_up_m_union);
+          free_array1_uc(d->derivs.adding_down_m_union);
      }
 
 
@@ -2010,7 +2261,7 @@ int xrtm_destroy(xrtm_data *d) {
 
           if (d->options & XRTM_OPTION_CALC_DERIVS && d->options & XRTM_OPTION_SAVE_PHASE_MATS) {
                free_array5_d(d->P_qq_pp_l);
-               free_array5_d(d->P_qq_mm_l);
+               free_array5_d(d->P_qq_mp_l);
 
                free_array4_d(d->P_q0_mm_l);
                free_array4_d(d->P_q0_pm_l);
@@ -2031,7 +2282,7 @@ int xrtm_destroy(xrtm_data *d) {
 
           if (d->options & XRTM_OPTION_CALC_DERIVS && d->options & XRTM_OPTION_SAVE_PHASE_MATS &&
               d->options & XRTM_OPTION_VECTOR) {
-               free_array5_d(d->P_qq_mp_l);
+               free_array5_d(d->P_qq_mm_l);
                free_array5_d(d->P_qq_pm_l);
 
                if (d->options & XRTM_OPTION_SFI && d->n_umus > 0) {
@@ -2065,6 +2316,9 @@ int xrtm_destroy(xrtm_data *d) {
 
                free_array3_d (d->Sl_p);
                free_array3_d (d->Sl_m);
+
+               free_array3_d (d->Sll_p);
+               free_array3_d (d->Sll_m);
           }
 
           if (d->options & XRTM_OPTION_SAVE_TOTAL_R_T_S) {
@@ -2075,6 +2329,9 @@ int xrtm_destroy(xrtm_data *d) {
 
                free_array2_d(d->Sa_p);
                free_array2_d(d->Sa_m);
+
+               free_array2_d(d->Sla_p);
+               free_array2_d(d->Sla_m);
           }
 
           if (d->options & XRTM_OPTION_SAVE_LAYER_R_T_S && d->options & XRTM_OPTION_CALC_DERIVS) {
@@ -2085,6 +2342,9 @@ int xrtm_destroy(xrtm_data *d) {
 
                free_array4_d(d->Sl_p_l);
                free_array4_d(d->Sl_m_l);
+
+               free_array4_d(d->Sll_p_l);
+               free_array4_d(d->Sll_m_l);
           }
 
           if (d->options & XRTM_OPTION_SAVE_TOTAL_R_T_S && d->options & XRTM_OPTION_CALC_DERIVS) {
@@ -2095,6 +2355,9 @@ int xrtm_destroy(xrtm_data *d) {
 
                free_array3_d (d->Sa_p_l);
                free_array3_d (d->Sa_m_l);
+
+               free_array3_d (d->Sla_p_l);
+               free_array3_d (d->Sla_m_l);
           }
      }
 
@@ -2121,7 +2384,7 @@ int xrtm_destroy(xrtm_data *d) {
 /*******************************************************************************
  *
  ******************************************************************************/
-static int check_inputs_all_set(xrtm_data *d) {
+static int check_inputs_initialized(xrtm_data *d) {
 
      int i;
      int j;
@@ -2129,120 +2392,123 @@ static int check_inputs_all_set(xrtm_data *d) {
 
      if (d->solvers & (XRTM_SOLVERS_DOUBLING)) {
           if (! d->set_flags_doub_d_tau) {
-               eprintf("ERROR: %s not set\n", xrtm_input_name(INPUT_DOUB_D_TAU));
+               fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_DOUB_D_TAU));
                return INPUT_DOUB_D_TAU;
           }
      }
 
      if (d->solvers & XRTM_SOLVER_PADE_ADD) {
           if (! d->set_flags_pade_params) {
-               eprintf("ERROR: %s not set\n", xrtm_input_name(INPUT_PADE_PARAMS));
+               fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_PADE_PARAMS));
                return INPUT_PADE_PARAMS;
           }
      }
 
      if (d->solvers & XRTM_SOLVER_SOS) {
           if (! d->set_flags_sos_params) {
-               eprintf("ERROR: %s not set\n", xrtm_input_name(INPUT_SOS_PARAMS));
+               fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_SOS_PARAMS));
                return INPUT_SOS_PARAMS;
           }
      }
-
+/*
      if (d->options & XRTM_OPTION_SOURCE_THERMAL) {
           if (! d->set_flags_lambda) {
-               eprintf("ERROR: %s not set\n", xrtm_input_name(INPUT_LAMBDA));
+               fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_LAMBDA));
                return INPUT_LAMBDA;
           }
      }
-
-     if (! d->set_flags_F_0) {
-          eprintf("ERROR: %s not set\n", xrtm_input_name(INPUT_F_0));
-          return INPUT_F_0;
-     }
-
-     if (! d->set_flags_mu_0) {
-          eprintf("ERROR: %s not set\n", xrtm_input_name(INPUT_THETA_0));
-          return INPUT_THETA_0;
-     }
-
-     if (! d->set_flags_phi_0) {
-          eprintf("ERROR: %s not set\n", xrtm_input_name(INPUT_PHI_0));
-          return INPUT_PHI_0;
+*/
+     if (d->options & XRTM_OPTION_PSA) {
+          if (! d->set_flags_planet_r) {
+               fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_PLANET_R));
+               return INPUT_PLANET_R;
+          }
+          if (! d->set_flags_levels_z) {
+               fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_LEVELS_Z));
+               return INPUT_LEVELS_Z;
+          }
      }
 
      if (d->options & XRTM_OPTION_OUTPUT_AT_LEVELS && ! d->set_flags_ulevels) {
-          eprintf("ERROR: %s not set\n", xrtm_input_name(INPUT_OUT_LEVELS));
+          fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_OUT_LEVELS));
           return INPUT_OUT_LEVELS;
      }
      else
      if (d->options & XRTM_OPTION_OUTPUT_AT_TAUS && ! d->set_flags_utaus) {
-          eprintf("ERROR: %s not set\n", xrtm_input_name(INPUT_OUT_TAUS));
+          fprintf(stderr, "ERROR: %s not set, or if %s has been reset then %s must be reset\n", xrtm_input_index_to_name(INPUT_OUT_TAUS), xrtm_input_index_to_name(INPUT_LTAU), xrtm_input_index_to_name(INPUT_OUT_TAUS));
           return INPUT_OUT_TAUS;
      }
 
      if (d->n_umus > 0 && ! d->set_flags_umus) {
-          eprintf("ERROR: %s not set\n", xrtm_input_name(INPUT_OUT_THETAS));
+          fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_OUT_THETAS));
           return INPUT_OUT_THETAS;
      }
 
-     if (d->options & XRTM_OPTION_SOURCE_THERMAL) {
-          if (! d->set_flags_top_b) {
-               eprintf("ERROR: %s not set\n", xrtm_input_name(INPUT_TOP_B));
-               return INPUT_TOP_B;
-          }
+     if (! d->set_flags_F_iso_top) {
+          fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_F_ISO_TOP));
+          return INPUT_F_ISO_TOP;
      }
 
-     if (d->options & XRTM_OPTION_PSA) {
-          if (! d->set_flags_planet_r) {
-               eprintf("ERROR: %s not set\n", xrtm_input_name(INPUT_PLANET_R));
-               return INPUT_PLANET_R;
+     if (! d->set_flags_F_iso_bot) {
+          fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_F_ISO_BOT));
+          return INPUT_F_ISO_BOT;
+     }
+
+     if (d->options & XRTM_OPTION_SOURCE_SOLAR) {
+          if (! d->set_flags_F_0) {
+               fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_F_0));
+               return INPUT_F_0;
           }
-          if (! d->set_flags_levels_z) {
-               eprintf("ERROR: %s not set\n", xrtm_input_name(INPUT_LEVELS_Z));
-               return INPUT_LEVELS_Z;
+
+          if (! d->set_flags_mu_0) {
+               fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_THETA_0));
+               return INPUT_THETA_0;
+          }
+
+          if (! d->set_flags_phi_0) {
+               fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_PHI_0));
+               return INPUT_PHI_0;
           }
      }
 
      if (d->options & XRTM_OPTION_SOURCE_THERMAL) {
           if (! d->set_flags_levels_b) {
-               eprintf("ERROR: %s not set\n", xrtm_input_name(INPUT_LEVELS_B));
+               fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_LEVELS_B));
                return INPUT_LEVELS_B;
+          }
+
+          if (! d->set_flags_surface_b) {
+               fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_SURFACE_B));
+               return INPUT_SURFACE_B;
           }
      }
 
      for (i = 0; i < d->n_layers; ++i) {
           if (d->solvers & XRTM_SOLVERS_USE_G) {
                if (! d->set_flags_g[i]) {
-                    eprintf("ERROR: %s not set for layer %d\n", xrtm_input_name(INPUT_G), i);
+                    fprintf(stderr, "ERROR: %s not set for layer %d\n", xrtm_input_index_to_name(INPUT_G), i);
                     return INPUT_G;
                }
           }
           if (d->solvers & XRTM_SOLVERS_USE_COEF) {
                if (! d->set_flags_coef[i]) {
-                    eprintf("ERROR: %s not set for layer %d\n", xrtm_input_name(INPUT_COEF), i);
+                    fprintf(stderr, "ERROR: %s not set for layer %d\n", xrtm_input_index_to_name(INPUT_COEF), i);
                     return INPUT_COEF;
                }
           }
           if (! d->set_flags_omega[i]) {
-               eprintf("ERROR: %s not set for layer %d\n", xrtm_input_name(INPUT_OMEGA), i);
+               fprintf(stderr, "ERROR: %s not set for layer %d\n", xrtm_input_index_to_name(INPUT_OMEGA), i);
                return INPUT_OMEGA;
           }
           if (! d->set_flags_ltau[i]) {
-               eprintf("ERROR: %s not set for layer %d\n", xrtm_input_name(INPUT_LTAU ), i);
+               fprintf(stderr, "ERROR: %s not set for layer %d\n", xrtm_input_index_to_name(INPUT_LTAU ), i);
                return INPUT_LTAU;
-          }
-     }
-
-     if (d->options & XRTM_OPTION_SOURCE_THERMAL) {
-          if (! d->set_flags_surface_b) {
-               eprintf("ERROR: %s not set\n", xrtm_input_name(INPUT_SURFACE_B));
-               return INPUT_SURFACE_B;
           }
      }
 
      for (i = 0; i < d->n_kernels; ++i) {
           if (! d->set_flags_kernel_ampfac[i]) {
-               eprintf("ERROR: %s not set for kernel %d\n", xrtm_input_name(INPUT_KERNEL_AMPFAC), i);
+               fprintf(stderr, "ERROR: %s not set for kernel %d\n", xrtm_input_index_to_name(INPUT_KERNEL_AMPFAC), i);
                return INPUT_KERNEL_AMPFAC;
           }
 
@@ -2250,8 +2516,15 @@ static int check_inputs_all_set(xrtm_data *d) {
 
           for (j = 0; j < n; ++j) {
                if (! d->set_flags_kernel_params[i][j]) {
-                    eprintf("ERROR: %s not set for kernel %d, param %d\n", xrtm_input_name(INPUT_KERNEL_PARAMS), i, j);
-                    return INPUT_KERNEL_AMPFAC;
+                    fprintf(stderr, "ERROR: %s not set for kernel %d, param %d\n", xrtm_input_index_to_name(INPUT_KERNEL_PARAMS), i, j);
+                    return INPUT_KERNEL_PARAMS;
+               }
+          }
+
+          if (d->kernels[i] == XRTM_KERNEL_USER_DEFINED) {
+               if (! d->set_flags_kernel_func[i]) {
+                    fprintf(stderr, "ERROR: %s not set for kernel %d\n", xrtm_input_index_to_name(INPUT_KERNEL_FUNCS), i);
+                    return INPUT_KERNEL_FUNCS;
                }
           }
      }
@@ -2266,14 +2539,14 @@ static int check_inputs_all_set(xrtm_data *d) {
           free_array2_uc(d->set_flags_kernel_params);
      }
 
-     d->initial_inputs = 0;
+     d->inputs_initialized = 0;
 
      return 0;
 }
 
 
 
-static int check_inputs_related(xrtm_data *d) {
+static int check_inputs_post_checks(xrtm_data *d) {
 
      int i;
 
@@ -2287,13 +2560,13 @@ static int check_inputs_related(xrtm_data *d) {
                a += d->ltau0[i];
 
           if (d->utaus[0] < 0. || d->utaus[0] > a) {
-               eprintf("ERROR: invalid value for utaus[%d]: %e, must be >= zero and <= total optical depth of all layers\n", 0, d->utaus[0]);
+               fprintf(stderr, "ERROR: invalid value for utaus[%d]: %e, must be >= zero and <= total optical depth of all layers\n", 0, d->utaus[0]);
                return -1;
           }
 
           for (i = 1; i < d->n_ulevels; ++i) {
                if (d->utaus[i] <= d->utaus[i-1] || d->utaus[i] > a) {
-                    eprintf("ERROR: invalid value for utaus[%d]: %e, must be > utaus[%d] and <= total optical depth of all layers\n", i, d->utaus[i], i - 1);
+                    fprintf(stderr, "ERROR: invalid value for utaus[%d]: %e, must be > utaus[%d] and <= total optical depth of all layers\n", i, d->utaus[i], i - 1);
                     return -1;
                }
           }
@@ -2306,21 +2579,21 @@ static int check_inputs_related(xrtm_data *d) {
 
 static int solution_preprocess(xrtm_data *d) {
 
-     if (d->initial_inputs) {
-          if (check_inputs_all_set(d)) {
-               eprintf("ERROR: check_inputs_all_set()\n");
+     if (d->inputs_initialized) {
+          if (check_inputs_initialized(d)) {
+               fprintf(stderr, "ERROR: check_inputs_initialized()\n");
                return -1;
           }
      }
 
-     if (check_inputs_related(d)) {
-          eprintf("ERROR: check_inputs_related()\n");
+     if (check_inputs_post_checks(d)) {
+          fprintf(stderr, "ERROR: check_inputs_post_checks()\n");
           return -1;
      }
 
      if (d->options & XRTM_OPTION_CALC_DERIVS) {
-          if (d->initial_derivs) {
-               eprintf("ERROR: xrtm_update_varied_layers() has not been called\n");
+          if (d->varied_layers_updated) {
+               fprintf(stderr, "ERROR: xrtm_update_varied_layers() has not been called\n");
                return -1;
           }
      }
@@ -2355,7 +2628,7 @@ static int mu_0_singularity_adjust(xrtm_data *d) {
                count++;
           }
           if (count > 1) {
-               eprintf("ERROR: mu_0 singularity adjustment conflict\n");
+               fprintf(stderr, "ERROR: mu_0 singularity adjustment conflict\n");
                return -1;
           }
      }
@@ -2364,19 +2637,6 @@ static int mu_0_singularity_adjust(xrtm_data *d) {
           set_deps(d, DEP_MASK_MU_0, 0, d->n_layers);
 
      return 0;
-}
-
-
-
-static void update_n_four2(xrtm_data *d, int flag1, int flag2) {
-
-     if (d->options & XRTM_OPTION_NO_AZIMUTHAL || (d->F_0 == 0. && (d->options & XRTM_OPTION_SOURCE_THERMAL)) || (d->n_stokes == 1 && ((flag1 && d->mu_0_0 == 1.) || (flag2 && d->n_umus == 1 && d->umus[0] == 1.))))
-/*
-     if (d->options & XRTM_OPTION_NO_AZIMUTHAL || (d->F_0 == 0. && (d->options & XRTM_OPTION_SOURCE_THERMAL)) || (d->n_stokes == 1 && ((flag1 && d->mu_0_0 == 1.) || (flag2 && d->n_umus == 1 && d->umus[0] == 1.))) || ((flag1 && d->mu_0_0 == 1.) && (flag2 && d->n_umus == 1 && d->umus[*] != 1.)))
-*/
-          d->n_four2 = 1;
-     else
-          d->n_four2 = d->n_four;
 }
 
 
@@ -2477,7 +2737,7 @@ int xrtm_get_n_kernel_quad(xrtm_data *d) {
 int xrtm_get_kernel(xrtm_data *d, int i_kernel) {
 
      if (i_kernel > d->n_kernels - 1) {
-          eprintf("ERROR: invalid kernel index: %d\n", i_kernel);
+          fprintf(stderr, "ERROR: invalid kernel index: %d\n", i_kernel);
           return XRTM_INT_ERROR;
      }
 
@@ -2509,15 +2769,15 @@ int xrtm_get_n_out_thetas(xrtm_data *d) {
 /*******************************************************************************
  *
  ******************************************************************************/
-int xrtm_set_doub_d_tau(xrtm_data *d, double d_tau) {
+int xrtm_set_doub_d_tau(xrtm_data *d, double doub_d_tau) {
 
-     if (d_tau <= 0.) {
-          eprintf("ERROR: invalid value for d_tau: %e, "
-                  "must be > zero\n", d_tau);
+     if (doub_d_tau <= 0.) {
+          fprintf(stderr, "ERROR: invalid value for d_tau: %e, "
+                  "must be > zero\n", doub_d_tau);
           return XRTM_INT_ERROR;
      }
 
-     d->doub_d_tau = d_tau;
+     d->doub_d_tau = doub_d_tau;
 
      d->set_flags_doub_d_tau = 1;
 
@@ -2534,11 +2794,11 @@ int xrtm_set_doub_d_tau(xrtm_data *d, double d_tau) {
 double xrtm_get_doub_d_tau(xrtm_data *d) {
 
      if (! (d->solvers & XRTM_SOLVERS_DOUBLING)) {
-          eprintf("ERROR: model not initialized for doubling solvers\n");
+          fprintf(stderr, "ERROR: model not initialized for doubling solvers\n");
           return XRTM_DBL_ERROR;
      }
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_doub_d_tau, xrtm_input_name(INPUT_DOUB_D_TAU), XRTM_DBL_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_doub_d_tau, xrtm_input_index_to_name(INPUT_DOUB_D_TAU), XRTM_DBL_ERROR);
 
      return d->doub_d_tau;
 }
@@ -2551,13 +2811,13 @@ double xrtm_get_doub_d_tau(xrtm_data *d) {
 int xrtm_set_pade_params(xrtm_data *d, int pade_s, int pade_r) {
 /*
      if (pade_s < 0) {
-          eprintf("ERROR: invalid value for s: %d, "
+          fprintf(stderr, "ERROR: invalid value for s: %d, "
                   "must be >= zero\n", pade_s);
           return XRTM_INT_ERROR;
      }
 
      if (pade_r <= 0) {
-          eprintf("ERROR: invalid value for r: %d, "
+          fprintf(stderr, "ERROR: invalid value for r: %d, "
                   "must be > zero\n", pade_r);
           return XRTM_INT_ERROR;
      }
@@ -2580,11 +2840,11 @@ int xrtm_set_pade_params(xrtm_data *d, int pade_s, int pade_r) {
 int xrtm_get_pade_params(xrtm_data *d, int *pade_s, int *pade_r) {
 
      if (! (d->solvers & XRTM_SOLVER_PADE_ADD)) {
-          eprintf("ERROR: model not initialized for solver \"pade_add\"\n");
+          fprintf(stderr, "ERROR: model not initialized for solver \"pade_add\"\n");
           return XRTM_INT_ERROR;
      }
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_pade_params, xrtm_input_name(INPUT_PADE_PARAMS), XRTM_INT_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_pade_params, xrtm_input_index_to_name(INPUT_PADE_PARAMS), XRTM_INT_ERROR);
 
      *pade_s = d->pade_s;
      *pade_r = d->pade_r;
@@ -2595,30 +2855,30 @@ int xrtm_get_pade_params(xrtm_data *d, int *pade_s, int *pade_r) {
 
 
 /*******************************************************************************
- * 
+ *
  ******************************************************************************/
-int xrtm_set_sos_params(xrtm_data *d, int max_os, double max_tau, double sos_tol) {
+int xrtm_set_sos_params(xrtm_data *d, int sos_max_os, double sos_max_tau, double sos_tol) {
 
-     if (max_os < 0) {
-          eprintf("ERROR: invalid value for max_os: %d, "
-                  "must be >= zero\n", max_os);
+     if (sos_max_os <= 0) {
+          fprintf(stderr, "ERROR: invalid value for max_os: %d, "
+                  "must be > zero\n", sos_max_os);
           return XRTM_INT_ERROR;
      }
 
-     if (max_tau <= 0.) {
-          eprintf("ERROR: invalid value for max_tau: %e, "
-                  "must be > zero\n", max_tau);
+     if (sos_max_tau <= 0.) {
+          fprintf(stderr, "ERROR: invalid value for max_tau: %e, "
+                  "must be > zero\n", sos_max_tau);
           return XRTM_INT_ERROR;
      }
 
      if (sos_tol < 0.) {
-          eprintf("ERROR: invalid value for sos_tol: %e, "
+          fprintf(stderr, "ERROR: invalid value for sos_tol: %e, "
                   "must be >= zero\n", sos_tol);
           return XRTM_INT_ERROR;
      }
 
-     d->sos_max_os  = max_os;
-     d->sos_max_tau = max_tau;
+     d->sos_max_os  = sos_max_os;
+     d->sos_max_tau = sos_max_tau;
      d->sos_tol     = sos_tol;
 
      d->set_flags_sos_params = 1;
@@ -2630,18 +2890,18 @@ int xrtm_set_sos_params(xrtm_data *d, int max_os, double max_tau, double sos_tol
 
 
 
-int xrtm_get_sos_params(xrtm_data *d, int *max_os, double *max_tau, double *sos_tol) {
+int xrtm_get_sos_params(xrtm_data *d, int *sos_max_os, double *sos_max_tau, double *sos_tol) {
 
      if (! (d->solvers & XRTM_SOLVER_SOS)) {
-          eprintf("ERROR: model not initialized for solver \"sos\"\n");
+          fprintf(stderr, "ERROR: model not initialized for solver \"sos\"\n");
           return XRTM_INT_ERROR;
      }
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_sos_params, xrtm_input_name(INPUT_SOS_PARAMS), XRTM_INT_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_sos_params, xrtm_input_index_to_name(INPUT_SOS_PARAMS), XRTM_INT_ERROR);
 
-     *max_os  = d->sos_max_os;
-     *max_tau = d->sos_max_tau;
-     *sos_tol = d->sos_tol;
+     *sos_max_os  = d->sos_max_os;
+     *sos_max_tau = d->sos_max_tau;
+     *sos_tol     = d->sos_tol;
 
      return 0;
 }
@@ -2649,12 +2909,12 @@ int xrtm_get_sos_params(xrtm_data *d, int *max_os, double *max_tau, double *sos_
 
 
 /*******************************************************************************
- * 
+ *
  ******************************************************************************/
 int xrtm_set_fourier_tol(xrtm_data *d, double fourier_tol) {
 
      if (fourier_tol < 0.) {
-          eprintf("ERROR: invalid value for fourier_tol: %e, "
+          fprintf(stderr, "ERROR: invalid value for fourier_tol: %e, "
                   "must be >= zero\n", fourier_tol);
           return XRTM_INT_ERROR;
      }
@@ -2670,7 +2930,7 @@ int xrtm_set_fourier_tol(xrtm_data *d, double fourier_tol) {
 
 double xrtm_get_fourier_tol(xrtm_data *d) {
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_fourier_tol, xrtm_input_name(INPUT_FOURIER_TOL), XRTM_DBL_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_fourier_tol, xrtm_input_index_to_name(INPUT_FOURIER_TOL), XRTM_DBL_ERROR);
 
      return d->fourier_tol;
 }
@@ -2678,17 +2938,17 @@ double xrtm_get_fourier_tol(xrtm_data *d) {
 
 
 /*******************************************************************************
- * 
+ *
  ******************************************************************************/
 int xrtm_set_lambda(xrtm_data *d, double lambda) {
 
      if (! (d->options & XRTM_OPTION_SOURCE_THERMAL)) {
-          eprintf("ERROR: model not initialized for thermal source\n");
+          fprintf(stderr, "ERROR: model not initialized for thermal sources\n");
           return XRTM_INT_ERROR;
      }
 
      if (lambda <= 0.) {
-          eprintf("ERROR: invalid value for lambda: %e, "
+          fprintf(stderr, "ERROR: invalid value for lambda: %e, "
                   "must be > zero\n", lambda);
           return XRTM_INT_ERROR;
      }
@@ -2707,124 +2967,112 @@ int xrtm_set_lambda(xrtm_data *d, double lambda) {
 double xrtm_get_lambda(xrtm_data *d) {
 
      if (! (d->options & XRTM_OPTION_SOURCE_THERMAL)) {
-          eprintf("ERROR: model not initialized for thermal source\n");
+          fprintf(stderr, "ERROR: model not initialized for thermal sources\n");
           return XRTM_DBL_ERROR;
      }
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_lambda, xrtm_input_name(INPUT_LAMBDA), XRTM_DBL_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_lambda, xrtm_input_index_to_name(INPUT_LAMBDA), XRTM_DBL_ERROR);
 
      return d->lambda;
 }
 
 
-
 /*******************************************************************************
- * 
+ *
  ******************************************************************************/
-int xrtm_set_F_0(xrtm_data *d, double F_0) {
+int xrtm_set_planet_r(xrtm_data *d, double planet_r) {
 
-     if (F_0 < 0.) {
-          eprintf("ERROR: invalid value for F_0: %e, "
-                  "must be >= zero\n", F_0);
+     if (! (d->options & XRTM_OPTION_PSA)) {
+          fprintf(stderr, "ERROR: model not initialized for psa\n");
           return XRTM_INT_ERROR;
      }
 
-     d->F_0 = F_0;
-
-     d->set_flags_F_0 = 1;
-
-     set_deps(d, DEP_MASK_F_0, 0, d->n_layers);
-
-     return 0;
-}
-
-int xrtm_set_f_0(xrtm_data *d, double F_0) {
-
-     return xrtm_set_F_0(d, F_0);
-}
-
-
-double xrtm_get_F_0(xrtm_data *d) {
-
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_F_0, xrtm_input_name(INPUT_F_0), XRTM_DBL_ERROR);
-
-     return d->F_0;
-}
-
-double xrtm_get_f_0(xrtm_data *d) {
-
-     return xrtm_get_F_0(d);
-}
-
-
-/*******************************************************************************
- * 
- ******************************************************************************/
-int xrtm_set_theta_0(xrtm_data *d, double theta_0) {
-
-     if (theta_0 < 0. || theta_0 >= 90.) {
-          eprintf("ERROR: invalid value for theta_0: %e, "
-                  "must be >= zero and < 90.0\n", theta_0);
+     if (planet_r <= 0.) {
+          fprintf(stderr, "ERROR: invalid value for planet_r: %e, "
+                  "must be > zero\n", planet_r);
           return XRTM_INT_ERROR;
      }
 
-     d->mu_0_0 = cos(theta_0*D2R);
+     d->planet_r = planet_r;
 
-     update_n_four2(d, 1, d->set_flags_umus);
+     d->set_flags_planet_r = 1;
 
-     if (mu_0_singularity_adjust(d)) {
-          eprintf("ERROR: mu_0_singularity_adjust()\n");
-          return XRTM_INT_ERROR;
-     }
-
-     if (d->solvers & XRTM_SOLVERS_INTERNAL && d->n_kernels > 0)
-          brdf_aux_calc_mu_0(&d->kernel_aux, d->n_quad + d->n_umus, d->mu_0, d->n_kernel_quad, d->kernel_qx);
-
-     d->set_flags_mu_0 = 1;
-
-     set_deps(d, DEP_MASK_MU_0, 0, d->n_layers);
+     set_deps(d, DEP_MASK_PLANET_R, 0, d->n_layers);
 
      return 0;
 }
 
 
 
-double xrtm_get_theta_0(xrtm_data *d) {
+double xrtm_get_planet_r(xrtm_data *d) {
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_mu_0, xrtm_input_name(INPUT_THETA_0), XRTM_DBL_ERROR);
+     if (! (d->options & XRTM_OPTION_PSA)) {
+          fprintf(stderr, "ERROR: model not initialized for psa\n");
+          return XRTM_DBL_ERROR;
+     }
 
-     return acos(d->mu_0_0)*R2D;
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_planet_r, xrtm_input_index_to_name(INPUT_PLANET_R), XRTM_DBL_ERROR);
+
+     return d->planet_r;
 }
 
 
 
 /*******************************************************************************
- * 
+ *
  ******************************************************************************/
-int xrtm_set_phi_0(xrtm_data *d, double phi_0) {
+int xrtm_set_levels_z(xrtm_data *d, double *levels_z) {
 
-     if (phi_0 < 0.) {
-          eprintf("ERROR: invalid value for phi_0: %e, "
-                  "must be >= zero\n", phi_0);
+     int i;
+
+     if (! (d->options & XRTM_OPTION_PSA)) {
+          fprintf(stderr, "ERROR: model not initialized for psa\n");
           return XRTM_INT_ERROR;
      }
+/*
+     for (i = 0; i < d->n_layers + 1; ++i) {
+          if (levels_z[i] + d->planet_r <= 0.) {
+               fprintf(stderr, "ERROR: invalid value for levels_z[%d]: %e, "
+                       "must be > -planet_r\n", i, levels_z[i]);
+               return XRTM_INT_ERROR;
+          }
+     }
+*/
+     for (i = 1; i < d->n_layers + 1; ++i) {
+          if (levels_z[i] > levels_z[i-1]) {
+               fprintf(stderr, "ERROR: levels_z[%d]: %e, is not < levels_z[%d]: %e\n",
+                       i, levels_z[i], i-1, levels_z[i-1]);
+               return XRTM_INT_ERROR;
+          }
+     }
 
-     d->phi_0 = phi_0;
+     for (i = 0; i < d->n_layers + 1; ++i)
+          d->levels_z[i] = levels_z[i];
 
-     set_deps(d, DEP_MASK_PHI_0, 0, d->n_layers);
+     d->set_flags_levels_z = 1;
 
-     d->set_flags_phi_0 = 1;
+     set_deps(d, DEP_MASK_LEVELS_Z, 0, d->n_layers);
 
      return 0;
 }
 
 
 
-double xrtm_get_phi_0(xrtm_data *d) {
+int xrtm_get_levels_z(xrtm_data *d, double *levels_z) {
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_phi_0, xrtm_input_name(INPUT_PHI_0), XRTM_DBL_ERROR);
+     int i;
 
-     return d->phi_0;
+     if (! (d->options & XRTM_OPTION_PSA)) {
+          fprintf(stderr, "ERROR: model not initialized for psa\n");
+          return XRTM_INT_ERROR;
+     }
+
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_levels_z, xrtm_input_index_to_name(INPUT_LEVELS_Z), XRTM_INT_ERROR);
+
+     for (i = 0; i < d->n_layers + 1; ++i)
+          levels_z[i] = d->levels_z[i];
+
+     return 0;
 }
 
 
@@ -2837,45 +3085,45 @@ int xrtm_set_out_levels(xrtm_data *d, int *out_levels) {
      int i;
 
      if (! (d->options & XRTM_OPTION_OUTPUT_AT_LEVELS)) {
-          eprintf("ERROR: model not initialized for output at levels\n");
+          fprintf(stderr, "ERROR: model not initialized for output at levels\n");
           return XRTM_INT_ERROR;
      }
 
      if (out_levels[0] < 0 || out_levels[0] > d->n_layers) {
-          eprintf("ERROR: invalid value for out_levels[%d]: %d, must be >= zero and <= n_layers\n", 0, out_levels[0]);
+          fprintf(stderr, "ERROR: invalid value for out_levels[%d]: %d, must be >= zero and <= n_layers\n", 0, out_levels[0]);
           return XRTM_INT_ERROR;
      }
 
      for (i = 1; i < d->n_ulevels; ++i) {
           if (out_levels[i] <= out_levels[i-1] || out_levels[i] > d->n_layers) {
-               eprintf("ERROR: invalid value for out_levels[%d]: %d, must be > out_levels[%d] and <= n_layers\n", i, out_levels[i], i - 1);
+               fprintf(stderr, "ERROR: invalid value for out_levels[%d]: %d, must be > out_levels[%d] and <= n_layers\n", i, out_levels[i], i - 1);
                return XRTM_INT_ERROR;
           }
      }
 
      for (i = 0; i < MIN(2, d->n_ulevels); ++i) {
           if (out_levels[i] != 0 && out_levels[i] != d->n_layers) {
-               if (check_solvers2(d, "out_levels[i] != 0 || out_levels[i] != d->n_layers", XRTM_SOLVER_DOUB_ADD, XRTM_SOLVER_EIG_ADD, XRTM_SOLVER_PADE_ADD, XRTM_SOLVER_SOS, XRTM_SOLVER_TWO_OS, 0))
+               if (check_solvers(d->solvers, 0, 1, "option", "out_levels[i] != 0 || out_levels[i] != d->n_layers", XRTM_SOLVER_DOUB_ADD, XRTM_SOLVER_EIG_ADD, XRTM_SOLVER_PADE_ADD, XRTM_SOLVER_SOS, XRTM_SOLVER_TWO_OS, 0))
                     return XRTM_INT_ERROR;
           }
      }
 
      if (d->options & XRTM_OPTION_TOP_DOWN_ADDING) {
           if (out_levels[0] != d->n_layers) {
-               eprintf("ERROR: out_levels[0] must be equal to n_layers for option %s\n", xrtm_option_name2(XRTM_OPTION_TOP_DOWN_ADDING));
+               fprintf(stderr, "ERROR: out_levels[0] must be equal to n_layers for option %s\n", xrtm_option_mask_to_name(XRTM_OPTION_TOP_DOWN_ADDING));
                return XRTM_INT_ERROR;
           }
      }
 
      if (d->options & XRTM_OPTION_BOTTOM_UP_ADDING) {
           if (out_levels[0] != 0) {
-               eprintf("ERROR: out_levels[0] must be equal to 0        for option %s\n", xrtm_option_name2(XRTM_OPTION_BOTTOM_UP_ADDING));
+               fprintf(stderr, "ERROR: out_levels[0] must be equal to 0        for option %s\n", xrtm_option_mask_to_name(XRTM_OPTION_BOTTOM_UP_ADDING));
                return XRTM_INT_ERROR;
           }
      }
 #ifdef INCLUDE_DEV_SOURCE
      if (check_dev_solvers_set_ulevels(d, out_levels)) {
-          eprintf("ERROR: check_dev_solvers_set_ulevels()\n");
+          fprintf(stderr, "ERROR: check_dev_solvers_set_ulevels()\n");
           return XRTM_INT_ERROR;
      }
 #endif
@@ -2896,11 +3144,11 @@ int xrtm_get_out_levels(xrtm_data *d, int *out_levels) {
      int i;
 
      if (! (d->options & XRTM_OPTION_OUTPUT_AT_LEVELS)) {
-          eprintf("ERROR: model not initialized for ulevels output\n");
+          fprintf(stderr, "ERROR: model not initialized for ulevels output\n");
           return XRTM_INT_ERROR;
      }
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_ulevels, xrtm_input_name(INPUT_OUT_LEVELS), XRTM_INT_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_ulevels, xrtm_input_index_to_name(INPUT_OUT_LEVELS), XRTM_INT_ERROR);
 
      for (i = 0; i < d->n_ulevels; ++i)
           out_levels[i] = d->ulevels[i];
@@ -2911,20 +3159,20 @@ int xrtm_get_out_levels(xrtm_data *d, int *out_levels) {
 
 
 /*******************************************************************************
- * 
+ *
  ******************************************************************************/
 int xrtm_set_out_taus(xrtm_data *d, double *out_taus) {
 
      int i;
 
      if (! (d->options & XRTM_OPTION_OUTPUT_AT_TAUS)) {
-          eprintf("ERROR: model not initialized for output at taus\n");
+          fprintf(stderr, "ERROR: model not initialized for output at taus\n");
           return XRTM_INT_ERROR;
      }
 
      for (i = 0; i < d->n_ulevels; ++i) {
           if (out_taus[i] < 0.) {
-               eprintf("ERROR: invalid value for out_taus[%d]: %e, must be >= zero\n", i, out_taus[i]);
+               fprintf(stderr, "ERROR: invalid value for out_taus[%d]: %e, must be >= zero\n", i, out_taus[i]);
                return XRTM_INT_ERROR;
           }
 
@@ -2945,11 +3193,11 @@ int xrtm_get_out_taus(xrtm_data *d, double *out_taus) {
      int i;
 
      if (! (d->options & XRTM_OPTION_OUTPUT_AT_TAUS)) {
-          eprintf("ERROR: model not initialized for utaus output\n");
+          fprintf(stderr, "ERROR: model not initialized for utaus output\n");
           return XRTM_INT_ERROR;
      }
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_utaus, xrtm_input_name(INPUT_OUT_TAUS), XRTM_INT_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_utaus, xrtm_input_index_to_name(INPUT_OUT_TAUS), XRTM_INT_ERROR);
 
      for (i = 0; i < d->n_ulevels; ++i)
           out_taus[i] = d->utaus[i];
@@ -2970,13 +3218,13 @@ int xrtm_set_out_thetas(xrtm_data *d, double *out_thetas) {
      int jj;
 
      if (d->n_umus == 0) {
-          eprintf("ERROR: model not initialized for user defined output angles (n_out_thetas == 0)\n");
+          fprintf(stderr, "ERROR: model not initialized for user defined output angles (n_out_thetas == 0)\n");
           return XRTM_INT_ERROR;
      }
 
      for (i = 0; i < d->n_umus; ++i) {
           if (out_thetas[i] < 0. || out_thetas[i] >= 90.) {
-               eprintf("ERROR: invalid value for out_thetas[%d]: %e, "
+               fprintf(stderr, "ERROR: invalid value for out_thetas[%d]: %e, "
                        "must be >= zero and < 90.0\n", i, out_thetas[i]);
                return XRTM_INT_ERROR;
           }
@@ -3008,7 +3256,7 @@ int xrtm_set_out_thetas(xrtm_data *d, double *out_thetas) {
 
      if (d->set_flags_mu_0) {
           if (mu_0_singularity_adjust(d)) {
-               eprintf("ERROR: mu_0_singularity_adjust()\n");
+               fprintf(stderr, "ERROR: mu_0_singularity_adjust()\n");
                return XRTM_INT_ERROR;
           }
      }
@@ -3017,8 +3265,10 @@ int xrtm_set_out_thetas(xrtm_data *d, double *out_thetas) {
           build_sim_vectors(0, d->n_umus_v, d->qx_v + d->n_quad_v, d->qw_v + d->n_quad_v, d->alpha1 + d->n_quad_v, d->alpha2 + d->n_quad_v);
 
      if (d->solvers & XRTM_SOLVERS_INTERNAL && d->n_kernels > 0) {
-          brdf_aux_calc_part(&d->kernel_aux, d->n_quad, d->n_quad + d->n_umus, d->qx,   d->n_kernel_quad, d->kernel_qx);
-          brdf_aux_calc_mu_0(&d->kernel_aux,            d->n_quad + d->n_umus, d->mu_0, d->n_kernel_quad, d->kernel_qx);
+          brdf_aux_calc_part(&d->kernel_aux, d->n_quad, d->n_quad + d->n_umus, d->qx, d->n_kernel_quad, d->kernel_qx);
+
+          if (d->set_flags_mu_0)
+               brdf_aux_calc_mu_0(&d->kernel_aux, d->n_quad + d->n_umus, d->mu_0, d->n_kernel_quad, d->kernel_qx);
      }
 
      set_deps(d, DEP_MASK_UMUS, 0, d->n_layers);
@@ -3034,11 +3284,11 @@ int xrtm_get_out_thetas(xrtm_data *d, double *out_thetas) {
      int ii;
 
      if (d->n_umus == 0) {
-          eprintf("ERROR: model not initialized for user defined output angles (n_out_thetas == 0)\n");
+          fprintf(stderr, "ERROR: model not initialized for user defined output angles (n_out_thetas == 0)\n");
           return XRTM_INT_ERROR;
      }
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_umus, xrtm_input_name(INPUT_OUT_THETAS), XRTM_INT_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_umus, xrtm_input_index_to_name(INPUT_OUT_THETAS), XRTM_INT_ERROR);
 
      ii = d->n_quad;
      for (i = 0; i < d->n_umus; ++i) {
@@ -3054,135 +3304,268 @@ int xrtm_get_out_thetas(xrtm_data *d, double *out_thetas) {
 /*******************************************************************************
  *
  ******************************************************************************/
-int xrtm_set_top_b(xrtm_data *d, double top_b) {
+int xrtm_set_F_iso_top(xrtm_data *d, double F_iso_top) {
 
-     if (! (d->options & XRTM_OPTION_SOURCE_THERMAL)) {
-          eprintf("ERROR: model not initialized for thermal source\n");
+     if (F_iso_top < 0.) {
+          fprintf(stderr, "ERROR: invalid value for F_iso_top: %e, "
+                  "must be > zero\n", F_iso_top);
           return XRTM_INT_ERROR;
      }
 
-     if (top_b < 0.) {
-          eprintf("ERROR: invalid value for top_b: %e, "
-                  "must be > zero\n", top_b);
-          return XRTM_INT_ERROR;
-     }
+     d->F_iso_top = F_iso_top;
 
-     d->top_b = top_b;
+     d->set_flags_F_iso_top = 1;
 
-     d->set_flags_top_b = 1;
-
-     set_deps(d, DEP_MASK_TOP_B, 0, d->n_layers);
+     set_deps(d, DEP_MASK_F_ISO_TOP, 0, d->n_layers);
 
      return 0;
 }
 
 
 
-double xrtm_get_top_b(xrtm_data *d) {
+double xrtm_get_F_iso_top(xrtm_data *d) {
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_top_b, xrtm_input_name(INPUT_TOP_B), XRTM_DBL_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_F_iso_top, xrtm_input_index_to_name(INPUT_F_ISO_TOP), XRTM_DBL_ERROR);
 
-     return d->top_b;
+     return d->F_iso_top;
 }
 
 
 
-/*******************************************************************************
- *
- ******************************************************************************/
-int xrtm_set_planet_r(xrtm_data *d, double planet_r) {
+int xrtm_set_F_iso_top_l_1(xrtm_data *d, int i_deriv, double F_iso_top_l) {
 
-     if (! (d->options & XRTM_OPTION_PSA)) {
-          eprintf("ERROR: model not initialized for psa\n");
-          return XRTM_INT_ERROR;
-     }
+     CHECK_INIT_FOR_DERIVS();
 
-     if (planet_r <= 0.) {
-          eprintf("ERROR: invalid value for planet_r: %e, "
-                  "must be > zero\n", planet_r);
-          return XRTM_INT_ERROR;
-     }
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
 
-     d->planet_r = planet_r;
+     d->F_iso_top_l[i_deriv] = F_iso_top_l;
 
-     d->set_flags_planet_r = 1;
-
-     set_deps(d, DEP_MASK_PLANET_R, 0, d->n_layers);
+     set_deps(d, DEP_MASK_F_ISO_TOP_L, 0, d->n_layers);
 
      return 0;
 }
 
 
 
-double xrtm_get_planet_r(xrtm_data *d) {
-
-     if (! (d->options & XRTM_OPTION_PSA)) {
-          eprintf("ERROR: model not initialized for psa\n");
-          return XRTM_DBL_ERROR;
-     }
-
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_planet_r, xrtm_input_name(INPUT_PLANET_R), XRTM_DBL_ERROR);
-
-     return d->planet_r;
-}
-
-
-
-/*******************************************************************************
- *
- ******************************************************************************/
-int xrtm_set_levels_z(xrtm_data *d, double *levels_z) {
+int xrtm_set_F_iso_top_l_n(xrtm_data *d, double *F_iso_top_l) {
 
      int i;
 
-     if (! (d->options & XRTM_OPTION_PSA)) {
-          eprintf("ERROR: model not initialized for psa\n");
+     CHECK_INIT_FOR_DERIVS();
+
+     for (i = 0; i < d->n_derivs; ++i)
+          d->F_iso_top_l[i] = F_iso_top_l[i];
+
+     set_deps(d, DEP_MASK_F_ISO_TOP_L, 0, d->n_layers);
+
+     return 0;
+}
+
+
+
+double xrtm_get_F_iso_top_l(xrtm_data *d, int i_deriv) {
+
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+
+     return d->F_iso_top_l[i_deriv];
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+int xrtm_set_F_iso_bot(xrtm_data *d, double F_iso_bot) {
+
+     if (F_iso_bot < 0.) {
+          fprintf(stderr, "ERROR: invalid value for F_iso_bot: %e, "
+                  "must be > zero\n", F_iso_bot);
           return XRTM_INT_ERROR;
      }
+
+     d->F_iso_bot = F_iso_bot;
+
+     d->set_flags_F_iso_bot = 1;
+
+     set_deps(d, DEP_MASK_F_ISO_BOT, 0, d->n_layers);
+
+     return 0;
+}
+
+
+
+double xrtm_get_F_iso_bot(xrtm_data *d) {
+
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_F_iso_bot, xrtm_input_index_to_name(INPUT_F_ISO_BOT), XRTM_DBL_ERROR);
+
+     return d->F_iso_bot;
+}
+
+
+
+int xrtm_set_F_iso_bot_l_1(xrtm_data *d, int i_deriv, double F_iso_bot_l) {
+
+     CHECK_INIT_FOR_DERIVS();
+
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+
+     d->F_iso_bot_l[i_deriv] = F_iso_bot_l;
+
+     set_deps(d, DEP_MASK_F_ISO_BOT_L, 0, d->n_layers);
+
+     return 0;
+}
+
+
+
+int xrtm_set_F_iso_bot_l_n(xrtm_data *d, double *F_iso_bot_l) {
+
+     int i;
+
+     CHECK_INIT_FOR_DERIVS();
+
+     for (i = 0; i < d->n_derivs; ++i)
+          d->F_iso_bot_l[i] = F_iso_bot_l[i];
+
+     set_deps(d, DEP_MASK_F_ISO_BOT_L, 0, d->n_layers);
+
+     return 0;
+}
+
+
+
+double xrtm_get_F_iso_bot_l(xrtm_data *d, int i_deriv) {
+
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+
+     return d->F_iso_bot_l[i_deriv];
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+int xrtm_set_F_0(xrtm_data *d, double F_0) {
+
+     if (! (d->options & XRTM_OPTION_SOURCE_SOLAR)) {
+          fprintf(stderr, "ERROR: model not initialized for solar sources\n");
+          return XRTM_INT_ERROR;
+     }
+
+     if (F_0 < 0.) {
+          fprintf(stderr, "ERROR: invalid value for F_0: %e, "
+                  "must be >= zero\n", F_0);
+          return XRTM_INT_ERROR;
+     }
+
+     d->F_0 = F_0;
+
+     d->set_flags_F_0 = 1;
+
+     set_deps(d, DEP_MASK_F_0, 0, d->n_layers);
+
+     return 0;
+}
+
+
+
+double xrtm_get_F_0(xrtm_data *d) {
+
+     if (! (d->options & XRTM_OPTION_SOURCE_SOLAR)) {
+          fprintf(stderr, "ERROR: model not initialized for solar sources\n");
+          return XRTM_INT_ERROR;
+     }
+
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_F_0, xrtm_input_index_to_name(INPUT_F_0), XRTM_DBL_ERROR);
+
+     return d->F_0;
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+int xrtm_set_theta_0(xrtm_data *d, double theta_0) {
+
+     if (! (d->options & XRTM_OPTION_SOURCE_SOLAR)) {
+          fprintf(stderr, "ERROR: model not initialized for solar sources\n");
+          return XRTM_INT_ERROR;
+     }
+
+     if (theta_0 < 0. || theta_0 >= 90.) {
+          fprintf(stderr, "ERROR: invalid value for theta_0: %e, "
+                  "must be >= zero and < 90.0\n", theta_0);
+          return XRTM_INT_ERROR;
+     }
+
+     d->mu_0_0 = cos(theta_0*D2R);
+
+     update_n_four2(d, 1, d->set_flags_umus);
+
+     if (mu_0_singularity_adjust(d)) {
+          fprintf(stderr, "ERROR: mu_0_singularity_adjust()\n");
+          return XRTM_INT_ERROR;
+     }
+
+     if (d->solvers & XRTM_SOLVERS_INTERNAL && d->n_kernels > 0)
+          brdf_aux_calc_mu_0(&d->kernel_aux, d->n_quad + d->n_umus, d->mu_0, d->n_kernel_quad, d->kernel_qx);
+
+     d->set_flags_mu_0 = 1;
+
+     set_deps(d, DEP_MASK_MU_0, 0, d->n_layers);
+
+     return 0;
+}
+
+
+
+double xrtm_get_theta_0(xrtm_data *d) {
+
+     if (! (d->options & XRTM_OPTION_SOURCE_SOLAR)) {
+          fprintf(stderr, "ERROR: model not initialized for solar sources\n");
+          return XRTM_INT_ERROR;
+     }
+
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_mu_0, xrtm_input_index_to_name(INPUT_THETA_0), XRTM_DBL_ERROR);
+
+     return acos(d->mu_0_0)*R2D;
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+int xrtm_set_phi_0(xrtm_data *d, double phi_0) {
 /*
-     for (i = 0; i < d->n_layers + 1; ++i) {
-          if (levels_z[i] + d->planet_r <= 0.) {
-               eprintf("ERROR: invalid value for levels_z[%d]: %e, "
-                       "must be > -planet_r\n", i, levels_z[i]);
-               return XRTM_INT_ERROR;
-          }
+     if (! (d->options & XRTM_OPTION_SOURCE_SOLAR)) {
+          fprintf(stderr, "ERROR: model not initialized for solar sources\n");
+          return XRTM_INT_ERROR;
      }
 */
-     for (i = 1; i < d->n_layers + 1; ++i) {
-          if (levels_z[i] >= levels_z[i-1]) {
-               eprintf("ERROR: levels_z[%d]: %e, is not < levels_z[%d]: %e\n",
-                       i, levels_z[i], i-1, levels_z[i-1]);
-               return XRTM_INT_ERROR;
-          }
-     }
+     d->phi_0 = phi_0;
 
-     for (i = 0; i < d->n_layers + 1; ++i)
-          d->levels_z[i] = levels_z[i];
+     set_deps(d, DEP_MASK_PHI_0, 0, d->n_layers);
 
-     d->set_flags_levels_z = 1;
-
-     set_deps(d, DEP_MASK_LEVELS_Z, 0, d->n_layers);
+     d->set_flags_phi_0 = 1;
 
      return 0;
 }
 
 
 
-int xrtm_get_levels_z(xrtm_data *d, double *levels_z) {
-
-     int i;
-
-     if (! (d->options & XRTM_OPTION_PSA)) {
-          eprintf("ERROR: model not initialized for psa\n");
+double xrtm_get_phi_0(xrtm_data *d) {
+/*
+     if (! (d->options & XRTM_OPTION_SOURCE_SOLAR)) {
+          fprintf(stderr, "ERROR: model not initialized for solar sources\n");
           return XRTM_INT_ERROR;
      }
+*/
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_phi_0, xrtm_input_index_to_name(INPUT_PHI_0), XRTM_DBL_ERROR);
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_levels_z, xrtm_input_name(INPUT_LEVELS_Z), XRTM_INT_ERROR);
-
-     for (i = 0; i < d->n_layers + 1; ++i)
-          levels_z[i] = d->levels_z[i];
-
-     return 0;
+     return d->phi_0;
 }
 
 
@@ -3195,13 +3578,13 @@ int xrtm_set_levels_b(xrtm_data *d, double *levels_b) {
      int i;
 
      if (! (d->options & XRTM_OPTION_SOURCE_THERMAL)) {
-          eprintf("ERROR: model not initialized for thermal source\n");
+          fprintf(stderr, "ERROR: model not initialized for thermal sources\n");
           return XRTM_INT_ERROR;
      }
 
      for (i = 0; i < d->n_layers + 1; ++i) {
           if (levels_b[i] < 0.) {
-               eprintf("ERROR: invalid value for levels_b[%d]: %e, "
+               fprintf(stderr, "ERROR: invalid value for levels_b[%d]: %e, "
                        "must be >= zero\n", i, levels_b[i]);
                return XRTM_INT_ERROR;
           }
@@ -3224,14 +3607,178 @@ int xrtm_get_levels_b(xrtm_data *d, double *levels_b) {
      int i;
 
      if (! (d->options & XRTM_OPTION_SOURCE_THERMAL)) {
-          eprintf("ERROR: model not initialized for thermal source\n");
+          fprintf(stderr, "ERROR: model not initialized for thermal sources\n");
           return XRTM_INT_ERROR;
      }
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_levels_b, xrtm_input_name(INPUT_LEVELS_B), XRTM_INT_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_levels_b, xrtm_input_index_to_name(INPUT_LEVELS_B), XRTM_INT_ERROR);
 
      for (i = 0; i < d->n_layers + 1; ++i)
           levels_b[i] = d->levels_b[i];
+
+     return 0;
+}
+
+
+
+int xrtm_set_levels_b_l_1(xrtm_data *d, int i_deriv, double *levels_b_l) {
+
+     int i;
+
+     if (! (d->options & XRTM_OPTION_SOURCE_THERMAL)) {
+          fprintf(stderr, "ERROR: model not initialized for thermal sources\n");
+          return XRTM_INT_ERROR;
+     }
+
+     CHECK_INIT_FOR_DERIVS();
+
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+
+     for (i = 0; i < d->n_layers + 1; ++i)
+          d->levels_b_l[i][i_deriv] = levels_b_l[i];
+
+     set_deps(d, DEP_MASK_LEVELS_B_L, 0, d->n_layers);
+
+     return 0;
+}
+
+
+
+int xrtm_set_levels_b_l_n(xrtm_data *d, double **levels_b_l) {
+
+     int i;
+     int j;
+
+     if (! (d->options & XRTM_OPTION_SOURCE_THERMAL)) {
+          fprintf(stderr, "ERROR: model not initialized for thermal sources\n");
+          return XRTM_INT_ERROR;
+     }
+
+     CHECK_INIT_FOR_DERIVS();
+
+     for (i = 0; i < d->n_layers + 1; ++i) {
+          for (j = 0; j < d->n_derivs; ++j)
+               d->levels_b_l[i][j] = levels_b_l[i][j];
+     }
+
+     set_deps(d, DEP_MASK_LEVELS_B_L, 0, d->n_layers);
+
+     return 0;
+}
+
+
+
+double xrtm_get_levels_b_l(xrtm_data *d, int i_deriv, double *levels_b_l) {
+
+     int i;
+
+     if (! (d->options & XRTM_OPTION_SOURCE_THERMAL)) {
+          fprintf(stderr, "ERROR: model not initialized for thermal sources\n");
+          return XRTM_INT_ERROR;
+     }
+
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+
+     for (i = 0; i < d->n_layers + 1; ++i)
+          levels_b_l[i] = d->levels_b_l[i][i_deriv];
+
+     return 0;
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+int xrtm_set_surface_b(xrtm_data *d, double surface_b) {
+
+     if (! (d->options & XRTM_OPTION_SOURCE_THERMAL)) {
+          fprintf(stderr, "ERROR: model not initialized for thermal sources\n");
+          return XRTM_INT_ERROR;
+     }
+
+     if (surface_b < 0.) {
+          fprintf(stderr, "ERROR: invalid value for surface_b: %e, "
+                  "must be > zero\n", surface_b);
+          return XRTM_INT_ERROR;
+     }
+
+     d->surface_b = surface_b;
+
+     d->set_flags_surface_b = 1;
+
+     set_deps(d, DEP_MASK_SURFACE_B, 0, d->n_layers);
+
+     return 0;
+}
+
+
+
+double xrtm_get_surface_b(xrtm_data *d) {
+
+     if (! (d->options & XRTM_OPTION_SOURCE_THERMAL)) {
+          fprintf(stderr, "ERROR: model not initialized for thermal sources\n");
+          return XRTM_INT_ERROR;
+     }
+
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_surface_b, xrtm_input_index_to_name(INPUT_SURFACE_B), XRTM_DBL_ERROR);
+
+     return d->surface_b;
+}
+
+
+
+int xrtm_set_surface_b_l_1(xrtm_data *d, int i_deriv, double surface_b_l) {
+
+     if (! (d->options & XRTM_OPTION_SOURCE_THERMAL)) {
+          fprintf(stderr, "ERROR: model not initialized for thermal sources\n");
+          return XRTM_INT_ERROR;
+     }
+
+     CHECK_INIT_FOR_DERIVS();
+
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+
+     d->surface_b_l[i_deriv] = surface_b_l;
+
+     set_deps(d, DEP_MASK_SURFACE_B_L, 0, d->n_layers);
+
+     return 0;
+}
+
+
+
+int xrtm_set_surface_b_l_n(xrtm_data *d, double *surface_b_l) {
+
+     int i;
+
+     if (! (d->options & XRTM_OPTION_SOURCE_THERMAL)) {
+          fprintf(stderr, "ERROR: model not initialized for thermal sources\n");
+          return XRTM_INT_ERROR;
+     }
+
+     CHECK_INIT_FOR_DERIVS();
+
+     for (i = 0; i < d->n_derivs; ++i)
+          d->surface_b_l[i] = surface_b_l[i];
+
+     set_deps(d, DEP_MASK_SURFACE_B_L, 0, d->n_layers);
+
+     return 0;
+}
+
+
+
+double xrtm_get_surface_b_l(xrtm_data *d, int i_deriv) {
+
+     if (! (d->options & XRTM_OPTION_SOURCE_THERMAL)) {
+          fprintf(stderr, "ERROR: model not initialized for thermal sources\n");
+          return XRTM_INT_ERROR;
+     }
+
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+
+     return d->surface_b_l[i_deriv];
 
      return 0;
 }
@@ -3249,7 +3796,7 @@ static int xrtm_set_g_x(xrtm_data *d, double *g,
      int deps;
 
      if (! (d->solvers & XRTM_SOLVERS_USE_G)) {
-          eprintf("ERROR: no two-stream solvers have been specified\n");
+          fprintf(stderr, "ERROR: no two-stream solvers have been specified\n");
           return -1;
      }
 
@@ -3257,14 +3804,14 @@ static int xrtm_set_g_x(xrtm_data *d, double *g,
 
      for (i = i_layer; i < n_layers; ++i) {
           if (g[i - i_layer] < -1. || g[i - i_layer] > 1.) {
-               eprintf("ERROR: invalid value for g[%d]: %e, must be >= -one and <= one\n", i, g[i - i_layer]);
+               fprintf(stderr, "ERROR: invalid value for g[%d]: %e, must be >= -one and <= one\n", i, g[i - i_layer]);
                return -1;
           }
      }
 
      if (xrtm_set_layer_x(d, d->g0, g,
                           i_layer, n_layers, d->set_flags_g)) {
-          eprintf("ERROR: xrtm_set_layer_x()\n");
+          fprintf(stderr, "ERROR: xrtm_set_layer_x()\n");
           return -1;
      }
 
@@ -3280,7 +3827,7 @@ static int xrtm_set_g_x(xrtm_data *d, double *g,
 int xrtm_set_g_1(xrtm_data *d, int i_layer, double g) {
 
      if (xrtm_set_g_x(d, &g, i_layer, i_layer + 1)) {
-          eprintf("ERROR: xrtm_set_g_x()\n");
+          fprintf(stderr, "ERROR: xrtm_set_g_x()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3292,7 +3839,7 @@ int xrtm_set_g_1(xrtm_data *d, int i_layer, double g) {
 int xrtm_set_g_n(xrtm_data *d, double *g) {
 
      if (xrtm_set_g_x(d, g, 0, d->n_layers)) {
-          eprintf("ERROR: xrtm_set_g_x()\n");
+          fprintf(stderr, "ERROR: xrtm_set_g_x()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3304,11 +3851,11 @@ int xrtm_set_g_n(xrtm_data *d, double *g) {
 double xrtm_get_g(xrtm_data *d, int i_layer) {
 
      if (! (d->solvers & XRTM_SOLVERS_USE_G)) {
-          eprintf("ERROR: no two-stream solvers have been specified\n");
+          fprintf(stderr, "ERROR: no two-stream solvers have been specified\n");
           return XRTM_DBL_ERROR;
      }
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_g[i_layer], xrtm_input_name(INPUT_G), XRTM_DBL_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_g[i_layer], xrtm_input_index_to_name(INPUT_G), XRTM_DBL_ERROR);
 
      CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", XRTM_DBL_ERROR);
 
@@ -3325,7 +3872,7 @@ static int xrtm_set_g_x_l(xrtm_data *d, void *g_l, int i_layer,
      CHECK_INIT_FOR_DERIVS();
 
      if (! (d->solvers & XRTM_SOLVERS_USE_G)) {
-          eprintf("ERROR: no two-stream solvers have been specified\n");
+          fprintf(stderr, "ERROR: no two-stream solvers have been specified\n");
           return -1;
      }
 
@@ -3334,7 +3881,7 @@ static int xrtm_set_g_x_l(xrtm_data *d, void *g_l, int i_layer,
 
      if (xrtm_set_layer_x_l(d, d->g0_l, g_l,
                             i_layer, n_layers, i_deriv, n_derivs, type)) {
-          eprintf("ERROR: xrtm_set_layer_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_layer_x_l()\n");
           return -1;
      }
 
@@ -3350,7 +3897,7 @@ static int xrtm_set_g_x_l(xrtm_data *d, void *g_l, int i_layer,
 int xrtm_set_g_l_11(xrtm_data *d, int i_layer, int i_deriv, double g_l) {
 
      if (xrtm_set_g_x_l(d, &g_l, i_layer, i_layer + 1, i_deriv, i_deriv + 1, 0)) {
-          eprintf("ERROR: xrtm_set_g_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_g_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3362,7 +3909,7 @@ int xrtm_set_g_l_11(xrtm_data *d, int i_layer, int i_deriv, double g_l) {
 int xrtm_set_g_l_n1(xrtm_data *d, int i_deriv, double *g_l) {
 
      if (xrtm_set_g_x_l(d, g_l, 0, d->n_layers, i_deriv, i_deriv + 1, 1)) {
-          eprintf("ERROR: xrtm_set_g_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_g_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3374,7 +3921,7 @@ int xrtm_set_g_l_n1(xrtm_data *d, int i_deriv, double *g_l) {
 int xrtm_set_g_l_1n(xrtm_data *d, int i_layer, double *g_l) {
 
      if (xrtm_set_g_x_l(d, g_l, i_layer, i_layer + 1, 0, d->n_derivs, 2)) {
-          eprintf("ERROR: xrtm_set_g_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_g_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3386,7 +3933,7 @@ int xrtm_set_g_l_1n(xrtm_data *d, int i_layer, double *g_l) {
 int xrtm_set_g_l_nn(xrtm_data *d, double **g_l) {
 
      if (xrtm_set_g_x_l(d, g_l, 0, d->n_layers, 0, d->n_derivs, 3)) {
-          eprintf("ERROR: xrtm_set_g_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_g_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3398,7 +3945,7 @@ int xrtm_set_g_l_nn(xrtm_data *d, double **g_l) {
 double xrtm_get_g_l(xrtm_data *d, int i_layer, int i_deriv) {
 
      if (! (d->solvers & XRTM_SOLVERS_USE_G)) {
-          eprintf("ERROR: no two-stream solvers have been specified\n");
+          fprintf(stderr, "ERROR: no two-stream solvers have been specified\n");
           return XRTM_DBL_ERROR;
      }
 
@@ -3424,7 +3971,7 @@ static int xrtm_set_coef_x(xrtm_data *d, double ***coef,
      int deps;
 
      if (! (d->solvers & XRTM_SOLVERS_USE_COEF)) {
-          eprintf("ERROR: no multi-stream solvers have been specified\n");
+          fprintf(stderr, "ERROR: no multi-stream solvers have been specified\n");
           return -1;
      }
 
@@ -3433,12 +3980,12 @@ static int xrtm_set_coef_x(xrtm_data *d, double ***coef,
      if (n_coef_layer) {
           for (i = i_layer, ii = 0; i < n_layers; ++i, ++ii) {
                if (n_coef_layer[ii] < 0) {
-                    eprintf("ERROR: n_coef for layer %d must be >= 0\n", i_layer);
+                    fprintf(stderr, "ERROR: n_coef for layer %d must be >= 0\n", i_layer);
                     return -1;
                }
 
                if (n_coef_layer[ii] > d->n_coef) {
-                    eprintf("ERROR: n_coef for layer %d > max # of coefs for which model was initiaized (%d > %d)\n", i_layer, n_coef_layer[ii], d->n_coef);
+                    fprintf(stderr, "ERROR: n_coef for layer %d > max # of coefs for which model was initiaized (%d > %d)\n", i_layer, n_coef_layer[ii], d->n_coef);
                     return -1;
                }
           }
@@ -3456,7 +4003,7 @@ static int xrtm_set_coef_x(xrtm_data *d, double ***coef,
 
           if (d->n_coef_layer[i] > 1) {
                if (fabs(1. - coef[ii][0][0]) > DBL_EPSILON) {
-                    eprintf("ERROR: the first phase function coefficient for layer %d is not = one\n", i_layer);
+                    fprintf(stderr, "ERROR: the first phase function coefficient for layer %d is not = one: %.16e\n", i, coef[ii][0][0]);
                     return -1;
                }
           }
@@ -3467,7 +4014,7 @@ static int xrtm_set_coef_x(xrtm_data *d, double ***coef,
                }
           }
 
-          if (d->initial_inputs)
+          if (d->inputs_initialized)
                d->set_flags_coef[i] = 1;
      }
 
@@ -3501,7 +4048,7 @@ int xrtm_set_coef_1(xrtm_data *d, int i_layer, int n_coef_layer, double **coef) 
           p = &n_coef_layer;
 
      if (xrtm_set_coef_x(d, &coef, i_layer, i_layer + 1, p)) {
-          eprintf("ERROR: xrtm_set_coef_x()\n");
+          fprintf(stderr, "ERROR: xrtm_set_coef_x()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3513,7 +4060,7 @@ int xrtm_set_coef_1(xrtm_data *d, int i_layer, int n_coef_layer, double **coef) 
 int xrtm_set_coef_n(xrtm_data *d, int *n_coef_layer, double ***coef) {
 
      if (xrtm_set_coef_x(d, coef, 0, d->n_layers, n_coef_layer)) {
-          eprintf("ERROR: xrtm_set_coef_x()\n");
+          fprintf(stderr, "ERROR: xrtm_set_coef_x()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3525,7 +4072,7 @@ int xrtm_set_coef_n(xrtm_data *d, int *n_coef_layer, double ***coef) {
 int xrtm_get_n_coef(xrtm_data *d, int i_layer) {
 
      if (! (d->solvers & XRTM_SOLVERS_USE_COEF)) {
-          eprintf("ERROR: no multi-stream solvers have been specified\n");
+          fprintf(stderr, "ERROR: no multi-stream solvers have been specified\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3541,11 +4088,11 @@ int xrtm_get_n_coef(xrtm_data *d, int i_layer) {
 double xrtm_get_coef(xrtm_data *d, int i_layer, int i_elem, int i_coef) {
 
      if (! (d->solvers & XRTM_SOLVERS_USE_COEF)) {
-          eprintf("ERROR: no multi-stream solvers have been specified\n");
+          fprintf(stderr, "ERROR: no multi-stream solvers have been specified\n");
           return XRTM_DBL_ERROR;
      }
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_coef[i_layer], xrtm_input_name(INPUT_COEF), XRTM_DBL_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_coef[i_layer], xrtm_input_index_to_name(INPUT_COEF), XRTM_DBL_ERROR);
 
      CHECK_INDEX_RANGE(i_layer, d->n_layers,              "i_layer", "n_layers",              XRTM_DBL_ERROR);
      CHECK_INDEX_RANGE(i_elem,  d->n_elem,                "i_elem",  "n_elem",                XRTM_DBL_ERROR);
@@ -3573,7 +4120,7 @@ static int xrtm_set_coef_x_l(xrtm_data *d, void *coef_l, int i_layer, int n_laye
      CHECK_INIT_FOR_DERIVS();
 
      if (! (d->solvers & XRTM_SOLVERS_USE_COEF)) {
-          eprintf("ERROR: no multi-stream solvers have been specified\n");
+          fprintf(stderr, "ERROR: no multi-stream solvers have been specified\n");
           return -1;
      }
 
@@ -3599,7 +4146,7 @@ static int xrtm_set_coef_x_l(xrtm_data *d, void *coef_l, int i_layer, int n_laye
                                    break;
                               default:
 #ifdef DEBUG
-                                   eprintf("ERROR: xrtm_set_coef_x_l(): end of switch\n");
+                                   fprintf(stderr, "ERROR: xrtm_set_coef_x_l(): end of switch\n");
                                    exit(1);
 #endif
                                    break;
@@ -3628,7 +4175,7 @@ static int xrtm_set_coef_x_l(xrtm_data *d, void *coef_l, int i_layer, int n_laye
 int xrtm_set_coef_l_11(xrtm_data *d, int i_layer, int i_deriv, double **coef_l) {
 
      if (xrtm_set_coef_x_l(d, coef_l, i_layer, i_layer + 1, i_deriv, i_deriv + 1, 0)) {
-          eprintf("ERROR: xrtm_set_coef_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_coef_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3640,7 +4187,7 @@ int xrtm_set_coef_l_11(xrtm_data *d, int i_layer, int i_deriv, double **coef_l) 
 int xrtm_set_coef_l_n1(xrtm_data *d, int i_deriv, double ***coef_l) {
 
      if (xrtm_set_coef_x_l(d, coef_l, 0, d->n_layers, i_deriv, i_deriv + 1, 1)) {
-          eprintf("ERROR: xrtm_set_coef_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_coef_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3652,7 +4199,7 @@ int xrtm_set_coef_l_n1(xrtm_data *d, int i_deriv, double ***coef_l) {
 int xrtm_set_coef_l_1n(xrtm_data *d, int i_layer, double ***coef_l) {
 
      if (xrtm_set_coef_x_l(d, coef_l, i_layer, i_layer + 1, 0, d->n_derivs, 2)) {
-          eprintf("ERROR: xrtm_set_coef_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_coef_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3664,7 +4211,7 @@ int xrtm_set_coef_l_1n(xrtm_data *d, int i_layer, double ***coef_l) {
 int xrtm_set_coef_l_nn(xrtm_data *d, double ****coef_l) {
 
      if (xrtm_set_coef_x_l(d, coef_l, 0, d->n_layers, 0, d->n_derivs, 3)) {
-          eprintf("ERROR: xrtm_set_coef_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_coef_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3676,7 +4223,7 @@ int xrtm_set_coef_l_nn(xrtm_data *d, double ****coef_l) {
 double xrtm_get_coef_l(xrtm_data *d, int i_layer, int i_deriv, int i_elem, int i_coef) {
 
      if (! (d->solvers & XRTM_SOLVERS_USE_COEF)) {
-          eprintf("ERROR: no multi-stream solvers have been specified\n");
+          fprintf(stderr, "ERROR: no multi-stream solvers have been specified\n");
           return XRTM_DBL_ERROR;
      }
 
@@ -3704,14 +4251,14 @@ static int xrtm_set_omega_x(xrtm_data *d, double *omega,
 
      for (i = i_layer; i < n_layers; ++i) {
           if (omega[i - i_layer] < 0. || omega[i - i_layer] > 1.) {
-               eprintf("ERROR: invalid value for omega[%d]: %e, must be >= zero and <= one\n", i, omega[i - i_layer]);
+               fprintf(stderr, "ERROR: invalid value for omega[%d]: %e, must be >= zero and <= one\n", i, omega[i - i_layer]);
                return -1;
           }
      }
 
      if (xrtm_set_layer_x(d, d->omega0, omega,
                           i_layer, n_layers, d->set_flags_omega)) {
-          eprintf("ERROR: xrtm_set_layer_x()\n");
+          fprintf(stderr, "ERROR: xrtm_set_layer_x()\n");
           return -1;
      }
 
@@ -3740,7 +4287,7 @@ static int xrtm_set_omega_x(xrtm_data *d, double *omega,
 int xrtm_set_omega_1(xrtm_data *d, int i_layer, double omega) {
 
      if (xrtm_set_omega_x(d, &omega, i_layer, i_layer + 1)) {
-          eprintf("ERROR: xrtm_set_omega_x()\n");
+          fprintf(stderr, "ERROR: xrtm_set_omega_x()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3752,7 +4299,7 @@ int xrtm_set_omega_1(xrtm_data *d, int i_layer, double omega) {
 int xrtm_set_omega_n(xrtm_data *d, double *omega) {
 
      if (xrtm_set_omega_x(d, omega, 0, d->n_layers)) {
-          eprintf("ERROR: xrtm_set_omega_x()\n");
+          fprintf(stderr, "ERROR: xrtm_set_omega_x()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3763,7 +4310,7 @@ int xrtm_set_omega_n(xrtm_data *d, double *omega) {
 
 double xrtm_get_omega(xrtm_data *d, int i_layer) {
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_omega[i_layer], xrtm_input_name(INPUT_OMEGA), XRTM_DBL_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_omega[i_layer], xrtm_input_index_to_name(INPUT_OMEGA), XRTM_DBL_ERROR);
 
      CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", XRTM_DBL_ERROR);
 
@@ -3784,7 +4331,7 @@ static int xrtm_set_omega_x_l(xrtm_data *d, void *omega_l, int i_layer,
 
      if (xrtm_set_layer_x_l(d, d->omega0_l, omega_l,
                             i_layer, n_layers, i_deriv, n_derivs, type)) {
-          eprintf("ERROR: xrtm_set_layer_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_layer_x_l()\n");
           return -1;
      }
 
@@ -3803,7 +4350,7 @@ static int xrtm_set_omega_x_l(xrtm_data *d, void *omega_l, int i_layer,
 int xrtm_set_omega_l_11(xrtm_data *d, int i_layer, int i_deriv, double omega_l) {
 
      if (xrtm_set_omega_x_l(d, &omega_l, i_layer, i_layer + 1, i_deriv, i_deriv + 1, 0)) {
-          eprintf("ERROR: xrtm_set_omega_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_omega_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3815,7 +4362,7 @@ int xrtm_set_omega_l_11(xrtm_data *d, int i_layer, int i_deriv, double omega_l) 
 int xrtm_set_omega_l_n1(xrtm_data *d, int i_deriv, double *omega_l) {
 
      if (xrtm_set_omega_x_l(d, omega_l, 0, d->n_layers, i_deriv, i_deriv + 1, 1)) {
-          eprintf("ERROR: xrtm_set_omega_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_omega_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3827,7 +4374,7 @@ int xrtm_set_omega_l_n1(xrtm_data *d, int i_deriv, double *omega_l) {
 int xrtm_set_omega_l_1n(xrtm_data *d, int i_layer, double *omega_l) {
 
      if (xrtm_set_omega_x_l(d, omega_l, i_layer, i_layer + 1, 0, d->n_derivs, 2)) {
-          eprintf("ERROR: xrtm_set_omega_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_omega_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3839,7 +4386,7 @@ int xrtm_set_omega_l_1n(xrtm_data *d, int i_layer, double *omega_l) {
 int xrtm_set_omega_l_nn(xrtm_data *d, double **omega_l) {
 
      if (xrtm_set_omega_x_l(d, omega_l, 0, d->n_layers, 0, d->n_derivs, 3)) {
-          eprintf("ERROR: xrtm_set_omega_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_omega_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3870,24 +4417,18 @@ static int xrtm_set_ltau_x(xrtm_data *d, double *ltau,
 
      for (i = i_layer; i < n_layers; ++i) {
           if (ltau[i - i_layer] <= 0.) {
-               eprintf("ERROR: invalid value for ltau[%d]: %e, must be > zero\n", i, ltau[i - i_layer]);
+               fprintf(stderr, "ERROR: invalid value for ltau[%d]: %e, must be > zero\n", i, ltau[i - i_layer]);
                return -1;
           }
      }
 
      if (xrtm_set_layer_x(d, d->ltau0, ltau,
                           i_layer, n_layers, d->set_flags_ltau)) {
-          eprintf("ERROR: xrtm_set_layer_x()\n");
+          fprintf(stderr, "ERROR: xrtm_set_layer_x()\n");
           return -1;
      }
 
      set_deps(d, DEP_MASK_LTAU, i_layer, n_layers);
-
-     if (d->options & XRTM_OPTION_OUTPUT_AT_TAUS) {
-          d->initial_inputs  = 1;
-
-          d->set_flags_utaus = 1;
-     }
 
      return 0;
 }
@@ -3897,7 +4438,7 @@ static int xrtm_set_ltau_x(xrtm_data *d, double *ltau,
 int xrtm_set_ltau_1(xrtm_data *d, int i_layer, double ltau) {
 
      if (xrtm_set_ltau_x(d, &ltau, i_layer, i_layer + 1)) {
-          eprintf("ERROR: xrtm_set_ltau_x()\n");
+          fprintf(stderr, "ERROR: xrtm_set_ltau_x()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3909,7 +4450,7 @@ int xrtm_set_ltau_1(xrtm_data *d, int i_layer, double ltau) {
 int xrtm_set_ltau_n(xrtm_data *d, double *ltau) {
 
      if (xrtm_set_ltau_x(d, ltau, 0, d->n_layers)) {
-          eprintf("ERROR: xrtm_set_ltau_x()\n");
+          fprintf(stderr, "ERROR: xrtm_set_ltau_x()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3920,7 +4461,7 @@ int xrtm_set_ltau_n(xrtm_data *d, double *ltau) {
 
 double xrtm_get_ltau(xrtm_data *d, int i_layer) {
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_ltau[i_layer], xrtm_input_name(INPUT_LTAU), XRTM_DBL_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_ltau[i_layer], xrtm_input_index_to_name(INPUT_LTAU), XRTM_DBL_ERROR);
 
      CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", XRTM_DBL_ERROR);
 
@@ -3939,7 +4480,7 @@ static int xrtm_set_ltau_x_l(xrtm_data *d, void *ltau_l, int i_layer,
 
      if (xrtm_set_layer_x_l(d, d->ltau0_l, ltau_l,
                             i_layer, n_layers, i_deriv, n_derivs, type)) {
-          eprintf("ERROR: xrtm_set_layer_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_layer_x_l()\n");
           return -1;
      }
 
@@ -3953,7 +4494,7 @@ static int xrtm_set_ltau_x_l(xrtm_data *d, void *ltau_l, int i_layer,
 int xrtm_set_ltau_l_11(xrtm_data *d, int i_layer, int i_deriv, double ltau_l) {
 
      if (xrtm_set_ltau_x_l(d, &ltau_l, i_layer, i_layer + 1, i_deriv, i_deriv + 1, 0)) {
-          eprintf("ERROR: xrtm_set_ltau_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_ltau_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3965,7 +4506,7 @@ int xrtm_set_ltau_l_11(xrtm_data *d, int i_layer, int i_deriv, double ltau_l) {
 int xrtm_set_ltau_l_n1(xrtm_data *d, int i_deriv, double *ltau_l) {
 
      if (xrtm_set_ltau_x_l(d, ltau_l, 0, d->n_layers, i_deriv, i_deriv + 1, 1)) {
-          eprintf("ERROR: xrtm_set_ltau_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_ltau_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3977,7 +4518,7 @@ int xrtm_set_ltau_l_n1(xrtm_data *d, int i_deriv, double *ltau_l) {
 int xrtm_set_ltau_l_1n(xrtm_data *d, int i_layer, double *ltau_l) {
 
      if (xrtm_set_ltau_x_l(d, ltau_l, i_layer, i_layer + 1, 0, d->n_derivs, 2)) {
-          eprintf("ERROR: xrtm_set_ltau_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_ltau_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -3989,7 +4530,7 @@ int xrtm_set_ltau_l_1n(xrtm_data *d, int i_layer, double *ltau_l) {
 int xrtm_set_ltau_l_nn(xrtm_data *d, double **ltau_l) {
 
      if (xrtm_set_ltau_x_l(d, ltau_l, 0, d->n_layers, 0, d->n_derivs, 3)) {
-          eprintf("ERROR: xrtm_set_ltau_x_l()\n");
+          fprintf(stderr, "ERROR: xrtm_set_ltau_x_l()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -4011,57 +4552,21 @@ double xrtm_get_ltau_l(xrtm_data *d, int i_layer, int i_deriv) {
 /*******************************************************************************
  *
  ******************************************************************************/
-int xrtm_set_surface_b(xrtm_data *d, double surface_b) {
-
-     if (! (d->options & XRTM_OPTION_SOURCE_THERMAL)) {
-          eprintf("ERROR: model not initialized for thermal source\n");
-          return XRTM_INT_ERROR;
-     }
-
-     if (surface_b < 0.) {
-          eprintf("ERROR: invalid value for surface_b: %e, "
-                  "must be > zero\n", surface_b);
-          return XRTM_INT_ERROR;
-     }
-
-     d->surface_b = surface_b;
-
-     d->set_flags_surface_b = 1;
-
-     set_deps(d, DEP_MASK_SURFACE_B, 0, d->n_layers);
-
-     return 0;
-}
-
-
-
-double xrtm_get_surface_b(xrtm_data *d) {
-
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_surface_b, xrtm_input_name(INPUT_SURFACE_B), XRTM_DBL_ERROR);
-
-     return d->surface_b;
-}
-
-
-
-/*******************************************************************************
- *
- ******************************************************************************/
 int xrtm_set_kernel_ampfac(xrtm_data *d, int i_kernel, double ampfac) {
 
-     CHECK_N_KERNESL_NOT_ZERO(d, XRTM_INT_ERROR);
+     CHECK_N_KERNELS_NOT_ZERO(d, XRTM_INT_ERROR);
 
      CHECK_INDEX_RANGE(i_kernel, d->n_kernels, "i_kernel", "n_kernels", XRTM_INT_ERROR);
 
      if (ampfac < 0. || ampfac > 1.) {
-          eprintf("ERROR: invalid value for ampfac: %e, "
+          fprintf(stderr, "ERROR: invalid value for ampfac: %e, "
                    "must be >= zero and <= one\n", ampfac);
           return XRTM_INT_ERROR;
      }
 
      d->kernel_ampfac[i_kernel] = ampfac;
 
-     if (d->initial_inputs)
+     if (d->inputs_initialized)
           d->set_flags_kernel_ampfac[i_kernel] = 1;
 
      set_deps(d, DEP_MASK_BRDF, 0, d->n_layers);
@@ -4073,9 +4578,9 @@ int xrtm_set_kernel_ampfac(xrtm_data *d, int i_kernel, double ampfac) {
 
 double xrtm_get_kernel_ampfac(xrtm_data *d, int i_kernel) {
 
-     CHECK_N_KERNESL_NOT_ZERO(d, XRTM_DBL_ERROR);
+     CHECK_N_KERNELS_NOT_ZERO(d, XRTM_DBL_ERROR);
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_kernel_ampfac[i_kernel], xrtm_input_name(INPUT_KERNEL_AMPFAC),  XRTM_DBL_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_kernel_ampfac[i_kernel], xrtm_input_index_to_name(INPUT_KERNEL_AMPFAC),  XRTM_DBL_ERROR);
 
      CHECK_INDEX_RANGE(i_kernel, d->n_kernels, "i_kernel", "n_kernels", XRTM_DBL_ERROR);
 
@@ -4088,7 +4593,7 @@ int xrtm_set_kernel_params_1(xrtm_data *d, int i_kernel, int i_param, double par
 
      int n_params;
 
-     CHECK_N_KERNESL_NOT_ZERO(d, XRTM_INT_ERROR);
+     CHECK_N_KERNELS_NOT_ZERO(d, XRTM_INT_ERROR);
 
      CHECK_INDEX_RANGE(i_kernel, d->n_kernels, "i_kernel", "n_kernels", XRTM_INT_ERROR);
 
@@ -4098,7 +4603,7 @@ int xrtm_set_kernel_params_1(xrtm_data *d, int i_kernel, int i_param, double par
 
      d->kernel_params[i_kernel][i_param] = param;
 
-     if (d->initial_inputs)
+     if (d->inputs_initialized)
           d->set_flags_kernel_params[i_kernel][i_param] = 1;
 
      set_deps(d, DEP_MASK_BRDF, 0, d->n_layers);
@@ -4114,7 +4619,7 @@ int xrtm_set_kernel_params_n(xrtm_data *d, int i_kernel, double *params) {
 
      int n_params;
 
-     CHECK_N_KERNESL_NOT_ZERO(d, XRTM_INT_ERROR);
+     CHECK_N_KERNELS_NOT_ZERO(d, XRTM_INT_ERROR);
 
      CHECK_INDEX_RANGE(i_kernel, d->n_kernels, "i_kernel", "n_kernels", XRTM_INT_ERROR);
 
@@ -4123,7 +4628,7 @@ int xrtm_set_kernel_params_n(xrtm_data *d, int i_kernel, double *params) {
      for (i = 0; i < n_params; ++i) {
           d->kernel_params[i_kernel][i] = params[i];
 
-          if (d->initial_inputs)
+          if (d->inputs_initialized)
                d->set_flags_kernel_params[i_kernel][i] = 1;
      }
 
@@ -4138,9 +4643,9 @@ double xrtm_get_kernel_params(xrtm_data *d, int i_kernel, int i_param) {
 
      int n_params;
 
-     CHECK_N_KERNESL_NOT_ZERO(d, XRTM_DBL_ERROR);
+     CHECK_N_KERNELS_NOT_ZERO(d, XRTM_DBL_ERROR);
 
-     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_kernel_params[i_kernel][i_param], xrtm_input_name(INPUT_KERNEL_PARAMS), XRTM_DBL_ERROR);
+     GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_kernel_params[i_kernel][i_param], xrtm_input_index_to_name(INPUT_KERNEL_PARAMS), XRTM_DBL_ERROR);
 
      CHECK_INDEX_RANGE(i_kernel, d->n_kernels, "i_kernel", "n_kernels", XRTM_DBL_ERROR);
 
@@ -4155,7 +4660,7 @@ double xrtm_get_kernel_params(xrtm_data *d, int i_kernel, int i_param) {
 
 int xrtm_set_kernel_ampfac_l_1(xrtm_data *d, int i_kernel, int i_deriv, double ampfac_l) {
 
-     CHECK_N_KERNESL_NOT_ZERO(d, XRTM_INT_ERROR);
+     CHECK_N_KERNELS_NOT_ZERO(d, XRTM_INT_ERROR);
 
      CHECK_INIT_FOR_DERIVS();
 
@@ -4175,7 +4680,7 @@ int xrtm_set_kernel_ampfac_l_n(xrtm_data *d, int i_kernel, double *ampfac_l) {
 
      int i;
 
-     CHECK_N_KERNESL_NOT_ZERO(d, XRTM_INT_ERROR);
+     CHECK_N_KERNELS_NOT_ZERO(d, XRTM_INT_ERROR);
 
      CHECK_INIT_FOR_DERIVS();
 
@@ -4193,10 +4698,10 @@ int xrtm_set_kernel_ampfac_l_n(xrtm_data *d, int i_kernel, double *ampfac_l) {
 
 double xrtm_get_kernel_ampfac_l(xrtm_data *d, int i_kernel, int i_deriv) {
 
-     CHECK_N_KERNESL_NOT_ZERO(d, XRTM_DBL_ERROR);
+     CHECK_N_KERNELS_NOT_ZERO(d, XRTM_DBL_ERROR);
 
      CHECK_INDEX_RANGE(i_kernel, d->n_kernels, "i_kernel", "n_kernels", XRTM_DBL_ERROR);
-     CHECK_INDEX_RANGE(i_deriv,  d->n_derivs,  "i_deriv",  "n_derivs", XRTM_DBL_ERROR);
+     CHECK_INDEX_RANGE(i_deriv,  d->n_derivs,  "i_deriv",  "n_derivs",  XRTM_DBL_ERROR);
 
      return d->kernel_ampfac_l[i_kernel][i_deriv];
 }
@@ -4207,7 +4712,9 @@ int xrtm_set_kernel_params_l_11(xrtm_data *d, int i_kernel, int i_deriv, int i_p
 
      int n_params;
 
-     CHECK_N_KERNESL_NOT_ZERO(d, XRTM_INT_ERROR);
+     CHECK_N_KERNELS_NOT_ZERO(d, XRTM_INT_ERROR);
+
+     CHECK_INIT_FOR_DERIVS();
 
      CHECK_INDEX_RANGE(i_kernel, d->n_kernels, "i_kernel", "n_kernels", XRTM_INT_ERROR);
 
@@ -4231,7 +4738,9 @@ int xrtm_set_kernel_params_l_1n(xrtm_data *d, int i_kernel, int i_deriv, double 
 
      int n_params;
 
-     CHECK_N_KERNESL_NOT_ZERO(d, XRTM_INT_ERROR);
+     CHECK_N_KERNELS_NOT_ZERO(d, XRTM_INT_ERROR);
+
+     CHECK_INIT_FOR_DERIVS();
 
      CHECK_INDEX_RANGE(i_kernel, d->n_kernels, "i_kernel", "n_kernels", XRTM_INT_ERROR);
      CHECK_INDEX_RANGE(i_deriv,  d->n_derivs,  "i_deriv",  "n_derivs",  XRTM_INT_ERROR);
@@ -4247,13 +4756,16 @@ int xrtm_set_kernel_params_l_1n(xrtm_data *d, int i_kernel, int i_deriv, double 
 }
 
 
+
 int xrtm_set_kernel_params_l_n1(xrtm_data *d, int i_kernel, int i_param, double *params_l) {
 
      int i;
 
      int n_params;
 
-     CHECK_N_KERNESL_NOT_ZERO(d, XRTM_INT_ERROR);
+     CHECK_N_KERNELS_NOT_ZERO(d, XRTM_INT_ERROR);
+
+     CHECK_INIT_FOR_DERIVS();
 
      CHECK_INDEX_RANGE(i_kernel, d->n_kernels, "i_kernel", "n_kernels", XRTM_INT_ERROR);
 
@@ -4278,7 +4790,9 @@ int xrtm_set_kernel_params_l_nn(xrtm_data *d, int i_kernel, double **params_l) {
 
      int n_params;
 
-     CHECK_N_KERNESL_NOT_ZERO(d, XRTM_INT_ERROR);
+     CHECK_N_KERNELS_NOT_ZERO(d, XRTM_INT_ERROR);
+
+     CHECK_INIT_FOR_DERIVS();
 
      CHECK_INDEX_RANGE(i_kernel, d->n_kernels, "i_kernel", "n_kernels", XRTM_INT_ERROR);
 
@@ -4301,7 +4815,7 @@ double xrtm_get_kernel_params_l(xrtm_data *d, int i_kernel, int i_deriv, int i_p
 
      int n_params;
 
-     CHECK_N_KERNESL_NOT_ZERO(d, XRTM_DBL_ERROR);
+     CHECK_N_KERNELS_NOT_ZERO(d, XRTM_DBL_ERROR);
 
      CHECK_INDEX_RANGE(i_kernel, d->n_kernels, "i_kernel", "n_kernels", XRTM_DBL_ERROR);
 
@@ -4315,31 +4829,34 @@ double xrtm_get_kernel_params_l(xrtm_data *d, int i_kernel, int i_deriv, int i_p
 
 
 
-/*******************************************************************************
- * 
- ******************************************************************************/
-int xrtm_set_misc_input(xrtm_data *d, misc_input_data misc_input) {
+int xrtm_set_kernel_func(xrtm_data *d, int i_kernel, void (*aux)(brdf_aux_data *aux, void *aux2, int i, int j, int n_derivs, uchar *derivs, double *p, double **p_l),
+                         double (*kernel)(brdf_aux_data *aux, void *aux2, enum xrtm_brdf_geometry brdf_geom, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l)) {
 
-     d->misc_input = misc_input;
+     CHECK_N_KERNELS_NOT_ZERO(d, XRTM_INT_ERROR);
+
+     CHECK_INDEX_RANGE(i_kernel, d->n_kernels, "i_kernel", "n_kernels", XRTM_INT_ERROR);
+
+     if (d->kernels[i_kernel] != XRTM_KERNEL_USER_DEFINED) {
+          fprintf(stderr, "ERROR: kernel %d is not a user defined kernel\n", i_kernel);
+          return XRTM_INT_ERROR;
+     }
+
+     d->kernel_func[i_kernel].aux    = aux;
+     d->kernel_func[i_kernel].kernel = kernel;
+
+     if (d->inputs_initialized)
+          d->set_flags_kernel_func[i_kernel] = 1;
+
+     set_deps(d, DEP_MASK_BRDF, 0, d->n_layers);
 
      return 0;
 }
 
 
 
-misc_input_data xrtm_get_misc_input(xrtm_data *d) {
+void *xrtm_get_kernel_func(xrtm_data *d, int i_kernel) {
 
-     return d->misc_input;
-}
-
-
-
-/*******************************************************************************
- * 
- ******************************************************************************/
-misc_input_data xrtm_get_misc_output(xrtm_data *d) {
-
-     return d->misc_input;
+     return NULL;
 }
 
 
@@ -4347,7 +4864,17 @@ misc_input_data xrtm_get_misc_output(xrtm_data *d) {
 /*******************************************************************************
  *
  ******************************************************************************/
-static void build_derivs_h(xrtm_data *d, uchar **derivs_h, int flag) {
+void xrtm_clear_saved(xrtm_data *d) {
+
+     init_deps(d, DEP_MASK_MASK, 0, d->n_layers);
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+static void build_derivs_layers(xrtm_data *d, uchar **derivs_layers, int flag) {
 
      int i;
      int j;
@@ -4359,36 +4886,36 @@ static void build_derivs_h(xrtm_data *d, uchar **derivs_h, int flag) {
      for (i = 0; i < d->n_layers; ++i) {
           for (j = 0; j < d->n_derivs; ++j) {
                if (d->ltau0_l[i][j] != 0.) {
-                    derivs_h[i][j] = 1;
+                    derivs_layers[i][j] = 1;
                     goto L1;
                }
                if (d->omega0_l[i][j] != 0.) {
-                    derivs_h[i][j] = 1;
+                    derivs_layers[i][j] = 1;
                     goto L1;
                }
 
                for (k = 0; k < d->n_elem; ++k) {
                     for (l = 0; l < d->n_coef_layer[i]; ++l) {
                          if (d->coef0_l[i][j][k][l] != 0.) {
-                              derivs_h[i][j] = 1;
+                              derivs_layers[i][j] = 1;
                               goto L1;
                          }
                     }
                }
 
-               derivs_h[i][j] = 0;
+               derivs_layers[i][j] = 0;
 
 L1:            continue;
           }
      }
 
      for (j = 0; j < d->n_derivs; ++j) {
-          derivs_h[i][j] = 0;
+          derivs_layers[i][j] = 0;
 
           if (flag || brdf_needs_fourier(d->kernels, d->n_kernels)) {
                for (k = 0; k < d->n_kernels; ++k) {
                     if (d->kernel_ampfac_l[k][j] != 0.) {
-                         derivs_h[i][j] = 1;
+                         derivs_layers[i][j] = 1;
                          goto L2;
                     }
 
@@ -4396,7 +4923,7 @@ L1:            continue;
 
                     for (l = 0; l < n_params; ++l) {
                          if (d->kernel_params_l[k][j][l] != 0.) {
-                              derivs_h[i][j] = 1;
+                              derivs_layers[i][j] = 1;
                               goto L2;
                          }
                     }
@@ -4406,12 +4933,32 @@ L1:            continue;
 L2:       continue;
      }
 
-     flags_fill_meta2(derivs_h, d->n_layers + 1, d->n_derivs);
+     flags_fill_meta2(derivs_layers, d->n_layers + 1, d->n_derivs);
 }
 
 
 
-static void build_derivs_s(xrtm_data *d, uchar **derivs_h, uchar **derivs_s) {
+static void build_derivs_total(xrtm_data *d, uchar **derivs_layers, uchar **derivs_sources, uchar **derivs_total) {
+
+     int i;
+     int j;
+
+     for (j = 0; j < d->n_derivs; ++j)
+          derivs_total[0][j] = 0;
+
+     for (i = 0; i < d->n_layers + 1; ++i) {
+          for (j = 0; j < d->n_derivs; ++j) {
+               if (derivs_layers[i][j] || derivs_sources[i][j])
+                    derivs_total[0][j] = 1;
+          }
+     }
+
+     flags_fill_meta2(derivs_total, 1, d->n_derivs);
+}
+
+
+
+static void build_derivs_beam(xrtm_data *d, uchar **derivs_layers, uchar **derivs_beam) {
 
      int i;
      int j;
@@ -4421,97 +4968,170 @@ static void build_derivs_s(xrtm_data *d, uchar **derivs_h, uchar **derivs_s) {
      for (j = 0; j < d->n_derivs; ++j) {
           flag = 0;
 
-          derivs_s[0][j] = ADDING_U_U;
-          if (derivs_h[0][j])
-               derivs_s[0][j] = ADDING_U_P;
-
-          if (derivs_h[0][j])
-               flag = 1;
-
-          for (i = 1; i <  d->n_layers + 1; ++i) {
-               if (! derivs_h[i-1][j] && ! flag)
-                    derivs_s[i][j] = ADDING_U_U;
-               else
-               if (  derivs_h[i-1][j] && ! flag)
-                    derivs_s[i][j] = ADDING_U_P;
-               else
-               if (! derivs_h[i-1][j] &&  flag)
-                    derivs_s[i][j] = ADDING_P_P;
-               else
-               if (  derivs_h[i-1][j] &&  flag)
-                    derivs_s[i][j] = ADDING_P_P;
-#ifdef DEBUG
-               else {
-                    eprintf("ERROR: invalid layer adding combination: %d %d\n",
-                            derivs_h[i-1][j], flag);
-                    exit(1);
-               }
-#endif
-               if (derivs_h[i][j])
+          for (i = 0; i <  d->n_layers + 1; ++i) {
+               if (derivs_layers[i][j])
                     flag = 1;
 
+               derivs_beam[i][j] = 0;
+               if (flag)
+                    derivs_beam[i][j] = 1;
           }
      }
 
-     flags_fill_meta2(derivs_s, d->n_layers + 1, d->n_derivs);
+     flags_fill_meta2(derivs_beam, d->n_layers + 1, d->n_derivs);
 }
 
 
 
-static void build_derivs_d(xrtm_data *d, uchar **derivs_h, uchar **derivs_d) {
+static void build_derivs_thermal(xrtm_data *d, uchar **derivs_layers, uchar **derivs_thermal) {
+
+     int i;
+     int j;
+
+     for (j = 0; j < d->n_derivs; ++j) {
+          for (i = 0; i < d->n_layers; ++i) {
+               derivs_thermal[i][j] = 0;
+
+               if (derivs_layers[i][j] ||
+                   d->levels_b_l[i][j] != 0. || d->levels_b_l[i + 1][j] != 0.)
+                    derivs_thermal[i][j] = 1;
+          }
+
+          derivs_thermal[i][j] = 0;
+          if (derivs_layers[i][j] || d->surface_b_l[j] != 0.)
+               derivs_thermal[i][j] = 1;
+     }
+
+
+     flags_fill_meta2(derivs_thermal, d->n_layers + 1, d->n_derivs);
+}
+
+
+
+static void build_derivs_sources(xrtm_data *d, uchar **derivs_layers, uchar **derivs_beam, uchar **derivs_thermal, uchar **derivs_sources) {
+
+     int i;
+     int j;
+
+     for (j = 0; j < d->n_derivs; ++j) {
+          for (i = 0; i < d->n_layers + 1; ++i) {
+               derivs_sources[i][j] = 0;
+
+               if (d->options & XRTM_OPTION_SOURCE_SOLAR)
+                    derivs_sources[i][j] |= derivs_beam[i][j];
+               if (d->options & XRTM_OPTION_SOURCE_THERMAL)
+                    derivs_sources[i][j] |= derivs_thermal[i][j];
+          }
+     }
+
+     flags_fill_meta2(derivs_sources, d->n_layers + 1, d->n_derivs);
+}
+
+
+
+static void build_derivs_adding_down(xrtm_data *d, uchar **derivs_layers, uchar **derivs_sources, uchar **derivs_adding_down) {
 
      int i;
      int j;
 
      int flag;
+     int flag2;
 
      for (j = 0; j < d->n_derivs; ++j) {
           flag = 0;
+          flag2 = 0;
 
-          derivs_d[0][j] = ADDING_U_U;
-          if (derivs_h[0][j])
-               derivs_d[0][j] = ADDING_U_L;
+          derivs_adding_down[0][j] = 255;
 
-          if (derivs_h[0][j])
+          if (! derivs_layers[0][j] && ! derivs_sources[0][j])
+               derivs_adding_down[0][j] = ADDING_U_U;
+          if (! derivs_layers[0][j] &&   derivs_sources[0][j])
+               derivs_adding_down[0][j] = ADDING_U_S;
+          if (  derivs_layers[0][j] && ! derivs_sources[0][j])
+               derivs_adding_down[0][j] = ADDING_U_L;
+          if (  derivs_layers[0][j] &&   derivs_sources[0][j])
+               derivs_adding_down[0][j] = ADDING_U_B;
+
+          if (derivs_layers[0][j])
                flag = 1;
+          if (derivs_sources[0][j])
+               flag2 = 1;
 
-          for (i = 1; i <  d->n_layers + 1; ++i) {
-               if (! derivs_h[i-1][j] && ! derivs_h[i][j] && ! flag)
-                    derivs_d[i][j] = ADDING_U_U;
+          for (i = 1; i < d->n_layers + 1; ++i) {
+               derivs_adding_down[i][j] = 255;
+
+               if (! flag && ! flag2 && ! derivs_layers[i][j] && ! derivs_sources[i][j])
+                    derivs_adding_down[i][j] = ADDING_U_U;
                else
-               if (! derivs_h[i-1][j] &&   derivs_h[i][j] && ! flag)
-                    derivs_d[i][j] = ADDING_U_L;
+               if (! flag && ! flag2 && ! derivs_layers[i][j] &&   derivs_sources[i][j])
+                    derivs_adding_down[i][j] = ADDING_U_S;
                else
-               if (  derivs_h[i-1][j] && ! derivs_h[i][j] &&   flag)
-                    derivs_d[i][j] = ADDING_L_P;
+               if (! flag && ! flag2 &&   derivs_layers[i][j] && ! derivs_sources[i][j])
+                    derivs_adding_down[i][j] = ADDING_U_L;
                else
-               if (! derivs_h[i-1][j] && ! derivs_h[i][j] &&   flag)
-                    derivs_d[i][j] = ADDING_L_P;
+               if (! flag && ! flag2 &&   derivs_layers[i][j] &&   derivs_sources[i][j])
+                    derivs_adding_down[i][j] = ADDING_U_B;
                else
-               if (  derivs_h[i-1][j] &&   derivs_h[i][j] &&   flag)
-                    derivs_d[i][j] = ADDING_L_L;
+
+
+               if (! flag &&   flag2 && ! derivs_layers[i][j] && ! derivs_sources[i][j])
+                    derivs_adding_down[i][j] = ADDING_S_U;
                else
-               if (! derivs_h[i-1][j] &&   derivs_h[i][j] &&   flag)
-                    derivs_d[i][j] = ADDING_L_L;
+               if (! flag &&   flag2 && ! derivs_layers[i][j] &&   derivs_sources[i][j])
+                    derivs_adding_down[i][j] = ADDING_S_S;
+               else
+               if (! flag &&   flag2 &&   derivs_layers[i][j] && ! derivs_sources[i][j])
+                    derivs_adding_down[i][j] = ADDING_S_L;
+               else
+               if (! flag &&   flag2 &&   derivs_layers[i][j] &&   derivs_sources[i][j])
+                    derivs_adding_down[i][j] = ADDING_S_B;
+               else
+
+
+               if (  flag && ! flag2 && ! derivs_layers[i][j] && ! derivs_sources[i][j])
+                    derivs_adding_down[i][j] = ADDING_L_U;
+               else
+               if (  flag && ! flag2 && ! derivs_layers[i][j] &&   derivs_sources[i][j])
+                    derivs_adding_down[i][j] = ADDING_L_S;
+               else
+               if (  flag && ! flag2 &&   derivs_layers[i][j] && ! derivs_sources[i][j])
+                    derivs_adding_down[i][j] = ADDING_L_L;
+               else
+               if (  flag && ! flag2 &&   derivs_layers[i][j] &&   derivs_sources[i][j])
+                    derivs_adding_down[i][j] = ADDING_L_B;
+               else
+
+
+               if (  flag &&   flag2 && ! derivs_layers[i][j] && ! derivs_sources[i][j])
+                    derivs_adding_down[i][j] = ADDING_B_U;
+               else
+               if (  flag &&   flag2 && ! derivs_layers[i][j] &&   derivs_sources[i][j])
+                    derivs_adding_down[i][j] = ADDING_B_S;
+               else
+               if (  flag &&   flag2 &&   derivs_layers[i][j] && ! derivs_sources[i][j])
+                    derivs_adding_down[i][j] = ADDING_B_L;
+               else
+               if (  flag &&   flag2 &&   derivs_layers[i][j])
+                    derivs_adding_down[i][j] = ADDING_B_B;
 #ifdef DEBUG
                else {
-                    eprintf("ERROR: invalid layer adding combination: %d %d %d\n",
-                            derivs_h[i-1][j], derivs_h[i][j], flag);
+                    fprintf(stderr, "ERROR: invalid downward layer adding combination\n");
                     exit(1);
                }
 #endif
-               if (derivs_h[i][j])
+               if (derivs_layers[i][j])
                     flag = 1;
-
+               if (derivs_sources[i][j])
+                    flag2 = 1;
           }
      }
 
-     flags_fill_meta2(derivs_d, d->n_layers + 1, d->n_derivs);
+     flags_fill_meta2(derivs_adding_down, d->n_layers + 1, d->n_derivs);
 }
 
 
 
-static void build_derivs_u(xrtm_data *d, uchar **derivs_h, uchar **derivs_d, uchar **derivs_u) {
+static void build_derivs_adding_up(xrtm_data *d, uchar **derivs_layers, uchar **derivs_sources, uchar **derivs_adding_up) {
 
      int i;
      int j;
@@ -4523,70 +5143,140 @@ static void build_derivs_u(xrtm_data *d, uchar **derivs_h, uchar **derivs_d, uch
           flag  = 0;
           flag2 = 0;
 
-          derivs_u[d->n_layers][j] = ADDING_U_U;
-          if (derivs_h[d->n_layers][j])
-               derivs_u[d->n_layers][j] = ADDING_L_U;
-          else
-          if (derivs_d[d->n_layers][j])
-               derivs_u[d->n_layers][j] = ADDING_P_U;
+          derivs_adding_up[d->n_layers][j] = 255;
 
-          if (derivs_d[d->n_layers][j])
-               flag  = 1;
+          if (! derivs_layers[d->n_layers][j] && ! derivs_sources[d->n_layers][j])
+               derivs_adding_up[d->n_layers][j] = ADDING_U_U;
+          if (! derivs_layers[d->n_layers][j] &&   derivs_sources[d->n_layers][j])
+               derivs_adding_up[d->n_layers][j] = ADDING_S_U;
+          if (  derivs_layers[d->n_layers][j] && ! derivs_sources[d->n_layers][j])
+               derivs_adding_up[d->n_layers][j] = ADDING_L_U;
+          if (  derivs_layers[d->n_layers][j] &&   derivs_sources[d->n_layers][j])
+               derivs_adding_up[d->n_layers][j] = ADDING_B_U;
 
-          if (derivs_h[d->n_layers][j])
+          if (derivs_layers[d->n_layers][j])
+               flag = 1;
+
+          if (derivs_sources[d->n_layers][j])
                flag2 = 1;
 
           for (i = d->n_layers - 1; i >= 0; --i) {
-               if (! derivs_h[i][j] && ! derivs_h[i+1][j] && ! derivs_d[i][j] && ! flag && ! flag2)
-                    derivs_u[i][j] = ADDING_U_U;
+               derivs_adding_up[i][j] = 255;
 
+               if (! derivs_layers[i][j] && ! derivs_sources[i][j] && ! flag && ! flag2)
+                    derivs_adding_up[i][j] = ADDING_U_U;
                else
-               if (! derivs_h[i][j] && ! derivs_h[i+1][j] && ! derivs_d[i][j] &&   flag && ! flag2)
-                    derivs_u[i][j] = ADDING_U_P;
+               if (! derivs_layers[i][j] &&   derivs_sources[i][j] && ! flag && ! flag2)
+                    derivs_adding_up[i][j] = ADDING_S_U;
                else
-               if (! derivs_h[i][j] && ! derivs_h[i+1][j] &&   derivs_d[i][j] &&   flag && ! flag2)
-                    derivs_u[i][j] = ADDING_P_P;
+               if (  derivs_layers[i][j] && ! derivs_sources[i][j] && ! flag && ! flag2)
+                    derivs_adding_up[i][j] = ADDING_L_U;
+               else
+               if (  derivs_layers[i][j] &&   derivs_sources[i][j] && ! flag && ! flag2)
+                    derivs_adding_up[i][j] = ADDING_B_U;
+               else
 
-               else
-               if (! derivs_h[i][j] && ! derivs_h[i+1][j] && ! derivs_d[i][j] &&   flag &&   flag2)
-                    derivs_u[i][j] = ADDING_U_L;
-               else
-               if (! derivs_h[i][j] && ! derivs_h[i+1][j] &&   derivs_d[i][j] &&   flag &&   flag2)
-                    derivs_u[i][j] = ADDING_P_L;
 
+               if (! derivs_layers[i][j] && ! derivs_sources[i][j] && ! flag &&   flag2)
+                    derivs_adding_up[i][j] = ADDING_U_S;
                else
-               if (! derivs_h[i][j] &&   derivs_h[i+1][j] && ! derivs_d[i][j] &&   flag &&   flag2)
-                    derivs_u[i][j] = ADDING_U_L;
+               if (! derivs_layers[i][j] &&   derivs_sources[i][j] && ! flag &&   flag2)
+                    derivs_adding_up[i][j] = ADDING_S_S;
                else
-               if (! derivs_h[i][j] &&   derivs_h[i+1][j] &&   derivs_d[i][j] &&   flag &&   flag2)
-                    derivs_u[i][j] = ADDING_P_L;
+               if (  derivs_layers[i][j] && ! derivs_sources[i][j] && ! flag &&   flag2)
+                    derivs_adding_up[i][j] = ADDING_L_S;
+               else
+               if (  derivs_layers[i][j] &&   derivs_sources[i][j] && ! flag &&   flag2)
+                    derivs_adding_up[i][j] = ADDING_B_S;
+               else
 
-               else
-               if (  derivs_h[i][j] && ! derivs_h[i+1][j] &&   derivs_d[i][j] &&   flag && ! flag2)
-                    derivs_u[i][j] = ADDING_L_P;
-               else
-               if (  derivs_h[i][j] && ! derivs_h[i+1][j] &&   derivs_d[i][j] &&   flag &&   flag2)
-                    derivs_u[i][j] = ADDING_L_L;
 
+               if (! derivs_layers[i][j] && ! derivs_sources[i][j] &&   flag && ! flag2)
+                    derivs_adding_up[i][j] = ADDING_U_L;
                else
-               if (  derivs_h[i][j] &&   derivs_h[i+1][j] &&   derivs_d[i][j] &&   flag &&   flag2)
-                    derivs_u[i][j] = ADDING_L_L;
+               if (! derivs_layers[i][j] &&   derivs_sources[i][j] &&   flag && ! flag2)
+                    derivs_adding_up[i][j] = ADDING_S_L;
+               else
+               if (  derivs_layers[i][j] && ! derivs_sources[i][j] &&   flag && ! flag2)
+                    derivs_adding_up[i][j] = ADDING_L_L;
+               else
+               if (  derivs_layers[i][j] &&   derivs_sources[i][j] &&   flag && ! flag2)
+                    derivs_adding_up[i][j] = ADDING_B_L;
+               else
+
+
+               if (! derivs_layers[i][j] && ! derivs_sources[i][j] &&   flag &&   flag2)
+                    derivs_adding_up[i][j] = ADDING_U_B;
+               else
+               if (! derivs_layers[i][j] &&   derivs_sources[i][j] &&   flag &&   flag2)
+                    derivs_adding_up[i][j] = ADDING_S_B;
+               else
+               if (  derivs_layers[i][j] && ! derivs_sources[i][j] &&   flag &&   flag2)
+                    derivs_adding_up[i][j] = ADDING_L_B;
+               else
+               if (  derivs_layers[i][j] &&   derivs_sources[i][j] &&   flag &&   flag2)
+                    derivs_adding_up[i][j] = ADDING_B_B;
 #ifdef DEBUG
                else {
-                    eprintf("ERROR: invalid adding layer combination: %d %d %d %d %d\n",
-                            derivs_h[i][j], derivs_h[i+1][j], derivs_d[i][j], flag, flag2);
+                    fprintf(stderr, "ERROR: invalid upward layer adding combination\n");
                     exit(1);
                }
 #endif
-               if (derivs_d[i][j])
-                    flag  = 1;
+               if (derivs_layers[i][j])
+                    flag = 1;
 
-               if (derivs_h[i][j])
+               if (derivs_sources[i][j])
                     flag2 = 1;
           }
      }
 
-     flags_fill_meta2(derivs_u, d->n_layers + 1, d->n_derivs);
+     flags_fill_meta2(derivs_adding_up, d->n_layers + 1, d->n_derivs);
+}
+
+
+
+static void build_derivs_stacks(xrtm_data *d, uchar **derivs_layers, uchar **derivs_stacks) {
+
+     int i;
+     int j;
+
+     int flag;
+
+     for (j = 0; j < d->n_derivs; ++j) {
+          flag = 0;
+
+          derivs_stacks[0][j] = ADDING_U_U;
+          if (derivs_layers[0][j])
+               derivs_stacks[0][j] = ADDING_U_S;
+
+          if (derivs_layers[0][j])
+               flag = 1;
+
+          for (i = 1; i <  d->n_layers + 1; ++i) {
+               if (! derivs_layers[i-1][j] && ! flag)
+                    derivs_stacks[i][j] = ADDING_U_U;
+               else
+               if (  derivs_layers[i-1][j] && ! flag)
+                    derivs_stacks[i][j] = ADDING_U_S;
+               else
+               if (! derivs_layers[i-1][j] &&  flag)
+                    derivs_stacks[i][j] = ADDING_S_S;
+               else
+               if (  derivs_layers[i-1][j] &&  flag)
+                    derivs_stacks[i][j] = ADDING_S_S;
+#ifdef DEBUG
+               else {
+                    fprintf(stderr, "ERROR: invalid layer adding combination\n");
+                    exit(1);
+               }
+#endif
+               if (derivs_layers[i][j])
+                    flag = 1;
+
+          }
+     }
+
+     flags_fill_meta2(derivs_stacks, d->n_layers + 1, d->n_derivs);
 }
 
 
@@ -4606,51 +5296,116 @@ int xrtm_update_varied_layers(xrtm_data *d) {
      stack_data *stack_chain;
 
      if (! (d->options & XRTM_OPTION_CALC_DERIVS)) {
-          eprintf("ERROR: model not initialized for linearized values\n");
+          fprintf(stderr, "ERROR: model not initialized for linearized values\n");
           return XRTM_INT_ERROR;
      }
 
-     if (d->initial_inputs) {
-          if (check_inputs_all_set(d)) {
-               eprintf("ERROR: check_inputs_all_set()\n");
+     if (d->inputs_initialized) {
+          if (check_inputs_initialized(d)) {
+               fprintf(stderr, "ERROR: check_inputs_initialized()\n");
                return XRTM_INT_ERROR;
           }
      }
 
-     build_derivs_h(d, d->derivs_h, 1);
-     build_derivs_s(d, d->derivs_h, d->derivs_s);
-     build_derivs_d(d, d->derivs_h, d->derivs_d);
-     build_derivs_u(d, d->derivs_h, d->derivs_d, d->derivs_u);
 
-     build_derivs_h(d, d->derivs_hm, 0);
-     build_derivs_s(d, d->derivs_hm, d->derivs_sm);
-     build_derivs_d(d, d->derivs_hm, d->derivs_dm);
-     build_derivs_u(d, d->derivs_hm, d->derivs_dm, d->derivs_um);
+     /*-------------------------------------------------------------------------
+      *
+      *-----------------------------------------------------------------------*/
+     build_derivs_layers(d, d->derivs.layers, 1);
+     build_derivs_stacks(d, d->derivs.layers, d->derivs.stacks);
 
+     if (d->options & XRTM_OPTION_SOURCE_SOLAR)
+          build_derivs_beam(d, d->derivs.layers, d->derivs.beam);
+
+     if (d->options & XRTM_OPTION_SOURCE_THERMAL)
+          build_derivs_thermal(d, d->derivs.layers, d->derivs.thermal);
+
+     build_derivs_sources(d, d->derivs.layers, d->derivs.beam, d->derivs.thermal, d->derivs.sources);
+
+     build_derivs_total(d, d->derivs.layers, d->derivs.sources, d->derivs.total);
+
+     build_derivs_adding_down(d, d->derivs.layers, d->derivs.sources, d->derivs.adding_down);
+     build_derivs_adding_up  (d, d->derivs.layers, d->derivs.sources, d->derivs.adding_up);
+
+
+     /*-------------------------------------------------------------------------
+      *
+      *-----------------------------------------------------------------------*/
+     build_derivs_layers(d, d->derivs.layers_m, 0);
+     build_derivs_stacks(d, d->derivs.layers_m, d->derivs.stacks_m);
+
+     if (d->options & XRTM_OPTION_SOURCE_SOLAR)
+          build_derivs_beam(d, d->derivs.layers_m, d->derivs.beam_m);
+
+     if (d->options & XRTM_OPTION_SOURCE_THERMAL)
+          build_derivs_thermal(d, d->derivs.layers_m, d->derivs.thermal_m);
+
+     build_derivs_sources(d, d->derivs.layers_m, d->derivs.beam_m, d->derivs.thermal_m, d->derivs.sources_m);
+
+     build_derivs_total(d, d->derivs.layers_m, d->derivs.sources_m, d->derivs.total_m);
+
+     build_derivs_adding_down(d, d->derivs.layers_m, d->derivs.sources_m, d->derivs.adding_down_m);
+     build_derivs_adding_up  (d, d->derivs.layers_m, d->derivs.sources_m, d->derivs.adding_up_m);
+
+
+     /*-------------------------------------------------------------------------
+      *
+      *-----------------------------------------------------------------------*/
      if (d->options & XRTM_OPTION_REVERSE_DERIVS) {
-          derivs_union_h2(d->n_layers + 1, d->n_derivs, d->derivs_h, d->derivs_h_union);
-          derivs_union_d2(d->n_layers + 1, d->n_derivs, d->derivs_u, d->derivs_u_union);
-          derivs_union_d2(d->n_layers + 1, d->n_derivs, d->derivs_d, d->derivs_d_union);
+          derivs_union_logical_or2(d->n_layers + 1, d->n_derivs, d->derivs.layers,  d->derivs.layers_union);
+/*
+          derivs_union_logical_or2(d->n_layers + 1, d->n_derivs, d->derivs.total,   d->derivs.total_union);
+*/
+          derivs_union_logical_or2(d->n_layers + 1, d->n_derivs, d->derivs.stacks,  d->derivs.stacks_union);
+          derivs_union_logical_or2(d->n_layers + 1, d->n_derivs, d->derivs.sources, d->derivs.sources_union);
+          if (d->options & XRTM_OPTION_SOURCE_SOLAR)
+               derivs_union_logical_or2(d->n_layers + 1, d->n_derivs, d->derivs.beam, d->derivs.beam_union);
 
-          derivs_union_d2(d->n_layers + 1, d->n_derivs, d->derivs_dm, d->derivs_dm_union);
-          derivs_union_d2(d->n_layers + 1, d->n_derivs, d->derivs_um, d->derivs_um_union);
+          if (d->options & XRTM_OPTION_SOURCE_THERMAL)
+               derivs_union_logical_or2(d->n_layers + 1, d->n_derivs, d->derivs.thermal, d->derivs.thermal_union);
+
+          derivs_union_bitwise_or2(d->n_layers + 1, d->n_derivs, d->derivs.adding_up,   d->derivs.adding_up_union);
+          derivs_union_bitwise_or2(d->n_layers + 1, d->n_derivs, d->derivs.adding_down, d->derivs.adding_down_union);
+
+
+          /*--------------------------------------------------------------------
+           *
+           *------------------------------------------------------------------*/
+          derivs_union_logical_or2(d->n_layers + 1, d->n_derivs, d->derivs.layers,      d->derivs.layers_m_union);
+/*
+          derivs_union_logical_or2(d->n_layers + 1, d->n_derivs, d->derivs.total,       d->derivs.total_m_union);
+*/
+          derivs_union_logical_or2(d->n_layers + 1, d->n_derivs, d->derivs.stacks,      d->derivs.stacks_m_union);
+          derivs_union_logical_or2(d->n_layers + 1, d->n_derivs, d->derivs.sources,     d->derivs.sources_m_union);
+          if (d->options & XRTM_OPTION_SOURCE_SOLAR)
+               derivs_union_logical_or2(d->n_layers + 1, d->n_derivs, d->derivs.beam, d->derivs.beam_union);
+
+          if (d->options & XRTM_OPTION_SOURCE_THERMAL)
+               derivs_union_logical_or2(d->n_layers + 1, d->n_derivs, d->derivs.thermal, d->derivs.thermal_m_union);
+
+          derivs_union_bitwise_or2(d->n_layers + 1, d->n_derivs, d->derivs.adding_up_m,   d->derivs.adding_up_m_union);
+          derivs_union_bitwise_or2(d->n_layers + 1, d->n_derivs, d->derivs.adding_down_m, d->derivs.adding_down_m_union);
      }
 
+
+     /*-------------------------------------------------------------------------
+      *
+      *-----------------------------------------------------------------------*/
      if (d->solvers & (XRTM_SOLVERS_INTERNAL & XRTM_SOLVERS_ADDING) && d->options & XRTM_OPTION_STACK_REUSE_ADDING) {
           size = d->n_layers * d->n_layers;
           if (! (stack_chain = (stack_data *) alloc_array1(size, sizeof(stack_data)))) {
-               eprintf("ERROR: alloc_array1(%d, %d)\n", size, sizeof(stack_data));
+               fprintf(stderr, "ERROR: alloc_array1(%ld, %ld)\n", size, sizeof(stack_data));
                return XRTM_INT_ERROR;
           }
 
-          n_stacks = build_stack_chain(d->n_layers, d->n_derivs, d->derivs_h, stack_chain);
+          n_stacks = build_stack_chain(d->n_layers, d->n_derivs, d->derivs.layers, stack_chain);
 
-          if (stack_chain_alloc(d->n_four, d->n_quad_v_x, d->n_derivs, d->n_layers, d->n_stacks, d->stack_chain, n_stacks, stack_chain, d->derivs_h, d->derivs_s, d->derivs_d)) {
-               eprintf("ERROR: stack_chain_alloc()\n");
+          if (stack_chain_alloc(d->n_four, d->n_quad_v_x, d->n_derivs, d->n_layers, d->n_stacks, d->stack_chain, n_stacks, stack_chain, d->derivs.layers, d->derivs.stacks, d->derivs.adding_down)) {
+               fprintf(stderr, "ERROR: stack_chain_alloc()\n");
                return XRTM_INT_ERROR;
           }
 
-          stack_chain_free(d->n_four, d->n_quad_v_x, d->n_derivs, d->n_layers, d->n_stacks, d->stack_chain, d->derivs_h, d->derivs_s, d->derivs_d);
+          stack_chain_free(d->n_four, d->n_quad_v_x, d->n_derivs, d->n_layers, d->n_stacks, d->stack_chain, d->derivs.layers, d->derivs.stacks, d->derivs.adding_down);
 
           free_array1((void * ) d->stack_chain);
 
@@ -4667,7 +5422,7 @@ int xrtm_update_varied_layers(xrtm_data *d) {
                d->stack_grid[d->stack_chain[i].i1][d->stack_chain[i].i2] = &(d->stack_chain[i]);
      }
 
-     d->initial_derivs = 0;
+     d->varied_layers_updated = 0;
 
      return 0;
 }
@@ -4705,10 +5460,39 @@ int xrtm_qw(xrtm_data *d, double *qw) {
 
 
 
+int xrtm_kernel_qx(xrtm_data *d, double *kernel_qx) {
+
+     int i;
+/*
+     SOLUTION_PREPROCESS();
+*/
+     for (i = 0; i < d->n_kernel_quad; ++i)
+          kernel_qx[i] = d->kernel_qx[i];
+
+     return 0;
+}
+
+
+
+int xrtm_kernel_qw(xrtm_data *d, double *kernel_qw) {
+
+     int i;
+/*
+     SOLUTION_PREPROCESS();
+*/
+     for (i = 0; i < d->n_kernel_quad; ++i)
+          kernel_qw[i] = d->kernel_qw[i];
+
+     return 0;
+}
+
+
+
 /*******************************************************************************
  *
  ******************************************************************************/
-/*
+#include "xrtm_pade_rts.h"
+
 int xrtm_pade_params(xrtm_data *d, int i_four, int i_layer, int *pade_s, int *pade_r) {
 
      int flag = 0;
@@ -4723,36 +5507,29 @@ int xrtm_pade_params(xrtm_data *d, int i_four, int i_layer, int *pade_s, int *pa
      double ***r_m_l;
      double ***t_m_l;
 
-     work_data work2;
-
      SOLUTION_PREPROCESS();
 
      CHECK_INDEX_RANGE(i_four,  d->n_four,   "i_four",  "n_four",   XRTM_INT_ERROR);
      CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", XRTM_INT_ERROR);
 
-     work2 = d->work;
-
-     update_opt_props_all(d, work2);
-
      if (get_local_r_t_u_w(d, i_four, i_layer, &r_p, &t_p, &r_m, &t_m, &r_p_l, &t_p_l, &r_m_l, &t_m_l, 1, d->save_tree, &d->work)) {
-          eprintf("ERROR: get_local_r_t_u_w()\n");
+          fprintf(stderr, "ERROR: get_local_r_t_u_w()\n");
           return XRTM_INT_ERROR;
      }
 
      if (d->options & XRTM_OPTION_CALC_DERIVS)
-          flag = flags_or(d->derivs_d, d->n_derivs);
+          flag = flags_or(d->derivs.layers, d->n_derivs) | flags_or(d->derivs.sources, d->n_derivs);
 
      pade_get_s_and_r(r_p, t_p, d->n_quad_v, d->ltau[i_layer], d->n_umus, d->umus, pade_s, pade_r, flag);
 
      return 0;
 }
-*/
+
 
 
 /*******************************************************************************
  *
  ******************************************************************************/
-/*
 int xrtm_local_r_t_u_w
      (xrtm_data *d, int i_four, int i_layer,
       double  **r_p_, double  **t_p_, double  **r_m_, double  **t_m_,
@@ -4776,7 +5553,7 @@ int xrtm_local_r_t_u_w
      CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", XRTM_INT_ERROR);
 
      if (get_local_r_t_u_w(d, i_four, i_layer, &r_p, &t_p, &r_m, &t_m, &r_p_l, &t_p_l, &r_m_l, &t_m_l, 1, d->save_tree, &d->work)) {
-          eprintf("ERROR: get_local_r_t_u_w()\n");
+          fprintf(stderr, "ERROR: get_local_r_t_u_w()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -4788,9 +5565,9 @@ int xrtm_local_r_t_u_w
           dmat_copy(t_m_, t_m, d->n_quad_v_x, d->n_quad_v_x);
      }
 
-     if (d->options & XRTM_OPTION_CALC_DERIVS && flags_or(d->derivs_h[i_layer], d->n_derivs)) {
+     if (d->options & XRTM_OPTION_CALC_DERIVS && flags_or(d->derivs.layers[i_layer], d->n_derivs)) {
           for (i = 0; i < d->n_derivs; ++i) {
-               if (! d->derivs_h[i_layer][i])
+               if (! d->derivs.layers[i_layer][i])
                     continue;
 
                dmat_copy(r_p_l_[i], r_p_l[i], d->n_quad_v_x, d->n_quad_v_x);
@@ -4805,7 +5582,7 @@ int xrtm_local_r_t_u_w
 
      return 0;
 }
-*/
+
 
 
 /*******************************************************************************
@@ -4814,35 +5591,51 @@ int xrtm_local_r_t_u_w
 int xrtm_solution(xrtm_data *d, enum xrtm_solver_mask solver, int solutions, int n_out_phis, double **out_phis, double ****I_p, double ****I_m, double *****I_p_l, double *****I_m_l, double *mean_p, double *mean_m, double **mean_p_l, double **mean_m_l, double *flux_p, double *flux_m, double **flux_p_l, double **flux_m_l, double *flux_div, double **flux_div_l) {
 
      if (! (solver & XRTM_SOLVERS_ALL)) {
-          eprintf("ERROR: invalid value for solver\n");
+          fprintf(stderr, "ERROR: invalid value for solver: %d\n", solver);
           return XRTM_INT_ERROR;
      }
 
      if (! (solver & d->solvers)) {
-          eprintf("ERROR: model not initialized for solver %s\n",
-                  xrtm_solver_name2(solver));
+          fprintf(stderr, "ERROR: model not initialized for solver %s\n",
+                  xrtm_solver_mask_to_name(solver));
           return XRTM_INT_ERROR;
      }
 
      if (! (solutions & XRTM_SOLUTION_ALL)) {
-          eprintf("ERROR: invalid value for solution\n");
+          fprintf(stderr, "ERROR: invalid value for solution\n");
           return XRTM_INT_ERROR;
      }
 
-     if (n_out_phis <= 0) {
-          eprintf("ERROR: invalid value for n_out_phis: %d, must be > zero\n", n_out_phis);
+     if (solutions & XRTM_OUTPUT_RADIANCE && n_out_phis <= 0) {
+          fprintf(stderr, "ERROR: invalid value for n_out_phis: %d, must be > zero for radiance output\n", n_out_phis);
           return XRTM_INT_ERROR;
      }
+
+     if (solutions & XRTM_OUTPUT_RADIANCE_MEAN) {
+          if (check_solvers(solver, 0, 1, "output option", xrtm_output_mask_to_name(XRTM_OUTPUT_RADIANCE_MEAN), XRTM_SOLVER_SINGLE, 0))
+               return XRTM_INT_ERROR;
+     }
+
+     if (solutions & XRTM_OUTPUT_FLUX) {
+          if (check_solvers(solver, 0, 1, "output option", xrtm_output_mask_to_name(XRTM_OUTPUT_FLUX), XRTM_SOLVER_SINGLE, 0))
+               return XRTM_INT_ERROR;
+     }
+
+     if (solutions & XRTM_OUTPUT_FLUX_DIVERGENCE) {
+          if (check_solvers(solver, 0, 1, "output option", xrtm_output_mask_to_name(XRTM_OUTPUT_FLUX_DIVERGENCE), XRTM_SOLVER_SINGLE, 0))
+               return XRTM_INT_ERROR;
+     }
+
 #ifdef INCLUDE_DEV_SOURCE
-     if (check_dev_solvers_solution(d, solver, n_out_phis, out_phis)) {
-          eprintf("ERROR: check_dev_solvers_solution()\n");
+     if (check_dev_solvers_solution(d, solver, solutions, n_out_phis, out_phis)) {
+          fprintf(stderr, "ERROR: check_dev_solvers_solution()\n");
           return XRTM_INT_ERROR;
      }
 #endif
      SOLUTION_PREPROCESS();
 
      if (get_solution(d, solver, solutions, n_out_phis, out_phis, I_p, I_m, I_p_l, I_m_l, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l, d->save_tree, d->work)) {
-          eprintf("ERROR: get_solution()\n");
+          fprintf(stderr, "ERROR: get_solution()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -4857,7 +5650,7 @@ int xrtm_solution(xrtm_data *d, enum xrtm_solver_mask solver, int solutions, int
 int xrtm_radiance(xrtm_data *d, enum xrtm_solver_mask solver, int n_out_phis, double **out_phis, double ****I_p, double ****I_m, double *****I_p_l, double *****I_m_l) {
 
      if (xrtm_solution(d, solver, XRTM_OUTPUT_RADIANCE, n_out_phis, out_phis, I_p, I_m, I_p_l, I_m_l, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)) {
-          eprintf("ERROR: xrtm_solution()\n");
+          fprintf(stderr, "ERROR: xrtm_solution()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -4872,7 +5665,7 @@ int xrtm_radiance(xrtm_data *d, enum xrtm_solver_mask solver, int n_out_phis, do
 int xrtm_mean_radiance(xrtm_data *d, enum xrtm_solver_mask solver, double *mean_p, double *mean_m, double **mean_p_l, double **mean_m_l) {
 
      if (xrtm_solution(d, solver, XRTM_OUTPUT_RADIANCE_MEAN, 0, NULL, NULL, NULL, NULL, NULL, mean_p, mean_m, mean_p_l, mean_m_l, NULL, NULL, NULL, NULL, NULL, NULL)) {
-          eprintf("ERROR: xrtm_solution()\n");
+          fprintf(stderr, "ERROR: xrtm_solution()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -4887,7 +5680,7 @@ int xrtm_mean_radiance(xrtm_data *d, enum xrtm_solver_mask solver, double *mean_
 int xrtm_flux(xrtm_data *d, enum xrtm_solver_mask solver, double *flux_p, double *flux_m, double **flux_p_l, double **flux_m_l) {
 
      if (xrtm_solution(d, solver, XRTM_OUTPUT_FLUX, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, flux_p, flux_m, flux_p_l, flux_m_l, NULL, NULL)) {
-          eprintf("ERROR: xrtm_solution()\n");
+          fprintf(stderr, "ERROR: xrtm_solution()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -4901,8 +5694,12 @@ int xrtm_flux(xrtm_data *d, enum xrtm_solver_mask solver, double *flux_p, double
  ******************************************************************************/
 int xrtm_flux_divergence(xrtm_data *d, enum xrtm_solver_mask solver, double *flux_div, double **flux_div_l) {
 
+     fprintf(stderr, "ERROR: flux_divergence not yet supported as an output\n");
+     return XRTM_INT_ERROR;
+
+
      if (xrtm_solution(d, solver, XRTM_OUTPUT_FLUX_DIVERGENCE, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, flux_div, flux_div_l)) {
-          eprintf("ERROR: xrtm_solution()\n");
+          fprintf(stderr, "ERROR: xrtm_solution()\n");
           return XRTM_INT_ERROR;
      }
 
@@ -4957,7 +5754,7 @@ int xrtm_solution_2(xrtm_data *d, enum xrtm_solver_mask solver, int solutions, i
       *-----------------------------------------------------------------------*/
      if (solver & XRTM_SOLVERS_EXT_EXTERNAL) {
           if (get_solution(d, solver, solutions, n_out_phis, out_phis, I_p, I_m, I_p_l, I_m_l, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l, d->save_tree, work2)) {
-               eprintf("ERROR: get_solution()\n");
+               fprintf(stderr, "ERROR: get_solution()\n");
                return -1;
           }
 
@@ -4969,12 +5766,12 @@ int xrtm_solution_2(xrtm_data *d, enum xrtm_solver_mask solver, int solutions, i
       *
       *-----------------------------------------------------------------------*/
      if (! (d->options & XRTM_OPTION_CALC_DERIVS)) {
-          eprintf("ERROR: xrtm_solution() requires option \"%s\"\n", xrtm_option_name2(XRTM_OPTION_CALC_DERIVS));
+          fprintf(stderr, "ERROR: xrtm_solution() requires option \"%s\"\n", xrtm_option_mask_to_name(XRTM_OPTION_CALC_DERIVS));
           return -1;
      }
 
      if (! (d->options & XRTM_OPTION_REVERSE_DERIVS)) {
-          eprintf("ERROR: xrtm_solution() requires option \"%s\"\n", xrtm_option_name2(XRTM_OPTION_REVERSE_DERIVS));
+          fprintf(stderr, "ERROR: xrtm_solution() requires option \"%s\"\n", xrtm_option_mask_to_name(XRTM_OPTION_REVERSE_DERIVS));
           return -1;
      }
 
@@ -5002,7 +5799,7 @@ int xrtm_solution_2(xrtm_data *d, enum xrtm_solver_mask solver, int solutions, i
      d->n_derivs = 0;
 
      if (get_solution(d, solver, solutions, n_out_phis, out_phis, I_p, I_m, NULL, NULL, mean_p, mean_m, NULL, NULL, flux_p, flux_m, NULL, NULL, flux_div, NULL, d->save_tree, work2)) {
-          eprintf("ERROR: get_solution2()\n");
+          fprintf(stderr, "ERROR: get_solution2()\n");
           return -1;
      }
 
@@ -5117,7 +5914,7 @@ int xrtm_solution_2(xrtm_data *d, enum xrtm_solver_mask solver, int solutions, i
                for (k = 0; k < d->n_derivs; ++k) {
                     a[ii_input][k][jj_input][kk_input][ll_input] += d->ltau0_l [j][k] * d->ltau0_a [j];
 
-                    if (d->derivs_h[j][k]) {
+                    if (d->derivs.layers[j][k]) {
                          a[ii_input][k][jj_input][kk_input][ll_input] += d->omega0_l[j][k] * d->omega0_a[j];
 
                          for (l = 0; l < d->n_elem; ++l) {
@@ -5142,7 +5939,7 @@ int xrtm_solution_2(xrtm_data *d, enum xrtm_solver_mask solver, int solutions, i
 int xrtm_radiance_2(xrtm_data *d, enum xrtm_solver_mask solver, int n_out_phis, double **out_phis, double ****I_p, double ****I_m, double *****I_p_l, double *****I_m_l) {
 
      if (xrtm_solution_2(d, solver, XRTM_OUTPUT_RADIANCE, n_out_phis, out_phis, I_p, I_m, I_p_l, I_m_l, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)) {
-          eprintf("ERROR: xrtm_solution_2()\n");
+          fprintf(stderr, "ERROR: xrtm_solution_2()\n");
           return XRTM_INT_ERROR;
      }
 

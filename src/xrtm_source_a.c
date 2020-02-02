@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -164,7 +164,7 @@ void build_source_vectors_1n_a(int n_quad, int n_stokes, double *qx_v,
 
      for (i = 0; i < n_quad_v; ++i)
           P_q0_mm_a[i] += F_0 * omega / (4. * PI) / qx_v[i] * c_a[i];
-     
+
      for (i = 0; i < n_quad_v; ++i)
           a_a[i] += b_a[i] * P_q0_pm[i];
 

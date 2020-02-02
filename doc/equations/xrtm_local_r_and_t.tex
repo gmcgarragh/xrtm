@@ -1,0 +1,73 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{Local $\mathbf{r}$ and $\mathbf{t}$}
+\label{sec:local_r_and_t}
+
+
+\subsection{Forward}
+\label{sec:local_r_and_t-forward}
+
+\begin{equation}
+\mathbf{r} = -(1 + \delta_{0,m}) \frac{\omega}{4}\mathbf{M}^{-1}\mathbf{P}^{-}\mathbf{W}
+\label{eq:local_r_and_t-forward-r}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = -\mathbf{M}^{-1} + (1 + \delta_{0,m}) \frac{\omega}{4}\mathbf{M}^{-1}\mathbf{P}^{+}\mathbf{W}
+\label{eq:local_r_and_t-forward-t}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Tangent linear}
+\label{sec:local_r_and_t-tangent_linear}
+
+\begin{equation}
+\mathcal{L}(\mathbf{r}) = -(1 + \delta_{0,m}) \frac{1}{4}\mathbf{M}^{-1}\left[\mathcal{L}(\omega)\mathbf{P}^{-} + \omega\mathcal{L}(\mathbf{P}^{-})\right]\mathbf{W}
+\label{eq:local_r_and_t-tangent_linear-u}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{t}) = (1 + \delta_{0,m}) \frac{1}{4}\mathbf{M}^{-1}\left[\mathcal{L}(\omega)\mathbf{P}^{+} + \omega\mathcal{L}(\mathbf{P}^{+})\right]\mathbf{W}
+\label{eq:local_r_and_t-tangent_linear-w}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Adjoint of tangent linear}
+\label{sec:local_r_and_t-adjoint_of_tangent_linear}
+
+\begin{equation}
+\mathbf{t} = -(1 + \delta_{0,m}) \frac{1}{4}\mathbf{M}^{-1}\mathcal{A}(\mathbf{r})\mathbf{W}
+\label{eq:local_r_and_t-adjoint_of_tangent_linear-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\omega) = \sum^{n}_{i} \sum^{n}_{j} \mathbf{t}_{ij} (\mathbf{P}^{-})_{ij}
+\label{eq:local_r_and_t-adjoint_of_tangent_linear-omega_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{P}^{-}) = \omega \mathbf{t}
+\label{eq:local_r_and_t-adjoint_of_tangent_linear-p_m_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = -(1 + \delta_{0,m}) \frac{1}{4}\mathbf{M}^{-1}\mathcal{A}(\mathbf{t})\mathbf{W}
+\label{eq:local_r_and_t-adjoint_of_tangent_linear-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\omega) = \mathcal{A}(\omega) + \sum^{n}_{i} \sum^{n}_{j} \mathbf{t}_{ij} (\mathbf{P}^{+})_{ij}
+\label{eq:local_r_and_t-adjoint_of_tangent_linear-omega_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{P}^{+}) = \omega \mathbf{t}
+\label{eq:local_r_and_t-adjoint_of_tangent_linear-p_p_a}
+\end{equation}

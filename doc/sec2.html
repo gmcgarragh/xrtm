@@ -35,7 +35,7 @@
 </a>
 
 <div class="p"><!----></div>
-The section discusses, first, the process of building (compiling) XRTM including the core library, the language interfaces, the example programs, and the utility programs.  Then the compilation details of using the XRTM core library and the appropriate language interface in your programs is outlined.
+This section discusses, first, the process of building (compiling) XRTM including the core library, the language interfaces, the example programs, and the utility programs.  Then the compilation details of using the XRTM core library and the appropriate language interface in your programs is outlined.
 
 <div class="p"><!----></div>
      <a id="tth_sEc2.1"></a><h3>
@@ -50,13 +50,13 @@ The section discusses, first, the process of building (compiling) XRTM including
 </a>
 
 <div class="p"><!----></div>
-The standard build system uses GNU Make (other versions of UNIX Make may work but are not tested).  This should work on Linux, Unix, Mac OS, and on Windows using the either <a href="http://www.cygwin.com/">Cygwin</a> or <a href="http://www.mingw.org/">MinGW (Minimalist GNU for Windows)</a>.
+The standard build system uses GNU Make (other versions of UNIX Make may work but are not tested).  This should work on Linux, Unix, Mac OS, and on Windows using either <a href="http://www.cygwin.com/">Cygwin</a> or <a href="http://www.mingw.org/">MinGW (Minimalist GNU for Windows)</a>.
 
 <div class="p"><!----></div>
-The first step is to configure the build for your environment.  This includes setting the compiler command and the associated options and setting the appropriate paths to your BLAS and LAPACK libraries.  Settings are contained in the file <tt>make.inc</tt> in the XRTM base directory. 
+The first step is to configure the build for your environment.  This includes setting the compiler commands and the associated options and setting the appropriate paths to external libraries.  Settings are contained in the file <tt>make.inc</tt> in the XRTM base directory.
 
 <div class="p"><!----></div>
-Compiler and associated options are contained within the section identified as "Compiler and linker settings".  The commands for the compilers to use are represented by the variables <tt>CC</tt>, <tt>CXX</tt>, <tt>F77</tt>, and <tt>F90</tt>, for the C, C++, Fortran 77, and Fortran 90 compilers, respectively, and the associated options are represented by the variables <tt>CCFLAGS</tt>, <tt>CXXFLAGS</tt>, <tt>F77FLAGS</tt>, and <tt>F90FLAGS</tt>.  The default settings are appropriate for GCC (GNU Compiler Collection) versions 4.2 and greater and should not have to be modified unless other compilers are being used.  Note that XRTM is entirely C89/90 compliant except for the use of complex types.  Therefore, the C compiler must be C99 compliant.  As an alternative all of XRTM's C code may be built with a C++ compiler in which case the complex support is through the C++ standard library's complex class.
+Compiler and associated options are contained within the section identified as "Compiler and linker settings".  The commands for the compilers to use are represented by the variables <tt>CC</tt>, <tt>CXX</tt>, <tt>F77</tt>, and <tt>F90</tt>, for the C, C++, Fortran 77, and Fortran 90 compilers, respectively, and the associated options are represented by the variables <tt>CCFLAGS</tt>, <tt>CXXFLAGS</tt>, <tt>F77FLAGS</tt>, and <tt>F90FLAGS</tt>.  The default settings are appropriate for GCC (GNU Compiler Collection) versions 4.2 and greater and should not have to be modified unless other compilers are being used.  Note that XRTM is entirely C89/90 compliant except for the use of complex types.  Therefore, the C compiler must be C99 compliant.  As an alternative, all of XRTM's C code may be built with a C++ compiler in which case the complex support is through the C++ standard library's complex class.
 
 <div class="p"><!----></div>
 The only external libraries that XRTM currently depends on are BLAS (Basic Linear Algebra Subprograms) and LAPACK (Linear Algebra PACKage).  Reference version of both libraries may be obtained from <a href="http://www.netlib.org/"><tt>http://www.netlib.org/</tt></a> but it is highly recommend, at least for BLAS, that libraries optimized for your platform are used instead.  The performance benefits are usually significant.  Optimized versions of BLAS include Intel Math Kernel Library (MKL), AMD Core Math Library (ACML), Automatically Tuned Linear Algebra Software (ATLAS), and GotoBLAS.  
@@ -90,7 +90,7 @@ XRTM may also be built on Windows using Visual Studio along with Intel's Visual 
 </a>
 
 <div class="p"><!----></div>
-To use XRTM in your own code either have to include/use the appropriate header/module file and link with the appropriate XRTM library files and BLAS/LAPACK library files.
+To use XRTM in your own code you have to include/use the appropriate header/module file and link with the appropriate XRTM library files and any required external library files.
 
 <div class="p"><!----></div>
       <a id="tth_sEc2.2.1"></a><h4>
@@ -99,7 +99,7 @@ To use XRTM in your own code either have to include/use the appropriate header/m
 </a>
 
 <div class="p"><!----></div>
-The C interface is part of the core library in the <tt>src/</tt> directory.  To use the C interface your code must include the following header file
+The C interface is part of the core library in the <tt>src/</tt> directory.  To use the C interface your code must include the following header file:
 
 <pre>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src/xrtm_interface.h
@@ -145,7 +145,7 @@ where the variable <tt>$(XRTM_HOME)</tt> is the location of the XRTM base direct
 </a>
 
 <div class="p"><!----></div>
-To use the C++ interface your code must include the following header file
+To use the C++ interface your code must include the following header file:
 
 <pre>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interfaces/xrtm_int_cpp.h
@@ -177,7 +177,7 @@ where the variable <tt>$(SolutionDir)</tt> is <tt>msvs_2005</tt>, <tt>msvs_2008<
 </a>
 
 <div class="p"><!----></div>
-To use the Fortran 77 interface your code must include the following file
+To use the Fortran 77 interface your code must include the following file:
 
 <pre>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interfaces/xrtm_int_f77.inc

@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 1998-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 1998-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -32,24 +32,28 @@ static uchar powers_of_two[] = {1, 2, 4, 8, 16, 32, 64, 128};
 
 
 /*******************************************************************************
- * 
+ *
  ******************************************************************************/
+#define is_complex_ 0
 #define prefix_ d
-#define cprefix_ f
 #define type_ double
-#define xreal(x) (x)
+#define xreal_(x) (x)
+#define xabs_ fabs
 #include "gmatrix.h"
+#undef is_complex_
 #undef prefix_
-#undef cprefix_
 #undef type_
-#undef xreal
+#undef xreal_
+#undef xabs_
 
+#define is_complex_ 1
 #define prefix_ z
-#define cprefix_ c
 #define type_ dcomplex
-#define xreal(x) (creal(x))
+#define xreal_(x) (creal(x))
+#define xabs_ cabs
 #include "gmatrix.h"
+#undef is_complex_
 #undef prefix_
-#undef cprefix_
 #undef type_
-#undef xreal
+#undef xreal_
+#undef xabs_

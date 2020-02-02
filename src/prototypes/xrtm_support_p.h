@@ -1,10 +1,20 @@
 /* xrtm_support.c */
-int kernel_code(char *name);
-const char *kernel_name(enum xrtm_kernel_type code);
-int eigen_solver_gen_real_code(char *name);
-const char *eigen_solver_gen_real_name(enum eigen_solver_gen_real_type code);
-int eigen_solver_gen_complex_code(char *name);
-const char *eigen_solver_gen_complex_name(enum eigen_solver_gen_complex_type code);
+int eigen_solver_gen_real_n(void);
+int eigen_solver_gen_real_max_name_length(void);
+const char *eigen_solver_gen_real_index_to_name(int index);
+int eigen_solver_gen_real_name_to_index(const char *name);
+enum eigen_solver_gen_real_type eigen_solver_gen_real_index_to_value(int index);
+int eigen_solver_gen_real_value_to_index(enum eigen_solver_gen_real_type type);
+enum eigen_solver_gen_real_type eigen_solver_gen_real_name_to_value(const char *name);
+const char *eigen_solver_gen_real_value_to_name(enum eigen_solver_gen_real_type type);
+int eigen_solver_gen_complex_n(void);
+int eigen_solver_gen_complex_max_name_length(void);
+const char *eigen_solver_gen_complex_index_to_name(int index);
+int eigen_solver_gen_complex_name_to_index(const char *name);
+enum eigen_solver_gen_complex_type eigen_solver_gen_complex_index_to_value(int index);
+int eigen_solver_gen_complex_value_to_index(enum eigen_solver_gen_complex_type type);
+enum eigen_solver_gen_complex_type eigen_solver_gen_complex_name_to_value(const char *name);
+const char *eigen_solver_gen_complex_value_to_name(enum eigen_solver_gen_complex_type type);
 void *jalloc_array1(jmp_buf env, long m, int size);
 void *jalloc_array2(jmp_buf env, long m, long n, int size);
 void *jalloc_array3(jmp_buf env, long m, long n, long o, int size);

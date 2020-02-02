@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 1998-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 1998-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -100,7 +100,7 @@ struct aatree_node {
 };
 
 
-aatree *aatree_create();
+aatree *aatree_create(void);
 void aatree_empty(aatree *);
 void aatree_free(aatree *);
 void aatree_set_comp(aatree *, int (*)(const void *, const void *));
@@ -138,14 +138,14 @@ static aatpos aatree_null_node = {
 };
 
 
-aatree *aatree_create() {
+aatree *aatree_create(void) {
 
      aatree *tree;
 
      tree = (aatree *) malloc(sizeof(aatree));
 
      if (tree == NULL)
-          eprintf("Memory allocation error: aatree_create()");
+          fprintf(stderr, "Memory allocation error: aatree_create()");
 
      tree->comp  = NULL;
      tree->free_ = NULL;
@@ -337,7 +337,7 @@ static aatpos *aatpos_insert_type(aatpos **tpos_, aatpos *parent, GSTRUCT_TYPE v
           tpos = (struct aatree_node *) malloc(sizeof(struct aatree_node));
 
           if (tpos == NULL)
-               eprintf("Memory allocation error: aatree_insert_type()");
+               fprintf(stderr, "Memory allocation error: aatree_insert_type()");
           else {
                tpos->value  = value;
                tpos->level  = 1;
@@ -388,7 +388,7 @@ static aatpos *aatpos_insert_comp(aatpos **tpos_, aatpos *parent, GSTRUCT_TYPE v
           tpos = (struct aatree_node *) malloc(sizeof(struct aatree_node));
 
           if (tpos == NULL)
-               eprintf("Memory allocation error: aatree_insert_comp()");
+               fprintf(stderr, "Memory allocation error: aatree_insert_comp()");
           else {
                tpos->value  = value;
                tpos->level  = 1;

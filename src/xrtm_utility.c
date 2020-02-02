@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -63,7 +63,7 @@ uchar *flags_alloc(int n) {
      a = (uchar *) malloc(sizeof(flags_meta_data) +
          n * sizeof(uchar)) + sizeof(flags_meta_data);
      if (a == NULL) {
-          eprintf("ERROR: memory allocation failed\n");
+          fprintf(stderr, "ERROR: memory allocation failed\n");
           return NULL;
      }
 
@@ -79,6 +79,26 @@ void flags_free(uchar *a) {
 
 
 
+void flags_init(uchar *a, int n, uchar x) {
+
+     int i;
+
+     for (i = 0; i < n; ++i)
+          a[i] = x;
+}
+
+
+
+void flags_copy(uchar *b, uchar *a, int n) {
+
+     int i;
+
+     for (i = 0; i < n; ++i)
+          b[i] = a[i];
+}
+
+
+
 uchar **flags_alloc2(int m, int n) {
 
      int i;
@@ -89,14 +109,14 @@ uchar **flags_alloc2(int m, int n) {
          ((uchar *) malloc(sizeof(flags_meta_data) +
          m * sizeof(uchar *)) + sizeof(flags_meta_data));
      if (a == NULL) {
-          eprintf("ERROR: memory allocation failed\n");
+          fprintf(stderr, "ERROR: memory allocation failed\n");
           return NULL;
      }
 
      a[0] = (uchar *) malloc(m * (sizeof(flags_meta_data) +
             n * sizeof(uchar))) + sizeof(flags_meta_data);
      if (a[0] == NULL) {
-          eprintf("ERROR: memory allocation failed\n");
+          fprintf(stderr, "ERROR: memory allocation failed\n");
           return NULL;
      }
 
@@ -112,6 +132,34 @@ void flags_free2(uchar **a) {
 
      free((uchar *) a[0] - sizeof(flags_meta_data));
      free((uchar *) a    - sizeof(flags_meta_data));
+}
+
+
+
+void flags_init2(uchar **a, int m, int n, uchar x) {
+
+     int i;
+     int j;
+
+     for (i = 0; i < m; ++i) {
+          for (j = 0; j < n; ++j) {
+               a[i][j] = x;
+          }
+     }
+}
+
+
+
+void flags_copy2(uchar **b, uchar **a, int m, int n) {
+
+     int i;
+     int j;
+
+     for (i = 0; i < m; ++i) {
+          for (j = 0; j < n; ++j) {
+               b[i][j] = a[i][j];
+          }
+     }
 }
 
 
@@ -240,13 +288,13 @@ void derivs_merge_s(int n_derivs, uchar *derivs_s1, uchar *derivs_sm, uchar *der
                derivs_s[i] = ADDING_U_U;
           else
           if (! derivs_s1[i] &&   derivs_sm[i])
-               derivs_s[i] = ADDING_U_P;
+               derivs_s[i] = ADDING_U_S;
           else
           if (  derivs_s1[i] &&   derivs_sm[i])
-               derivs_s[i] = ADDING_P_P;
+               derivs_s[i] = ADDING_S_S;
 #ifdef DEBUG
           else {
-               eprintf("ERROR: invalid layer adding combination: %d %d\n",
+               fprintf(stderr, "ERROR: invalid layer adding combination: %d %d\n",
                        derivs_s1[i], derivs_sm[i]);
                exit(1);
           }
@@ -258,38 +306,38 @@ void derivs_merge_s(int n_derivs, uchar *derivs_s1, uchar *derivs_sm, uchar *der
 
 
 
-uchar derivs_union_d(int n_derivs, uchar *derivs_d1) {
+uchar derivs_union_bitwise_or(int n_derivs, uchar *derivs1) {
 
      int i;
 
-     uchar derivs_d2;
+     uchar derivs2;
 
-     derivs_d2 = ADDING_U_U;
+     derivs2 = ADDING_U_U;
 
      for (i = 0; i < n_derivs; ++i)
-          derivs_d2 |= derivs_d1[i];
+          derivs2 |= derivs1[i];
 
-     return derivs_d2;
+     return derivs2;
 }
 
 
 
-void derivs_union_h2(int n_layers, int n_derivs, uchar **derivs_h1, uchar *derivs_h2) {
+void derivs_union_logical_or2(int n_layers, int n_derivs, uchar **derivs1, uchar *derivs2) {
 
      int i;
 
      for (i = 0; i < n_layers; ++i)
-          derivs_h2[i] = flags_or(derivs_h1[i], n_derivs);
+          derivs2[i] = flags_or(derivs1[i], n_derivs);
 }
 
 
 
-void derivs_union_d2(int n_layers, int n_derivs, uchar **derivs_d1, uchar *derivs_d2) {
+void derivs_union_bitwise_or2(int n_layers, int n_derivs, uchar **derivs1, uchar *derivs2) {
 
      int i;
 
      for (i = 0; i < n_layers; ++i)
-          derivs_d2[i] = derivs_union_d(n_derivs, derivs_d1[i]);
+          derivs2[i] = derivs_union_bitwise_or(n_derivs, derivs1[i]);
 }
 
 
@@ -354,7 +402,7 @@ int check_phase_vecs_norm(int n_quad, int n_stokes,
      }
 
      if (fabs(2. - a) > 10.e-8) {
-          eprintf("ERROR: phase vectors not normalized: %.16f != 2.0\n", a);
+          fprintf(stderr, "ERROR: phase vectors not normalized: %.16f != 2.0\n", a);
           return 1;
      }
 
@@ -384,7 +432,7 @@ int check_phase_mats_norm(int n_quad1, int n_quad2, int n_stokes,
           }
 
           if (fabs(2. - a) > 10.e-8) {
-               eprintf("ERROR: phase matrices not normalized: %.16f != 2.0\n", a);
+               fprintf(stderr, "ERROR: phase matrices not normalized: %.16f != 2.0\n", a);
                return 1;
           }
 
@@ -413,7 +461,7 @@ int check_phase_vecs_norm_l(int n_quad, int n_stokes,
      }
 
      if (fabs(0. - a) > 10.e-8) {
-          eprintf("ERROR: integration of the columns of the derivatives of "
+          fprintf(stderr, "ERROR: integration of the columns of the derivatives of "
                  "the phase matrices not equal to zero: %.16f != 0.0\n", a);
           return 1;
      }
@@ -444,7 +492,7 @@ int check_phase_mats_norm_l(int n_quad1, int n_quad2, int n_stokes,
           }
 
           if (fabs(0. - a) > 10.e-8) {
-               eprintf("ERROR: integration of the columns of the derivatives of "
+               fprintf(stderr, "ERROR: integration of the columns of the derivatives of "
                       "the phase matrices not equal to zero: %.16f != 0.0\n", a);
                return 1;
           }
@@ -477,7 +525,7 @@ int check_R_and_T_norm(int n_quad, int n_stokes, double **R, double **T) {
           }
 
           if (fabs(1. - a) > 10.e-8) {
-               eprintf("ERROR: R and T not normalized: %.16f != 1.0\n", a);
+               fprintf(stderr, "ERROR: R and T not normalized: %.16f != 1.0\n", a);
                return 1;
           }
 
@@ -509,7 +557,7 @@ int check_R_and_T_norm_l(int n_quad, int n_stokes, double **R_l, double **T_l) {
           }
 
           if (fabs(0. - a) > 10.e-8) {
-               eprintf("ERROR: summation of the columns of the derivatives of "
+               fprintf(stderr, "ERROR: summation of the columns of the derivatives of "
                       "the R and T matrics not equal to zero: %.16f != 0.0\n", a);
                return 1;
           }
@@ -542,7 +590,7 @@ int check_conserve_energy(int n_quad, int n_stokes, double *qx,
      a = (2. * PI * a + F_0 * mu_0 * btran) / mu_0;
 
      if (fabs(1. - a) > 10.e-8) {
-          eprintf("ERROR: model does not conserve energy: %.16f != 1.0\n", a);
+          fprintf(stderr, "ERROR: model does not conserve energy: %.16f != 1.0\n", a);
           return 1;
      }
 
@@ -571,7 +619,7 @@ int check_conserve_energy_l(int n_quad, int n_stokes, double *qx,
      a = (2. * PI * a + F_0 * mu_0 * btran_l) / mu_0;
 
      if (fabs(0. - a) > 10.e-8) {
-          eprintf("ERROR: model does not conserve energy: %.16f != 1.0\n", a);
+          fprintf(stderr, "ERROR: model does not conserve energy: %.16f != 1.0\n", a);
           return 1;
      }
 
@@ -778,7 +826,7 @@ void delta_m_ltau_l(int n_derivs, double f, double *f_l,
 
 void delta_m(int n_coef, int n_derivs, double f, double *f_l,
              double **coef, double **coef_prime,
-             double omega, double *omega_prime,          
+             double omega, double *omega_prime,
              double ltau, double *ltau_prime,
              double ***coef_l, double ***coef_prime_l,
              double *omega_l, double *omega_prime_l,
@@ -861,7 +909,10 @@ void chapman_functions(int n_layers, double mu_0, double z0, double *z, double *
           for (j = 0; j <= i; ++j) {
                r1 = z0 + z[j];
                r2 = z0 + z[j+1];
-               chap[i][j] = (sqrt(r1*r1 - b) - sqrt(r2*r2 - b)) / (r1 - r2);
+               if (r1 == r2)
+                    chap[i][j] = chap[i][j - 1];
+               else
+                    chap[i][j] = (sqrt(r1*r1 - b) - sqrt(r2*r2 - b)) / (r1 - r2);
           }
      }
 }
@@ -872,7 +923,7 @@ void chapman_functions(int n_layers, double mu_0, double z0, double *z, double *
  *
  ******************************************************************************/
 static void build_local_r_or_t_mat(int i_four, int n_quad, int n_derivs,
-                                   double *v1, double *qw_v, double a, 
+                                   double *v1, double *qw_v, double a,
                                    double omega, double *omega_l,
                                    double **P_m, double ***P_m_l,
                                    double **r, double ***r_l, uchar *derivs,
@@ -966,7 +1017,7 @@ void build_local_r_and_t(int i_four, int n_quad, int n_derivs,
 
      v1 = get_work1(&work, WORK_DX);
 
-     dvec_inv(qx_v, v1, n_quad);
+     dvec_inv_elem(qx_v, v1, n_quad);
 
      build_local_r_or_t_mat(i_four, n_quad, n_derivs, v1, qw_v, -1.,
                             omega, omega_l, P_m, P_m_l, r, r_l, derivs, work);
@@ -1349,9 +1400,11 @@ void dmat_mul_D_A2_2(int n_quad1, int n_stokes1, int n_quad2, int n_stokes2, dou
 void no_scatter_r_t_s(int n_quad, int n_derivs,
                       double *qx_v, double *qw_v, double ltau, double *ltau_l,
                       double **R_p, double **T_p, double **R_m, double **T_m,
-                      double *S_p, double *S_m,
+                      double *S_p, double *S_m, double *Sl_p, double *Sl_m,
                       double ***R_p_l, double ***T_p_l, double ***R_m_l, double ***T_m_l,
-                      double **S_p_l, double **S_m_l, uchar *derivs_h, uchar *derivs_p) {
+                      double **S_p_l, double **S_m_l, double **Sl_p_l, double **Sl_m_l,
+                      int solar, int thermal,
+                      uchar *derivs_layers, uchar *derivs_beam, uchar *derivs_thermal) {
      int i;
      int j;
 
@@ -1359,15 +1412,21 @@ void no_scatter_r_t_s(int n_quad, int n_derivs,
      dmat_zero(T_p, n_quad, n_quad);
      dmat_zero(R_m, n_quad, n_quad);
      dmat_zero(T_m, n_quad, n_quad);
-     dvec_zero(S_p, n_quad);
-     dvec_zero(S_m, n_quad);
+     if (solar) {
+          dvec_zero(S_p, n_quad);
+          dvec_zero(S_m, n_quad);
+     }
+     if (thermal) {
+          fprintf(stderr, "ERROR: no_scatter_r_t_s() does not support thermal sources yet\n");
+          exit(1);
+     }
 
      for (i = 0; i < n_quad; ++i)
           T_p[i][i] = T_m[i][i] = exp(-ltau / qx_v[i]);
 
-     if (flags_or(derivs_h, n_derivs)) {
+     if (flags_or(derivs_layers, n_derivs)) {
           for (i = 0; i < n_derivs; ++i) {
-               if (! derivs_h[i])
+               if (! derivs_layers[i])
                     continue;
 
                dmat_zero(R_p_l[i], n_quad, n_quad);
@@ -1380,13 +1439,20 @@ void no_scatter_r_t_s(int n_quad, int n_derivs,
           }
      }
 
-     if (flags_or(derivs_p, n_derivs)) {
+     if (solar && flags_or(derivs_beam, n_derivs)) {
           for (i = 0; i < n_derivs; ++i) {
-               if (! derivs_p[i])
+               if (! derivs_beam[i])
                     continue;
 
                dvec_zero(S_p_l[i], n_quad);
                dvec_zero(S_m_l[i], n_quad);
+          }
+     }
+
+     if (thermal && flags_or(derivs_thermal, n_derivs)) {
+          for (i = 0; i < n_derivs; ++i) {
+               if (! derivs_thermal[i])
+                    continue;
           }
      }
 }

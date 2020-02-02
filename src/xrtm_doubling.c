@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -30,17 +30,15 @@
 #else
 void layer_double(double **R, double **T,
                   double *Se_m, double *Se_p, double *Sl_m, double *Sl_p,
+                  double *L_m, double *L_p,
                   int n, double atran, double lin_fac,
-                  int flag1, int flag2, int flag3, work_data work) {
+                  int solar, int thermal, int initialize, work_data work) {
 
      int *i1;
 
      double *v1;
      double *v2;
      double *v3;
-
-     double *a_p;
-     double *a_m;
 
      double **w1;
      double **w2;
@@ -51,31 +49,28 @@ void layer_double(double **R, double **T,
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     i1  = get_work1(&work, WORK_IX);
+     i1 = get_work1(&work, WORK_IX);
 
-     v1  = get_work1(&work, WORK_DX);
-     v2  = get_work1(&work, WORK_DX);
-     v3  = get_work1(&work, WORK_DX);
+     v1 = get_work1(&work, WORK_DX);
+     v2 = get_work1(&work, WORK_DX);
+     v3 = get_work1(&work, WORK_DX);
 
-     a_p = get_work1(&work, WORK_DX);
-     a_m = get_work1(&work, WORK_DX);
+     w1 = get_work1(&work, WORK_DXX);
+     w2 = get_work1(&work, WORK_DXX);
 
-     w1  = get_work1(&work, WORK_DXX);
-     w2  = get_work1(&work, WORK_DXX);
-
-     A   = get_work1(&work, WORK_DXX);
+     A  = get_work1(&work, WORK_DXX);
 
 
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     /* LU of (E - Rn * Rn)^T */
+     /* LU of (E - R * R)^T */
      dmat_mul(R, R, n, n, n, w1);
      dmat_i_sub(w1, w1, n);
      dmat_trans(w1, w2, n, n);
      dmat_getrf(w2, n, n, i1);
 
-     /* An = Tn * Pn */
+     /* A = T * P */
      dmat_copy(A, T, n, n);
      dmat_getrs(w2, A, n, n, i1);
 
@@ -83,23 +78,23 @@ void layer_double(double **R, double **T,
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     if (flag1) {
-          /* v1 = An * (Rn * Snm + Snp * t) */
+     if (solar) {
+          /* v1 = A * (R * Se_m + Se_p * t) */
           dm_v_mul(R, Se_m, n, n, v1);
           dvec_scale(atran, Se_p, v2, n);
           dvec_add(v1, v2, v2, n);
           dm_v_mul(A, v2, n, n, v1);
 
-          /* v2 = An * (Rn * Snp * t + Snm) */
+          /* v2 = A * (R * Se_p * t + Se_m) */
           dm_v_mul(R, Se_p, n, n, v2);
           dvec_scale(atran, v2, v2, n);
           dvec_add(v2, Se_m, v3, n);
           dm_v_mul(A, v3, n, n, v2);
 
-          /* Snp = v1 + Snp */
+          /* Se_p = v1 + Se_p */
           dvec_add(v1, Se_p, Se_p, n);
 
-          /* Snm = v2 + Snm * t */
+          /* Se_m = v2 + Se_m * t */
           dvec_scale(atran, Se_m, Se_m, n);
           dvec_add(v2, Se_m, Se_m, n);
      }
@@ -108,62 +103,65 @@ void layer_double(double **R, double **T,
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     if (flag2) {
-          if (flag3) {
-               dvec_copy(a_p, Sl_p, n);
-               dvec_copy(a_m, Sl_m, n);
+     if (thermal) {
+          if (initialize) {
+               dvec_copy(L_p, Sl_p, n);
+               dvec_copy(L_m, Sl_m, n);
           }
 
-          /* v1 = An * (Rn * Snm + Snp + anp * f) */
+          /* v1 = A * (R * Sl_m + Sl_p + L_p * f) */
           dm_v_mul(R, Sl_m, n, n, v1);
           dvec_add(v1, Sl_p, v1, n);
-          dvec_scale(lin_fac, a_p, v2, n);
+          dvec_scale(lin_fac, L_p, v2, n);
           dvec_add(v1, v2, v2, n);
           dm_v_mul(A, v2, n, n, v1);
 
-          /* v2 = An * (Rn * (Snp + anp * f) + Snm) */
-          dvec_scale(lin_fac, a_p, v2, n);
+          /* v2 = A * (R * (Sl_p + L_p * f) + Sl_m) */
+          dvec_scale(lin_fac, L_p, v2, n);
           dvec_add(Sl_p, v2, v2, n);
           dm_v_mul(R, v2, n, n, v3);
           dvec_add(v3, Sl_m, v3, n);
           dm_v_mul(A, v3, n, n, v2);
 
-          /* Snp = v1 + Snp */
+          /* Sl_p = v1 + Sl_p */
           dvec_add(v1, Sl_p, Sl_p, n);
 
-          /* Snm = v2 + Snm + a_m * f */
+          /* Sl_m = v2 + Sl_m + L_m * f */
           dvec_add(v2, Sl_m, Sl_m, n);
-          dvec_scale(lin_fac, a_m, v1, n);
+          dvec_scale(lin_fac, L_m, v1, n);
           dvec_add(Sl_m, v1, Sl_m, n);
 
 
-          /* v1 = An * (Rn * anm + anp) */
-          dm_v_mul(R, a_m, n, n, v1);
-          dvec_add(v1, a_p, v2, n);
+          /* v1 = A * (R * L_m + L_p) */
+          dm_v_mul(R, L_m, n, n, v1);
+          dvec_add(v1, L_p, v2, n);
           dm_v_mul(A, v2, n, n, v1);
 
-          /* v2 = An * (Rn * anp + anm) */
-          dm_v_mul(R, a_p, n, n, v2);
-          dvec_add(v2, a_m, v3, n);
+          /* v2 = A * (R * L_p + L_m) */
+          dm_v_mul(R, L_p, n, n, v2);
+          dvec_add(v2, L_m, v3, n);
           dm_v_mul(A, v3, n, n, v2);
 
-          /* anp = v1 + anp */
-          dvec_add(v1, a_p, a_p, n);
+          /* L_p = v1 + L_p */
+          dvec_add(v1, L_p, L_p, n);
 
-          /* anm = v2 + anm */
-          dvec_add(v2, a_m, a_m, n);
+          /* L_m = v2 + L_m */
+          dvec_add(v2, L_m, L_m, n);
      }
 
 
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     /* R(n+1) = Rn + An * Bn */
+     /* R = R + A * B */
      dmat_mul(A, R, n, n, n, w1);
+/*
      dmat_mul(w1, T, n, n, n, w2);
      dmat_add(R, w2, R, n, n);
+*/
+     dmat_gxgxmx(0, w1, 0, T, 1., R, 1., n, n, n);
 
-     /* T(n+1) = An * Tn */
+     /* T = A * T */
      dmat_mul(A, T, n, n, n, w1);
      dmat_copy(T, w1, n, n);
 }
@@ -173,8 +171,11 @@ void layer_double(double **R, double **T,
 /*******************************************************************************
  *
  ******************************************************************************/
-void layer_double_s(double **R, double **T, double *S_m, double *S_p,
-                    int n, double atran, work_data work) {
+void layer_double_s(double **R, double **T,
+                    double *Se_m, double *Se_p, double *Sl_m, double *Sl_p,
+                    double *L_m, double *L_p,
+                    int n, double atran, double lin_fac,
+                    int solar, int thermal, int initialize, work_data work) {
 
      int *i1;
 
@@ -187,6 +188,10 @@ void layer_double_s(double **R, double **T, double *S_m, double *S_p,
 
      double **A;
 
+
+     /*-------------------------------------------------------------------------
+      *
+      *-----------------------------------------------------------------------*/
      i1 = get_work1(&work, WORK_IX);
 
      v1 = get_work1(&work, WORK_DX);
@@ -196,57 +201,79 @@ void layer_double_s(double **R, double **T, double *S_m, double *S_p,
      w1 = get_work1(&work, WORK_DXX);
      w2 = get_work1(&work, WORK_DXX);
 
-     A = get_work1(&work, WORK_DXX);
+     A  = get_work1(&work, WORK_DXX);
+
+
+     /*-------------------------------------------------------------------------
+      *
+      *-----------------------------------------------------------------------*/
 if (1) {
-     /* LU of (E - Rn * Rn)^T */
+     /* LU of (E - R * R)^T */
      dsym_mul(R, R, n, n, w1, 1);
      dmat_i_sub(w1, w2, n);
      dmat_trans(w2, w1, n, n);
      dmat_getrf(w1, n, n, i1);
 
-     /* An = Tn * Pn */
+     /* A = T * P */
      dmat_copy(A, T, n, n);
      dmat_getrs(w1, A, n, n, i1);
 }
 else {
-     /* LU of (E - Rn * Rn)^T */
+     /* LU of (E - R * R)^T */
      dsym_mul(R, R, n, n, w1, 1);
      dmat_i_sub(w1, w1, n);
      dmat_potrf(w1, n);
 
-     /* An = Tn * Pn */
+     /* A = T * P */
      dmat_copy(A, T, n, n);
      dmat_potrs(w1, A, n, n);
 }
-if (S_p) {
-     /* v1 = (Rn * Snm + Snp * t) */
-     dm_v_mul(R, S_m, n, n, v1);
-     dvec_scale(atran, S_p, v2, n);
-     dvec_add(v1, v2, v2, n);
-     dm_v_mul(A, v2, n, n, v1);
-}
-if (S_m) {
-     /* v2 = (Rn * Snp * t + Snm) */
-     dm_v_mul(R, S_p, n, n, v2);
-     dvec_scale(atran, v2, v2, n);
-     dvec_add(v2, S_m, v3, n);
-     dm_v_mul(A, v3, n, n, v2);
-}
-if (S_p) {
-     /* Snp = v1 + Snp */
-     dvec_add(v1, S_p, S_p, n);
-}
-if (S_m) {
-     /* Snm = v2 + Snm * t */
-     dvec_scale(atran, S_m, S_m, n);
-     dvec_add(v2, S_m, S_m, n);
-}
-     /* R(n+1) = Rn + An * Bn */
+
+     /*-------------------------------------------------------------------------
+      *
+      *-----------------------------------------------------------------------*/
+     if (solar) {
+          /* v1 = (R * Se_m + Se_p * t) */
+          dm_v_mul(R, Se_m, n, n, v1);
+          dvec_scale(atran, Se_p, v2, n);
+          dvec_add(v1, v2, v2, n);
+          dm_v_mul(A, v2, n, n, v1);
+
+          /* v2 = (R * Se_p * t + Se_m) */
+          dm_v_mul(R, Se_p, n, n, v2);
+          dvec_scale(atran, v2, v2, n);
+          dvec_add(v2, Se_m, v3, n);
+          dm_v_mul(A, v3, n, n, v2);
+
+          /* Se_p = v1 + Se_p */
+          dvec_add(v1, Se_p, Se_p, n);
+
+          /* Se_m = v2 + Se_m * t */
+          dvec_scale(atran, Se_m, Se_m, n);
+          dvec_add(v2, Se_m, Se_m, n);
+     }
+
+
+     /*-------------------------------------------------------------------------
+      *
+      *-----------------------------------------------------------------------*/
+     if (thermal) {
+          if (initialize) {
+               dvec_copy(L_p, Sl_p, n);
+               dvec_copy(L_m, Sl_m, n);
+          }
+     }
+
+
+     /*-------------------------------------------------------------------------
+      *
+      *-----------------------------------------------------------------------*/
+     /* R = R + A * B */
      dmat_mul(A, R, n, n, n, w1);
      dsym_mul(w1, T, n, n, w2, 1);
      dmat_add(R, w2, R, n, n);
 
-     /* T(n+1) = An * Tn */
+     /* T = A * T */
      dsym_mul(A, T, n, n, w1, 1);
      dmat_copy(T, w1, n, n);
 }
@@ -256,10 +283,16 @@ if (S_m) {
 /*******************************************************************************
  *
  ******************************************************************************/
-void layer_double_l(double **R, double **T, double *S_m, double *S_p,
-                    double ***R_l, double ***T_l, double **S_m_l, double **S_p_l,
-                    int n, int n_derivs, double atran, double *atran_l,
-                    uchar *derivs_h, uchar *derivs_p, work_data work) {
+void layer_double_l(double **R, double **T,
+                    double *Se_m, double *Se_p, double *Sl_m, double *Sl_p,
+                    double *L_m, double *L_p,
+                    double ***R_l, double ***T_l,
+                    double **Se_m_l, double **Se_p_l, double **Sl_m_l, double **Sl_p_l,
+                    double **L_m_l, double **L_p_l,
+                    int n, int n_derivs,
+                    double atran, double *atran_l, double lin_fac, double *lin_fac_l,
+                    int solar, int thermal, int initialize,
+                    uchar *derivs_layers, uchar *derivs_beam, uchar *derivs_thermal, work_data work) {
 
      int i;
 
@@ -269,6 +302,15 @@ void layer_double_l(double **R, double **T, double *S_m, double *S_p,
      double *v2;
      double *v3;
      double *v4;
+     double *v5;
+
+     double *a;
+     double *b;
+     double *c;
+     double *d;
+
+     double *e;
+     double *f;
 
      double **w1;
      double **w2;
@@ -276,8 +318,8 @@ void layer_double_l(double **R, double **T, double *S_m, double *S_p,
      double **P;
      double **A;
      double **B;
-     double **C;
-     double **D;
+
+     double **A_l;
 
      i1 = get_work1(&work, WORK_IX);
 
@@ -285,36 +327,84 @@ void layer_double_l(double **R, double **T, double *S_m, double *S_p,
      v2 = get_work1(&work, WORK_DX);
      v3 = get_work1(&work, WORK_DX);
 
+     a  = get_work1(&work, WORK_DX);
+     b  = get_work1(&work, WORK_DX);
+     c  = get_work1(&work, WORK_DX);
+     d  = get_work1(&work, WORK_DX);
+
+     e  = get_work1(&work, WORK_DX);
+     f  = get_work1(&work, WORK_DX);
+
      w1 = get_work1(&work, WORK_DXX);
-     w2 = get_work1(&work, WORK_DXX);
 
      P  = get_work1(&work, WORK_DXX);
      A  = get_work1(&work, WORK_DXX);
      B  = get_work1(&work, WORK_DXX);
 
      if (n_derivs > 0) {
-          v4 = get_work1(&work, WORK_DX);
+          v4  = get_work1(&work, WORK_DX);
+          v5  = get_work1(&work, WORK_DX);
 
-          C  = get_work1(&work, WORK_DXX);
-          D  = get_work1(&work, WORK_DXX);
+          w2  = get_work1(&work, WORK_DXX);
+
+          A_l = get_work1(&work, WORK_DXX);
      }
 
 
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     /* P = LU of (E - Rn * Rn)^T */
+     /* P = LU of (E - R * R)^T */
      dmat_mul(R, R, n, n, n, P);
      dmat_i_sub(P, w1, n);
      dmat_trans(w1, P, n, n);
      dmat_getrf(P, n, n, i1);
 
-     /* An = Tn * Pn */
+     /* A = T * P */
      dmat_copy(A, T, n, n);
      dmat_getrs(P, A, n, n, i1);
 
-     /* Bn = Rn * Tn */
+     /* B = R * T */
      dmat_mul(R, T, n, n, n, B);
+
+     if (solar) {
+          /* a = R * Se_m + Se_p * t */
+          dm_v_mul(R, Se_m, n, n, v1);
+          dvec_scale(atran, Se_p, v2, n);
+          dvec_add(v1, v2, a, n);
+
+          /* b = R * Se_p * t + Se_m */
+          dm_v_mul(R, Se_p, n, n, v1);
+          dvec_scale(atran, v1, v1, n);
+          dvec_add(v1, Se_m, b, n);
+     }
+
+     if (thermal) {
+          if (initialize) {
+               dvec_copy(L_p, Sl_p, n);
+               dvec_copy(L_m, Sl_m, n);
+          }
+
+          /* e = R * Sl_m + Sl_p + L_p * f */
+          dm_v_mul(R, Sl_m, n, n, v1);
+          dvec_add(v1, Sl_p, v1, n);
+          dvec_scale(lin_fac, L_p, v2, n);
+          dvec_add(v1, v2, e, n);
+
+          /* f = R * (Sl_p + L_p * f) + Sl_m */
+          dvec_scale(lin_fac, L_p, v1, n);
+          dvec_add(Sl_p, v1, v1, n);
+          dm_v_mul(R, v1, n, n, v2);
+          dvec_add(v2, Sl_m, f, n);
+
+          /* c = R * L_m + L_p */
+          dm_v_mul(R, L_m, n, n, v1);
+          dvec_add(v1, L_p, c, n);
+
+          /* d = R * L_p + L_m */
+          dm_v_mul(R, L_p, n, n, v1);
+          dvec_add(v1, L_m, d, n);
+     }
 
 
      /*-------------------------------------------------------------------------
@@ -322,141 +412,275 @@ void layer_double_l(double **R, double **T, double *S_m, double *S_p,
       *-----------------------------------------------------------------------*/
      for (i = 0; i < n_derivs; ++i) {
 
-          if (derivs_h[i]) {
-               /* Cn = Wn * Pn */
-               dmat_copy(C, T_l[i], n, n);
-               dmat_getrs(P, C, n, n, i1);
+          if (derivs_layers[i]) {
+               /* A_l = T_l * P + A * (R_l * R + R * R_l) * P */
+               dmat_copy(A_l, T_l[i], n, n);
+               dmat_getrs(P, A_l, n, n, i1);
 
-               /* Dn = An * (Un_l * Rn + Rn * Un_l) * Pn */
                dmat_mul(R_l[i], R, n, n, n, w1);
                dmat_mul(R, R_l[i], n, n, n, w2);
                dmat_add(w1, w2, w1, n, n);
                dmat_getrs(P, w1, n, n, i1);
-               dmat_mul(A, w1, n, n, n, D);
+               dmat_mul(A, w1, n, n, n, w2);
+
+               dmat_add(A_l, w2, A_l, n, n);
 
 
                /*---------------------------------------------------------------
                 *
                 *-------------------------------------------------------------*/
-if (S_p_l) {
-               /* an = Rn * Snm + Snp * t */
-               dm_v_mul(R, S_m, n, n, v1);
-               dvec_scale(atran, S_p, v2, n);
-               dvec_add(v1, v2, v1, n);
+               if (solar && derivs_beam[i]) {
+                    /* v1 = A_l * a + A * (R_l * Se_m + R * Se_m_l + Se_p_l * t + Se_p * L(t)) */
+                    dm_v_mul(A_l, a, n, n, v1);
 
-               /* v1 = Cn * a + Dn * a + An * (Un_l * Snm + Rn * Vnm + Vnp * t + Snp * L(t)) */
-               dm_v_mul(C, v1, n, n, v2);
-               dm_v_mul(D, v1, n, n, v3);
-               dvec_add(v2, v3, v1, n);
+                    dm_v_mul(R_l[i], Se_m, n, n, v2);
+                    dm_v_mul(R, Se_m_l[i], n, n, v3);
+                    dvec_add(v2, v3, v2, n);
+                    dvec_scale(atran, Se_p_l[i], v3, n);
+                    dvec_add(v2, v3, v2, n);
+                    dvec_scale(atran_l[i], Se_p, v3, n);
+                    dvec_add(v2, v3, v2, n);
 
-               dm_v_mul(R_l[i], S_m, n, n, v2);
-               dm_v_mul(R, S_m_l[i], n, n, v3);
-               dvec_add(v2, v3, v2, n);
-               dvec_scale(atran, S_p_l[i], v3, n);
-               dvec_add(v2, v3, v2, n);
-               dvec_scale(atran_l[i], S_p, v3, n);
-               dvec_add(v2, v3, v2, n);
+                    dm_v_mul(A, v2, n, n, v3);
+                    dvec_add(v1, v3, v1, n);
 
-               dm_v_mul(A, v2, n, n, v3);
-               dvec_add(v1, v3, v1, n);
-}
-if (S_m_l) {
-               /* bn = Rn * Snm + Snp * t */
-               dm_v_mul(R, S_p, n, n, v2);
-               dvec_scale(atran, v2, v2, n);
-               dvec_add(v2, S_m, v2, n);
+                    /* v2 = A_l * b + A * [R_l * Se_p * t + R * (Se_p_l * t + Se_p * L(t)) + Se_m_l] */
+                    dm_v_mul(A_l, b, n, n, v2);
 
-               /* v2 = Cn * b + Dn * b + An * [Un_l * Snp * t + Rn * (Vnp * t + Snp * L(t)) + Vnm] */
-               dm_v_mul(C, v2, n, n, v3);
-               dm_v_mul(D, v2, n, n, v4);
-               dvec_add(v3, v4, v2, n);
+                    dvec_scale(atran, Se_p_l[i], v3, n);
+                    dvec_scale(atran_l[i], Se_p, v4, n);
+                    dvec_add(v3, v4, v3, n);
+                    dm_v_mul(R, v3, n, n, v4);
 
-               dvec_scale(atran, S_p_l[i], v3, n);
-               dvec_scale(atran_l[i], S_p, v4, n);
-               dvec_add(v3, v4, v3, n);
-               dm_v_mul(R, v3, n, n, v4);
+                    dm_v_mul(R_l[i], Se_p, n, n, v3);
+                    dvec_scale(atran, v3, v3, n);
+                    dvec_add(v3, v4, v3, n);
 
-               dm_v_mul(R_l[i], S_p, n, n, v3);
-               dvec_scale(atran, v3, v3, n);
-               dvec_add(v3, v4, v3, n);
+                    dvec_add(v3, Se_m_l[i], v3, n);
 
-               dvec_add(v3, S_m_l[i], v3, n);
+                    dm_v_mul(A, v3, n, n, v4);
+                    dvec_add(v2, v4, v2, n);
 
-               dm_v_mul(A, v3, n, n, v4);
-               dvec_add(v2, v4, v2, n);
-}
-if (S_p_l) {
-               /* V(n + 1)p = v1 + Vnp */
-               dvec_add(v1, S_p_l[i], S_p_l[i], n);
-}
-if (S_m_l) {
-               /* V(n + 1)m = v2 + Vnm * t + Snm * L(t) */
-               dvec_scale(atran, S_m_l[i], v3, n);
-               dvec_add(v2, v3, v2, n);
-               dvec_scale(atran_l[i], S_m, v3, n);
-               dvec_add(v2, v3, S_m_l[i], n);
-}
-               /* U(n + 1)_l = Un_l + (Cn + Dn) * Bn + An * (Un_l * Tn + Rn * Wn) */
+                    /* Se_p_l = v1 + Se_p_l */
+                    dvec_add(v1, Se_p_l[i], Se_p_l[i], n);
+
+                    /* Se_m_l = v2 + Se_m_l * t + Se_m * L(t) */
+                    dvec_scale(atran, Se_m_l[i], v3, n);
+                    dvec_add(v2, v3, v2, n);
+                    dvec_scale(atran_l[i], Se_m, v3, n);
+                    dvec_add(v2, v3, Se_m_l[i], n);
+               }
+
+
+               /*---------------------------------------------------------------
+                *
+                *-------------------------------------------------------------*/
+               if (thermal && derivs_thermal[i]) {
+                    if (initialize) {
+                         dvec_copy(L_p_l[i], Sl_p_l[i], n);
+                         dvec_copy(L_m_l[i], Sl_m_l[i], n);
+                    }
+
+                    /* v1 = */
+                    dm_v_mul(A_l, e, n, n, v1);
+
+                    dm_v_mul(R_l[i], Sl_m, n, n, v2);
+                    dm_v_mul(R, Sl_m_l[i], n, n, v3);
+                    dvec_add(v2, v3, v2, n);
+                    dvec_add(v2, Sl_p_l[i], v2, n);
+                    dvec_scale(lin_fac, L_p_l[i], v3, n);
+                    dvec_add(v2, v3, v2, n);
+                    dvec_scale(lin_fac_l[i], L_p, v3, n);
+                    dvec_add(v2, v3, v2, n);
+
+                    dm_v_mul(A, v2, n, n, v3);
+                    dvec_add(v1, v3, v1, n);
+
+                    /* v2 = */
+                    dm_v_mul(A_l, f, n, n, v2);
+
+                    dvec_scale(lin_fac, L_p, v3, n);
+                    dvec_add(Sl_p, v3, v3, n);
+                    dm_v_mul(R_l[i], v3, n, n, v4);
+
+                    dvec_scale(lin_fac, L_p_l[i], v3, n);
+                    dvec_add(Sl_p_l[i], v3, v3, n);
+                    dvec_scale(lin_fac_l[i], L_p, v5, n);
+                    dvec_add(v3, v5, v3, n);
+                    dm_v_mul(R, v3, n, n, v5);
+
+                    dvec_add(v4, v5, v3, n);
+
+                    dvec_add(v3, Sl_m_l[i], v3, n);
+
+                    dm_v_mul(A, v3, n, n, v4);
+                    dvec_add(v2, v4, v2, n);
+
+                    /* Sl_p = */
+                    dvec_add(v1, Sl_p_l[i], Sl_p_l[i], n);
+
+                    /* Sl_m = */
+                    dvec_add(v2, Sl_m_l[i], Sl_m_l[i], n);
+
+                    dvec_scale(lin_fac, L_m_l[i], v2, n);
+                    dvec_add(Sl_m_l[i], v2, Sl_m_l[i], n);
+
+                    dvec_scale(lin_fac_l[i], L_m, v2, n);
+                    dvec_add(Sl_m_l[i], v2, Sl_m_l[i], n);
+
+
+                    /* v1 = */
+                    dm_v_mul(A_l, c, n, n, v1);
+
+                    dm_v_mul(R_l[i], L_m, n, n, v2);
+                    dm_v_mul(R, L_m_l[i], n, n, v3);
+                    dvec_add(v2, v3, v2, n);
+                    dvec_add(v2, L_p_l[i], v2, n);
+
+                    dm_v_mul(A, v2, n, n, v3);
+                    dvec_add(v1, v3, v1, n);
+
+                    /* v2 = */
+                    dm_v_mul(A_l, d, n, n, v2);
+
+                    dm_v_mul(R_l[i], L_p, n, n, v3);
+                    dm_v_mul(R, L_p_l[i], n, n, v4);
+                    dvec_add(v3, v4, v3, n);
+                    dvec_add(v3, L_m_l[i], v3, n);
+
+                    dm_v_mul(A, v3, n, n, v4);
+                    dvec_add(v2, v4, v2, n);
+
+                    /* L_p = */
+                    dvec_add(v1, L_p_l[i], L_p_l[i], n);
+
+                    /* L_m = */
+                    dvec_add(v2, L_m_l[i], L_m_l[i], n);
+               }
+
+
+               /*---------------------------------------------------------------
+                *
+                *-------------------------------------------------------------*/
+
+               /* R_l = R_l + A_l * B + A * (R_l * T + R * T_l) */
                dmat_mul(R_l[i], T, n, n, n, w1);
                dmat_mul(R, T_l[i], n, n, n, w2);
                dmat_add(w1, w2, w1, n, n);
                dmat_mul(A, w1, n, n, n, w2);
                dmat_add(R_l[i], w2, R_l[i], n, n);
 
-               dmat_add(C, D, w1, n, n);
-               dmat_mul(w1, B, n, n, n, w2);
-               dmat_add(R_l[i], w2, R_l[i], n, n);
+               dmat_mul(A_l, B, n, n, n, w1);
+               dmat_add(R_l[i], w1, R_l[i], n, n);
 
-               /* W(n + 1) = (Cn + Dn) * Tn + An * Wn */
-               dmat_add(C, D, w1, n, n);
-               dmat_mul(w1, T, n, n, n, w2);
+               /* T_l = A_l * T + A * T_l */
+               dmat_mul(A_l, T, n, n, n, w1);
 
-               dmat_mul(A, T_l[i], n, n, n, w1);
+               dmat_mul(A, T_l[i], n, n, n, w2);
 
-               dmat_add(w2, w1, T_l[i], n, n);
-}
+               dmat_add(w1, w2, T_l[i], n, n);
+          }
 
-          /*----------------------------------------------------------
+
+          /*--------------------------------------------------------------------
            *
-           *--------------------------------------------------------*/
-          else
-          if ((S_p_l || S_p_l) && derivs_p[i]) {
+           *------------------------------------------------------------------*/
+          else {
+               if (solar && derivs_beam[i]) {
 
-if (S_p_l) {
-               /* v1 = Cn * a + Dn * a + An * (Un_l * Snm + Rn * Vnm + Vnp * t + Snp * L(t)) */
-               /* v1 =                   An * (             Rn * Vnm + Vnp * t + Snp * L(t)) */
-               dm_v_mul(R, S_m_l[i], n, n, v1);
-               dvec_scale(atran, S_p_l[i], v2, n);
-               dvec_add(v1, v2, v1, n);
-               dvec_scale(atran_l[i], S_p, v2, n);
-               dvec_add(v1, v2, v2, n);
+                    /* v1 = A_l * a + A * (R_l * Se_m + R * Se_m_l + Se_p_l * t + Se_p * L(t)) */
+                    /* v1 =           A * (             R * Se_m_l + Se_p_l * t + Se_p * L(t)) */
+                    dm_v_mul(R, Se_m_l[i], n, n, v1);
+                    dvec_scale(atran, Se_p_l[i], v2, n);
+                    dvec_add(v1, v2, v1, n);
+                    dvec_scale(atran_l[i], Se_p, v2, n);
+                    dvec_add(v1, v2, v2, n);
 
-               dm_v_mul(A, v2, n, n, v1);
-}
-if (S_m_l) {
-               /* v2 = Cn * b + Dn * b + An * [Un_l * Snp * t + Rn * (Vnp * t + Snp * L(t)) + Vnm] */
-               /* v2 =                   An * [                 Rn * (Vnp * t + Snp * L(t)) + Vnm] */
-               dvec_scale(atran, S_p_l[i], v2, n);
-               dvec_scale(atran_l[i], S_p, v3, n);
-               dvec_add(v2, v3, v2, n);
-               dm_v_mul(R, v2, n, n, v3);
+                    dm_v_mul(A, v2, n, n, v1);
 
-               dvec_add(v3, S_m_l[i], v3, n);
+                    /* v2 = A_l * b + A * [R_l * Se_p * t + R * (Se_p_l * t + Se_p * L(t)) + Se_m_l] */
+                    /* v2 =           A * [                 R * (Se_p_l * t + Se_p * L(t)) + Se_m_l] */
+                    dvec_scale(atran, Se_p_l[i], v2, n);
+                    dvec_scale(atran_l[i], Se_p, v3, n);
+                    dvec_add(v2, v3, v2, n);
+                    dm_v_mul(R, v2, n, n, v3);
 
-               dm_v_mul(A, v3, n, n, v2);
-}
-if (S_p_l) {
-               /* V(n + 1)p = v1 + Vnp */
-               dvec_add(v1, S_p_l[i], S_p_l[i], n);
-}
-if (S_m_l) {
-               /* V(n + 1)m = v2 + Vnm * t + Snm * L(t) */
-               dvec_scale(atran, S_m_l[i], v3, n);
-               dvec_add(v2, v3, v2, n);
-               dvec_scale(atran_l[i], S_m, v3, n);
-               dvec_add(v2, v3, S_m_l[i], n);
-}
+                    dvec_add(v3, Se_m_l[i], v3, n);
 
+                    dm_v_mul(A, v3, n, n, v2);
+
+                    /* Se_p_l = v1 + Se_p_l */
+                    dvec_add(v1, Se_p_l[i], Se_p_l[i], n);
+
+                    /* Se_m_l = v2 + Se_m_l * t + Se_m * L(t) */
+                    dvec_scale(atran, Se_m_l[i], v3, n);
+                    dvec_add(v2, v3, v2, n);
+                    dvec_scale(atran_l[i], Se_m, v3, n);
+                    dvec_add(v2, v3, Se_m_l[i], n);
+               }
+
+
+               /*---------------------------------------------------------------
+                *
+                *-------------------------------------------------------------*/
+               if (thermal && derivs_thermal[i]) {
+                    if (initialize) {
+                         dvec_copy(L_p_l[i], Sl_p_l[i], n);
+                         dvec_copy(L_m_l[i], Sl_m_l[i], n);
+                    }
+
+                    /* v1 = */
+                    dm_v_mul(R, Sl_m_l[i], n, n, v2);
+                    dvec_add(v2, Sl_p_l[i], v2, n);
+                    dvec_scale(lin_fac, L_p_l[i], v3, n);
+                    dvec_add(v2, v3, v2, n);
+                    dvec_scale(lin_fac_l[i], L_p, v3, n);
+                    dvec_add(v2, v3, v2, n);
+
+                    dm_v_mul(A, v2, n, n, v1);
+
+                    /* v2 = */
+                    dvec_scale(lin_fac, L_p_l[i], v3, n);
+                    dvec_add(Sl_p_l[i], v3, v3, n);
+                    dvec_scale(lin_fac_l[i], L_p, v5, n);
+                    dvec_add(v3, v5, v3, n);
+                    dm_v_mul(R, v3, n, n, v5);
+
+                    dvec_add(v5, Sl_m_l[i], v3, n);
+
+                    dm_v_mul(A, v3, n, n, v2);
+
+                    /* Sl_p = */
+                    dvec_add(v1, Sl_p_l[i], Sl_p_l[i], n);
+
+                    /* Sl_m = */
+                    dvec_add(v2, Sl_m_l[i], Sl_m_l[i], n);
+
+                    dvec_scale(lin_fac, L_m_l[i], v2, n);
+                    dvec_add(Sl_m_l[i], v2, Sl_m_l[i], n);
+
+                    dvec_scale(lin_fac_l[i], L_m, v2, n);
+                    dvec_add(Sl_m_l[i], v2, Sl_m_l[i], n);
+
+
+                    /* v1 = */
+                    dm_v_mul(R, L_m_l[i], n, n, v2);
+                    dvec_add(v2, L_p_l[i], v2, n);
+
+                    dm_v_mul(A, v2, n, n, v1);
+
+                    /* v2 = */
+                    dm_v_mul(R, L_p_l[i], n, n, v3);
+                    dvec_add(v3, L_m_l[i], v3, n);
+
+                    dm_v_mul(A, v3, n, n, v2);
+
+                    /* L_p = */
+                    dvec_add(v1, L_p_l[i], L_p_l[i], n);
+
+                    /* L_m = */
+                    dvec_add(v2, L_m_l[i], L_m_l[i], n);
+               }
           }
      }
 
@@ -464,34 +688,51 @@ if (S_m_l) {
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-if (S_p) {
-     /* v1 = A * (Rn * Snm + Snp * t) */
-     dm_v_mul(R, S_m, n, n, v1);
-     dvec_scale(atran, S_p, v2, n);
-     dvec_add(v1, v2, v2, n);
-     dm_v_mul(A, v2, n, n, v1);
-}
-if (S_m) {
-     /* v2 = A * (Rn * Snp * t + Snm) */
-     dm_v_mul(R, S_p, n, n, v2);
-     dvec_scale(atran, v2, v2, n);
-     dvec_add(v2, S_m, v3, n);
-     dm_v_mul(A, v3, n, n, v2);
-}
-if (S_p) {
-     /* Snp = v1 + Snp */
-     dvec_add(v1, S_p, S_p, n);
-}
-if (S_m) {
-     /* Snm = v2 + Snm * t */
-     dvec_scale(atran, S_m, S_m, n);
-     dvec_add(v2, S_m, S_m, n);
-}
-     /* R(n+1) = Rn + An * Bn */
+     if (solar) {
+          /* Se_p = A * a + Se_p */
+          dm_v_mul(A, a, n, n, v1);
+          dvec_add(v1, Se_p, Se_p, n);
+
+          /* Se_m = A * b + Se_m * t */
+          dm_v_mul(A, b, n, n, v1);
+          dvec_scale(atran, Se_m, Se_m, n);
+          dvec_add(v1, Se_m, Se_m, n);
+     }
+
+
+     /*-------------------------------------------------------------------------
+      *
+      *-----------------------------------------------------------------------*/
+     if (thermal) {
+          /* Sl_p = A * e + Se_p */
+          dm_v_mul(A, e, n, n, v1);
+          dvec_add(v1, Sl_p, Sl_p, n);
+
+          /* Sl_m = A * f + Se_m + L_m * f */
+          dm_v_mul(A, f, n, n, v1);
+          dvec_add(v1, Sl_m, Sl_m, n);
+          dvec_scale(lin_fac, L_m, v1, n);
+          dvec_add(Sl_m, v1, Sl_m, n);
+
+
+          /* L_p = A * c + L_p */
+          dm_v_mul(A, c, n, n, v1);
+          dvec_add(v1, L_p, L_p, n);
+
+          /* L_m = A * d + L_m */
+          dm_v_mul(A, d, n, n, v1);
+          dvec_add(v1, L_m, L_m, n);
+     }
+
+
+     /*-------------------------------------------------------------------------
+      *
+      *-----------------------------------------------------------------------*/
+     /* R = R + A * B */
      dmat_mul(A, B, n, n, n, w1);
      dmat_add(R, w1, R, n, n);
 
-     /* T(n+1) = An * Tn */
+     /* T = A * T */
      dmat_mul(A, T, n, n, n, w1);
      dmat_copy(T, w1, n, n);
 }
@@ -501,10 +742,16 @@ if (S_m) {
 /*******************************************************************************
  *
  ******************************************************************************/
-void layer_double_s_l(double **R, double **T, double *S_m, double *S_p,
-                      double ***R_l, double ***T_l, double **S_m_l, double **S_p_l,
-                      int n, int n_derivs, double atran, double *atran_l,
-                      uchar *derivs_h, uchar *derivs_p, work_data work) {
+void layer_double_s_l(double **R, double **T,
+                      double *Se_m, double *Se_p, double *Sl_m, double *Sl_p,
+                      double *L_m, double *L_p,
+                      double ***R_l, double ***T_l,
+                      double **Se_m_l, double **Se_p_l, double **Sl_m_l, double **Sl_p_l,
+                      double **L_m_l, double **L_p_l,
+                      int n, int n_derivs,
+                      double atran, double *atran_l, double lin_fac, double *lin_fac_l,
+                      int solar, int thermal, int initialize,
+                      uchar *derivs_layers, uchar *derivs_beam, uchar *derivs_thermal, work_data work) {
 
      int i;
 
@@ -514,7 +761,15 @@ void layer_double_s_l(double **R, double **T, double *S_m, double *S_p,
      double *v2;
      double *v3;
      double *v4;
+/*
+     double *a;
+     double *b;
+     double *c;
+     double *d;
 
+     double *e;
+     double *f;
+*/
      double **w1;
      double **w2;
      double **w3;
@@ -532,7 +787,6 @@ void layer_double_s_l(double **R, double **T, double *S_m, double *S_p,
      v3 = get_work1(&work, WORK_DX);
 
      w1 = get_work1(&work, WORK_DXX);
-     w2 = get_work1(&work, WORK_DXX);
 
      P  = get_work1(&work, WORK_DXX);
      A  = get_work1(&work, WORK_DXX);
@@ -541,6 +795,7 @@ void layer_double_s_l(double **R, double **T, double *S_m, double *S_p,
      if (n_derivs > 0) {
           v4 = get_work1(&work, WORK_DX);
 
+          w2 = get_work1(&work, WORK_DXX);
           w3 = get_work1(&work, WORK_DXX);
 
           C  = get_work1(&work, WORK_DXX);
@@ -552,54 +807,65 @@ void layer_double_s_l(double **R, double **T, double *S_m, double *S_p,
       *
       *-----------------------------------------------------------------------*/
 if (1) {
-     /* P = LU of (E - Rn * Rn)^T */
+     /* P = LU of (E - R * R)^T */
      dsym_mul(R, R, n, n, P, 1);
      dmat_i_sub(P, w1, n);
      dmat_trans(w1, P, n, n);
      dmat_getrf(P, n, n, i1);
 
-     /* An = Tn * Pn */
+     /* A = T * P */
      dmat_copy(A, T, n, n);
      dmat_getrs(P, A, n, n, i1);
 
-     /* Bn = Rn * Tn */
+     /* B = R * T */
      dmat_mul(R, T, n, n, n, B);
 }
 else {
-     /* w1 = LU of (E - Rn * Rn)^T */
+     /* w1 = LU of (E - R * R)^T */
      dsym_mul(R, R, n, n, P, 1);
      dmat_i_sub(P, P, n);
      dmat_potrf(P, n);
 
-     /* An = Tn * Pn */
+     /* A = T * P */
      dmat_copy(A, T, n, n);
      dmat_potrs(P, A, n, n);
 
-     /* Bn = Rn * Tn */
+     /* B = R * T */
      dmat_mul(R, T, n, n, n, B);
 }
+     if (solar) {
+
+     }
+
+     if (thermal) {
+          if (initialize) {
+               dvec_copy(L_p, Sl_p, n);
+               dvec_copy(L_m, Sl_m, n);
+          }
+     }
+
 
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
      for (i = 0; i < n_derivs; ++i) {
-          if (derivs_h[i]) {
- if (1) {
-               /* Cn = Wn * Pn */
+          if (derivs_layers[i]) {
+if (1) {
+               /* C = T_l * P */
                dmat_copy(C, T_l[i], n, n);
                dmat_getrs(P, C, n, n, i1);
 
-               /* Dn = An * (Un_l * Rn + Rn * Un_l) * Pn */
+               /* D = A * (R_l * R + R * R_l) * P */
                dsym_mta(R_l[i], R, n, n, w2);
                dmat_getrs(P, w2, n, n, i1);
                dmat_mul(A, w2, n, n, n, D);
 }
 else {
-               /* Cn = Wn * Pn */
+               /* C = T_l * P */
                dmat_copy(C, T_l[i], n, n);
                dmat_potrs(P, C, n, n);
 
-               /* Dn = An * (Un_l * Rn + Rn * Un_l) * Pn */
+               /* D = A * (R_l * R + R * R_l) * P */
                dsym_mta(R_l[i], R, n, n, w2);
                dmat_potrs(P, w2, n, n);
                dmat_mul(A, w2, n, n, n, D);
@@ -608,65 +874,76 @@ else {
                /*---------------------------------------------------------------
                 *
                 *-------------------------------------------------------------*/
-if (S_p_l) {
-               /* an = Rn * Snm + Snp * t */
-               dm_v_mul(R, S_m, n, n, v1);
-               dvec_scale(atran, S_p, v2, n);
-               dvec_add(v1, v2, v1, n);
+               if (solar && derivs_beam[i]) {
+                    /* an = R * Se_m + Se_p * t */
+                    dm_v_mul(R, Se_m, n, n, v1);
+                    dvec_scale(atran, Se_p, v2, n);
+                    dvec_add(v1, v2, v1, n);
 
-               /* v1 = Cn * a + Dn * a + An * (Un_l * Snm + Rn * Vnm + Vnp * t + Snp * L(t)) */
-               dm_v_mul(C, v1, n, n, v2);
-               dm_v_mul(D, v1, n, n, v3);
-               dvec_add(v2, v3, v1, n);
+                    /* v1 = C * a + D * a + A * (R_l * Se_m + R * Se_m_l + Se_p_l * t + Se_p * L(t)) */
+                    dm_v_mul(C, v1, n, n, v2);
+                    dm_v_mul(D, v1, n, n, v3);
+                    dvec_add(v2, v3, v1, n);
 
-               dm_v_mul(R_l[i], S_m, n, n, v2);
-               dm_v_mul(R, S_m_l[i], n, n, v3);
-               dvec_add(v2, v3, v2, n);
-               dvec_scale(atran, S_p_l[i], v3, n);
-               dvec_add(v2, v3, v2, n);
-               dvec_scale(atran_l[i], S_p, v3, n);
-               dvec_add(v2, v3, v2, n);
+                    dm_v_mul(R_l[i], Se_m, n, n, v2);
+                    dm_v_mul(R, Se_m_l[i], n, n, v3);
+                    dvec_add(v2, v3, v2, n);
+                    dvec_scale(atran, Se_p_l[i], v3, n);
+                    dvec_add(v2, v3, v2, n);
+                    dvec_scale(atran_l[i], Se_p, v3, n);
+                    dvec_add(v2, v3, v2, n);
 
-               dm_v_mul(A, v2, n, n, v3);
-               dvec_add(v1, v3, v1, n);
-}
-if (S_m_l) {
-               /* bn = Rn * Snm + Snp * t */
-               dm_v_mul(R, S_p, n, n, v2);
-               dvec_scale(atran, v2, v2, n);
-               dvec_add(v2, S_m, v2, n);
+                    dm_v_mul(A, v2, n, n, v3);
+                    dvec_add(v1, v3, v1, n);
 
-               /* v2 = Cn * b + Dn * b + An * [Un_l * Snp * t + Rn * (Vnp * t + Snp * L(t)) + Vnm] */
-               dm_v_mul(C, v2, n, n, v3);
-               dm_v_mul(D, v2, n, n, v4);
-               dvec_add(v3, v4, v2, n);
+                    /* bn = R * Se_m + Se_p * t */
+                    dm_v_mul(R, Se_p, n, n, v2);
+                    dvec_scale(atran, v2, v2, n);
+                    dvec_add(v2, Se_m, v2, n);
 
-               dvec_scale(atran, S_p_l[i], v3, n);
-               dvec_scale(atran_l[i], S_p, v4, n);
-               dvec_add(v3, v4, v3, n);
-               dm_v_mul(R, v3, n, n, v4);
+                    /* v2 = C * b + D * b + A * [R_l * Se_p * t + R * (Se_p_l * t + Se_p * L(t)) + Se_m_l] */
+                    dm_v_mul(C, v2, n, n, v3);
+                    dm_v_mul(D, v2, n, n, v4);
+                    dvec_add(v3, v4, v2, n);
 
-               dm_v_mul(R_l[i], S_p, n, n, v3);
-               dvec_scale(atran, v3, v3, n);
-               dvec_add(v3, v4, v3, n);
+                    dvec_scale(atran, Se_p_l[i], v3, n);
+                    dvec_scale(atran_l[i], Se_p, v4, n);
+                    dvec_add(v3, v4, v3, n);
+                    dm_v_mul(R, v3, n, n, v4);
 
-               dvec_add(v3, S_m_l[i], v3, n);
+                    dm_v_mul(R_l[i], Se_p, n, n, v3);
+                    dvec_scale(atran, v3, v3, n);
+                    dvec_add(v3, v4, v3, n);
 
-               dm_v_mul(A, v3, n, n, v4);
-               dvec_add(v2, v4, v2, n);
-}
-if (S_p_l) {
-               /* V(n + 1)p = v1 + Vnp */
-               dvec_add(v1, S_p_l[i], S_p_l[i], n);
-}
-if (S_m_l) {
-               /* V(n + 1)m = v2 + Vnm * t + Snm * L(t) */
-               dvec_scale(atran, S_m_l[i], v3, n);
-               dvec_add(v2, v3, v2, n);
-               dvec_scale(atran_l[i], S_m, v3, n);
-               dvec_add(v2, v3, S_m_l[i], n);
-}
-               /* U(n + 1)_l = Un_l + (Cn + Dn) * Bn + An * (Un_l * Tn + Rn * Wn) */
+                    dvec_add(v3, Se_m_l[i], v3, n);
+
+                    dm_v_mul(A, v3, n, n, v4);
+                    dvec_add(v2, v4, v2, n);
+
+                    /* V(n + 1)p = v1 + Se_p_l */
+                    dvec_add(v1, Se_p_l[i], Se_p_l[i], n);
+
+                    /* V(n + 1)m = v2 + Se_m_l * t + Se_m * L(t) */
+                    dvec_scale(atran, Se_m_l[i], v3, n);
+                    dvec_add(v2, v3, v2, n);
+                    dvec_scale(atran_l[i], Se_m, v3, n);
+                    dvec_add(v2, v3, Se_m_l[i], n);
+               }
+
+
+               /*---------------------------------------------------------------
+                *
+                *-------------------------------------------------------------*/
+               if (thermal && derivs_thermal[i]) {
+
+               }
+
+
+               /*---------------------------------------------------------------
+                *
+                *-------------------------------------------------------------*/
+
+               /* R_l = R_l + (C + D) * B + A * (R_l * T + R * T_l) */
                dmat_add(C, D, w1, n, n);
 
                dmat_mul(R_l[i], T, n, n, n, w2);
@@ -677,7 +954,7 @@ if (S_m_l) {
 
                dsym_add(R_l[i], w3, R_l[i], n, 1);
 
-               /* W(n + 1) = (Cn + Dn) * Tn + An * Wn */
+               /* T_l = (C + D) * T + A * T_l */
                dsym_mul(w1, T, n, n, w2, 0);
                dsym_mul(A , T_l[i], n, n, w3, 0);
 
@@ -685,45 +962,49 @@ if (S_m_l) {
           }
 
 
-          /*----------------------------------------------------------
+          /*--------------------------------------------------------------------
            *
-           *--------------------------------------------------------*/
-          else
-          if ((S_p_l || S_p_l) && derivs_p[i]) {
-if (S_p_l) {
-               /* v1 = Cn * a + Dn * a + An * (Un_l * Snm + Rn * Vnm + Vnp * t + Snp * L(t)) */
-               /* v1 =                   An * (             Rn * Vnm + Vnp * t + Snp * L(t)) */
-               dm_v_mul(R, S_m_l[i], n, n, v1);
-               dvec_scale(atran, S_p_l[i], v2, n);
-               dvec_add(v1, v2, v1, n);
-               dvec_scale(atran_l[i], S_p, v2, n);
-               dvec_add(v1, v2, v2, n);
+           *------------------------------------------------------------------*/
+          else {
+               if (solar && derivs_beam[i]) {
+                    /* v1 = C * a + D * a + A * (R_l * Se_m + R * Se_m_l + Se_p_l * t + Se_p * L(t)) */
+                    /* v1 =                 A * (             R * Se_m_l + Se_p_l * t + Se_p * L(t)) */
+                    dm_v_mul(R, Se_m_l[i], n, n, v1);
+                    dvec_scale(atran, Se_p_l[i], v2, n);
+                    dvec_add(v1, v2, v1, n);
+                    dvec_scale(atran_l[i], Se_p, v2, n);
+                    dvec_add(v1, v2, v2, n);
 
-               dm_v_mul(A, v2, n, n, v1);
-}
-if (S_m_l) {
-               /* v2 = Cn * b + Dn * b + An * [Un_l * Snp * t + Rn * (Vnp * t + Snp * L(t)) + Vnm] */
-               /* v2 =                   An * [                 Rn * (Vnp * t + Snp * L(t)) + Vnm] */
-               dvec_scale(atran, S_p_l[i], v2, n);
-               dvec_scale(atran_l[i], S_p, v3, n);
-               dvec_add(v2, v3, v2, n);
-               dm_v_mul(R, v2, n, n, v3);
+                    dm_v_mul(A, v2, n, n, v1);
 
-               dvec_add(v3, S_m_l[i], v3, n);
+                    /* v2 = C * b + D * b + A * [R_l * Se_p * t + R * (Se_p_l * t + Se_p * L(t)) + Se_m_l] */
+                    /* v2 =                 A * [                 R * (Se_p_l * t + Se_p * L(t)) + Se_m_l] */
+                    dvec_scale(atran, Se_p_l[i], v2, n);
+                    dvec_scale(atran_l[i], Se_p, v3, n);
+                    dvec_add(v2, v3, v2, n);
+                    dm_v_mul(R, v2, n, n, v3);
 
-               dm_v_mul(A, v3, n, n, v2);
-}
-if (S_p_l) {
-               /* V(n + 1)p = v1 + Vnp */
-               dvec_add(v1, S_p_l[i], S_p_l[i], n);
-}
-if (S_m_l) {
-               /* V(n + 1)m = v2 + Vnm * t + Snm * L(t) */
-               dvec_scale(atran, S_m_l[i], v3, n);
-               dvec_add(v2, v3, v2, n);
-               dvec_scale(atran_l[i], S_m, v3, n);
-               dvec_add(v2, v3, S_m_l[i], n);
-}
+                    dvec_add(v3, Se_m_l[i], v3, n);
+
+                    dm_v_mul(A, v3, n, n, v2);
+
+                    /* V(n + 1)p = v1 + Se_p_l */
+                    dvec_add(v1, Se_p_l[i], Se_p_l[i], n);
+
+                    /* V(n + 1)m = v2 + Se_m_l * t + Se_m * L(t) */
+                    dvec_scale(atran, Se_m_l[i], v3, n);
+                    dvec_add(v2, v3, v2, n);
+                    dvec_scale(atran_l[i], Se_m, v3, n);
+                    dvec_add(v2, v3, Se_m_l[i], n);
+               }
+
+
+               /*---------------------------------------------------------------
+                *
+                *-------------------------------------------------------------*/
+               if (thermal && derivs_thermal[i]) {
+
+               }
           }
      }
 
@@ -731,34 +1012,44 @@ if (S_m_l) {
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-if (S_p) {
-     /* v1 = A * (Rn * Snm + Snp * t) */
-     dm_v_mul(R, S_m, n, n, v1);
-     dvec_scale(atran, S_p, v2, n);
-     dvec_add(v1, v2, v2, n);
-     dm_v_mul(A, v2, n, n, v1);
-}
-if (S_m) {
-     /* v2 = A * (Rn * Snp * t + Snm) */
-     dm_v_mul(R, S_p, n, n, v2);
-     dvec_scale(atran, v2, v2, n);
-     dvec_add(v2, S_m, v3, n);
-     dm_v_mul(A, v3, n, n, v2);
-}
-if (S_p) {
-     /* Snp = v1 + Snp */
-     dvec_add(v1, S_p, S_p, n);
-}
-if (S_m) {
-     /* Snm = v2 + Snm * t */
-     dvec_scale(atran, S_m, S_m, n);
-     dvec_add(v2, S_m, S_m, n);
-}
-     /* R(n+1) = Rn + An * Bn */
+     if (solar) {
+          /* v1 = A * (R * Se_m + Se_p * t) */
+          dm_v_mul(R, Se_m, n, n, v1);
+          dvec_scale(atran, Se_p, v2, n);
+          dvec_add(v1, v2, v2, n);
+          dm_v_mul(A, v2, n, n, v1);
+
+          /* v2 = A * (R * Se_p * t + Se_m) */
+          dm_v_mul(R, Se_p, n, n, v2);
+          dvec_scale(atran, v2, v2, n);
+          dvec_add(v2, Se_m, v3, n);
+          dm_v_mul(A, v3, n, n, v2);
+
+          /* Se_p = v1 + Se_p */
+          dvec_add(v1, Se_p, Se_p, n);
+
+          /* Se_m = v2 + Se_m * t */
+          dvec_scale(atran, Se_m, Se_m, n);
+          dvec_add(v2, Se_m, Se_m, n);
+     }
+
+
+     /*-------------------------------------------------------------------------
+      *
+      *-----------------------------------------------------------------------*/
+     if (thermal) {
+
+     }
+
+
+     /*-------------------------------------------------------------------------
+      *
+      *-----------------------------------------------------------------------*/
+     /* R = R + A * B */
      dsym_mul(A, B, n, n, w1, 1);
      dmat_add(R, w1, R, n, n);
 
-     /* T(n+1) = An * Tn */
+     /* T = A * T */
      dsym_mul(A, T, n, n, w1, 1);
      dmat_copy(T, w1, n, n);
 }

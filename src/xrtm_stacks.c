@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -426,7 +426,7 @@ int build_stack_chain(int n_layers, int n_derivs, uchar **derivs, stack_data *st
 /*******************************************************************************
  *
  ******************************************************************************/
-int stack_chain_alloc(int n_four, int n_quad, int n_derivs, int n_layers, int n_stacks0, stack_data *stacks0, int n_stacks, stack_data *stacks, uchar **derivs_h, uchar **derivs_s, uchar **derivs_d) {
+int stack_chain_alloc(int n_four, int n_quad, int n_derivs, int n_layers, int n_stacks0, stack_data *stacks0, int n_stacks, stack_data *stacks, uchar **derivs_layers, uchar **derivs_s, uchar **derivs_d) {
 
      uchar *derivs_s2;
 
@@ -440,7 +440,7 @@ int stack_chain_alloc(int n_four, int n_quad, int n_derivs, int n_layers, int n_
      jmp_buf env;
 
      if (! (derivs_s2 = flags_alloc(n_derivs))) {
-          eprintf("ERROR: flags_alloc()");
+          fprintf(stderr, "ERROR: flags_alloc()");
           return -1;
      }
 
@@ -461,6 +461,9 @@ int stack_chain_alloc(int n_four, int n_quad, int n_derivs, int n_layers, int n_
                stacks[i].S_p = stacks0[ii].S_p;
                stacks[i].S_m = stacks0[ii].S_m;
 
+               stacks[i].Sl_p = stacks0[ii].Sl_p;
+               stacks[i].Sl_m = stacks0[ii].Sl_m;
+
                if (i < n_layers) {
                     stacks[i].R_p_l = stacks0[ii].R_p_l;
                     stacks[i].T_p_l = stacks0[ii].T_p_l;
@@ -469,10 +472,16 @@ int stack_chain_alloc(int n_four, int n_quad, int n_derivs, int n_layers, int n_
 
                     stacks[i].S_p_l = stacks0[ii].S_p_l;
                     stacks[i].S_m_l = stacks0[ii].S_m_l;
+
+                    stacks[i].Sl_p_l = stacks0[ii].Sl_p_l;
+                    stacks[i].Sl_m_l = stacks0[ii].Sl_m_l;
                }
                else {
                     stacks[i].S_p_l = stacks0[ii].S_p_l;
                     stacks[i].S_m_l = stacks0[ii].S_m_l;
+
+                    stacks[i].Sl_p_l = stacks0[ii].Sl_p_l;
+                    stacks[i].Sl_m_l = stacks0[ii].Sl_m_l;
                }
 
                stacks[i].d = stacks0[ii].d;
@@ -491,9 +500,12 @@ int stack_chain_alloc(int n_four, int n_quad, int n_derivs, int n_layers, int n_
                stacks[i].S_p = ALLOC_ARRAY2_D(n_four, n_quad);
                stacks[i].S_m = ALLOC_ARRAY2_D(n_four, n_quad);
 
+               stacks[i].Sl_p = ALLOC_ARRAY2_D(n_four, n_quad);
+               stacks[i].Sl_m = ALLOC_ARRAY2_D(n_four, n_quad);
+
                if (i < n_layers) {
 /*
-                    if (flags_or(derivs_h[i], n_derivs)) {
+                    if (flags_or(derivs_layers[i], n_derivs)) {
 */
                          stacks[i].R_p_l = ALLOC_ARRAY2(n_four, n_derivs, double **);
                          stacks[i].T_p_l = ALLOC_ARRAY2(n_four, n_derivs, double **);
@@ -503,7 +515,7 @@ int stack_chain_alloc(int n_four, int n_quad, int n_derivs, int n_layers, int n_
                          for (j = 0; j < n_four; ++j) {
                               for (k = 0; k < n_derivs; ++k) {
 /*
-if (derivs_h[i][k]) {
+if (derivs_layers[i][k]) {
 */
                                    stacks[i].R_p_l[j][k] = ALLOC_ARRAY2_D(n_quad, n_quad);
                                    stacks[i].T_p_l[j][k] = ALLOC_ARRAY2_D(n_quad, n_quad);
@@ -522,6 +534,9 @@ if (derivs_h[i][k]) {
                          stacks[i].S_p_l = ALLOC_ARRAY2(n_four, n_derivs, double *);
                          stacks[i].S_m_l = ALLOC_ARRAY2(n_four, n_derivs, double *);
 
+                         stacks[i].Sl_p_l = ALLOC_ARRAY2(n_four, n_derivs, double *);
+                         stacks[i].Sl_m_l = ALLOC_ARRAY2(n_four, n_derivs, double *);
+
                          for (j = 0; j < n_four; ++j) {
                               for (k = 0; k < n_derivs; ++k) {
 /*
@@ -532,6 +547,8 @@ if (derivs_d[i][k]) {
 /*
 }
 */
+                                   stacks[i].Sl_p_l[j][k] = ALLOC_ARRAY1_D(n_quad);
+                                   stacks[i].Sl_m_l[j][k] = ALLOC_ARRAY1_D(n_quad);
                               }
                          }
 /*
@@ -546,6 +563,9 @@ if (derivs_d[i][k]) {
                          stacks[i].S_p_l = ALLOC_ARRAY2(n_four, n_derivs, double *);
                          stacks[i].S_m_l = ALLOC_ARRAY2(n_four, n_derivs, double *);
 
+                         stacks[i].Sl_p_l = ALLOC_ARRAY2(n_four, n_derivs, double *);
+                         stacks[i].Sl_m_l = ALLOC_ARRAY2(n_four, n_derivs, double *);
+
                          for (j = 0; j < n_four; ++j) {
                               for (k = 0; k < n_derivs; ++k) {
 /*
@@ -556,6 +576,8 @@ if (derivs_s2[k]) {
 /*
 }
 */
+                                   stacks[i].Sl_p_l[j][k] = ALLOC_ARRAY1_D(n_quad);
+                                   stacks[i].Sl_m_l[j][k] = ALLOC_ARRAY1_D(n_quad);
                               }
                          }
 /*
@@ -565,7 +587,7 @@ if (derivs_s2[k]) {
 
                     for (j = 0; j < n_four; ++j) {
                          if (layer_add_aux_alloc(&stacks[i].d[j], n_quad)) {
-                              eprintf("ERROR: layer_add_aux_alloc()");
+                              fprintf(stderr, "ERROR: layer_add_aux_alloc()");
                               return -1;
                          }
                     }
@@ -587,7 +609,7 @@ if (derivs_s2[k]) {
 /*******************************************************************************
  *
  ******************************************************************************/
-int stack_chain_free(int n_four, int n_quad, int n_derivs, int n_layers, int n_stacks, stack_data *stacks, uchar **derivs_h, uchar **derivs_s, uchar **derivs_d) {
+int stack_chain_free(int n_four, int n_quad, int n_derivs, int n_layers, int n_stacks, stack_data *stacks, uchar **derivs_layers, uchar **derivs_s, uchar **derivs_d) {
 
      uchar *derivs_s2;
 
@@ -599,7 +621,7 @@ int stack_chain_free(int n_four, int n_quad, int n_derivs, int n_layers, int n_s
           return 0;
 
      if (! (derivs_s2 = flags_alloc(n_derivs))) {
-          eprintf("ERROR: flags_alloc()");
+          fprintf(stderr, "ERROR: flags_alloc()");
           return -1;
      }
 
@@ -613,14 +635,17 @@ int stack_chain_free(int n_four, int n_quad, int n_derivs, int n_layers, int n_s
                free_array2_d(stacks[i].S_p);
                free_array2_d(stacks[i].S_m);
 
+               free_array2_d(stacks[i].Sl_p);
+               free_array2_d(stacks[i].Sl_m);
+
                if (i < n_layers) {
 /*
-                    if (flags_or(derivs_h[i], n_derivs)) {
+                    if (flags_or(derivs_layers[i], n_derivs)) {
 */
                          for (j = 0; j < n_four; ++j) {
                               for (k = 0; k < n_derivs; ++k) {
 /*
-if (derivs_h[i][k]) {
+if (derivs_layers[i][k]) {
 */
                                    free_array2_d(stacks[i].R_p_l[j][k]);
                                    free_array2_d(stacks[i].T_p_l[j][k]);
@@ -651,11 +676,16 @@ if (derivs_d[i][k]) {
 /*
 }
 */
+                                   free_array1_d(stacks[i].Sl_p_l[j][k]);
+                                   free_array1_d(stacks[i].Sl_m_l[j][k]);
                               }
                          }
 
                          free_array2((void **) stacks[i].S_p_l);
                          free_array2((void **) stacks[i].S_m_l);
+
+                         free_array2((void **) stacks[i].Sl_p_l);
+                         free_array2((void **) stacks[i].Sl_m_l);
 /*
                     }
 */
@@ -675,11 +705,16 @@ if (derivs_s2[k]) {
 /*
 }
 */
+                                   free_array1_d(stacks[i].Sl_p_l[j][k]);
+                                   free_array1_d(stacks[i].Sl_m_l[j][k]);
                               }
                          }
 
                          free_array2((void **) stacks[i].S_p_l);
                          free_array2((void **) stacks[i].S_m_l);
+
+                         free_array2((void **) stacks[i].Sl_p_l);
+                         free_array2((void **) stacks[i].Sl_m_l);
 /*
                     }
 */

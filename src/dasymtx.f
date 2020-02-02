@@ -107,7 +107,7 @@ c     ..
 
       IF( M.LT.1 .OR. IA.LT.M .OR. IEVEC.LT.M ) THEN
 c    &    CALL ERRMSG( 'ASYMTX--bad input variable(s)', .TRUE. )
-          WRITE (0, *), 'ASYMTX--bad input variable(s)'
+          WRITE (0, *) 'ASYMTX--bad input variable(s)'
           STOP
       ENDIF
 c                           ** Handle 1x1 and 2x2 special cases
@@ -123,7 +123,7 @@ c                           ** Handle 1x1 and 2x2 special cases
 
          IF( DISCRI .LT. 0.0 ) THEN
 C    &       CALL ERRMSG( 'ASYMTX--complex evals in 2x2 case',.TRUE. )
-             WRITE (0, *), 'ASYMTX--complex evals in 2x2 case'
+             WRITE (0, *) 'ASYMTX--complex evals in 2x2 case'
              STOP
          ENDIF
 

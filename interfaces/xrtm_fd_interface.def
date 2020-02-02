@@ -1,0 +1,56 @@
+/*******************************************************************************
+ * Bindx2 interface definition file for XRTM
+ ******************************************************************************/
+prefix xrtm_fd;
+
+include "xrtm";
+
+subprogram_init int 0 create				0, xrtm_data 1 "1" xrtm in, int 0 n_derivs in;
+subprogram_free int 0 destroy				0;
+
+subprogram_general int 0 get_n_derivs			1;
+subprogram_general int 0 set_delta			0, double 1 "d->n_derivs" delta in;
+subprogram_general int 0 get_delta			0, double 1 "d->n_derivs" delta out;
+subprogram_general int 0 set_F_iso_top_p_1		0, int 0 i_deriv in, double 0 F_iso_top_l in;
+subprogram_general int 0 set_F_iso_top_p_n		0, double 1 "d->n_derivs" F_iso_top_l in;
+subprogram_general double 0 get_F_iso_top_p		1, int 0 i_deriv in;
+subprogram_general int 0 set_F_iso_bot_p_1		0, int 0 i_deriv in, double 0 F_iso_bot_l in;
+subprogram_general int 0 set_F_iso_bot_p_n		0, double 1 "d->n_derivs" F_iso_bot_l in;
+subprogram_general double 0 get_F_iso_bot_p		1, int 0 i_deriv in;
+subprogram_general int 0 set_levels_b_p_1		0, int 0 i_deriv in, double 1 "d->d->n_layers + 1" levels_b_l in;
+subprogram_general int 0 set_levels_b_p_n		0, double 2 "d->d->n_layers + 1" "d->d->n_derivs" levels_b_l in;
+subprogram_general double 0 get_levels_b_p		1, int 0 i_deriv in, double 1 "d->d->n_layers + 1" levels_b_l out;
+subprogram_general int 0 set_surface_b_p_1		0, int 0 i_deriv in, double 0 surface_b_l in;
+subprogram_general int 0 set_surface_b_p_n		0, double 1 "d->n_derivs" surface_b_l in;
+subprogram_general double 0 get_surface_b_p		1, int 0 i_deriv in;
+subprogram_general int 0 set_g_p_11			0, int 0 i_layer in, int 0 i_deriv in, double 0 g_l in;
+subprogram_general int 0 set_g_p_n1			0, int 0 i_deriv in, double 1 "d->n_layers" g_l in;
+subprogram_general int 0 set_g_p_1n			0, int 0 i_layer in, double 1 "d->n_derivs" g_l in;
+subprogram_general int 0 set_g_p_nn			0, double 2 "d->d->n_layers" "d->d->n_derivs" g_l in;
+subprogram_general double 0 get_g_p			1, int 0 i_layer in, int 0 i_deriv in;
+subprogram_general int 0 set_coef_p_11			0, int 0 i_layer in, int 0 i_deriv in, double 2 "d->d->n_elem" "d->d->n_coef_layer[i_layer]" coef_l in;
+subprogram_general int 0 set_coef_p_n1			0, int 0 i_deriv in, double 3 "d->d->n_layers" "d->d->n_elem" "d->d->n_coef" coef_l in;
+subprogram_general int 0 set_coef_p_1n			0, int 0 i_layer in, double 3 "d->d->n_derivs" "d->d->n_elem" "d->d->n_coef_layer[i_layer]" coef_l in;
+subprogram_general int 0 set_coef_p_nn			0, double 4 "d->d->n_layers" "d->d->n_derivs" "d->d->n_elem" "d->d->n_coef" coef_l in;
+subprogram_general double 0 get_coef_p			1, int 0 i_layer in, int 0 i_deriv in, int 0 i_elem in, int 0 i_coef in;
+subprogram_general int 0 set_omega_p_11			0, int 0 i_layer in, int 0 i_deriv in, double 0 omega_l in;
+subprogram_general int 0 set_omega_p_n1			0, int 0 i_deriv in, double 1 "d->n_derivs" omega_l in;
+subprogram_general int 0 set_omega_p_1n			0, int 0 i_layer in, double 1 "d->n_layers" omega_l in;
+subprogram_general int 0 set_omega_p_nn			0, double 2 "d->d->n_layers" "d->d->n_derivs" omega_l in;
+subprogram_general double 0 get_omega_p			1, int 0 i_layer in, int 0 i_deriv in;
+subprogram_general int 0 set_ltau_p_11			0, int 0 i_layer in, int 0 i_deriv in, double 0 ltau_l in;
+subprogram_general int 0 set_ltau_p_n1			0, int 0 i_deriv in, double 1 "d->n_derivs" ltau_l in;
+subprogram_general int 0 set_ltau_p_1n			0, int 0 i_layer in, double 1 "d->n_layers" ltau_l in;
+subprogram_general int 0 set_ltau_p_nn			0, double 2 "d->d->n_layers" "d->d->n_derivs" ltau_l in;
+subprogram_general double 0 get_ltau_p			1, int 0 i_layer in, int 0 i_deriv in;
+subprogram_general int 0 set_kernel_ampfac_p_1		0, int 0 i_kernel in, int 0 i_deriv in, double 0 ampfac_l in;
+subprogram_general int 0 set_kernel_ampfac_p_n		0, int 0 i_kernel in, double 1 "d->n_derivs" ampfac_l in;
+subprogram_general double 0 get_kernel_ampfac_p		1, int 0 i_kernel in, int 0 i_deriv in;
+subprogram_general int 0 set_kernel_params_p_11		0, int 0 i_kernel in, int 0 i_deriv in, int 0 i_param in, double 0 param_l in;
+subprogram_general int 0 set_kernel_params_p_1n		0, int 0 i_kernel in, int 0 i_deriv in, double 1 "kernel_n_params((enum xrtm_kernel_type) d->d->kernels[i_kernel])" params_l in;
+subprogram_general int 0 set_kernel_params_p_n1		0, int 0 i_kernel in, int 0 i_param in, double 1 "d->n_derivs" params_l in;
+subprogram_general int 0 set_kernel_params_p_nn		0, int 0 i_kernel in, double 2 "d->d->n_derivs"  "kernel_n_params((enum xrtm_kernel_type) d->d->kernels[i_kernel])" params_l in;
+subprogram_general double 0 get_kernel_params_p		1, int 0 i_kernel in, int 0 i_deriv in, int 0 i_param in;
+
+subprogram_general int 0 solution			0, enum solver_mask 0 solver in enum_external "xrtm" "xrtm_int_cpp", int 0 solutions in, enum method_type 0 method in, int 0 n_out_phis in, double 2 "d->d->n_umus" "n_out_phis" out_phis in, double 4 "d->d->n_ulevels" "d->d->n_umus == 0 ? d->d->n_quad : d->d->n_umus" "n_out_phis" "d->d->n_stokes" I_p out, double 4 "d->d->n_ulevels" "d->d->n_umus == 0 ? d->d->n_quad : d->d->n_umus" "n_out_phis" "d->d->n_stokes" I_m out, double 5 "d->d->n_ulevels" "d->d->n_derivs" "d->d->n_umus == 0 ? d->d->n_quad : d->d->n_umus" "n_out_phis" "d->d->n_stokes" K_p out, double 5 "d->d->n_ulevels" "d->d->n_derivs" "d->d->n_umus == 0 ? d->d->n_quad : d->d->n_umus" "n_out_phis" "d->d->n_stokes" K_m out, double 1 "d->d->n_ulevels" mean_p out, double 1 "d->d->n_ulevels" mean_m out, double 2 "d->d->n_ulevels" "d->d->n_derivs" mean_p_l out, double 2 "d->d->n_ulevels" "d->d->n_derivs" mean_m_l out, double 1 "d->d->n_ulevels" flux_p out, double 1 "d->d->n_ulevels" flux_m out, double 2 "d->d->n_ulevels" "d->d->n_derivs" flux_p_l out, double 2 "d->d->n_ulevels" "d->d->n_derivs" flux_m_l out, double 1 "d->d->n_ulevels" flux_div out, double 2 "d->d->n_ulevels" "d->d->n_derivs" flux_div_l out;
+subprogram_general int 0 radiance			0, enum solver_mask 0 solver in enum_external "xrtm" "xrtm_int_cpp", enum method_type 0 method in, int 0 n_out_phis in, double 2 "d->d->n_umus" "n_out_phis" out_phis in, double 4 "d->d->n_ulevels" "d->d->n_umus == 0 ? d->d->n_quad : d->d->n_umus" "n_out_phis" "d->d->n_stokes" I_p out, double 4 "d->d->n_ulevels" "d->d->n_umus == 0 ? d->d->n_quad : d->d->n_umus" "n_out_phis" "d->d->n_stokes" I_m out, double 5 "d->d->n_ulevels" "d->d->n_derivs" "d->d->n_umus == 0 ? d->d->n_quad : d->d->n_umus" "n_out_phis" "d->d->n_stokes" K_p out, double 5 "d->d->n_ulevels" "d->d->n_derivs" "d->d->n_umus == 0 ? d->d->n_quad : d->d->n_umus" "n_out_phis" "d->d->n_stokes" K_m out;

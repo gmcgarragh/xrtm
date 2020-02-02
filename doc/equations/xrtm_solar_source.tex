@@ -1,0 +1,670 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{Solar source}
+\label{sec:solar_source}
+
+
+\subsection{Local solar source, classical, full order}
+\label{sec:solar_source-local_solar_source-classical_full_order}
+
+
+\subsubsection{Forward}
+\label{sec:solar_source-local_solar_source-classical_full_order-forward}
+
+\begin{equation}
+\mathbf{B} = \lambda \mathbf{E} - \mathbf{A}
+\label{eq:solar_source-local_solar_source-classical_full_order-forward-B}
+\end{equation}
+
+\begin{equation}
+\mathbf{C}^{\mp} = \frac{F_{0}}{4\pi} \mathbf{M}
+\label{eq:solar_source-local_solar_source-classical_full_order-forward-C}
+\end{equation}
+
+\begin{equation}
+\mathbf{D}^{\mp} = \mathbf{C}^{\mp}\mathbf{P}^{\mp}_{\circ}
+\label{eq:solar_source-local_solar_source-classical_full_order-forward-D}
+\end{equation}
+
+\begin{equation}
+\mathbf{F}^{\pm} = \mathbf{B}^{-1}\omega\mathbf{D}^{\mp}
+\label{eq:solar_source-local_solar_source-classical_full_order-forward-F}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:solar_source-local_solar_source-classical_full_order-tangent_linear}
+
+\begin{equation}
+\mathcal{L}(\mathbf{F}^{\pm}) = \mathbf{B}^{-1}\left[-\mathcal{L}(\mathbf{B}) \mathbf{F}^{\pm} + \mathcal{L}(\omega)\mathbf{D}^{\mp} + \omega\mathbf{C}^{\mp}\mathcal{L}(\mathbf{P}^{\mp}_{\circ})\right]
+\label{eq:solar_source-local_solar_source-classical_full_order-tangent_linear-G}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:solar_source-local_solar_source-classical_full_order-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Local solar source, classical, reduced order}
+\label{sec:solar_source-local_solar_source-classical_reduced_order}
+
+
+\subsubsection{Forward}
+\label{sec:solar_source-local_solar_source-classical_reduced_order-forward}
+
+
+\begin{equation}
+\mathbf{a} = \frac{F_{0}\omega}{4\pi} \mathbf{M}^{-1}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-forward-a}
+\end{equation}
+
+\begin{equation}
+\mathbf{b} = \mathbf{a}\mathbf{P}^{+}_{\circ}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-forward-b}
+\end{equation}
+
+\begin{equation}
+\mathbf{c} = \mathbf{a}\mathbf{P}^{-}_{\circ}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-forward-c}
+\end{equation}
+
+\begin{equation}
+\mathbf{d} = \mathbf{b} + \mathbf{c}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-forward-d}
+\end{equation}
+
+\begin{equation}
+\mathbf{e} = \mathbf{b} - \mathbf{c}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-forward-e}
+\end{equation}
+
+\begin{equation}
+\mathbf{f} = \left(\mathbf{\Gamma} - \lambda^{2}\mathbf{E}\right)^{-1}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-forward-f}
+\end{equation}
+
+\begin{equation}
+\mathbf{g} = \left[-(\mathbf{t} - \mathbf{r})\mathbf{e} - \lambda\mathbf{d}\right]
+\label{eq:solar_source-local_solar_source-classical_reduced_order-forward-g}
+\end{equation}
+
+\begin{equation}
+\mathbf{p} = \mathbf{f}\mathbf{g}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-forward-p}
+\end{equation}
+
+\begin{equation}
+\mathbf{h} = (\mathbf{t} + \mathbf{r})\mathbf{p} + \mathbf{e}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-forward-h}
+\end{equation}
+
+\begin{equation}
+\mathbf{F}^{+} = \frac{1}{2}(\frac{1}{\lambda}\mathbf{h} + \mathbf{p})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-forward-F_p}
+\end{equation}
+
+\begin{equation}
+\mathbf{F}^{-} = \mathbf{F}^{+} - \mathbf{p}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-forward-F_m}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:solar_source-local_solar_source-classical_reduced_order-tangent_linear}
+
+\begin{equation}
+\mathcal{L}(\mathbf{a}) = \frac{F_{0}\mathcal{L}(\omega)}{4\pi} \mathbf{M}^{-1}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-tangent_linear-a_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{b}) = \mathcal{L}(\mathbf{a})\mathbf{P}^{+}_{\circ} + \mathbf{a}\mathcal{L}(\mathbf{P}^{+}_{\circ})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-tangent_linear-b_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{c}) = \mathcal{L}(\mathbf{a})\mathbf{P}^{-}_{\circ} + \mathbf{a}\mathcal{L}(\mathbf{P}^{-}_{\circ})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-tangent_linear-c_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{d}) = \mathcal{L}(\mathbf{b}) + \mathcal{L}(\mathbf{c})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-tangent_linear-d_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{e}) = \mathcal{L}(\mathbf{b}) - \mathcal{L}(\mathbf{c})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-tangent_linear-e_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{p}) = \mathbf{f}\left\{-\left[\mathcal{L}(\mathbf{\Gamma}) - 2 \mathcal{L}(\lambda)\lambda\mathbf{E}\right]\mathbf{p} - \left[\mathcal{L}(\mathbf{t}) - \mathcal{L}(\mathbf{r})\right]  \mathbf{e} - (\mathbf{t} - \mathbf{r})\mathcal{L}(\mathbf{e}) - \mathcal{L}(\lambda)\mathbf{d} - \lambda\mathcal{L}(\mathbf{d})\right\}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-tangent_linear-p_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{h}) = \left[\mathcal{L}(\mathbf{t}) + \mathcal{L}(\mathbf{r})\right]\mathbf{p} + (\mathbf{t} + \mathbf{r})\mathcal{L}(\mathbf{p}) + \mathcal{L}(\mathbf{e})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-tangent_linear-h_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{F}^{+}) = \frac{1}{2}\left[-\frac{\mathcal{L}(\lambda)}{\lambda^{2}}\mathbf{h} + \frac{1}{\lambda}\mathcal{L}(\mathbf{h}) + \mathcal{L}(\mathbf{p})\right]
+\label{eq:solar_source-local_solar_source-classical_reduced_order-tangent_linear-G_p}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{F}^{-}) = \mathcal{L}(\mathbf{F}^{+}) - \mathcal{L}(\mathbf{p})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-tangent_linear-G_m}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear}
+
+\begin{equation}
+\mathcal{A}(\mathbf{F}^{+}) = \mathcal{A}(\mathbf{F}^{+}) + \mathcal{A}(\mathbf{F}^{-})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-F_p_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{p}) = -\mathcal{A}(\mathbf{F}^{-})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-p_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\lambda) = -\frac{1}{2\lambda^{2}} \mathbf{h}^{T}\mathcal{A}(\mathbf{F}^{+})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-lambda_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{h}) = \frac{1}{2\lambda} \mathcal{A}(\mathbf{F}^{+})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-h_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{p}) = \mathcal{A}(\mathbf{p}) + \frac{1}{2} \mathcal{A}(\mathbf{F}^{+})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-p_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{t} + \mathbf{r}) = \mathcal{A}(\mathbf{h})\mathbf{p}^{T}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-tpr_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{p}) = \mathcal{A}(\mathbf{p}) + (\mathbf{t} + \mathbf{r})^{T}\mathcal{A}(\mathbf{h})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-p_a3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{e}) = \mathcal{A}(\mathbf{h})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-e_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathbf{f}^{T}\mathcal{A}(\mathbf{p})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-t}
+\end{equation}
+
+\begin{equation}
+\mathbf{t}_{2} = -\mathbf{t}\mathbf{p}^{T}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-t2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{\Gamma}) = \mathbf{t}_{2}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-gamma_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\lambda) = \mathcal{A}(\lambda) - 2 \lambda \mathbf{t}_{2}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-lambda_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{t} + \mathbf{r}) = \mathcal{A}(\mathbf{t} + \mathbf{r}) - \mathbf{t}\mathbf{e}^{T}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-tpr_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{e}) = \mathcal{A}(\mathbf{e}) - (\mathbf{t} + \mathbf{r})^{T}\mathbf{t}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-e_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\lambda) = \mathcal{A}(\lambda) - \mathbf{t}\mathbf{d}^{T}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-lambda_a3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{d}) = \lambda\mathbf{t}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-d_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{b}) = \mathcal{A}(\mathbf{e})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-e_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{c}) = -\mathcal{A}(\mathbf{e})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-c_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{b}) = \mathcal{A}(\mathbf{b}) + \mathcal{A}(\mathbf{d})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-b_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{c}) = \mathcal{A}(\mathbf{c}) + \mathcal{A}(\mathbf{d})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-c_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{a}) = \mathcal{A}(\mathbf{c})(\mathbf{P}^{-}_{\circ})^{T}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-a_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{P}^{-}_{\circ}) = \mathbf{a}^{T}\mathcal{A}(\mathbf{c})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-p_m_0_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{a}) = \mathcal{A}(\mathbf{a}) + \mathcal{A}(\mathbf{b})(\mathbf{P}^{+}_{\circ})^{T}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-a_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{P}^{+}_{\circ}) = \mathbf{a}^{T}\mathcal{A}(\mathbf{b})
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-p_p_0_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\omega) = \frac{F_{0}}{4\pi} \sum^{n}_{i}(\mathbf{M}^{-1}\mathcal{A}(\mathbf{a}))_{i}
+\label{eq:solar_source-local_solar_source-classical_reduced_order-adjoint_of_tangent_linear-p_p_0_a}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Local solar source, Green's function}
+\label{sec:solar_source-local_solar_source-greens_function}
+
+
+\subsubsection{Forward}
+\label{sec:solar_source-local_solar_source-greens_function_forward}
+
+\begin{equation}
+a = \frac{F_{0}}{4 \pi}
+\label{eq:solar_source-local_solar_source-greens_function_forward-a}
+\end{equation}
+
+\begin{equation}
+b^{-}_{i}(\upsilon) = \frac{e^{-\upsilon \nu_{i}} - e^{-\upsilon \lambda}}{\lambda - \nu_{i}}
+\label{eq:solar_source-local_solar_source-greens_function_forward-b_m}
+\end{equation}
+
+\begin{equation}
+b^{+}_{i}(\upsilon) = \frac{e^{-\upsilon \lambda} - e^{-x \lambda}e^{-(x - \upsilon)\nu_{i}}}{\lambda + \nu_{i}}
+\label{eq:solar_source-local_solar_source-greens_function_forward-b_p}
+\end{equation}
+
+\begin{equation}
+c_{i} = \mu_{j} w_{j}
+\label{eq:solar_source-local_solar_source-greens_function_forward-c}
+\end{equation}
+
+\begin{equation}
+d_{i} = \sum^{N}_{j = 1} c_{j} \left[X_{+,ji}X_{+,ji} - X_{-,ji}X_{-,ji}\right]
+\label{eq:solar_source-local_solar_source-greens_function_forward-d}
+\end{equation}
+
+\begin{equation}
+e_{i} = \frac{a \omega}{d_{i}}
+\label{eq:solar_source-local_solar_source-greens_function_forward-e}
+\end{equation}
+
+\begin{equation}
+f^{-}_{i}(\upsilon) = e_{i} b^{-}_{i}(\upsilon)
+\label{eq:solar_source-local_solar_source-greens_function_forward-f_m}
+\end{equation}
+
+\begin{equation}
+f^{+}_{i}(\upsilon) = e_{i} b^{+}_{i}(\upsilon)
+\label{eq:solar_source-local_solar_source-greens_function_forward-f_p}
+\end{equation}
+
+\begin{equation}
+g_{i} = \sum^{N}_{j = 1} w_{j} (P^{+}_{j}X_{-,ji} - P^{-}_{j}X_{+,ji})
+\label{eq:solar_source-local_solar_source-greens_function_forward-g}
+\end{equation}
+
+\begin{equation}
+h_{i} = \sum^{N}_{j = 1} w_{j} (P^{+}_{j}X_{+,ji} - P^{-}_{j}X_{-,ji})
+\label{eq:solar_source-local_solar_source-greens_function_forward-h}
+\end{equation}
+
+\begin{equation}
+q_{i}(\upsilon) = f^{-}_{i}(\upsilon) g_{i}
+\label{eq:solar_source-local_solar_source-greens_function_forward-q}
+\end{equation}
+
+\begin{equation}
+r_{i}(\upsilon) = f^{+}_{i}(\upsilon) h_{i}
+\label{eq:solar_source-local_solar_source-greens_function_forward-r}
+\end{equation}
+
+\begin{equation}
+\mathbf{F}^{+}(0) = \mathbf{X}_{-}\mathbf{r}(0)
+\label{eq:solar_source-local_solar_source-greens_function_forward-F_p_0}
+\end{equation}
+
+\begin{equation}
+\mathbf{F}^{+}(x) = \mathbf{X}_{+}\mathbf{q}(x)
+\label{eq:solar_source-local_solar_source-greens_function_forward-F_p_x}
+\end{equation}
+
+\begin{equation}
+\mathbf{F}^{-}(0) = -\mathbf{X}_{+}\mathbf{r}(0)
+\label{eq:solar_source-local_solar_source-greens_function_forward-F_m_0}
+\end{equation}
+
+\begin{equation}
+\mathbf{F}^{-}(x) = -\mathbf{X}_{-}\mathbf{q}(x)
+\label{eq:solar_source-local_solar_source-greens_function_forward-F_m_x}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:solar_source-local_solar_source-greens_function_tangent_linear}
+
+\begin{adjustwidth}{-1in}{-1in}
+\begin{equation}
+\footnotesize
+\mathcal{L}\left[b^{-}_{i}(\upsilon)\right] = \frac{\left[-\mathcal{L}(\upsilon)\nu_{i} - \upsilon\mathcal{L}(\nu_{i})\right]e^{-\upsilon\nu_{i}} - \left[-\mathcal{L}(\upsilon)\lambda - \upsilon\mathcal{L}(\lambda)\right]e^{-\upsilon\lambda} - b^{-}_{i}(\upsilon) \left[\mathcal{L}(\lambda) - \mathcal{L}(\nu_{i})\right]}{\lambda - \nu_{i}}
+\label{eq:solar_source-local_solar_source-greens_function_tangent_linear-b_m_l}
+\end{equation}
+\end{adjustwidth}
+
+\begin{adjustwidth}{-2in}{-2in}
+\begin{equation}
+\footnotesize
+\mathcal{L}\left[b^{+}_{i}(\upsilon)\right] = \frac{\left[-\mathcal{L}(\upsilon)\lambda - \upsilon\mathcal{L}(\lambda)\right]e^{-\upsilon\lambda} - \left[-\mathcal{L}(x)\lambda - x\mathcal{L}(\lambda)\right]e^{-x\lambda}e^{-(x - \upsilon)\nu_{i}} - e^{-x\lambda}\left\{-\left[\mathcal{L}(x) - \mathcal{L}(\upsilon)\right]\nu_{i} - (x\mathcal - \upsilon)\mathcal{L}(\nu_{i})\right\}e^{-(x - \upsilon)\nu_{i}} - b^{+}_{i}(\upsilon) \left[\mathcal{L}(\lambda) + \mathcal{L}(\nu_{i})\right]}{\lambda + \nu_{i}}
+\label{eq:solar_source-local_solar_source-greens_function_tangent_linear-b_p_l}
+\end{equation}
+\end{adjustwidth}
+
+\begin{equation}
+\mathcal{L}(d_{i}) = \sum^{N}_{j = 1} c_{j} 2\left[\mathcal{L}(X_{+,ji})X_{+,ji} - \mathcal{L}(X_{-,ji})X_{-,ji}\right]
+\label{eq:solar_source-local_solar_source-greens_function_tangent_linear-d_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(e_{i}) = \frac{a \mathcal{L}(\omega) - e_{i} \mathcal{L}(d_{i})}{d_{i}}
+\label{eq:solar_source-local_solar_source-greens_function_tangent_linear-e_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}\left[f^{-}_{i}(\upsilon)\right] = \mathcal{L}(e_{i}) b^{-}_{i}(\upsilon) + e_{i}\mathcal{L}\left[b^{-}_{i}(\upsilon)\right]
+\label{eq:solar_source-local_solar_source-greens_function_tangent_linear-f_m_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}\left[f^{+}_{i}(\upsilon)\right] = \mathcal{L}(e_{i}) b^{+}_{i}(\upsilon) + e_{i}\mathcal{L}\left[b^{+}_{i}(\upsilon)\right]
+\label{eq:solar_source-local_solar_source-greens_function_tangent_linear-f_p_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(g_{i}) = \sum^{N}_{j = 1} w_{j} \left[\mathcal{L}(P^{+}_{j})X_{-,ji} + P^{+}_{j}\mathcal{L}(X_{-,ji}) - \mathcal{L}(P^{-}_{j})X_{+,ji} - P^{-}_{j}\mathcal{L}(X_{+,ji})\right]
+\label{eq:solar_source-local_solar_source-greens_function_forward-g_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(h_{i}) = \sum^{N}_{j = 1} w_{j} \left[\mathcal{L}(P^{+}_{j})X_{+,ji} + P^{+}_{j}\mathcal{L}(X_{+,ji}) - \mathcal{L}(P^{-}_{j})X_{-,ji} - P^{-}_{j}\mathcal{L}(X_{-,ji})\right]
+\label{eq:solar_source-local_solar_source-greens_function_forward-h_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}\left[q_{i}(\upsilon)\right] = \mathcal{L}\left[d^{-}_{i}(\upsilon)\right] g_{i} + d^{-}_{i}(\upsilon) \mathcal{L}(g_{i})
+\label{eq:solar_source-local_solar_source-greens_function_tangent_linear-q_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}\left[r_{i}(\upsilon)\right] = \mathcal{L}\left[d^{+}_{i}(\upsilon)\right] h_{i} + d^{+}_{i}(\upsilon) \mathcal{L}(h_{i})
+\label{eq:solar_source-local_solar_source-greens_function_tangent_linear-r_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}\left[\mathbf{F}^{+}(0)\right] = \mathcal{L}(\mathbf{X}_{-})\mathbf{r}(0) + \mathbf{X}_{-}\mathcal{L}\left[\mathbf{r}(0)\right]
+\label{eq:solar_source-local_solar_source-greens_function_forward-F_p_0_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}\left[\mathbf{F}^{+}(x)\right] = \mathcal{L}(\mathbf{X}_{+})\mathbf{q}(x) + \mathbf{X}_{+}\mathcal{L}\left[\mathbf{q}(x)\right]
+\label{eq:solar_source-local_solar_source-greens_function_forward-F_p_x_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}\left[\mathbf{F}^{-}(0)\right] = -\mathcal{L}(\mathbf{X}_{+})\mathbf{r}(0) - \mathbf{X}_{+}\mathcal{L}\left[\mathbf{r}(0)\right]
+\label{eq:solar_source-local_solar_source-greens_function_forward-F_m_0_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}\left[\mathbf{F}^{-}(x)\right] = -\mathcal{L}(\mathbf{X}_{-})\mathbf{q}(x) - \mathbf{X}_{-}\mathcal{L}\left[\mathbf{q}(x)\right]
+\label{eq:solar_source-local_solar_source-greens_function_forward-F_m_x_l}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:solar_source-local_solar_source-greens_function_adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Global solar source}
+\label{sec:solar_source-global_solar_source}
+
+
+\subsubsection{Forward}
+\label{sec:solar_source-global_solar_source-forward}
+
+
+\begin{equation}
+\mathbf{S}^{+} = \mathbf{F}^{+} - \mathbf{T}^{+}\mathbf{F}^{+}\mathcal{X}_{\mathrm{b}} - \mathbf{R}^{-}\mathbf{F}^{-}
+\label{eq:solar_source-global_solar_source-forward-S_p}
+\end{equation}
+
+\begin{equation}
+\mathbf{S}^{-} = \mathbf{F}^{-}\mathcal{X}_{\mathrm{b}} - \mathbf{T}^{-}\mathbf{F}^{-} - \mathbf{R}^{+}\mathbf{F}^{+}\mathcal{X}_{\mathrm{b}}
+\label{eq:solar_source-global_solar_source-forward-S_m}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:solar_source-global_solar_source-tangent_linear}
+
+\begin{equation}
+\mathcal{L}(\mathcal{X}_{\mathrm{b}}) = \left[-\mathcal{L}(\opticalthickness) \lambda \right]\mathcal{X}_{\mathrm{b}}
+\label{eq:solar_source-global_solar_source-tangent_linear-layer_trans_l}
+\end{equation}
+
+\begin{equation}
+\mathbf{A} = \mathcal{L}(\mathbf{F}^{+})\mathcal{X}_{\mathrm{b}} + \mathbf{F}^{+}\mathcal{L}(\mathcal{X}_{\mathrm{b}})
+\label{eq:solar_source-global_solar_source-tangent_linear-A}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}^{+}) = \mathcal{L}(\mathbf{F}^{+}) - \mathcal{L}(\mathbf{T}^{+})\mathbf{F}^{+}\mathcal{X}_{\mathrm{b}} - \mathbf{T}^{+}\mathbf{A} - \mathcal{L}(\mathbf{R}^{-})\mathbf{F}^{-} - \mathbf{R}^{-}\mathcal{L}(\mathbf{F}^{-})
+\label{eq:solar_source-global_solar_source-tangent_linear-V_p}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}^{-}) = \mathcal{L}(\mathbf{F}^{-})\mathcal{X}_{\mathrm{b}} + \mathbf{F}^{-}\mathcal{L}(\mathcal{X}_{\mathrm{b}}) - \mathcal{L}(\mathbf{T}^{-})\mathbf{F}^{-} - \mathbf{T}^{-}\mathcal{L}(\mathbf{F}^{-}) - \mathcal{L}(\mathbf{R}^{+})\mathbf{F}^{+}\mathcal{X}_{\mathrm{b}} - \mathbf{R}^{+}\mathbf{A}
+\label{eq:solar_source-global_solar_source-tangent_linear-V_m}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:solar_source-global_solar_source-adjoint_of_tangent_linear}
+
+\begin{equation}
+\mathcal{A}(\mathbf{F}^{-}) = \mathcal{A}(\mathbf{S}^{-})\mathcal{X}_{\mathrm{b}}
+\label{eq:solar_source-global_solar_source-adjoint_of_tangent_linear-f_m_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(t) = (\mathbf{F}^{-})^{T}\mathcal{A}(\mathbf{S}^{-})
+\label{eq:solar_source-global_solar_source-adjoint_of_tangent_linear-t_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}^{-}) = -\mathcal{A}(\mathbf{S}^{-})(\mathbf{F}^{-})^{T}
+\label{eq:solar_source-global_solar_source-adjoint_of_tangent_linear-T_m_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{F}^{-}) = \mathcal{A}(\mathbf{F}^{-}) - (\mathbf{T}^{-})^{T}\mathcal{A}(\mathbf{S}^{-})
+\label{eq:solar_source-global_solar_source-adjoint_of_tangent_linear-f_m_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}^{+}) = -\mathcal{A}(\mathbf{S}^{-})(\mathbf{F}^{+})^{T}\mathcal{X}_{\mathrm{b}}
+\label{eq:solar_source-global_solar_source-adjoint_of_tangent_linear-R_p_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{A}) = -(\mathbf{R}^{+})^{T}\mathcal{A}(\mathbf{S}^{-})
+\label{eq:solar_source-global_solar_source-adjoint_of_tangent_linear-A_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{F}^{+}) = \mathcal{A}(\mathbf{S}^{+})
+\label{eq:solar_source-global_solar_source-adjoint_of_tangent_linear-f_p_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{W}^{+}) = -\mathcal{A}(\mathbf{S}^{+})(\mathbf{F}^{+})^{T}\mathcal{X}_{\mathrm{b}}
+\label{eq:solar_source-global_solar_source-adjoint_of_tangent_linear-T_p_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{A}) = \mathcal{A}(\mathbf{A}) - (\mathbf{T}^{+})^{T}\mathcal{A}(\mathbf{S}^{+})
+\label{eq:solar_source-global_solar_source-adjoint_of_tangent_linear-A_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}^{-}) = -\mathcal{A}(\mathbf{S}^{+})(\mathbf{F}^{-})^{T}
+\label{eq:solar_source-global_solar_source-adjoint_of_tangent_linear-R_m_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{F}^{-}) = \mathcal{A}(\mathbf{F}^{-}) - (\mathbf{R}^{-})^{T}\mathcal{A}(\mathbf{S}^{+})
+\label{eq:solar_source-global_solar_source-adjoint_of_tangent_linear-f_m_a3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{F}^{+}) = \mathcal{A}(\mathbf{F}^{+}) + \mathcal{A}(\mathbf{A})\mathcal{X}_{\mathrm{b}}
+\label{eq:solar_source-global_solar_source-adjoint_of_tangent_linear-f_p_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathcal{X}_{\mathrm{b}}) = \mathcal{A}(\mathcal{X}_{\mathrm{b}}) + (\mathbf{F}^{+})^{T}\mathcal{A}(\mathbf{A})
+\label{eq:solar_source-global_solar_source-adjoint_of_tangent_linear-t_a2}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Scale global solar source}
+\label{sec:solar_source-scale_global_solar_source}
+
+
+\subsubsection{Forward}
+\label{sec:solar_source-scale_global_solar_source-forward}
+
+\begin{equation}
+\mathbf{S}^{+\prime} = \mathcal{T}_{\mathrm{b},l} \mathbf{S}^{+}
+\label{eq:solar_source-scale_global_solar_source-forward-F_p_prime}
+\end{equation}
+
+\begin{equation}
+\mathbf{S}^{-\prime} = \mathcal{T}_{\mathrm{b},l} \mathbf{S}^{-}
+\label{eq:solar_source-scale_global_solar_source-forward-F_m_prime}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:solar_source-scale_global_solar_source-tangent_linear}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}^{+\prime}) = \mathcal{L}(\mathcal{T}_{\mathrm{b},l}) \mathbf{S}^{+} + \mathcal{T}_{\mathrm{b},l} \mathcal{L}(\mathbf{S}^{+})
+\label{eq:solar_source-scale_global_solar_source-tangent_linear-F_p_prime}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{S}^{-\prime}) = \mathcal{L}(\mathcal{T}_{\mathrm{b},l}) \mathbf{S}^{-} + \mathcal{T}_{\mathrm{b},l} \mathcal{L}(\mathbf{S}^{-})
+\label{eq:solar_source-scale_global_solar_source-tangent_linear-F_m_prime}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:solar_source-scale_global_solar_source-adjoint_of_tangent_linear}
+
+\begin{equation}
+\mathcal{A}(\mathcal{T}_{\mathrm{b},l}) = (\mathbf{S}^{+})^{T}\mathcal{A}(\mathbf{S}^{+\prime})
+\label{eq:solar_source-scale_global_solar_source-adjoint_of_tangent_linear-t_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}^{+}) = \mathcal{T}_{\mathrm{b},l}\mathcal{A}(\mathbf{S}^{+\prime})
+\label{eq:solar_source-scale_global_solar_source-adjoint_of_tangent_linear-F_p_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathcal{T}_{\mathrm{b},l}) = \mathcal{A}(\mathcal{T}_{\mathrm{b},l}) + (\mathbf{S}^{-})^{T}\mathcal{A}(\mathbf{S}^{-\prime})
+\label{eq:solar_source-scale_global_solar_source-adjoint_of_tangent_linear-t_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}^{-}) = \mathcal{T}_{\mathrm{b},l}\mathcal{A}(\mathbf{S}^{-\prime})
+\label{eq:solar_source-scale_global_solar_source-adjoint_of_tangent_linear-F_m_a}
+\end{equation}

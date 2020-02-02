@@ -438,7 +438,7 @@ Matrix exponential by eigenmatrix / BVP: A variant of the Discrete Ordinate Meth
 </a></dd>
  <dt><b><tt><tt>XRTM_SOLVER_PADE_ADD</tt></tt></b></dt>
 	<dd>  <br />
-Matrix exponential by Pad&#233; approximation / Adding (A.K.A. PARTM): Use the Pad&#233; approximation to the matrix exponential to get global reflection and transmission matrices for each layer.  Then use adding to get global reflection and transmission matrices for the entire atmosphere [<a href="refs.html#mcgarragh_greg_2010" id="CITEmcgarragh_greg_2010">McGarragh and Gabriel, 2010</a>].
+Matrix exponential by Pad&#233; approximation / Adding (A.K.A. PARTM): Use the Pad&#233; approximation to the matrix exponential to get global reflection and transmission matrices for each layer.  Then use adding to get global reflection and transmission matrices for the entire atmosphere [<a href="refs.html#mcgarragh_greg_2010" id="CITEmcgarragh_greg_2010">McGarragh and Gabriel, 2010</a>,].
 
 <div class="p"><!----></div>
 <a id="XRTM_SOLVER_SINGLE">
@@ -677,7 +677,7 @@ Destroy an XRTM instance which includes freeing all memory allocated by <a href=
 	<dd>
 
 <div class="p"><!----></div>
-none
+None.
 
 <div class="p"><!----></div>
 </dd>
@@ -2609,7 +2609,7 @@ Zero with successful completion or <a href="#XRTM_INT_ERROR">XRTM_INT_ERROR</a> 
 	<dd>
 
 <div class="p"><!----></div>
-Set layer phase matrix expansion coefficients B<sub>ij,l</sub>, where i,j = 1 for scalar transport (<a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a> = 1) and 1  &#8804; i,j  &#8804; 4 for vector transport (when option <a href="#XRTM_OPTION_VECTOR">XRTM_OPTION_VECTOR</a> has been specified and <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>  &gt;  1).  In the case of scalar transport a single element B<sub>0,0,l</sub> is given to XRTM which are the Legendre expansion coefficients &#946;<sub>l</sub> in the equation for the phase function given by
+Set layer phase matrix expansion coefficients B<sub>ij,l</sub>, where i,j = 1 for scalar transport (<a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a> = 1) and 1  &#8804; i,j  &#8804; 4 for vector transport (when option <a href="#XRTM_OPTION_VECTOR">XRTM_OPTION_VECTOR</a> has been specified and <a href="#xrtm_create"><tt><tt><i><b>n_stokes</b></i></tt></tt></a>  &gt;  1).  In the case of scalar transport a single element B<sub>0,0,l</sub> is given to XRTM which are the Legendre expansion coefficients &#946;<sub>l</sub> in the equation for the scattering phase function given by
 
 <br clear="all" /><table border="0" width="90%"><tr><td>
 <table align="center" cellspacing="0"  cellpadding="2"><tr><td nowrap="nowrap" align="center">
@@ -2621,7 +2621,7 @@ P(cos&#920;) = </td><td nowrap="nowrap" align="center">
 </td></tr></table>
 
 
-where &#920; is single scattering angle, P<sub>l</sub> are Legendre polynomials of degree l, and N is the maximum degree term in the expansion.  In the case of vector transport 6 elements are given to XRTM, the so "Greek constants" [<a href="refs.html#siewert_c_e_1982a" id="CITEsiewert_c_e_1982a">Siewert, 1982</a>] of the matrix
+where &#920; is single scattering angle, P<sub>l</sub>(cos&#920;) are Legendre polynomials of degree l, and N is the maximum degree term in the expansion.  In the case of vector transport 6 elements are given to XRTM, the so "Greek constants" [<a href="refs.html#siewert_c_e_1982a" id="CITEsiewert_c_e_1982a">Siewert, 1982</a>] of the matrix
 
 <br clear="all" /><table border="0" width="90%"><tr><td>
 <table align="center" cellspacing="0"  cellpadding="2"><tr><td nowrap="nowrap" align="center">
@@ -2753,11 +2753,11 @@ b<sub>2</sub>(&#920;) </td></tr></table></td><td nowrap="nowrap" align="left">
 <small>N</small><!--sup
 --><br /><span class="largerstill">&#8721;<br />
 </span><small>l = 0</small>&nbsp;<br /></td><td nowrap="nowrap" align="center">
-&#949;<sub>l</sub> P<sup>l</sup><sub>0,2</sub>(cos&#920;).</td></tr></table></td><td width="50%"></td></tr></table>
+&#949;<sub>l</sub> P<sup>l</sup><sub>0,2</sub>(cos&#920;),</td></tr></table></td><td width="50%"></td></tr></table>
 </td></tr></table>
 
 
-The "Greek constants" are given to XRTM as a (6 &times; <tt><tt><i><b>n_coef</b></i></tt></tt>) array of arrays according to the mapping
+and P<sup>l</sup><sub>m,n</sub>(cos&#920;) are generalized spherical functions.  It is worth noting that a<sub>1</sub>(&#920;) is equal to the scattering phase function P(cos&#920;) of the scalar case and the generalized spherical function P<sup>l</sup><sub>0,0</sub>(cos&#920;) is equal to the Legendre polynomial P<sub>l</sub>(cos&#920;).  The expansion coefficients are given to XRTM as a (6 &times; <tt><tt><i><b>n_coef</b></i></tt></tt>) array of arrays according to the mapping
 
 <br clear="all" /><table border="0" width="90%"><tr><td>
 <table border="0" cellspacing="0" cellpadding="0">
@@ -4404,7 +4404,7 @@ An example program using the C interface is at
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;examples/example_c.c
 
 </pre>
-and when the XRTM code is compiled properly the C example program should be compiled as
+and when the XRTM code is compiled properly the C example program will be compiled as
 
 <pre>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;examples/example_c

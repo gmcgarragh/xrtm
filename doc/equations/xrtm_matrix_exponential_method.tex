@@ -1,0 +1,512 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{Matrix exponetial method}
+\label{sec:mem}
+
+
+\subsection{Layer quantities}
+\label{sec:mem-layer_quantities}
+
+
+\subsubsection{Homogeneous solution}
+\label{sec:mem-layer_quantities-homogeneous_solution}
+
+
+\paragraph{Forward}
+\label{sec:mem-layer_quantities-homogeneous_solution-forward}
+
+\begin{equation}
+\boldsymbol{\alpha} = \mathrm{diag}(e^{-\nu_{i}\opticalthickness})
+\label{eq:mem-layer_quantities-homogeneous_solution-forward-alpha}
+\end{equation}
+
+\begin{equation}
+\mathbf{a} = \mathbf{X}_{+} - \mathbf{X}_{-}
+\label{eq:mem-layer_quantities-homogeneous_solution-forward-a}
+\end{equation}
+
+\begin{equation}
+\mathbf{b} = \mathbf{X}_{+} + \mathbf{X}_{-}
+\label{eq:mem-layer_quantities-homogeneous_solution-forward-b}
+\end{equation}
+
+\begin{equation}
+\mathbf{c} = \frac{1}{2} (\mathbf{a}^{-1} + \mathbf{b}^{-1})
+\label{eq:mem-layer_quantities-homogeneous_solution-forward-c}
+\end{equation}
+
+\begin{equation}
+\mathbf{d} = \frac{1}{2} (\mathbf{a}^{-1} - \mathbf{b}^{-1})
+\label{eq:mem-layer_quantities-homogeneous_solution-forward-d}
+\end{equation}
+
+\begin{equation}
+\mathbf{e} = \boldsymbol{\alpha}\mathbf{c}
+\label{eq:mem-layer_quantities-homogeneous_solution-forward-e}
+\end{equation}
+
+\begin{equation}
+\mathbf{f} = \boldsymbol{\alpha}\mathbf{d}
+\label{eq:mem-layer_quantities-homogeneous_solution-forward-f}
+\end{equation}
+
+\begin{equation}
+\mathbf{A}_{1} =
+\left[
+\begin{array}{rr}
+ \mathbf{e} &  \mathbf{f} \\
+-\mathbf{d} & -\mathbf{c}
+\end{array}
+\right]
+\label{eq:mem-layer_quantities-homogeneous_solution-forward-A1}
+\end{equation}
+
+\begin{equation}
+\mathbf{A}_{2} =
+\left[
+\begin{array}{rr}
+-\mathbf{c} & -\mathbf{d} \\
+ \mathbf{f} &  \mathbf{e}
+\end{array}
+\right]
+\label{eq:mem-layer_quantities-homogeneous_solution-forward-A2}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Tangent linear}
+\label{sec:mem-layer_quantities-homogeneous_solution-tangent_linear}
+
+\begin{equation}
+\mathcal{L}(\boldsymbol{\alpha}) = \mathrm{diag}\left\{\left[-\mathcal{L}(\nu_{i})\opticalthickness -\nu_{i}\mathcal{L}(\opticalthickness)\right] e^{-\nu_{i}\opticalthickness}\right\}
+\label{eq:mem-layer_quantities-homogeneous_solution-tangent_linear-alpha_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{a}) = \mathcal{L}(\mathbf{X}_{+}) - \mathcal{L}(\mathbf{X}_{-})
+\label{eq:mem-layer_quantities-homogeneous_solution-tangent_linear-a_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{b}) = \mathcal{L}(\mathbf{X}_{+}) + \mathcal{L}(\mathbf{X}_{-})
+\label{eq:mem-layer_quantities-homogeneous_solution-tangent_linear-b_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{a}^{-1}) = -\mathbf{a}^{-1}\mathcal{L}(\mathbf{a})\mathbf{a}^{-1}
+\label{eq:mem-layer_quantities-homogeneous_solution-tangent_linear-a_inv_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{b}^{-1}) = -\mathbf{b}^{-1}\mathcal{L}(\mathbf{b})\mathbf{b}^{-1}
+\label{eq:mem-layer_quantities-homogeneous_solution-tangent_linear-b_inv_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{c}) = \frac{1}{2} \left[\mathcal{L}(\mathbf{a}^{-1}) + \mathcal{L}(\mathbf{b}^{-1})\right]
+\label{eq:mem-layer_quantities-homogeneous_solution-tangent_linear-c_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{d}) = \frac{1}{2} \left[\mathcal{L}(\mathbf{a}^{-1}) - \mathcal{L}(\mathbf{b}^{-1})\right]
+\label{eq:mem-layer_quantities-homogeneous_solution-tangent_linear-d_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{e}) = \mathcal{L}(\boldsymbol{\alpha})\mathbf{c} + \boldsymbol{\alpha}\mathcal{L}(\mathbf{c})
+\label{eq:mem-layer_quantities-homogeneous_solution-tangent_linear-e_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{f}) = \mathcal{L}(\boldsymbol{\alpha})\mathbf{d} + \boldsymbol{\alpha}\mathcal{L}(\mathbf{d})
+\label{eq:mem-layer_quantities-homogeneous_solution-tangent_linear-f_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{A}_{1}) =
+\left[
+\begin{array}{rr}
+ \mathcal{L}(\mathbf{e}) &  \mathcal{L}(\mathbf{f}) \\
+-\mathcal{L}(\mathbf{d}) & -\mathcal{L}(\mathbf{c})
+\end{array}
+\right]
+\label{eq:mem-layer_quantities-homogeneous_solution-tangent_linear-A1_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{A}_{2}) =
+\left[
+\begin{array}{rr}
+-\mathcal{L}(\mathbf{c}) & -\mathcal{L}(\mathbf{d}) \\
+ \mathcal{L}(\mathbf{f}) &  \mathcal{L}(\mathbf{e})
+\end{array}
+\right]
+\label{eq:mem-layer_quantities-homogeneous_solution-tangent_linear-A2_l}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Adjoint of tangent linear}
+\label{sec:mem-layer_quantities-homogeneous_solution-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Particular solution}
+\label{sec:mem-layer_quantities-particular_solution}
+
+
+\paragraph{Forward}
+\label{sec:mem-layer_quantities-particular_solution-forward}
+
+\begin{equation}
+b_{1}(\nu_{i}\opticalthickness) = \frac{e^{-(\tau_{k} + \nu_{i}\opticalthickness)} - e^{-\tau_{k+1}}}{\tau_{k+1} - \tau_{k} - \nu_{i}\opticalthickness}
+\label{eq:mem-layer_quantities-particular_solution-forward-b1}
+\end{equation}
+
+\begin{equation}
+\boldsymbol{\beta_{1}} = \mathrm{diag}\left[b_{1}(\nu_{i}\opticalthickness)\right]
+\label{eq:mem-layer_quantities-particular_solution-forward-beta1}
+\end{equation}
+
+\begin{align}
+b_{2}(\nu_{i}\opticalthickness) &= \frac{e^{-(\tau_{k+1} + \nu_{i}\Delta\tau)} - e^{-\tau_{k}}}{\tau_{k} - \tau_{k+1} - \nu_{i}\Delta\tau} \\
+                                &= b_{1}(-\nu_{i}\opticalthickness)e^{-\nu_{i}\opticalthickness}
+\label{eq:mem-layer_quantities-particular_solution-forward-b2}
+\end{align}
+
+\begin{equation}
+\boldsymbol{\beta_{2}} = \mathrm{diag}\left[b_{2}(\nu_{i}\opticalthickness)\right]
+\label{eq:mem-layer_quantities-particular_solution-forward-beta2}
+\end{equation}
+
+\begin{equation}
+\mathbf{\Sigma}^{\pm} = \frac{F_{0}}{4 \pi} \mathbf{M}^{-1} \omega \mathbf{P}^{\pm}_{0}
+\label{eq:mem-layer_quantities-particular_solution-forward-Sigma}
+\end{equation}
+
+\begin{equation}
+\mathbf{o} = \boldsymbol{\beta_{1}}(\mathbf{c}\boldsymbol{\Sigma}^{+} + \mathbf{d}\boldsymbol{\Sigma}^{-})
+\label{eq:mem-layer_quantities-particular_solution-forward-o}
+\end{equation}
+
+\begin{equation}
+\mathbf{p} = \boldsymbol{\beta_{2}}(-\mathbf{d}\boldsymbol{\Sigma}^{+} + -\mathbf{c}\boldsymbol{\Sigma}^{-})
+\label{eq:mem-layer_quantities-particular_solution-forward-p}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Tangent linear}
+\label{sec:mem-layer_quantities-particular_solution-tangent_linear}
+
+\begin{adjustwidth}{-1in}{-1in}
+\center
+\begin{equation}
+\mathcal{L}\left[b_{1}(\nu_{i}\opticalthickness)\right] = \frac{\left[-\mathcal{L}(\tau_{k}) - \mathcal{L}(\nu_{i})\opticalthickness - \nu_{i}\mathcal{L}(\opticalthickness)\right]e^{-(\tau_{k} + \nu_{i}\opticalthickness)} + \mathcal{L}(\tau_{k+1})e^{-\tau_{k+1}} - \beta_{1} \left[\mathcal{L}(\tau_{k+1}) - \mathcal{L}(\tau_{k}) - \mathcal{L}(\nu_{i})\opticalthickness - \nu_{i}\mathcal{L}(\opticalthickness)\right]}{\tau_{k+1} - \tau_{k} - \nu_{i}\opticalthickness}
+\label{eq:mem-layer_quantities-particular_solution-tangent_linear-b1_l}
+\end{equation}
+\end{adjustwidth}
+
+\begin{equation}
+\mathcal{L}(\boldsymbol{\beta_{1}}) = \mathrm{diag}\left\{\mathcal{L}\left[b_{1}(\nu_{i}\opticalthickness)\right]\right\}
+\label{eq:mem-layer_quantities-particular_solution-tangent_linear-lambda1_l}
+\end{equation}
+
+\begin{adjustwidth}{-1in}{-1in}
+\center
+\begin{equation}
+\mathcal{L}\left[b_{2}(\nu_{i}\opticalthickness)\right] = \frac{\left[-\mathcal{L}(\tau_{k+1}) - \mathcal{L}(\nu_{i})\opticalthickness - \nu_{i}\mathcal{L}(\opticalthickness)\right]e^{-(\tau_{k+1} + \nu_{i}\opticalthickness)} + \mathcal{L}(\tau_{k})e^{-\tau_{k}} - \beta_{2} \left[\mathcal{L}(\tau_{k}) - \mathcal{L}(\tau_{k+1}) - \mathcal{L}(\nu_{i})\opticalthickness - \nu_{i}\mathcal{L}(\opticalthickness)\right]}{\tau_{k} - \tau_{k+1} - \nu_{i}\opticalthickness}
+\label{eq:mem-layer_quantities-particular_solution-tangent_linear-b2_l}
+\end{equation}
+\end{adjustwidth}
+
+\begin{equation}
+\mathcal{L}(\boldsymbol{\beta_{2}}) = \mathrm{diag}\left\{\mathcal{L}\left[b_{2}(\nu_{i}\opticalthickness)\right]\right\}
+\label{eq:mem-layer_quantities-particular_solution-tangent_linear-lambda2_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{\Sigma}^{\pm}) = \frac{F_{0}}{4 \pi} \mathbf{M}^{-1} \left[\mathcal{L}(\omega) \mathbf{P}^{\pm}_{0} + \omega \mathcal{L}(\mathbf{P}^{\pm}_{0})\right]
+\label{eq:mem-layer_quantities-particular_solution-tangent_linear-Sigma_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{o}) = \mathcal{L}(\boldsymbol{\beta_{1}})(\mathbf{c}\mathbf{g} + \mathbf{d}\mathbf{h}) + \boldsymbol{\beta_{1}}\left[\mathcal{L}(\mathbf{c})\mathbf{g} + \mathbf{c}\mathcal{L}(\mathbf{g}) + \mathcal{L}(\mathbf{d})\mathbf{h} + \mathbf{d}\mathcal{L}(\mathbf{h})\right]
+\label{eq:mem-layer_quantities-particular_solution-tangent_linear-o_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{p}) = \mathcal{L}(\boldsymbol{\beta_{2}})(\mathbf{d}\mathbf{g} + \mathbf{c}\mathbf{h}) + \boldsymbol{\beta_{2}}\left[\mathcal{L}(\mathbf{d})\mathbf{g} + \mathbf{d}\mathcal{L}(\mathbf{g}) + \mathcal{L}(\mathbf{c})\mathbf{h} + \mathbf{c}\mathcal{L}(\mathbf{h})\right]
+\label{eq:mem-layer_quantities-particular_solution-tangent_linear-p_l}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Adjoint of tangent linear}
+\label{sec:mem-layer_quantities-particular_solution-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Boundary value problem}
+\label{sec:mem-bvp}
+
+
+\subsubsection{Forward}
+\label{sec:mem-bvp-forward}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:mem-bvp-tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:mem-bvp-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Radiance}
+\label{sec:mem-radiance}
+
+
+\subsubsection{At levels}
+\label{sec:mem-radiance_at_levels}
+
+
+\paragraph{Forward}
+\label{sec:mem-radiance_at_levels-forward}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Tangent linear}
+\label{sec:mem-radiance_at_levels-tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Adjoint of tangent linear}
+\label{sec:mem-radiance_at_levels-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{At optical depth}
+\label{sec:mem-radiance_at_optical_depth}
+
+
+\paragraph{Forward}
+\label{sec:mem-radiance_at_optical_depth-forward}
+
+\begin{equation}
+\mathbf{a} = +(\mathbf{X}^{-1})_{11}\mathbf{I}^{+} + (\mathbf{X}^{-1})_{12}\mathbf{I}^{-}
+\label{eq:mem-radiance_at_optical_depth-forward-a}
+\end{equation}
+
+\begin{equation}
+\mathbf{b} = -(\mathbf{X}^{-1})_{12}\mathbf{I}^{+} - (\mathbf{X}^{-1})_{11}\mathbf{I}^{-}
+\label{eq:mem-radiance_at_optical_depth-forward-b}
+\end{equation}
+
+\begin{equation}
+\mathbf{c} = +(\mathbf{X}^{-1})_{11}\mathbf{\Sigma}^{+} + (\mathbf{X}^{-1})_{12}\mathbf{\Sigma}^{-}
+\label{eq:mem-radiance_at_optical_depth-forward-c}
+\end{equation}
+
+\begin{equation}
+\mathbf{d} = -(\mathbf{X}^{-1})_{12}\mathbf{\Sigma}^{+} - (\mathbf{X}^{-1})_{11}\mathbf{\Sigma}^{-}
+\label{eq:mem-radiance_at_optical_depth-forward-d}
+\end{equation}
+
+\begin{equation}
+\mathbf{d}_{1} = \mathrm{diag}(e^{-\nu_{i}\upsilon})
+\label{eq:mem-radiance_at_optical_depth-forward-d1}
+\end{equation}
+
+\begin{equation}
+\mathbf{d}_{2} = \mathrm{diag}\left[e^{-\nu_{i}(\opticalthickness - \upsilon)}\right]
+\label{eq:mem-radiance_at_optical_depth-forward-d2}
+\end{equation}
+
+\begin{equation}
+c_{1}(y) = \frac{e^{-(\tau_{k} + y)} - e^{-\left[(1 - \upsilon / \opticalthickness)\tau_{k} + (\upsilon / \opticalthickness)\tau_{k+1}\right]}}{\tau_{k+1} - \tau_{k} - \nu_{i}\opticalthickness}
+\label{eq:mem-radiance_at_optical_depth-forward-c1}
+\end{equation}
+
+\begin{equation}
+\mathbf{d}_{3} = \mathrm{diag}\left[-c_{1}(\nu_{i}\upsilon)\right]
+\label{eq:mem-radiance_at_optical_depth-forward-d3}
+\end{equation}
+
+\begin{equation}
+c_{2}(y) = \frac{e^{-(\tau_{k+1} + y)} - e^{-\left[(1 - \upsilon / \opticalthickness)\tau_{k} + (\upsilon / \opticalthickness)\tau_{k+1}\right]}}{\tau_{k} - \tau_{k+1} - \nu_{i}\opticalthickness}
+\label{eq:mem-radiance_at_optical_depth-forward-c1}
+\end{equation}
+
+\begin{equation}
+\mathbf{d}_{4} = \mathrm{diag}\left\{c_{2}\left[\nu_{i}(\opticalthickness - \upsilon)\right]\right\}
+\label{eq:mem-radiance_at_optical_depth-forward-d4}
+\end{equation}
+
+\begin{equation}
+\mathbf{g} = \mathbf{d}_{1}\mathbf{a}
+\label{eq:mem-radiance_at_optical_depth-forward-g}
+\end{equation}
+
+\begin{equation}
+\mathbf{h} = \mathbf{d}_{2}\mathbf{b}
+\label{eq:mem-radiance_at_optical_depth-forward-h}
+\end{equation}
+
+\begin{equation}
+\mathbf{o} = \mathbf{d}_{3}\mathbf{c}
+\label{eq:mem-radiance_at_optical_depth-forward-o}
+\end{equation}
+
+\begin{equation}
+\mathbf{d} = \mathbf{d}_{4}\mathbf{d}
+\label{eq:mem-radiance_at_optical_depth-forward-p}
+\end{equation}
+
+\begin{equation}
+\mathbf{I}^{+} = +\mathbf{X}_{+}(\mathbf{g} + \mathbf{o}) + \mathbf{X}_{-}(\mathbf{h} + \mathbf{p})
+\label{eq:mem-radiance_at_optical_depth-forward-I_p}
+\end{equation}
+
+\begin{equation}
+\mathbf{I}^{-} = -\mathbf{X}_{-}(\mathbf{g} + \mathbf{o}) - \mathbf{X}_{+}(\mathbf{h} + \mathbf{p})
+\label{eq:mem-radiance_at_optical_depth-forward-I_m}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Tangent linear}
+\label{sec:mem-radiance_at_optical_depth-tangent_linear}
+
+\begin{equation}
+\mathcal{L}(\mathbf{a}) = +\mathcal{L}(\mathbf{X}^{-1})_{11}\mathbf{I}^{+} + (\mathbf{X}^{-1})_{11}\mathbf{K}^{+} + \mathcal{L}(\mathbf{X}^{-1})_{12}\mathbf{I}^{-} + (\mathbf{X}^{-1})_{12}\mathbf{K}^{-}
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-a_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{b}) = -\mathcal{L}(\mathbf{X}^{-1})_{12}\mathbf{I}^{+} - (\mathbf{X}^{-1})_{12}\mathbf{K}^{+} - \mathcal{L}(\mathbf{X}^{-1})_{11}\mathbf{I}^{-} - (\mathbf{X}^{-1})_{11}\mathbf{K}^{-}
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-b_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{c}) = +\mathcal{L}(\mathbf{X}^{-1})_{11}\mathbf{\Sigma}^{+} + (\mathbf{X}^{-1})_{11}\mathcal{L}(\mathbf{\Sigma}^{+}) + \mathcal{L}(\mathbf{X}^{-1})_{12}\mathbf{\Sigma}^{-} + (\mathbf{X}^{-1})_{12}\mathcal{L}(\mathbf{\Sigma}^{-})
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-c_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{d}) = -\mathcal{L}(\mathbf{X}^{-1})_{12}\mathbf{\Sigma}^{+} - (\mathbf{X}^{-1})_{12}\mathcal{L}(\mathbf{\Sigma}^{+}) - \mathcal{L}(\mathbf{X}^{-1})_{11}\mathbf{\Sigma}^{-} - (\mathbf{X}^{-1})_{11}\mathcal{L}(\mathbf{\Sigma}^{-})
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-d_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{d}_{1}) = -\mathcal{L}(\nu_{i})\upsilon e^{-\nu_{i} \upsilon}
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-d1_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{d}_{2}) = -\left[\mathcal{L}(\nu_{i})(\opticalthickness - \upsilon) + \nu\mathcal{L}(\opticalthickness\right)] e^{-\nu_{i} (\opticalthickness - \upsilon)}
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-d2_l}
+\end{equation}
+
+\begin{adjustwidth}{-1.25in}{-1.25in}
+\center
+\begin{equation}
+\mathcal{L}(\alpha_{1})(y_{1}, y_{2}, y_{3}) = \left[-\mathcal{L}(\tau_{k}) - y_{2}\right] e^{-(\tau_{k} + y_{1})} + \left[\frac{\upsilon \mathcal{L}(\opticalthickness)}{(\opticalthickness)^{2}}\tau_{k} + (1 - \frac{\upsilon}{\opticalthickness})\mathcal{L}(\tau_{k}) - \frac{\upsilon \mathcal{L}(\opticalthickness)}{(\opticalthickness)^{2}}\tau_{k+1} + \frac{\upsilon}{\opticalthickness}\mathcal{L}(\opticalthickness_{k+1})\right] e^{-\left[(1 - \frac{\upsilon}{\opticalthickness})\tau_{k} + (\frac{\upsilon}{\opticalthickness})\tau_{k+1}\right]}
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-alpha1_l}
+\end{equation}
+\end{adjustwidth}
+
+\begin{equation}
+\mathcal{L}(c_{1})(y_{1}, y_{2}, y_{3}) = \frac{\mathcal{L}(\alpha_{1})(y_{1}, y_{2}, y_{3}) - y_{3}\left[\mathcal{L}(\tau_{k+1}) - \mathcal{L}(\tau_{k}) - \mathcal{L}(\nu_{i})\opticalthickness - \nu_{i}\mathcal{L}(\opticalthickness)\right]}{\tau_{k+1} - \tau_{k} - \nu_{i}\opticalthickness}
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-c1_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{d}_{3}) = \mathrm{diag}\left\{-\mathcal{L}(c_{1})\left[\nu_{i}\upsilon, \mathcal{L}(\nu_{i})\upsilon, \mathbf{d}_{3}\right]\right\}
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-d4_l}
+\end{equation}
+
+\begin{adjustwidth}{-1.25in}{-1.25in}
+\center
+\begin{equation}
+\mathcal{L}(\alpha_{2})(y_{1}, y_{2}, y_{3}) = \left[-\mathcal{L}(\tau_{k+1}) - y_{2}\right] e^{-(\tau_{k+1} + y_{1})} + \left[\frac{\upsilon \mathcal{L}(\opticalthickness)}{(\opticalthickness)^{2}}\tau_{k} + (1 - \frac{\upsilon}{\opticalthickness})\mathcal{L}(\tau_{k}) - \frac{\upsilon \mathcal{L}(\opticalthickness)}{(\opticalthickness)^{2}}\tau_{k+1} + \frac{\upsilon}{\opticalthickness}\mathcal{L}(\opticalthickness_{k+1})\right] e^{-\left[(1 - \frac{\upsilon}{\opticalthickness})\tau_{k} + (\frac{\upsilon}{\opticalthickness})\tau_{k+1}\right]}
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-alpha2_l}
+\end{equation}
+\end{adjustwidth}
+
+\begin{equation}
+\mathcal{L}(c_{2})(y_{1}, y_{2}, y_{3}) = \frac{\mathcal{L}(\alpha_{2})(y_{1}, y_{2}, y_{3}) - y_{3}\left[\mathcal{L}(\tau_{k}) - \mathcal{L}(\tau_{k+1}) - \mathcal{L}(\nu_{i})\opticalthickness - \nu_{i}\mathcal{L}(\opticalthickness)\right]}{\tau_{k} - \tau_{k+1} - \nu_{i}\opticalthickness}
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-c2_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{d}_{4}) = \mathrm{diag}\left\{\mathcal{L}(c_{2})\left[\nu_{i}(\opticalthickness - \upsilon), \mathcal{L}(\nu_{i})(\opticalthickness - \upsilon) + \nu_{i}\mathcal{L}(\opticalthickness), \mathbf{d}_{4}\right]\right\}
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-d4_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{g}) = \mathcal{L}(\mathbf{d}_{1})\mathbf{a} + \mathbf{d}_{1}\mathcal{L}(\mathbf{a})
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-g_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{h}) = \mathcal{L}(\mathbf{d}_{2})\mathbf{b} + \mathbf{d}_{2}\mathcal{L}(\mathbf{b})
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-h_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{o}) = \mathcal{L}(\mathbf{d}_{3})\mathbf{c} + \mathbf{d}_{3}\mathcal{L}(\mathbf{c})
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-o_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{p}) = \mathcal{L}(\mathbf{d}_{4})\mathbf{d} + \mathbf{d}_{3}\mathcal{L}(\mathbf{d})
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-o_l}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{+} = +\mathbf{Y}_{+}(\mathbf{g} + \mathbf{o}) + \mathbf{X}_{+}\left[\mathcal{L}(\mathbf{g}) + \mathcal{L}(\mathbf{o})\right] + \mathbf{Y}_{-}(\mathbf{h} + \mathbf{p}) + \mathbf{X}_{-}\left[\mathcal{L}(\mathbf{h}) + \mathcal{L}(\mathbf{p})\right]
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-K_p}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{-} = -\mathbf{Y}_{-}(\mathbf{g} + \mathbf{o}) - \mathbf{X}_{-}\left[\mathcal{L}(\mathbf{g}) + \mathcal{L}(\mathbf{o})\right] - \mathbf{Y}_{+}(\mathbf{h} + \mathbf{p}) - \mathbf{X}_{+}\left[\mathcal{L}(\mathbf{h}) + \mathcal{L}(\mathbf{p})\right]
+\label{eq:mem-radiance_at_optical_depth-tangent_linear-K_p}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Adjoint of tangent linear}
+\label{sec:mem-radiance_at_optical_depth-adjoint_of_tangent_linear}

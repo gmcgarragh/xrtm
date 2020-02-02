@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -71,9 +71,9 @@ void extended_trapezoidal_quad(int n, double a, double b, double *x, double *w) 
  *
  ******************************************************************************/
 static void gauss_leg_point(int n, int i, int ia, int ib,
-                           double da, double *y1_, double *p2_) {
+                            double da, double *y1_, double *p2_) {
 
-     /* Davis 1975 */
+     /* Davis 1975. page 95 */
 
      int j;
 
@@ -132,7 +132,7 @@ static void gauss_leg_point(int n, int i, int ia, int ib,
 
 void gauss_leg_quad(int n, double *x, double *w) {
 
-     /* Davis 1975 */
+     /* Davis 1975. page 95 */
 
      int i;
      int ii;
@@ -174,7 +174,7 @@ void gauss_leg_quad(int n, double *x, double *w) {
 
 void gauss_leg_quad2(int n, double *x, double *w) {
 
-     /* Davis 1975 */
+     /* Davis 1975. page 95 */
 
      int i;
      int ii;
@@ -232,7 +232,7 @@ void gauss_leg_quadx_l(int n, int n_derivs,
                        double x1, double x2, double *x1_l, double *x2_l,
                        double *x, double *w, double **x_l, double **w_l) {
 
-     /* Davis 1975 */
+     /* Davis 1975. page 95 */
 
      int i;
      int ii;
@@ -256,9 +256,11 @@ void gauss_leg_quadx_l(int n, int n_derivs,
 
      double p2;
 
-     db_l = alloc_array1_d(n_derivs);
-     dc_l = alloc_array1_d(n_derivs);
-     
+     if (n_derivs > 0) {
+          db_l = alloc_array1_d(n_derivs);
+          dc_l = alloc_array1_d(n_derivs);
+     }
+
      nn = (n + 1) / 2;
 
      ia = 4 * n + 2;
@@ -307,8 +309,10 @@ void gauss_leg_quadx_l(int n, int n_derivs,
           ii--;
      }
 
-     free_array1_d(db_l);
-     free_array1_d(dc_l);
+     if (n_derivs > 0) {
+          free_array1_d(db_l);
+          free_array1_d(dc_l);
+     }
 }
 
 
@@ -340,8 +344,10 @@ void gauss_leg_quad_fit_l(int n, int n_derivs,
      double dd;
      double dd_l;
 
-     db_l = alloc_array1_d(n_derivs);
-     dc_l = alloc_array1_d(n_derivs);
+     if (n_derivs > 0) {
+          db_l = alloc_array1_d(n_derivs);
+          dc_l = alloc_array1_d(n_derivs);
+     }
 
      nn = (n + 1) / 2;
 
@@ -374,8 +380,10 @@ void gauss_leg_quad_fit_l(int n, int n_derivs,
           ii--;
      }
 
-     free_array1_d(db_l);
-     free_array1_d(dc_l);
+     if (n_derivs > 0) {
+          free_array1_d(db_l);
+          free_array1_d(dc_l);
+     }
 }
 
 
@@ -390,7 +398,7 @@ int simpsons_rule_quad(int n, double a, double b, double *x, double *w) {
      double f;
 
      if (n % 2 == 0) {
-          eprintf("ERROR: number of points for Simpson's rule must be odd\n");
+          fprintf(stderr, "ERROR: number of points for Simpson's rule must be odd\n");
           return -1;
      }
 
@@ -468,7 +476,7 @@ void leg_poly(int n_l, double mu, double *p) {
 
 void leg_poly2(int n_mu, int n_l, double *mu, double **p) {
 
-     /* Davis 1975 */
+     /* Davis 1975. page 95 */
 
      int i;
      int j;
@@ -945,35 +953,35 @@ void gen_spher_funcs_prt2(int n_mu, int n_l, double *mu,
      double db_2x2;
      double dc_2x2;
 
-     da_0p2 = 0.25 * sqrt(6.);
+     da_0p2 = .25 * sqrt(6.);
 
      for (i = 0; i < n_mu; ++i) {
-           mu2 = mu[i]*mu[i];
+          mu2 = mu[i]*mu[i];
 
-           if (n_l > 0) {
-                 p00[i][0] = 1.;
-                 p0p2[i][0] = 0.;
-                 p2p2[i][0] = 0.;
-                 p2m2[i][0] = 0.;
-           }
+          if (n_l > 0) {
+               p00[i][0] = 1.;
+               p0p2[i][0] = 0.;
+               p2p2[i][0] = 0.;
+               p2m2[i][0] = 0.;
+          }
 
-           if (n_l > 1) {
-                 p00[i][1] = mu[i];
-                 p0p2[i][1] = 0.;
-                 p2p2[i][1] = 0.;
-                 p2m2[i][1] = 0.;
-           }
+          if (n_l > 1) {
+               p00[i][1] = mu[i];
+               p0p2[i][1] = 0.;
+               p2p2[i][1] = 0.;
+               p2m2[i][1] = 0.;
+          }
 
-           if (n_l > 2) {
-                 p00[i][2] = (3. * mu2 - 1.) / 2.;
-                 p0p2[i][2] = da_0p2 * (mu2 - 1.);
+          if (n_l > 2) {
+               p00[i][2] = (3. * mu2 - 1.) / 2.;
+               p0p2[i][2] = da_0p2 * (mu2 - 1.);
 
-                 da = (1. + mu[i]);
-                 p2p2[i][2] = 0.25 * da*da;
+               da = (1. + mu[i]);
+               p2p2[i][2] = 0.25 * da*da;
 
-                 da = (1. - mu[i]);
-                 p2m2[i][2] = 0.25 * da*da;
-           }
+               da = (1. - mu[i]);
+               p2m2[i][2] = 0.25 * da*da;
+          }
      }
 
      for (j = 2; j < n_l - 1; ++j) {

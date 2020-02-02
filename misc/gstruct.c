@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 1998-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 1998-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -41,17 +41,19 @@
 #define HTREE_USE_SUB_LIST
 #endif
 */
+/*
 #ifndef HTREE_USE_SUB_TREE
 #define HTREE_USE_SUB_TREE
 #endif
-
+*/
 #define IMPLEMENTATION
 #include "gstruct_aatree.h"
-
 /*
 #include "gstruct_btree.h"
 #include "gstruct_dlist.h"
+*/
 #include "gstruct_dclist.h"
+/*
 #include "gstruct_htree.h"
 #include "gstruct_queue.h"
 #include "gstruct_slist.h"

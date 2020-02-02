@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -11,6 +11,7 @@
 
 #include "rtutil_math.h"
 #include "rtutil_size_dist.h"
+#include "zeroin.h"
 
 
 /*******************************************************************************
@@ -18,6 +19,9 @@
  ******************************************************************************/
 int get_particle_dist_n(enum size_dist_type dist_type, int n_int1, int n_int2, int n_quad) {
 
+     if (dist_type == SIZE_DIST_MONO)
+          return 1;
+     else
      if (dist_type == SIZE_DIST_MODIFIED_GAMMA)
           return n_int2 * n_quad;
      else
@@ -39,7 +43,7 @@ int get_particle_dist_n(enum size_dist_type dist_type, int n_int1, int n_int2, i
      if (dist_type == SIZE_DIST_EXPONENTIAL)
           return n_int2 * n_quad;
      else {
-          eprintf("ERROR: Invalid distribution type: %d\n", dist_type);
+          fprintf(stderr, "ERROR: Invalid distribution type: %d\n", dist_type);
           return -1;
      }
 }
@@ -49,6 +53,7 @@ int get_particle_dist_n(enum size_dist_type dist_type, int n_int1, int n_int2, i
 /*******************************************************************************
  *
  ******************************************************************************/
+/*
 static double zeroin_func(double *r1, double *data) {
 
      double r2;
@@ -83,6 +88,36 @@ void get_power_law_range(double a1, double b1, double *r1, double *r2) {
      *r1 = zeroin_(&a, &a1, zeroin_func, data, &b);
 
      *r2 = (1. + b1) * 2. * a1 - *r1;
+}
+*/
+
+
+static double zeroin_func(double r1, double *data) {
+
+     double r2;
+
+     r2 = (1. + data[1]) * 2. * data[0] - r1;
+
+     return (r2 - r1) / log(r2 / r1) - data[0];
+}
+
+
+
+void get_power_law_range(double a1, double a2, double *r1, double *r2) {
+
+     double a;
+     double b;
+
+     double data[2];
+
+     data[0] = a1;
+     data[1] = a2;
+
+     a = DBL_EPSILON;
+     b = 0.;
+     *r1 = zeroin(a, a1, zeroin_func, data, b);
+
+     *r2 = (1. + a2) * 2. * a1 - *r1;
 }
 
 
@@ -164,10 +199,10 @@ static void get_particle_dist_quad(int n_int, int n_quad, int n_derivs,
  ******************************************************************************/
 int get_particle_dist(enum size_dist_type dist_type,
                       int n_int1, int n_int2, int n_quad, int n_derivs,
-                      double a1, double b1, double a2, double b2,
-                      double gamma, double r1, double r2,
-                      double *a1_l, double *b1_l, double *a2_l, double *b2_l,
-                      double *gamma_l, double *r1_l, double *r2_l,
+                      double a1, double a2, double a3, double a4,
+                      double a5, double r1, double r2,
+                      double *a1_l, double *a2_l, double *a3_l, double *a4_l,
+                      double *a5_l, double *r1_l, double *r2_l,
                       double *qx, double *qw, double *nr,
                       double *r1_, double *r2_,
                       double **qx_l, double **qw_l,double **nr_l,
@@ -229,6 +264,35 @@ int get_particle_dist(enum size_dist_type dist_type,
           c_2_l = alloc_array1_d(n_derivs);
      }
 
+     if (dist_type == SIZE_DIST_MONO) {
+          n_qsiz = 1;
+
+          *r1_ = a1;
+          *r2_ = a1;
+          for (i = 0; i < n_derivs; ++i) {
+               r1_l_[i] = 0.;
+               r2_l_[i] = 0.;
+          }
+
+          qx[0] = a1;
+          qw[0] = 1.;
+
+          for (i = 0; i < n_derivs; ++i) {
+               qx_l[0][i] = a1_l[i];
+               qw_l[0][i] = 0.;
+          }
+
+          a = 1.;
+
+          for (i = 0; i < n_derivs; ++i)
+               a_l[i] = 0.;
+
+          nr[0] = 1.;
+
+          for (i = 0; i < n_derivs; ++i)
+               nr_l[0][i] = 0.;
+     }
+     else
      if (dist_type == SIZE_DIST_MODIFIED_GAMMA) {
           n_qsiz = n_int2 * n_quad;
 
@@ -244,21 +308,21 @@ int get_particle_dist(enum size_dist_type dist_type,
 
           a = 0.;
 
-          b = pow(b1, gamma);
-          c = gamma * b;
+          b = pow(a2, a3);
+          c = a3 * b;
           d = b / c;
-          e = gamma / b1;
-          f = log(b1);
+          e = a3 / a2;
+          f = log(a2);
           g = a1 / c;
 
           for (i = 0; i < n_derivs; ++i) {
                a_l[i] = 0.;
 
-               c_l[i] = gamma_l[i] * d + (b1_l[i] * e + gamma_l[i] * f);
+               c_l[i] = a3_l[i] * d + (a2_l[i] * e + a3_l[i] * f);
           }
 
           for (i = 0; i < n_qsiz; ++i) {
-               h = pow(qx[i], gamma);
+               h = pow(qx[i], a3);
 
                nr[i] = pow(qx[i], a1) * exp(-g * h);
 
@@ -271,7 +335,7 @@ int get_particle_dist(enum size_dist_type dist_type,
                     p = qx_l[i][j] / qx[i];
 
                     nr_l[i][j] = nr[i] * ((p * a1 + a1_l[j] * o) + h * ((-a1_l[j] +
-                                 a1 * (-(p * gamma + gamma_l[j] * o) + c_l[j])) / c));
+                                 a1 * (-(p * a3 + a3_l[j] * o) + c_l[j])) / c));
                     a_l[j] += nr_l[i][j] * qw[i] + nr[i] * qw_l[i][j];
                }
           }
@@ -293,13 +357,13 @@ int get_particle_dist(enum size_dist_type dist_type,
           a = 0.;
 
           b = log(a1);
-          c = 2. * b1;
+          c = 2. * a2;
 
           for (i = 0; i < n_derivs; ++i) {
                a_l[i] = 0.;
 
                b_l[i] = a1_l[i] / a1;
-               c_l[i] = 2. * b1_l[i];
+               c_l[i] = 2. * a2_l[i];
           }
 
           for (i = 0; i < n_qsiz; ++i) {
@@ -321,7 +385,7 @@ int get_particle_dist(enum size_dist_type dist_type,
      if (dist_type == SIZE_DIST_POWER_LAW) {
           n_qsiz = n_int2 * n_quad;
 
-          get_power_law_range(a1, b1, r1_, r2_);
+          get_power_law_range(a1, a2, r1_, r2_);
 
           for (i = 0; i < n_derivs; ++i) {
                /* from the system of the 2 equations in the function f */
@@ -330,7 +394,7 @@ int get_particle_dist(enum size_dist_type dist_type,
                c =  a - (*r2_ - *r1_) / *r2_;
                a = a1_l[i] * a * a;
 
-               d = b1_l[i] * 2. * a1 + (1. + b1) * 2. * a1_l[i];
+               d = a2_l[i] * 2. * a1 + (1. + a2) * 2. * a1_l[i];
 
                r1_l_[i] = (c * d - a) / (c - b);
                r2_l_[i] = (b * d - a) / (b - c);
@@ -370,14 +434,14 @@ int get_particle_dist(enum size_dist_type dist_type,
 
           a = 0.;
 
-          b = a1 * b1;
-          c = (1. - 3. * b1) / b1;
+          b = a1 * a2;
+          c = (1. - 3. * a2) / a2;
 
           for (i = 0; i < n_derivs; ++i) {
                a_l[i] = 0.;
 
-               b_l[i] =  a1_l[i] * b1 + a1 * b1_l[i];
-               c_l[i] = (-3. * b1_l[i] - c * b1_l[i]) / b1;
+               b_l[i] =  a1_l[i] * a2 + a1 * a2_l[i];
+               c_l[i] = (-3. * a2_l[i] - c * a2_l[i]) / a2;
           }
 
           for (i = 0; i < n_qsiz; ++i) {
@@ -438,12 +502,12 @@ int get_particle_dist(enum size_dist_type dist_type,
           for (     ; i < n_qsiz ; ++i) {
                b = qx[i] / *r1_;
 
-               nr[i] = pow(b, b1);
+               nr[i] = pow(b, a1);
                a += nr[i] * qw[i];
 
                for (j = 0; j < n_derivs; ++j) {
                     nr_l[i][j] = nr[i] * ((qx_l[i][j] - b * r1_l_[j]) / *r1_ *
-                                 b1 / b + b1_l[j] * log(b));
+                                 a1 / b + a1_l[j] * log(b));
                     a_l[j] += nr_l[i][j] * qw[i] + nr[i] * qw_l[i][j];
                }
           }
@@ -465,19 +529,19 @@ int get_particle_dist(enum size_dist_type dist_type,
           a = 0.;
 
           b_1 = log(a1);
-          c_1 = 2. * b1;
+          c_1 = 2. * a2;
 
-          b_2 = log(a2);
-          c_2 = 2. * b2;
+          b_2 = log(a3);
+          c_2 = 2. * a4;
 
           for (i = 0; i < n_derivs; ++i) {
                a_l[i] = 0.;
 
                b_1_l[i] = a1_l[i] / a1;
-               c_1_l[i] = 2. * b1_l[i];
+               c_1_l[i] = 2. * a2_l[i];
 
-               b_2_l[i] = a2_l[i] / a2;
-               c_2_l[i] = 2. * b2_l[i];
+               b_2_l[i] = a3_l[i] / a3;
+               c_2_l[i] = 2. * a4_l[i];
           }
 
           for (i = 0; i < n_qsiz; ++i) {
@@ -493,7 +557,7 @@ int get_particle_dist(enum size_dist_type dist_type,
                f  = qx[i] * qx[i];
                f2 = f * f;
 
-               nr[i] = (o_1 + gamma * o_2) / f2;
+               nr[i] = (o_1 + a5 * o_2) / f2;
                a += nr[i] * qw[i];
 
                d_1 *= 2.;
@@ -510,7 +574,7 @@ int get_particle_dist(enum size_dist_type dist_type,
                     h_1 = ((-g + b_1_l[j]) * d_1 + e_1 * c_1_l[j]) * o_1;
                     h_2 = ((-g + b_2_l[j]) * d_2 + e_2 * c_2_l[j]) * o_2;
 
-                    nr_l[i][j] = (h_1 + gamma_l[j] * exp(-e_2) + gamma * h_2 -
+                    nr_l[i][j] = (h_1 + a5_l[j] * exp(-e_2) + a5 * h_2 -
                                   p * qx_l[i][j]) / f2;
 
                     a_l[j] += nr_l[i][j] * qw[i] + nr[i] * qw_l[i][j];
@@ -542,7 +606,7 @@ int get_particle_dist(enum size_dist_type dist_type,
 
                for (j = 0; j < n_derivs; ++j) {
 /*
-                    nr_l[i][j] = 
+                    nr_l[i][j] =
 
                     a_l[j] += nr_l[i][j] * qw[i] + nr[i] * qw_l[i][j];
 */
@@ -550,7 +614,7 @@ int get_particle_dist(enum size_dist_type dist_type,
           }
      }
      else {
-          eprintf("ERROR: Invalid distribution type: %d\n", dist_type);
+          fprintf(stderr, "ERROR: Invalid distribution type: %d\n", dist_type);
           return -1;
      }
 

@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -60,7 +60,7 @@ void pade_get_s_and_r(double **r_, double **t_, int n_quad,
           i = 0;
      else
      if (i > pade_table_n_ltaus) {
-          eprintf("ERROR: pade_get_s_and_r(): ltau index too high\n");
+          fprintf(stderr, "ERROR: pade_get_s_and_r(): ltau index too high\n");
           exit(1);
      }
 
@@ -70,7 +70,7 @@ void pade_get_s_and_r(double **r_, double **t_, int n_quad,
      if (j < 0)
           j = 0;
      if (j > pade_table_n_angles - 1) {
-          eprintf("ERROR: pade_get_s_and_r(): angle index too high\n");
+          fprintf(stderr, "ERROR: pade_get_s_and_r(): angle index too high\n");
           exit(1);
      }
 
@@ -1964,7 +1964,7 @@ else {
           *condition = aa;
 /*
           if (aa < DBL_EPSILON) {
-               eprintf("ERROR: pade condition < machine precision\n");
+               fprintf(stderr, "ERROR: pade condition < machine precision\n");
                return -1;
           }
 */
@@ -2281,20 +2281,21 @@ else {
  ******************************************************************************/
 void rtm_pade_rts2(int n_quad, int n_stokes, int n_derivs, double F_0,
                   double *qxv, double *qwv, double *umus, int n_umus,
-                  double planck0, double planck1,
+                  double planck0, double planck1, double *planck0_l, double *planck1_l,
                   double omega, double *omega_l, double ltau, double *ltau_l,
                   double as_0, double *as_0_l, double atran, double *atran_l,
-                  double  *P_0p, double  *P_0m,
+                  double  *P_x0_p, double  *P_x0_m,
                   double  **r_p, double  **t_p, double  **r_m, double  **t_m,
                   double  **R_p, double  **T_p, double  **R_m, double  **T_m,
-                  double  *S_p, double  *S_m,
-                  double **P_0p_l, double **P_0m_l,
+                  double  *S_p, double  *S_m, double  *Sl_p, double  *Sl_m,
+                  double **P_x0_p_l, double **P_x0_m_l,
                   double ***r_p_l, double ***t_p_l, double ***r_m_l, double ***t_m_l,
                   double ***R_p_l, double ***T_p_l, double ***R_m_l, double ***T_m_l,
-                  double **S_p_l, double **S_m_l,
+                  double **S_p_l, double **S_m_l, double **Sl_p_l, double **Sl_m_l,
                   int pade_s, int pade_r, int check_condition, int symmetric,
-                  int thermal, int vector, double *condition,
-                  uchar *derivs_h, uchar *derivs_p, save_tree_data save_tree, work_data work) {
+                  int solar, int thermal, int vector, int gamma_init, double *condition,
+                  uchar *derivs_layers, uchar *derivs_beam, uchar *derivs_thermal,
+                  uchar *derivs_sources, save_tree_data save_tree, work_data work) {
 
      int i;
      int ii;
@@ -2322,16 +2323,18 @@ void rtm_pade_rts2(int n_quad, int n_stokes, int n_derivs, double F_0,
      double *F_p;
      double *F_m;
 
-     double *F0_p;
-     double *F0_m;
-     double *F1_p;
-     double *F1_m;
-
-     double *St_p;
-     double *St_m;
+     double *Ft0_p;
+     double *Ft0_m;
+     double *Ft1_p;
+     double *Ft1_m;
 
      double **F_p_l;
      double **F_m_l;
+
+     double **Ft0_p_l;
+     double **Ft0_m_l;
+     double **Ft1_p_l;
+     double **Ft1_m_l;
 
      double **tpr;
      double **tmr;
@@ -2390,7 +2393,7 @@ void rtm_pade_rts2(int n_quad, int n_stokes, int n_derivs, double F_0,
       *
       *-----------------------------------------------------------------------*/
      if (pade_s < 0 || pade_r <= 0)
-          pade_get_s_and_r(r_p, t_p, n_quad_v, ltau, n_umus, umus, &pade_s, &pade_r, flags_or(derivs_p, n_derivs));
+          pade_get_s_and_r(r_p, t_p, n_quad_v, ltau, n_umus, umus, &pade_s, &pade_r, flags_or(derivs_layers, n_derivs));
 
      pade_coefs_x(pade_r, pade_r, 1., pade_c);
 
@@ -2408,17 +2411,16 @@ void rtm_pade_rts2(int n_quad, int n_stokes, int n_derivs, double F_0,
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     F_p = get_work1(&work, WORK_DX);
-     F_m = get_work1(&work, WORK_DX);
+     if (solar) {
+          F_p = get_work1(&work, WORK_DX);
+          F_m = get_work1(&work, WORK_DX);
+     }
 
      if (thermal) {
-          F0_p = get_work1(&work, WORK_DX);
-          F0_m = get_work1(&work, WORK_DX);
-          F1_p = get_work1(&work, WORK_DX);
-          F1_m = get_work1(&work, WORK_DX);
-
-          St_p = get_work1(&work, WORK_DX);
-          St_m = get_work1(&work, WORK_DX);
+          Ft0_p = get_work1(&work, WORK_DX);
+          Ft0_m = get_work1(&work, WORK_DX);
+          Ft1_p = get_work1(&work, WORK_DX);
+          Ft1_m = get_work1(&work, WORK_DX);
      }
 
      tpr = get_work1(&work, WORK_DXX);
@@ -2440,17 +2442,28 @@ void rtm_pade_rts2(int n_quad, int n_stokes, int n_derivs, double F_0,
      R_m2 = get_work_d2_d(&work, n_quad_v2, n_quad_v2, n_umus_v2);
      T_m2 = get_work_d2_d(&work, n_quad_v2, n_quad_v2, n_umus_v2);
 
-     if (flags_or(derivs_p, n_derivs)) {
-          F_p_l = get_work2(&work, WORK_DX, WORK_DERIVS_V, derivs_p);
-          F_m_l = get_work2(&work, WORK_DX, WORK_DERIVS_V, derivs_p);
+     if (solar) {
+          if (flags_or(derivs_beam, n_derivs)) {
+               F_p_l = get_work2(&work, WORK_DX, WORK_DERIVS_V, derivs_beam);
+               F_m_l = get_work2(&work, WORK_DX, WORK_DERIVS_V, derivs_beam);
+          }
      }
 
-     if (flags_or(derivs_h, n_derivs)) {
-          tpr_l = get_work2(&work, WORK_DXX, WORK_DERIVS_V, derivs_h);
-          tmr_l = get_work2(&work, WORK_DXX, WORK_DERIVS_V, derivs_h);
+     if (thermal) {
+          if (flags_or(derivs_thermal, n_derivs)) {
+               Ft0_p_l = get_work2(&work, WORK_DX, WORK_DERIVS_V, derivs_thermal);
+               Ft0_m_l = get_work2(&work, WORK_DX, WORK_DERIVS_V, derivs_thermal);
+               Ft1_p_l = get_work2(&work, WORK_DX, WORK_DERIVS_V, derivs_thermal);
+               Ft1_m_l = get_work2(&work, WORK_DX, WORK_DERIVS_V, derivs_thermal);
+          }
+     }
+
+     if (flags_or(derivs_layers, n_derivs)) {
+          tpr_l = get_work2(&work, WORK_DXX, WORK_DERIVS_V, derivs_layers);
+          tmr_l = get_work2(&work, WORK_DXX, WORK_DERIVS_V, derivs_layers);
 
           B12 = get_work_d2_d2(&work, n_derivs, n_quad_v2, n_quad_v2, n_umus_v2);
-          B21 = get_work_d2_d2(&work, n_derivs, n_quad_v2, n_quad_v2, n_umus_v2); 
+          B21 = get_work_d2_d2(&work, n_derivs, n_quad_v2, n_quad_v2, n_umus_v2);
 
           O11 = get_work_d2_d2(&work, n_derivs, n_quad_v2, n_quad_v2, n_umus_v2);
           O12 = get_work_d2_d2(&work, n_derivs, n_quad_v2, n_quad_v2, n_umus_v2);
@@ -2470,7 +2483,7 @@ void rtm_pade_rts2(int n_quad, int n_stokes, int n_derivs, double F_0,
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     build_txr(n_quad, n_stokes, n_derivs, r_p, t_p, tpr, tmr, r_p_l, t_p_l, tpr_l, tmr_l, derivs_h, work);
+     build_txr(n_quad, n_stokes, n_derivs, r_p, t_p, tpr, tmr, r_p_l, t_p_l, tpr_l, tmr_l, derivs_layers, work);
 
 
      /*-------------------------------------------------------------------------
@@ -2504,9 +2517,9 @@ void rtm_pade_rts2(int n_quad, int n_stokes, int n_derivs, double F_0,
           }
      }
 
-     if (flags_or(derivs_h, n_derivs)) {
+     if (flags_or(derivs_layers, n_derivs)) {
           for (i = 0; i < n_derivs; ++i) {
-               if (! derivs_h[i])
+               if (! derivs_layers[i])
                     continue;
 
                b = ltau_l[i] / m_pade;
@@ -2546,13 +2559,13 @@ void rtm_pade_rts2(int n_quad, int n_stokes, int n_derivs, double F_0,
                           pade_c, pade_r, A12, A21, B12, B21,
                           N11, N12, N21, N22, D11, D12, D21, D22,
                           O11, O12, O21, O22, E11, E12, E21, E22,
-                          derivs_h, work);
+                          derivs_layers, work);
      else
           calc_n_d_sym_3(n_quad2, n_umus2, n_stokes, n_derivs,
                           pade_c, pade_r, A12, A21, B12, B21,
                           N11, N12, N21, N22, D11, D12, D21, D22,
                           O11, O12, O21, O22, E11, E12, E21, E22,
-                          derivs_h, work);
+                          derivs_layers, work);
 
 
      /*-------------------------------------------------------------------------
@@ -2561,9 +2574,9 @@ void rtm_pade_rts2(int n_quad, int n_stokes, int n_derivs, double F_0,
      reduced_recover(N11, N12, N21, N22, D11, D12, D21, D22,
                      N11, N12, N21, N22, D11, D12, D21, D22, n_quad_v2, n_umus_v2);
 
-     if (flags_or(derivs_h, n_derivs)) {
+     if (flags_or(derivs_layers, n_derivs)) {
           for (i = 0; i < n_derivs; ++i) {
-               if (! derivs_h[i])
+               if (! derivs_layers[i])
                     continue;
 
                reduced_recover(O11[i], O12[i], O21[i], O22[i], E11[i], E12[i], E21[i], E22[i],
@@ -2590,21 +2603,21 @@ void rtm_pade_rts2(int n_quad, int n_stokes, int n_derivs, double F_0,
                          O11, O12, O21, O22, E11, E12, E21, E22,
                          R_p_l2, T_p_l2, R_m_l2, T_m_l2,
                          n_quad, n_stokes, n_derivs,
-                         check_condition, 1, symmetric2, 0, condition, derivs_h, work);
+                         check_condition, 1, symmetric2, 0, condition, derivs_layers, work);
 */
      pade_calc_R_and_T_2(N11, N12, N21, N22, D11, D12, D21, D22,
                          NONE, NONE, R_m2, T_m2,
                          O11, O12, O21, O22, E11, E12, E21, E22,
                          NULL, NULL, R_m_l2, T_m_l2,
                          n_quad2, n_stokes, n_derivs,
-                         check_condition, 1, symmetric2, 0, condition, derivs_h, work, n_umus2);
+                         check_condition, 1, symmetric2, 0, condition, derivs_layers, work, n_umus2);
 
      matd1d2_to_matrix(R_m2, R_p, n_quad_v2, n_umus_v2);
      matd1d2_to_matrix(T_m2, T_p, n_quad_v2, n_umus_v2);
 
-     if (flags_or(derivs_h, n_derivs)) {
+     if (flags_or(derivs_layers, n_derivs)) {
           for (i = 0; i < n_derivs; ++i) {
-               if (! derivs_h[i])
+               if (! derivs_layers[i])
                     continue;
 
                matd1d2_to_matrix(R_m_l2[i], R_p_l[i], n_quad_v2, n_umus_v2);
@@ -2618,22 +2631,16 @@ void rtm_pade_rts2(int n_quad, int n_stokes, int n_derivs, double F_0,
       *-----------------------------------------------------------------------*/
      for (i = 0; i < pade_s; ++i) {
           if (! symmetric2) {
-               if (! flags_or(derivs_h, n_derivs))
-                    layer_double  (R_p, T_p, NULL, NULL, NULL, NULL,
-                                   n_quad_v, 0., 0., 0, 0, i == 0, work);
+               if (! flags_or(derivs_layers, n_derivs))
+                    layer_double  (R_p, T_p, NULL, NULL, NULL, NULL, NULL, NULL, n_quad_v, 0., 0., 0, 0, i == 0, work);
                else
-                    layer_double_l(R_p, T_p, NULL, NULL,
-                                   R_p_l, T_p_l, NULL, NULL,
-                                   n_quad_v, n_derivs, 0., NULL, derivs_h, NULL, work);
+                    layer_double_l(R_p, T_p, NULL, NULL, NULL, NULL, NULL, NULL, R_p_l, T_p_l, NULL, NULL, NULL, NULL, NULL, NULL, n_quad_v, n_derivs, 0., NULL, 0., NULL, 0, 0, i == 0, derivs_layers, NULL, NULL, work);
           }
           else {
-               if (! flags_or(derivs_h, n_derivs))
-                    layer_double_s  (R_p, T_p, NULL, NULL,
-                                     n_quad_v, 0., work);
+               if (! flags_or(derivs_layers, n_derivs))
+                    layer_double_s  (R_p, T_p, NULL, NULL, NULL, NULL, NULL, NULL, n_quad_v, 0., 0., 0, 0, i == 0, work);
                else
-                    layer_double_s_l(R_p, T_p, NULL, NULL,
-                                     R_p_l, T_p_l, NULL, NULL,
-                                     n_quad_v, n_derivs, 0., NULL, derivs_h, NULL, work);
+                    layer_double_s_l(R_p, T_p, NULL, NULL, NULL, NULL, NULL, NULL, R_p_l, T_p_l, NULL, NULL, NULL, NULL, NULL, NULL, n_quad_v, n_derivs, 0., NULL, 0., NULL, 0, 0, i == 0, derivs_layers, NULL, NULL, work);
           }
      }
 
@@ -2645,9 +2652,9 @@ void rtm_pade_rts2(int n_quad, int n_stokes, int n_derivs, double F_0,
           dmat_mul_D_A(n_quad, n_stokes, R_p, R_p);
           phase_matrix_symmetry2(n_quad, n_stokes, T_p, R_p, T_m, R_m, 1.);
 
-          if (flags_or(derivs_h, n_derivs)) {
+          if (flags_or(derivs_layers, n_derivs)) {
                for (i = 0; i < n_derivs; ++i) {
-                    if (! derivs_h[i])
+                    if (! derivs_layers[i])
                     continue;
 
                     dmat_mul_D_A(n_quad, n_stokes, R_p_l[i], R_p_l[i]);
@@ -2660,56 +2667,44 @@ void rtm_pade_rts2(int n_quad, int n_stokes, int n_derivs, double F_0,
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-if (1) {
-     gamma = get_work1(&work, WORK_DXX);
+     if (solar) {
+          if (! CLASSICAL_PARTICULAR_SOLUTION_USE_2D) {
+               gamma = get_work1(&work, WORK_DXX);
 
-     if (flags_or(derivs_h, n_derivs))
-          gamma_l = get_work2(&work, WORK_DXX, WORK_DERIVS_V, derivs_h);
+               if (flags_or(derivs_layers, n_derivs))
+                    gamma_l = get_work2(&work, WORK_DXX, WORK_DERIVS_V, derivs_layers);
 
-     build_gamma(n_quad_v, n_derivs, tpr, tmr, gamma, tpr_l, tmr_l, gamma_l, derivs_h, work);
+               if (gamma_init)
+                    dmat_init(gamma, n_quad_v, n_quad_v, 1.);
+               else
+                    build_gamma(n_quad_v, n_derivs, tpr, tmr, gamma, tpr_l, tmr_l, gamma_l, derivs_layers, work);
 
-     build_source_vectors_1n(n_quad, n_stokes, n_derivs, qxv, F_0, omega, omega_l, as_0, as_0_l, P_0p, P_0m, tpr, tmr, gamma, F_p, F_m, P_0p_l, P_0m_l, tpr_l, tmr_l, gamma_l, F_p_l, F_m_l, derivs_h, derivs_p, save_tree, work);
-}
-else {
-     if (! vector)
-          build_source_vectors_2n(n_quad_v, n_derivs, qxv, F_0, omega, omega_l, as_0, as_0_l, P_0p, P_0m, r_p, t_p, F_p, F_m, P_0p_l, P_0m_l, r_p_l, t_p_l, F_p_l, F_m_l, derivs_h, derivs_p, work);
-     else
-          build_source_vectors_2n2(n_quad_v, n_derivs, qxv, F_0, omega, omega_l, as_0, as_0_l, P_0p, P_0m, r_p, t_p, r_m, t_m, F_p, F_m, P_0p_l, P_0m_l, r_p_l, t_p_l, r_m_l, t_m_l, F_p_l, F_m_l, derivs_h, derivs_p, work);
-}
-     if (! vector)
-          build_global_source (n_quad_v, n_derivs, atran, atran_l, R_p, T_p, F_p, F_m, S_p, S_m, R_p_l, T_p_l, F_p_l, F_m_l, S_p_l, S_m_l, derivs_h, derivs_p, work);
-     else
-          build_global_source2(n_quad_v, n_derivs, atran, atran_l, R_p, T_p, R_m, T_m, F_p, F_m, S_p, S_m, R_p_l, T_p_l, R_m_l, T_m_l, F_p_l, F_m_l, S_p_l, S_m_l, derivs_h, derivs_p, work);
+               build_source_vectors_solar_classic_1n(n_quad, n_stokes, n_derivs, qxv, F_0, omega, omega_l, as_0, as_0_l, P_x0_p, P_x0_m, tpr, tmr, gamma, F_p, F_m, P_x0_p_l, P_x0_m_l, tpr_l, tmr_l, gamma_l, F_p_l, F_m_l, derivs_layers, derivs_beam, save_tree, work);
+          }
+          else {
+               if (! vector)
+                    build_source_vectors_solar_classic_2n(n_quad_v, n_derivs, qxv, F_0, omega, omega_l, as_0, as_0_l, P_x0_p, P_x0_m, r_p, t_p, F_p, F_m, P_x0_p_l, P_x0_m_l, r_p_l, t_p_l, F_p_l, F_m_l, derivs_layers, derivs_beam, work);
+               else
+                    build_source_vectors_solar_classic_2n2(n_quad_v, n_derivs, qxv, F_0, omega, omega_l, as_0, as_0_l, P_x0_p, P_x0_m, r_p, t_p, r_m, t_m, F_p, F_m, P_x0_p_l, P_x0_m_l, r_p_l, t_p_l, r_m_l, t_m_l, F_p_l, F_m_l, derivs_layers, derivs_beam, work);
+          }
+
+          if (! vector)
+               build_global_source_solar (n_quad_v, n_derivs, atran, atran_l, R_p, T_p, F_p, F_m, S_p, S_m, R_p_l, T_p_l, F_p_l, F_m_l, S_p_l, S_m_l, derivs_layers, derivs_beam, work, NULL, NULL, NULL, NULL);
+          else
+               build_global_source_solar2(n_quad_v, n_derivs, atran, atran_l, R_p, T_p, R_m, T_m, F_p, F_m, S_p, S_m, R_p_l, T_p_l, R_m_l, T_m_l, F_p_l, F_m_l, S_p_l, S_m_l, derivs_layers, derivs_beam, work, NULL, NULL, NULL, NULL);
+     }
 
 
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-if (thermal) {
-     build_source_vectors_thermal(n_quad, n_stokes, n_derivs, qxv, F_0, planck0, planck1, omega, omega_l, ltau, ltau_l, as_0, as_0_l, P_0p, P_0m, r_p, t_p, r_m, t_m, F0_p, F0_m, F1_p, F1_m, P_0p_l, P_0m_l, r_p_l, t_p_l, r_m_l, t_m_l, NULL, NULL, NULL, NULL, thermal, derivs_h, derivs_p, work);
+     if (thermal) {
+          build_source_vectors_thermal2(n_quad, n_stokes, n_derivs, qxv, planck0, planck1, planck0_l, planck1_l, omega, omega_l, ltau, ltau_l, r_p, t_p, r_m, t_m, Ft0_p, Ft0_m, Ft1_p, Ft1_m, r_p_l, t_p_l, r_m_l, t_m_l, Ft0_p_l, Ft0_m_l, Ft1_p_l, Ft1_m_l, derivs_layers, derivs_thermal, work);
 
-     if (! vector)
-          build_global_source_thermal(n_quad_v, n_derivs, atran, atran_l, R_p, T_p, R_p, T_p, F0_p, F0_m, F1_p, F1_m, St_p, St_m, R_p_l, T_p_l, R_p_l, T_p_l, NULL, NULL, NULL, NULL, S_p_l, S_m_l, derivs_h, derivs_p, work);
-     else
-          build_global_source_thermal(n_quad_v, n_derivs, atran, atran_l, R_p, T_p, R_m, T_m, F0_p, F0_m, F1_p, F1_m, St_p, St_m, R_p_l, T_p_l, R_m_l, T_m_l, NULL, NULL, NULL, NULL, S_p_l, S_m_l, derivs_h, derivs_p, work);
-}
-
-     /*-------------------------------------------------------------------------
-      *
-      *-----------------------------------------------------------------------*/
-     if (F_0 == 0. && ! thermal) {
-          dvec_zero(S_p, n_quad_v);
-          dvec_zero(S_m, n_quad_v);
-     }
-     else
-     if (F_0 == 0. && thermal) {
-          dvec_copy(S_p, St_p, n_quad_v);
-          dvec_copy(S_m, St_m, n_quad_v);
-     }
-     else
-     if (F_0 != 0. && thermal) {
-          dvec_add (S_p, St_p, S_p, n_quad_v);
-          dvec_add (S_m, St_m, S_m, n_quad_v);
+          if (! vector)
+               build_global_source_thermal(n_quad_v, n_derivs, R_p, T_p, R_p, T_p, Ft0_p, Ft0_m, Ft1_p, Ft1_m, Sl_p, Sl_m, R_p_l, T_p_l, R_p_l, T_p_l, Ft0_p_l, Ft0_m_l, Ft1_p_l, Ft1_m_l, Sl_p_l, Sl_m_l, derivs_layers, derivs_thermal, work);
+          else
+               build_global_source_thermal(n_quad_v, n_derivs, R_p, T_p, R_m, T_m, Ft0_p, Ft0_m, Ft1_p, Ft1_m, Sl_p, Sl_m, R_p_l, T_p_l, R_m_l, T_m_l, Ft0_p_l, Ft0_m_l, Ft1_p_l, Ft1_m_l, Sl_p_l, Sl_m_l, derivs_layers, derivs_thermal, work);
      }
 }
 

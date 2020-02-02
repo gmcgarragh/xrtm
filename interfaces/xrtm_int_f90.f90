@@ -5,6 +5,7 @@
 module xrtm_int_f90
 
 use iso_c_binding
+use iso_fortran_env
 
 
 private
@@ -34,26 +35,42 @@ public :: xrtm_type, &
           xrtm_get_fourier_tol_f90, &
           xrtm_set_lambda_f90, &
           xrtm_get_lambda_f90, &
-          xrtm_set_F_0_f90, &
-          xrtm_get_F_0_f90, &
-          xrtm_set_theta_0_f90, &
-          xrtm_get_theta_0_f90, &
-          xrtm_set_phi_0_f90, &
-          xrtm_get_phi_0_f90, &
+          xrtm_set_planet_r_f90, &
+          xrtm_get_planet_r_f90, &
+          xrtm_set_levels_z_f90, &
+          xrtm_get_levels_z_f90, &
           xrtm_set_out_levels_f90, &
           xrtm_get_out_levels_f90, &
           xrtm_set_out_taus_f90, &
           xrtm_get_out_taus_f90, &
           xrtm_set_out_thetas_f90, &
           xrtm_get_out_thetas_f90, &
-          xrtm_set_top_b_f90, &
-          xrtm_get_top_b_f90, &
-          xrtm_set_planet_r_f90, &
-          xrtm_get_planet_r_f90, &
-          xrtm_set_levels_z_f90, &
-          xrtm_get_levels_z_f90, &
+          xrtm_set_F_iso_top_f90, &
+          xrtm_get_F_iso_top_f90, &
+          xrtm_set_F_iso_top_l_1_f90, &
+          xrtm_set_F_iso_top_l_n_f90, &
+          xrtm_get_F_iso_top_l_f90, &
+          xrtm_set_F_iso_bot_f90, &
+          xrtm_get_F_iso_bot_f90, &
+          xrtm_set_F_iso_bot_l_1_f90, &
+          xrtm_set_F_iso_bot_l_n_f90, &
+          xrtm_get_F_iso_bot_l_f90, &
+          xrtm_set_F_0_f90, &
+          xrtm_get_F_0_f90, &
+          xrtm_set_theta_0_f90, &
+          xrtm_get_theta_0_f90, &
+          xrtm_set_phi_0_f90, &
+          xrtm_get_phi_0_f90, &
           xrtm_set_levels_b_f90, &
           xrtm_get_levels_b_f90, &
+          xrtm_set_levels_b_l_1_f90, &
+          xrtm_set_levels_b_l_n_f90, &
+          xrtm_get_levels_b_l_f90, &
+          xrtm_set_surface_b_f90, &
+          xrtm_get_surface_b_f90, &
+          xrtm_set_surface_b_l_1_f90, &
+          xrtm_set_surface_b_l_n_f90, &
+          xrtm_get_surface_b_l_f90, &
           xrtm_set_g_1_f90, &
           xrtm_set_g_n_f90, &
           xrtm_get_g_f90, &
@@ -87,8 +104,6 @@ public :: xrtm_type, &
           xrtm_set_ltau_l_1n_f90, &
           xrtm_set_ltau_l_nn_f90, &
           xrtm_get_ltau_l_f90, &
-          xrtm_set_surface_b_f90, &
-          xrtm_get_surface_b_f90, &
           xrtm_set_kernel_ampfac_f90, &
           xrtm_get_kernel_ampfac_f90, &
           xrtm_set_kernel_params_1_f90, &
@@ -103,6 +118,10 @@ public :: xrtm_type, &
           xrtm_set_kernel_params_l_nn_f90, &
           xrtm_get_kernel_params_l_f90, &
           xrtm_update_varied_layers_f90, &
+          xrtm_qx_f90, &
+          xrtm_qw_f90, &
+          xrtm_kernel_qx_f90, &
+          xrtm_kernel_qw_f90, &
           xrtm_solution_f90, &
           xrtm_radiance_f90, &
           xrtm_mean_radiance_f90, &
@@ -114,60 +133,76 @@ public :: xrtm_type, &
 !*******************************************************************************
 !
 !*******************************************************************************
-integer, parameter, public :: XRTM_OPTION_CALC_DERIVS = 1
-integer, parameter, public :: XRTM_OPTION_REVERSE_DERIVS = 2
-integer, parameter, public :: XRTM_OPTION_DELTA_M = 4
-integer, parameter, public :: XRTM_OPTION_N_T_TMS = 8
-integer, parameter, public :: XRTM_OPTION_FOUR_CONV_OLD = 16
-integer, parameter, public :: XRTM_OPTION_FOUR_CONV_NEW = 32
-integer, parameter, public :: XRTM_OPTION_NO_AZIMUTHAL = 64
-integer, parameter, public :: XRTM_OPTION_OUTPUT_AT_LEVELS = 128
-integer, parameter, public :: XRTM_OPTION_OUTPUT_AT_TAUS = 256
-integer, parameter, public :: XRTM_OPTION_PHASE_SCALAR = 512
-integer, parameter, public :: XRTM_OPTION_PHASE_MATRIX_GC = 1024
-integer, parameter, public :: XRTM_OPTION_PHASE_MATRIX_LC = 2048
-integer, parameter, public :: XRTM_OPTION_PSA = 4096
-integer, parameter, public :: XRTM_OPTION_QUAD_NORM_GAUS_LEG = 8192
-integer, parameter, public :: XRTM_OPTION_QUAD_DOUB_GAUS_LEG = 16384
-integer, parameter, public :: XRTM_OPTION_QUAD_LOBATTO = 32768
-integer, parameter, public :: XRTM_OPTION_SAVE_LEG_POLYS = 65536
-integer, parameter, public :: XRTM_OPTION_SAVE_PHASE_MATS = 131072
-integer, parameter, public :: XRTM_OPTION_SAVE_LOCAL_R_T = 262144
-integer, parameter, public :: XRTM_OPTION_SAVE_LAYER_R_T_S = 524288
-integer, parameter, public :: XRTM_OPTION_SAVE_TOTAL_R_T_S = 1048576
-integer, parameter, public :: XRTM_OPTION_SFI = 2097152
-integer, parameter, public :: XRTM_OPTION_SOURCE_SOLAR = 4194304
-integer, parameter, public :: XRTM_OPTION_SOURCE_THERMAL = 8388608
-integer, parameter, public :: XRTM_OPTION_STACK_REUSE_ADDING = 16777216
-integer, parameter, public :: XRTM_OPTION_TOP_DOWN_ADDING = 33554432
-integer, parameter, public :: XRTM_OPTION_BOTTOM_UP_ADDING = 67108864
-integer, parameter, public :: XRTM_OPTION_UPWELLING_OUTPUT = 134217728
-integer, parameter, public :: XRTM_OPTION_DOWNWELLING_OUTPUT = 268435456
-integer, parameter, public :: XRTM_OPTION_VECTOR = 536870912
+integer, parameter, public :: XRTM_OPTION_CALC_DERIVS = 1_int64
+integer, parameter, public :: XRTM_OPTION_REVERSE_DERIVS = 2_int64
+integer, parameter, public :: XRTM_OPTION_DELTA_M = 4_int64
+integer, parameter, public :: XRTM_OPTION_N_T_TMS = 8_int64
+integer, parameter, public :: XRTM_OPTION_FOUR_CONV_OLD = 16_int64
+integer, parameter, public :: XRTM_OPTION_FOUR_CONV_NEW = 32_int64
+integer, parameter, public :: XRTM_OPTION_NO_AZIMUTHAL = 64_int64
+integer, parameter, public :: XRTM_OPTION_OUTPUT_AT_LEVELS = 128_int64
+integer, parameter, public :: XRTM_OPTION_OUTPUT_AT_TAUS = 256_int64
+integer, parameter, public :: XRTM_OPTION_PART_SOL_CLASSICAL = 512_int64
+integer, parameter, public :: XRTM_OPTION_PART_SOL_GREENS = 1024_int64
+integer, parameter, public :: XRTM_OPTION_PHASE_SCALAR = 2048_int64
+integer, parameter, public :: XRTM_OPTION_PHASE_MATRIX_GC = 4096_int64
+integer, parameter, public :: XRTM_OPTION_PHASE_MATRIX_LC = 8192_int64
+integer, parameter, public :: XRTM_OPTION_PSA = 16384_int64
+integer, parameter, public :: XRTM_OPTION_QUAD_NORM_GAUS_LEG = 32768_int64
+integer, parameter, public :: XRTM_OPTION_QUAD_DOUB_GAUS_LEG = 65536_int64
+integer, parameter, public :: XRTM_OPTION_QUAD_LOBATTO = 131072_int64
+integer, parameter, public :: XRTM_OPTION_SAVE_LEG_POLYS = 262144_int64
+integer, parameter, public :: XRTM_OPTION_SAVE_PHASE_MATS = 524288_int64
+integer, parameter, public :: XRTM_OPTION_SAVE_LOCAL_R_T = 1048576_int64
+integer, parameter, public :: XRTM_OPTION_SAVE_LAYER_R_T_S = 2097152_int64
+integer, parameter, public :: XRTM_OPTION_SAVE_TOTAL_R_T_S = 4194304_int64
+integer, parameter, public :: XRTM_OPTION_SFI = 8388608_int64
+integer, parameter, public :: XRTM_OPTION_SOURCE_SOLAR = 16777216_int64
+integer, parameter, public :: XRTM_OPTION_SOURCE_THERMAL = 33554432_int64
+integer, parameter, public :: XRTM_OPTION_STACK_REUSE_ADDING = 67108864_int64
+integer, parameter, public :: XRTM_OPTION_TOP_DOWN_ADDING = 134217728_int64
+integer, parameter, public :: XRTM_OPTION_BOTTOM_UP_ADDING = 268435456_int64
+integer, parameter, public :: XRTM_OPTION_UPWELLING_OUTPUT = 536870912_int64
+integer, parameter, public :: XRTM_OPTION_DOWNWELLING_OUTPUT = 1073741824_int64
+integer, parameter, public :: XRTM_OPTION_VECTOR = -2147483648_int64
 
-integer, parameter, public :: XRTM_SOLVER_DOUB_ADD = 1
-integer, parameter, public :: XRTM_SOLVER_EIG_ADD = 2
-integer, parameter, public :: XRTM_SOLVER_EIG_BVP = 4
-integer, parameter, public :: XRTM_SOLVER_MEM_BVP = 8
-integer, parameter, public :: XRTM_SOLVER_PADE_ADD = 16
-integer, parameter, public :: XRTM_SOLVER_SINGLE = 32
-integer, parameter, public :: XRTM_SOLVER_SOS = 64
-integer, parameter, public :: XRTM_SOLVER_TWO_OS = 128
+integer, parameter, public :: XRTM_SOLVER_DOUB_ADD = 1_int64
+integer, parameter, public :: XRTM_SOLVER_EIG_ADD = 2_int64
+integer, parameter, public :: XRTM_SOLVER_EIG_BVP = 4_int64
+integer, parameter, public :: XRTM_SOLVER_FOUR_STREAM = 8_int64
+integer, parameter, public :: XRTM_SOLVER_MEM_BVP = 16_int64
+integer, parameter, public :: XRTM_SOLVER_PADE_ADD = 32_int64
+integer, parameter, public :: XRTM_SOLVER_SINGLE = 64_int64
+integer, parameter, public :: XRTM_SOLVER_SIX_STREAM = 128_int64
+integer, parameter, public :: XRTM_SOLVER_SOS = 256_int64
+integer, parameter, public :: XRTM_SOLVER_TWO_OS = 512_int64
+integer, parameter, public :: XRTM_SOLVER_TWO_STREAM = 1024_int64
+integer, parameter, public :: XRTM_SOLVER_DISORT = 65536_int64
+integer, parameter, public :: XRTM_SOLVER_LIDORT = 131072_int64
+integer, parameter, public :: XRTM_SOLVER_LRAD = 262144_int64
+integer, parameter, public :: XRTM_SOLVER_POLRAD = 524288_int64
+integer, parameter, public :: XRTM_SOLVER_RADIANT = 1048576_int64
+integer, parameter, public :: XRTM_SOLVER_RADTRAN3 = 2097152_int64
+integer, parameter, public :: XRTM_SOLVER_SOI = 4194304_int64
+integer, parameter, public :: XRTM_SOLVER_TWOSTR = 8388608_int64
+integer, parameter, public :: XRTM_SOLVER_VLIDORT = 16777216_int64
 
-integer, parameter, public :: XRTM_OUTPUT_RADIANCE = 1
-integer, parameter, public :: XRTM_OUTPUT_RADIANCE_MEAN = 2
-integer, parameter, public :: XRTM_OUTPUT_FLUX = 4
-integer, parameter, public :: XRTM_OUTPUT_FLUX_DIVERGENCE = 8
+integer, parameter, public :: XRTM_OUTPUT_RADIANCE = 1_int64
+integer, parameter, public :: XRTM_OUTPUT_RADIANCE_MEAN = 2_int64
+integer, parameter, public :: XRTM_OUTPUT_FLUX = 4_int64
+integer, parameter, public :: XRTM_OUTPUT_FLUX_DIVERGENCE = 8_int64
 
-integer, parameter, public :: XRTM_KERNEL_LAMBERTIAN = 0
-integer, parameter, public :: XRTM_KERNEL_ROUJEAN = 1
-integer, parameter, public :: XRTM_KERNEL_LI_SPARSE = 2
-integer, parameter, public :: XRTM_KERNEL_LI_DENSE = 3
-integer, parameter, public :: XRTM_KERNEL_ROSS_THIN = 4
-integer, parameter, public :: XRTM_KERNEL_ROSS_THICK = 5
-integer, parameter, public :: XRTM_KERNEL_HAPKE = 6
-integer, parameter, public :: XRTM_KERNEL_RAHMAN = 7
-integer, parameter, public :: XRTM_KERNEL_COX_MUNK = 8
+integer, parameter, public :: XRTM_KERNEL_LAMBERTIAN = 0_int64
+integer, parameter, public :: XRTM_KERNEL_DIRECT_AND_DIFFUSE = 1_int64
+integer, parameter, public :: XRTM_KERNEL_ROUJEAN = 2_int64
+integer, parameter, public :: XRTM_KERNEL_LI_SPARSE = 3_int64
+integer, parameter, public :: XRTM_KERNEL_LI_DENSE = 4_int64
+integer, parameter, public :: XRTM_KERNEL_ROSS_THIN = 5_int64
+integer, parameter, public :: XRTM_KERNEL_ROSS_THICK = 6_int64
+integer, parameter, public :: XRTM_KERNEL_HAPKE = 7_int64
+integer, parameter, public :: XRTM_KERNEL_RAHMAN = 8_int64
+integer, parameter, public :: XRTM_KERNEL_COX_MUNK = 9_int64
+integer, parameter, public :: XRTM_KERNEL_USER_DEFINED = 10_int64
 
 
 
@@ -175,7 +210,7 @@ integer, parameter, public :: XRTM_KERNEL_COX_MUNK = 8
 !
 !*******************************************************************************
 type, bind(c) :: xrtm_type
-     integer(c_signed_char) :: data(2000)
+     integer(c_signed_char) :: data(2264)
 end type xrtm_type
 
 
@@ -184,7 +219,7 @@ end type xrtm_type
 !
 !*******************************************************************************
 interface
-     integer(c_int) function xrtm_create(d, options, solvers, max_coef, n_quad, n_stokes, n_derivs, n_layers, n_kernels, n_kernel_quad, kernels, n_out_levels, n_out_thetas) bind(c)
+     integer(c_int) function xrtm_create(d, options, solvers, max_coef, n_quad, n_stokes, n_derivs, n_layers, n_theta_0s, n_kernels, n_kernel_quad, kernels, n_out_levels, n_out_thetas) bind(c, name = "xrtm_create")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -196,6 +231,7 @@ interface
      integer(c_int), intent(in), value :: n_stokes
      integer(c_int), intent(in), value :: n_derivs
      integer(c_int), intent(in), value :: n_layers
+     integer(c_int), intent(in), value :: n_theta_0s
      integer(c_int), intent(in), value :: n_kernels
      integer(c_int), intent(in), value :: n_kernel_quad
      integer(c_int), intent(in) :: kernels(*)
@@ -206,7 +242,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_destroy(d) bind(c)
+     integer(c_int) function xrtm_destroy(d) bind(c, name = "xrtm_destroy")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -216,7 +252,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_options(d) bind(c)
+     integer(c_int) function xrtm_get_options(d) bind(c, name = "xrtm_get_options")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -226,7 +262,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_solvers(d) bind(c)
+     integer(c_int) function xrtm_get_solvers(d) bind(c, name = "xrtm_get_solvers")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -236,7 +272,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_max_coef(d) bind(c)
+     integer(c_int) function xrtm_get_max_coef(d) bind(c, name = "xrtm_get_max_coef")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -246,7 +282,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_n_quad(d) bind(c)
+     integer(c_int) function xrtm_get_n_quad(d) bind(c, name = "xrtm_get_n_quad")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -256,7 +292,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_n_stokes(d) bind(c)
+     integer(c_int) function xrtm_get_n_stokes(d) bind(c, name = "xrtm_get_n_stokes")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -266,7 +302,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_n_derivs(d) bind(c)
+     integer(c_int) function xrtm_get_n_derivs(d) bind(c, name = "xrtm_get_n_derivs")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -276,7 +312,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_n_layers(d) bind(c)
+     integer(c_int) function xrtm_get_n_layers(d) bind(c, name = "xrtm_get_n_layers")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -286,7 +322,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_n_kernels(d) bind(c)
+     integer(c_int) function xrtm_get_n_kernels(d) bind(c, name = "xrtm_get_n_kernels")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -296,7 +332,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_n_kernel_quad(d) bind(c)
+     integer(c_int) function xrtm_get_n_kernel_quad(d) bind(c, name = "xrtm_get_n_kernel_quad")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -306,7 +342,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_kernel(d, i_kernel) bind(c)
+     integer(c_int) function xrtm_get_kernel(d, i_kernel) bind(c, name = "xrtm_get_kernel")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -317,7 +353,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_n_out_levels(d) bind(c)
+     integer(c_int) function xrtm_get_n_out_levels(d) bind(c, name = "xrtm_get_n_out_levels")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -327,7 +363,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_n_out_thetas(d) bind(c)
+     integer(c_int) function xrtm_get_n_out_thetas(d) bind(c, name = "xrtm_get_n_out_thetas")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -337,7 +373,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_doub_d_tau(d, d_tau) bind(c)
+     integer(c_int) function xrtm_set_doub_d_tau(d, d_tau) bind(c, name = "xrtm_set_doub_d_tau")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -348,7 +384,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_doub_d_tau(d) bind(c)
+     real(c_double) function xrtm_get_doub_d_tau(d) bind(c, name = "xrtm_get_doub_d_tau")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -358,7 +394,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_pade_params(d, pade_s, pade_r) bind(c)
+     integer(c_int) function xrtm_set_pade_params(d, pade_s, pade_r) bind(c, name = "xrtm_set_pade_params")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -370,19 +406,19 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_pade_params(d, pade_s, pade_r) bind(c)
+     integer(c_int) function xrtm_get_pade_params(d, pade_s, pade_r) bind(c, name = "xrtm_get_pade_params")
      use iso_c_binding
      import xrtm_type
      implicit none
      type(xrtm_type), intent(inout) :: d
-     integer(c_int), intent(out) :: pade_s(*)
-     integer(c_int), intent(out) :: pade_r(*)
+     integer(c_int), intent(out) :: pade_s
+     integer(c_int), intent(out) :: pade_r
      end function xrtm_get_pade_params
 end interface
 
 
 interface
-     integer(c_int) function xrtm_set_sos_params(d, max_os, max_tau, sos_tol) bind(c)
+     integer(c_int) function xrtm_set_sos_params(d, max_os, max_tau, sos_tol) bind(c, name = "xrtm_set_sos_params")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -395,20 +431,20 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_sos_params(d, max_os, max_tau, sos_tol) bind(c)
+     integer(c_int) function xrtm_get_sos_params(d, max_os, max_tau, sos_tol) bind(c, name = "xrtm_get_sos_params")
      use iso_c_binding
      import xrtm_type
      implicit none
      type(xrtm_type), intent(inout) :: d
-     integer(c_int), intent(out) :: max_os(*)
-     real(c_double), intent(out) :: max_tau(*)
-     real(c_double), intent(out) :: sos_tol(*)
+     integer(c_int), intent(out) :: max_os
+     real(c_double), intent(out) :: max_tau
+     real(c_double), intent(out) :: sos_tol
      end function xrtm_get_sos_params
 end interface
 
 
 interface
-     integer(c_int) function xrtm_set_fourier_tol(d, fourier_tol) bind(c)
+     integer(c_int) function xrtm_set_fourier_tol(d, fourier_tol) bind(c, name = "xrtm_set_fourier_tol")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -419,7 +455,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_fourier_tol(d) bind(c)
+     real(c_double) function xrtm_get_fourier_tol(d) bind(c, name = "xrtm_get_fourier_tol")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -429,7 +465,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_lambda(d, lambda) bind(c)
+     integer(c_int) function xrtm_set_lambda(d, lambda) bind(c, name = "xrtm_set_lambda")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -440,7 +476,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_lambda(d) bind(c)
+     real(c_double) function xrtm_get_lambda(d) bind(c, name = "xrtm_get_lambda")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -450,157 +486,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_F_0(d, F_0) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     real(c_double), intent(in), value :: F_0
-     end function xrtm_set_F_0
-end interface
-
-
-interface
-     real(c_double) function xrtm_get_F_0(d) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     end function xrtm_get_F_0
-end interface
-
-
-interface
-     integer(c_int) function xrtm_set_theta_0(d, theta_0) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     real(c_double), intent(in), value :: theta_0
-     end function xrtm_set_theta_0
-end interface
-
-
-interface
-     real(c_double) function xrtm_get_theta_0(d) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     end function xrtm_get_theta_0
-end interface
-
-
-interface
-     integer(c_int) function xrtm_set_phi_0(d, phi_0) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     real(c_double), intent(in), value :: phi_0
-     end function xrtm_set_phi_0
-end interface
-
-
-interface
-     real(c_double) function xrtm_get_phi_0(d) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     end function xrtm_get_phi_0
-end interface
-
-
-interface
-     integer(c_int) function xrtm_set_out_levels(d, out_levels) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     integer(c_int), intent(in) :: out_levels(*)
-     end function xrtm_set_out_levels
-end interface
-
-
-interface
-     integer(c_int) function xrtm_get_out_levels(d, out_levels) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     integer(c_int), intent(out) :: out_levels(*)
-     end function xrtm_get_out_levels
-end interface
-
-
-interface
-     integer(c_int) function xrtm_set_out_taus(d, out_taus) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     real(c_double), intent(in) :: out_taus(*)
-     end function xrtm_set_out_taus
-end interface
-
-
-interface
-     integer(c_int) function xrtm_get_out_taus(d, out_taus) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     real(c_double), intent(out) :: out_taus(*)
-     end function xrtm_get_out_taus
-end interface
-
-
-interface
-     integer(c_int) function xrtm_set_out_thetas(d, out_thetas) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     real(c_double), intent(in) :: out_thetas(*)
-     end function xrtm_set_out_thetas
-end interface
-
-
-interface
-     integer(c_int) function xrtm_get_out_thetas(d, out_thetas) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     real(c_double), intent(out) :: out_thetas(*)
-     end function xrtm_get_out_thetas
-end interface
-
-
-interface
-     integer(c_int) function xrtm_set_top_b(d, top_b) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     real(c_double), intent(in), value :: top_b
-     end function xrtm_set_top_b
-end interface
-
-
-interface
-     real(c_double) function xrtm_get_top_b(d) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     end function xrtm_get_top_b
-end interface
-
-
-interface
-     integer(c_int) function xrtm_set_planet_r(d, planet_r) bind(c)
+     integer(c_int) function xrtm_set_planet_r(d, planet_r) bind(c, name = "xrtm_set_planet_r")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -611,7 +497,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_planet_r(d) bind(c)
+     real(c_double) function xrtm_get_planet_r(d) bind(c, name = "xrtm_get_planet_r")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -621,7 +507,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_levels_z(d, levels_z) bind(c)
+     integer(c_int) function xrtm_set_levels_z(d, levels_z) bind(c, name = "xrtm_set_levels_z")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -632,7 +518,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_levels_z(d, levels_z) bind(c)
+     integer(c_int) function xrtm_get_levels_z(d, levels_z) bind(c, name = "xrtm_get_levels_z")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -643,7 +529,246 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_levels_b(d, levels_b) bind(c)
+     integer(c_int) function xrtm_set_out_levels(d, out_levels) bind(c, name = "xrtm_set_out_levels")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer(c_int), intent(in) :: out_levels(*)
+     end function xrtm_set_out_levels
+end interface
+
+
+interface
+     integer(c_int) function xrtm_get_out_levels(d, out_levels) bind(c, name = "xrtm_get_out_levels")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer(c_int), intent(out) :: out_levels(*)
+     end function xrtm_get_out_levels
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_out_taus(d, out_taus) bind(c, name = "xrtm_set_out_taus")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(in) :: out_taus(*)
+     end function xrtm_set_out_taus
+end interface
+
+
+interface
+     integer(c_int) function xrtm_get_out_taus(d, out_taus) bind(c, name = "xrtm_get_out_taus")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(out) :: out_taus(*)
+     end function xrtm_get_out_taus
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_out_thetas(d, out_thetas) bind(c, name = "xrtm_set_out_thetas")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(in) :: out_thetas(*)
+     end function xrtm_set_out_thetas
+end interface
+
+
+interface
+     integer(c_int) function xrtm_get_out_thetas(d, out_thetas) bind(c, name = "xrtm_get_out_thetas")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(out) :: out_thetas(*)
+     end function xrtm_get_out_thetas
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_F_iso_top(d, F_iso_top) bind(c, name = "xrtm_set_F_iso_top")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(in), value :: F_iso_top
+     end function xrtm_set_F_iso_top
+end interface
+
+
+interface
+     real(c_double) function xrtm_get_F_iso_top(d) bind(c, name = "xrtm_get_F_iso_top")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     end function xrtm_get_F_iso_top
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_F_iso_top_l_1(d, i_deriv, F_iso_top_l) bind(c, name = "xrtm_set_F_iso_top_l_1")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer(c_int), intent(in), value :: i_deriv
+     real(c_double), intent(in), value :: F_iso_top_l
+     end function xrtm_set_F_iso_top_l_1
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_F_iso_top_l_n(d, F_iso_top_l) bind(c, name = "xrtm_set_F_iso_top_l_n")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(in) :: F_iso_top_l(*)
+     end function xrtm_set_F_iso_top_l_n
+end interface
+
+
+interface
+     real(c_double) function xrtm_get_F_iso_top_l(d, i_deriv) bind(c, name = "xrtm_get_F_iso_top_l")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer(c_int), intent(in), value :: i_deriv
+     end function xrtm_get_F_iso_top_l
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_F_iso_bot(d, F_iso_bot) bind(c, name = "xrtm_set_F_iso_bot")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(in), value :: F_iso_bot
+     end function xrtm_set_F_iso_bot
+end interface
+
+
+interface
+     real(c_double) function xrtm_get_F_iso_bot(d) bind(c, name = "xrtm_get_F_iso_bot")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     end function xrtm_get_F_iso_bot
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_F_iso_bot_l_1(d, i_deriv, F_iso_bot_l) bind(c, name = "xrtm_set_F_iso_bot_l_1")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer(c_int), intent(in), value :: i_deriv
+     real(c_double), intent(in), value :: F_iso_bot_l
+     end function xrtm_set_F_iso_bot_l_1
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_F_iso_bot_l_n(d, F_iso_bot_l) bind(c, name = "xrtm_set_F_iso_bot_l_n")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(in) :: F_iso_bot_l(*)
+     end function xrtm_set_F_iso_bot_l_n
+end interface
+
+
+interface
+     real(c_double) function xrtm_get_F_iso_bot_l(d, i_deriv) bind(c, name = "xrtm_get_F_iso_bot_l")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer(c_int), intent(in), value :: i_deriv
+     end function xrtm_get_F_iso_bot_l
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_F_0(d, F_0) bind(c, name = "xrtm_set_F_0")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(in), value :: F_0
+     end function xrtm_set_F_0
+end interface
+
+
+interface
+     real(c_double) function xrtm_get_F_0(d) bind(c, name = "xrtm_get_F_0")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     end function xrtm_get_F_0
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_theta_0(d, theta_0) bind(c, name = "xrtm_set_theta_0")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(in), value :: theta_0
+     end function xrtm_set_theta_0
+end interface
+
+
+interface
+     real(c_double) function xrtm_get_theta_0(d) bind(c, name = "xrtm_get_theta_0")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     end function xrtm_get_theta_0
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_phi_0(d, phi_0) bind(c, name = "xrtm_set_phi_0")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(in), value :: phi_0
+     end function xrtm_set_phi_0
+end interface
+
+
+interface
+     real(c_double) function xrtm_get_phi_0(d) bind(c, name = "xrtm_get_phi_0")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     end function xrtm_get_phi_0
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_levels_b(d, levels_b) bind(c, name = "xrtm_set_levels_b")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -654,7 +779,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_levels_b(d, levels_b) bind(c)
+     integer(c_int) function xrtm_get_levels_b(d, levels_b) bind(c, name = "xrtm_get_levels_b")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -665,7 +790,97 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_g_1(d, i_layer, g) bind(c)
+     integer(c_int) function xrtm_set_levels_b_l_1(d, i_deriv, levels_b_l) bind(c, name = "xrtm_set_levels_b_l_1")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer(c_int), intent(in), value :: i_deriv
+     real(c_double), intent(in) :: levels_b_l(*)
+     end function xrtm_set_levels_b_l_1
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_levels_b_l_n_bindx_f90(d, levels_b_l) bind(c, name = "xrtm_set_levels_b_l_n_bindx_f90")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(in) :: levels_b_l(*)
+     end function xrtm_set_levels_b_l_n_bindx_f90
+end interface
+
+
+interface
+     integer(c_int) function xrtm_get_levels_b_l(d, i_deriv, levels_b_l) bind(c, name = "xrtm_get_levels_b_l")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer(c_int), intent(in), value :: i_deriv
+     real(c_double), intent(out) :: levels_b_l(*)
+     end function xrtm_get_levels_b_l
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_surface_b(d, surface_b) bind(c, name = "xrtm_set_surface_b")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(in), value :: surface_b
+     end function xrtm_set_surface_b
+end interface
+
+
+interface
+     real(c_double) function xrtm_get_surface_b(d) bind(c, name = "xrtm_get_surface_b")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     end function xrtm_get_surface_b
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_surface_b_l_1(d, i_deriv, surface_b_l) bind(c, name = "xrtm_set_surface_b_l_1")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer(c_int), intent(in), value :: i_deriv
+     real(c_double), intent(in), value :: surface_b_l
+     end function xrtm_set_surface_b_l_1
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_surface_b_l_n(d, surface_b_l) bind(c, name = "xrtm_set_surface_b_l_n")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(in) :: surface_b_l(*)
+     end function xrtm_set_surface_b_l_n
+end interface
+
+
+interface
+     real(c_double) function xrtm_get_surface_b_l(d, i_deriv) bind(c, name = "xrtm_get_surface_b_l")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer(c_int), intent(in), value :: i_deriv
+     end function xrtm_get_surface_b_l
+end interface
+
+
+interface
+     integer(c_int) function xrtm_set_g_1(d, i_layer, g) bind(c, name = "xrtm_set_g_1")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -677,7 +892,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_g_n(d, g) bind(c)
+     integer(c_int) function xrtm_set_g_n(d, g) bind(c, name = "xrtm_set_g_n")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -688,7 +903,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_g(d, i_layer) bind(c)
+     real(c_double) function xrtm_get_g(d, i_layer) bind(c, name = "xrtm_get_g")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -699,7 +914,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_g_l_11(d, i_layer, i_deriv, g_l) bind(c)
+     integer(c_int) function xrtm_set_g_l_11(d, i_layer, i_deriv, g_l) bind(c, name = "xrtm_set_g_l_11")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -712,7 +927,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_g_l_n1(d, i_deriv, g_l) bind(c)
+     integer(c_int) function xrtm_set_g_l_n1(d, i_deriv, g_l) bind(c, name = "xrtm_set_g_l_n1")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -724,7 +939,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_g_l_1n(d, i_layer, g_l) bind(c)
+     integer(c_int) function xrtm_set_g_l_1n(d, i_layer, g_l) bind(c, name = "xrtm_set_g_l_1n")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -736,7 +951,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_g_l_nn_bindx_f90(d, g_l) bind(c)
+     integer(c_int) function xrtm_set_g_l_nn_bindx_f90(d, g_l) bind(c, name = "xrtm_set_g_l_nn_bindx_f90")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -747,7 +962,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_g_l(d, i_layer, i_deriv) bind(c)
+     real(c_double) function xrtm_get_g_l(d, i_layer, i_deriv) bind(c, name = "xrtm_get_g_l")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -759,7 +974,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_coef_1_bindx_f90(d, i_layer, n_coef_layer, coef) bind(c)
+     integer(c_int) function xrtm_set_coef_1_bindx_f90(d, i_layer, n_coef_layer, coef) bind(c, name = "xrtm_set_coef_1_bindx_f90")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -772,7 +987,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_coef_n_bindx_f90(d, n_coef_layer, coef) bind(c)
+     integer(c_int) function xrtm_set_coef_n_bindx_f90(d, n_coef_layer, coef) bind(c, name = "xrtm_set_coef_n_bindx_f90")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -784,7 +999,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_get_n_coef(d, i_layer) bind(c)
+     integer(c_int) function xrtm_get_n_coef(d, i_layer) bind(c, name = "xrtm_get_n_coef")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -795,7 +1010,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_coef(d, i_layer, i_elem, i_coef) bind(c)
+     real(c_double) function xrtm_get_coef(d, i_layer, i_elem, i_coef) bind(c, name = "xrtm_get_coef")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -808,7 +1023,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_coef_l_11_bindx_f90(d, i_layer, i_deriv, coef_l) bind(c)
+     integer(c_int) function xrtm_set_coef_l_11_bindx_f90(d, i_layer, i_deriv, coef_l) bind(c, name = "xrtm_set_coef_l_11_bindx_f90")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -821,7 +1036,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_coef_l_n1_bindx_f90(d, i_deriv, coef_l) bind(c)
+     integer(c_int) function xrtm_set_coef_l_n1_bindx_f90(d, i_deriv, coef_l) bind(c, name = "xrtm_set_coef_l_n1_bindx_f90")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -833,7 +1048,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_coef_l_1n_bindx_f90(d, i_layer, coef_l) bind(c)
+     integer(c_int) function xrtm_set_coef_l_1n_bindx_f90(d, i_layer, coef_l) bind(c, name = "xrtm_set_coef_l_1n_bindx_f90")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -845,7 +1060,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_coef_l_nn_bindx_f90(d, coef_l) bind(c)
+     integer(c_int) function xrtm_set_coef_l_nn_bindx_f90(d, coef_l) bind(c, name = "xrtm_set_coef_l_nn_bindx_f90")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -856,7 +1071,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_coef_l(d, i_layer, i_deriv, i_elem, i_coef) bind(c)
+     real(c_double) function xrtm_get_coef_l(d, i_layer, i_deriv, i_elem, i_coef) bind(c, name = "xrtm_get_coef_l")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -870,7 +1085,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_omega_1(d, i_layer, omega) bind(c)
+     integer(c_int) function xrtm_set_omega_1(d, i_layer, omega) bind(c, name = "xrtm_set_omega_1")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -882,7 +1097,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_omega_n(d, omega) bind(c)
+     integer(c_int) function xrtm_set_omega_n(d, omega) bind(c, name = "xrtm_set_omega_n")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -893,7 +1108,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_omega(d, i_layer) bind(c)
+     real(c_double) function xrtm_get_omega(d, i_layer) bind(c, name = "xrtm_get_omega")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -904,7 +1119,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_omega_l_11(d, i_layer, i_deriv, omega_l) bind(c)
+     integer(c_int) function xrtm_set_omega_l_11(d, i_layer, i_deriv, omega_l) bind(c, name = "xrtm_set_omega_l_11")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -917,7 +1132,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_omega_l_n1(d, i_deriv, omega_l) bind(c)
+     integer(c_int) function xrtm_set_omega_l_n1(d, i_deriv, omega_l) bind(c, name = "xrtm_set_omega_l_n1")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -929,7 +1144,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_omega_l_1n(d, i_layer, omega_l) bind(c)
+     integer(c_int) function xrtm_set_omega_l_1n(d, i_layer, omega_l) bind(c, name = "xrtm_set_omega_l_1n")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -941,7 +1156,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_omega_l_nn_bindx_f90(d, omega_l) bind(c)
+     integer(c_int) function xrtm_set_omega_l_nn_bindx_f90(d, omega_l) bind(c, name = "xrtm_set_omega_l_nn_bindx_f90")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -952,7 +1167,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_omega_l(d, i_layer, i_deriv) bind(c)
+     real(c_double) function xrtm_get_omega_l(d, i_layer, i_deriv) bind(c, name = "xrtm_get_omega_l")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -964,7 +1179,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_ltau_1(d, i_layer, ltau) bind(c)
+     integer(c_int) function xrtm_set_ltau_1(d, i_layer, ltau) bind(c, name = "xrtm_set_ltau_1")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -976,7 +1191,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_ltau_n(d, ltau) bind(c)
+     integer(c_int) function xrtm_set_ltau_n(d, ltau) bind(c, name = "xrtm_set_ltau_n")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -987,7 +1202,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_ltau(d, i_layer) bind(c)
+     real(c_double) function xrtm_get_ltau(d, i_layer) bind(c, name = "xrtm_get_ltau")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -998,7 +1213,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_ltau_l_11(d, i_layer, i_deriv, ltau_l) bind(c)
+     integer(c_int) function xrtm_set_ltau_l_11(d, i_layer, i_deriv, ltau_l) bind(c, name = "xrtm_set_ltau_l_11")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1011,7 +1226,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_ltau_l_n1(d, i_deriv, ltau_l) bind(c)
+     integer(c_int) function xrtm_set_ltau_l_n1(d, i_deriv, ltau_l) bind(c, name = "xrtm_set_ltau_l_n1")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1023,7 +1238,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_ltau_l_1n(d, i_layer, ltau_l) bind(c)
+     integer(c_int) function xrtm_set_ltau_l_1n(d, i_layer, ltau_l) bind(c, name = "xrtm_set_ltau_l_1n")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1035,7 +1250,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_ltau_l_nn_bindx_f90(d, ltau_l) bind(c)
+     integer(c_int) function xrtm_set_ltau_l_nn_bindx_f90(d, ltau_l) bind(c, name = "xrtm_set_ltau_l_nn_bindx_f90")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1046,7 +1261,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_ltau_l(d, i_layer, i_deriv) bind(c)
+     real(c_double) function xrtm_get_ltau_l(d, i_layer, i_deriv) bind(c, name = "xrtm_get_ltau_l")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1058,28 +1273,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_surface_b(d, surface_b) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     real(c_double), intent(in), value :: surface_b
-     end function xrtm_set_surface_b
-end interface
-
-
-interface
-     real(c_double) function xrtm_get_surface_b(d) bind(c)
-     use iso_c_binding
-     import xrtm_type
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     end function xrtm_get_surface_b
-end interface
-
-
-interface
-     integer(c_int) function xrtm_set_kernel_ampfac(d, i_kernel, ampfac) bind(c)
+     integer(c_int) function xrtm_set_kernel_ampfac(d, i_kernel, ampfac) bind(c, name = "xrtm_set_kernel_ampfac")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1091,7 +1285,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_kernel_ampfac(d, i_kernel) bind(c)
+     real(c_double) function xrtm_get_kernel_ampfac(d, i_kernel) bind(c, name = "xrtm_get_kernel_ampfac")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1102,7 +1296,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_kernel_params_1(d, i_kernel, i_param, param) bind(c)
+     integer(c_int) function xrtm_set_kernel_params_1(d, i_kernel, i_param, param) bind(c, name = "xrtm_set_kernel_params_1")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1115,7 +1309,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_kernel_params_n(d, i_kernel, params) bind(c)
+     integer(c_int) function xrtm_set_kernel_params_n(d, i_kernel, params) bind(c, name = "xrtm_set_kernel_params_n")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1127,7 +1321,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_kernel_params(d, i_kernel, i_param) bind(c)
+     real(c_double) function xrtm_get_kernel_params(d, i_kernel, i_param) bind(c, name = "xrtm_get_kernel_params")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1139,7 +1333,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_kernel_ampfac_l_1(d, i_kernel, i_deriv, ampfac_l) bind(c)
+     integer(c_int) function xrtm_set_kernel_ampfac_l_1(d, i_kernel, i_deriv, ampfac_l) bind(c, name = "xrtm_set_kernel_ampfac_l_1")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1152,7 +1346,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_kernel_ampfac_l_n(d, i_kernel, ampfac_l) bind(c)
+     integer(c_int) function xrtm_set_kernel_ampfac_l_n(d, i_kernel, ampfac_l) bind(c, name = "xrtm_set_kernel_ampfac_l_n")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1164,7 +1358,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_kernel_ampfac_l(d, i_kernel, i_deriv) bind(c)
+     real(c_double) function xrtm_get_kernel_ampfac_l(d, i_kernel, i_deriv) bind(c, name = "xrtm_get_kernel_ampfac_l")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1176,7 +1370,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_kernel_params_l_11(d, i_kernel, i_deriv, i_param, param_l) bind(c)
+     integer(c_int) function xrtm_set_kernel_params_l_11(d, i_kernel, i_deriv, i_param, param_l) bind(c, name = "xrtm_set_kernel_params_l_11")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1190,7 +1384,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_kernel_params_l_1n(d, i_kernel, i_deriv, params_l) bind(c)
+     integer(c_int) function xrtm_set_kernel_params_l_1n(d, i_kernel, i_deriv, params_l) bind(c, name = "xrtm_set_kernel_params_l_1n")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1203,7 +1397,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_kernel_params_l_n1(d, i_kernel, i_param, params_l) bind(c)
+     integer(c_int) function xrtm_set_kernel_params_l_n1(d, i_kernel, i_param, params_l) bind(c, name = "xrtm_set_kernel_params_l_n1")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1216,7 +1410,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_set_kernel_params_l_nn_bindx_f90(d, i_kernel, params_l) bind(c)
+     integer(c_int) function xrtm_set_kernel_params_l_nn_bindx_f90(d, i_kernel, params_l) bind(c, name = "xrtm_set_kernel_params_l_nn_bindx_f90")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1228,7 +1422,7 @@ end interface
 
 
 interface
-     real(c_double) function xrtm_get_kernel_params_l(d, i_kernel, i_deriv, i_param) bind(c)
+     real(c_double) function xrtm_get_kernel_params_l(d, i_kernel, i_deriv, i_param) bind(c, name = "xrtm_get_kernel_params_l")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1241,7 +1435,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_update_varied_layers(d) bind(c)
+     integer(c_int) function xrtm_update_varied_layers(d) bind(c, name = "xrtm_update_varied_layers")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1251,15 +1445,59 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_solution_bindx_f90(d, solver, solutions, n_phis, phis, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l) bind(c)
+     integer(c_int) function xrtm_qx(d, qx) bind(c, name = "xrtm_qx")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(out) :: qx(*)
+     end function xrtm_qx
+end interface
+
+
+interface
+     integer(c_int) function xrtm_qw(d, qw) bind(c, name = "xrtm_qw")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(out) :: qw(*)
+     end function xrtm_qw
+end interface
+
+
+interface
+     integer(c_int) function xrtm_kernel_qx(d, kernel_qx) bind(c, name = "xrtm_kernel_qx")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(out) :: kernel_qx(*)
+     end function xrtm_kernel_qx
+end interface
+
+
+interface
+     integer(c_int) function xrtm_kernel_qw(d, kernel_qw) bind(c, name = "xrtm_kernel_qw")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(c_double), intent(out) :: kernel_qw(*)
+     end function xrtm_kernel_qw
+end interface
+
+
+interface
+     integer(c_int) function xrtm_solution_bindx_f90(d, solver, solutions, n_out_phis, out_phis, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l) bind(c, name = "xrtm_solution_bindx_f90")
      use iso_c_binding
      import xrtm_type
      implicit none
      type(xrtm_type), intent(inout) :: d
      integer(c_int), intent(in), value :: solver
      integer(c_int), intent(in), value :: solutions
-     integer(c_int), intent(in), value :: n_phis
-     real(c_double), intent(in) :: phis(*)
+     integer(c_int), intent(in), value :: n_out_phis
+     real(c_double), intent(in) :: out_phis(*)
      real(c_double), intent(out) :: I_p(*)
      real(c_double), intent(out) :: I_m(*)
      real(c_double), intent(out) :: K_p(*)
@@ -1279,14 +1517,14 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_radiance_bindx_f90(d, solver, n_phis, phis, I_p, I_m, K_p, K_m) bind(c)
+     integer(c_int) function xrtm_radiance_bindx_f90(d, solver, n_out_phis, out_phis, I_p, I_m, K_p, K_m) bind(c, name = "xrtm_radiance_bindx_f90")
      use iso_c_binding
      import xrtm_type
      implicit none
      type(xrtm_type), intent(inout) :: d
      integer(c_int), intent(in), value :: solver
-     integer(c_int), intent(in), value :: n_phis
-     real(c_double), intent(in) :: phis(*)
+     integer(c_int), intent(in), value :: n_out_phis
+     real(c_double), intent(in) :: out_phis(*)
      real(c_double), intent(out) :: I_p(*)
      real(c_double), intent(out) :: I_m(*)
      real(c_double), intent(out) :: K_p(*)
@@ -1296,7 +1534,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_mean_radiance_bindx_f90(d, solver, mean_p, mean_m, mean_p_l, mean_m_l) bind(c)
+     integer(c_int) function xrtm_mean_radiance_bindx_f90(d, solver, mean_p, mean_m, mean_p_l, mean_m_l) bind(c, name = "xrtm_mean_radiance_bindx_f90")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1311,7 +1549,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_flux_bindx_f90(d, solver, flux_p, flux_m, flux_p_l, flux_m_l) bind(c)
+     integer(c_int) function xrtm_flux_bindx_f90(d, solver, flux_p, flux_m, flux_p_l, flux_m_l) bind(c, name = "xrtm_flux_bindx_f90")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1326,7 +1564,7 @@ end interface
 
 
 interface
-     integer(c_int) function xrtm_flux_divergence_bindx_f90(d, solver, flux_div, flux_div_l) bind(c)
+     integer(c_int) function xrtm_flux_divergence_bindx_f90(d, solver, flux_div, flux_div_l) bind(c, name = "xrtm_flux_divergence_bindx_f90")
      use iso_c_binding
      import xrtm_type
      implicit none
@@ -1345,7 +1583,7 @@ end interface
 contains
 
 
-subroutine xrtm_create_f90(d, options, solvers, max_coef, n_quad, n_stokes, n_derivs, n_layers, n_kernels, n_kernel_quad, kernels, n_out_levels, n_out_thetas, error)
+subroutine xrtm_create_f90(d, options, solvers, max_coef, n_quad, n_stokes, n_derivs, n_layers, n_theta_0s, n_kernels, n_kernel_quad, kernels, n_out_levels, n_out_thetas, error)
      implicit none
      type(xrtm_type), intent(inout) :: d
      integer, intent(in) :: options
@@ -1355,13 +1593,14 @@ subroutine xrtm_create_f90(d, options, solvers, max_coef, n_quad, n_stokes, n_de
      integer, intent(in) :: n_stokes
      integer, intent(in) :: n_derivs
      integer, intent(in) :: n_layers
+     integer, intent(in) :: n_theta_0s
      integer, intent(in) :: n_kernels
      integer, intent(in) :: n_kernel_quad
      integer, intent(in) :: kernels(:)
      integer, intent(in) :: n_out_levels
      integer, intent(in) :: n_out_thetas
      integer, intent(out) :: error
-     error = xrtm_create(d, options, solvers, max_coef, n_quad, n_stokes, n_derivs, n_layers, n_kernels, n_kernel_quad, kernels, n_out_levels, n_out_thetas)
+     error = xrtm_create(d, options, solvers, max_coef, n_quad, n_stokes, n_derivs, n_layers, n_theta_0s, n_kernels, n_kernel_quad, kernels, n_out_levels, n_out_thetas)
 end subroutine xrtm_create_f90
 
 
@@ -1484,13 +1723,14 @@ subroutine xrtm_set_pade_params_f90(d, pade_s, pade_r, error)
 end subroutine xrtm_set_pade_params_f90
 
 
-integer function xrtm_get_pade_params_f90(d, pade_s, pade_r)
+subroutine xrtm_get_pade_params_f90(d, pade_s, pade_r, error)
      implicit none
      type(xrtm_type), intent(inout) :: d
-     integer, intent(out) :: pade_s(:)
-     integer, intent(out) :: pade_r(:)
-     xrtm_get_pade_params_f90 = xrtm_get_pade_params(d, pade_s, pade_r)
-end function xrtm_get_pade_params_f90
+     integer, intent(out) :: pade_s
+     integer, intent(out) :: pade_r
+     integer, intent(out) :: error
+     error = xrtm_get_pade_params(d, pade_s, pade_r)
+end subroutine xrtm_get_pade_params_f90
 
 
 subroutine xrtm_set_sos_params_f90(d, max_os, max_tau, sos_tol, error)
@@ -1504,14 +1744,15 @@ subroutine xrtm_set_sos_params_f90(d, max_os, max_tau, sos_tol, error)
 end subroutine xrtm_set_sos_params_f90
 
 
-integer function xrtm_get_sos_params_f90(d, max_os, max_tau, sos_tol)
+subroutine xrtm_get_sos_params_f90(d, max_os, max_tau, sos_tol, error)
      implicit none
      type(xrtm_type), intent(inout) :: d
-     integer, intent(out) :: max_os(:)
-     real(8), intent(out) :: max_tau(:)
-     real(8), intent(out) :: sos_tol(:)
-     xrtm_get_sos_params_f90 = xrtm_get_sos_params(d, max_os, max_tau, sos_tol)
-end function xrtm_get_sos_params_f90
+     integer, intent(out) :: max_os
+     real(8), intent(out) :: max_tau
+     real(8), intent(out) :: sos_tol
+     integer, intent(out) :: error
+     error = xrtm_get_sos_params(d, max_os, max_tau, sos_tol)
+end subroutine xrtm_get_sos_params_f90
 
 
 subroutine xrtm_set_fourier_tol_f90(d, fourier_tol, error)
@@ -1546,52 +1787,38 @@ real(8) function xrtm_get_lambda_f90(d)
 end function xrtm_get_lambda_f90
 
 
-subroutine xrtm_set_F_0_f90(d, F_0, error)
+subroutine xrtm_set_planet_r_f90(d, planet_r, error)
      implicit none
      type(xrtm_type), intent(inout) :: d
-     real(8), intent(in) :: F_0
+     real(8), intent(in) :: planet_r
      integer, intent(out) :: error
-     error = xrtm_set_F_0(d, F_0)
-end subroutine xrtm_set_F_0_f90
+     error = xrtm_set_planet_r(d, planet_r)
+end subroutine xrtm_set_planet_r_f90
 
 
-real(8) function xrtm_get_F_0_f90(d)
+real(8) function xrtm_get_planet_r_f90(d)
      implicit none
      type(xrtm_type), intent(inout) :: d
-     xrtm_get_F_0_f90 = xrtm_get_F_0(d)
-end function xrtm_get_F_0_f90
+     xrtm_get_planet_r_f90 = xrtm_get_planet_r(d)
+end function xrtm_get_planet_r_f90
 
 
-subroutine xrtm_set_theta_0_f90(d, theta_0, error)
+subroutine xrtm_set_levels_z_f90(d, levels_z, error)
      implicit none
      type(xrtm_type), intent(inout) :: d
-     real(8), intent(in) :: theta_0
+     real(8), intent(in) :: levels_z(:)
      integer, intent(out) :: error
-     error = xrtm_set_theta_0(d, theta_0)
-end subroutine xrtm_set_theta_0_f90
+     error = xrtm_set_levels_z(d, levels_z)
+end subroutine xrtm_set_levels_z_f90
 
 
-real(8) function xrtm_get_theta_0_f90(d)
+subroutine xrtm_get_levels_z_f90(d, levels_z, error)
      implicit none
      type(xrtm_type), intent(inout) :: d
-     xrtm_get_theta_0_f90 = xrtm_get_theta_0(d)
-end function xrtm_get_theta_0_f90
-
-
-subroutine xrtm_set_phi_0_f90(d, phi_0, error)
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     real(8), intent(in) :: phi_0
+     real(8), intent(out) :: levels_z(:)
      integer, intent(out) :: error
-     error = xrtm_set_phi_0(d, phi_0)
-end subroutine xrtm_set_phi_0_f90
-
-
-real(8) function xrtm_get_phi_0_f90(d)
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     xrtm_get_phi_0_f90 = xrtm_get_phi_0(d)
-end function xrtm_get_phi_0_f90
+     error = xrtm_get_levels_z(d, levels_z)
+end subroutine xrtm_get_levels_z_f90
 
 
 subroutine xrtm_set_out_levels_f90(d, out_levels, error)
@@ -1648,54 +1875,138 @@ subroutine xrtm_get_out_thetas_f90(d, out_thetas, error)
 end subroutine xrtm_get_out_thetas_f90
 
 
-subroutine xrtm_set_top_b_f90(d, top_b, error)
+subroutine xrtm_set_F_iso_top_f90(d, F_iso_top, error)
      implicit none
      type(xrtm_type), intent(inout) :: d
-     real(8), intent(in) :: top_b
+     real(8), intent(in) :: F_iso_top
      integer, intent(out) :: error
-     error = xrtm_set_top_b(d, top_b)
-end subroutine xrtm_set_top_b_f90
+     error = xrtm_set_F_iso_top(d, F_iso_top)
+end subroutine xrtm_set_F_iso_top_f90
 
 
-real(8) function xrtm_get_top_b_f90(d)
+real(8) function xrtm_get_F_iso_top_f90(d)
      implicit none
      type(xrtm_type), intent(inout) :: d
-     xrtm_get_top_b_f90 = xrtm_get_top_b(d)
-end function xrtm_get_top_b_f90
+     xrtm_get_F_iso_top_f90 = xrtm_get_F_iso_top(d)
+end function xrtm_get_F_iso_top_f90
 
 
-subroutine xrtm_set_planet_r_f90(d, planet_r, error)
+subroutine xrtm_set_F_iso_top_l_1_f90(d, i_deriv, F_iso_top_l, error)
      implicit none
      type(xrtm_type), intent(inout) :: d
-     real(8), intent(in) :: planet_r
+     integer, intent(in) :: i_deriv
+     real(8), intent(in) :: F_iso_top_l
      integer, intent(out) :: error
-     error = xrtm_set_planet_r(d, planet_r)
-end subroutine xrtm_set_planet_r_f90
+     error = xrtm_set_F_iso_top_l_1(d, i_deriv, F_iso_top_l)
+end subroutine xrtm_set_F_iso_top_l_1_f90
 
 
-real(8) function xrtm_get_planet_r_f90(d)
+subroutine xrtm_set_F_iso_top_l_n_f90(d, F_iso_top_l, error)
      implicit none
      type(xrtm_type), intent(inout) :: d
-     xrtm_get_planet_r_f90 = xrtm_get_planet_r(d)
-end function xrtm_get_planet_r_f90
-
-
-subroutine xrtm_set_levels_z_f90(d, levels_z, error)
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     real(8), intent(in) :: levels_z(:)
+     real(8), intent(in) :: F_iso_top_l(:)
      integer, intent(out) :: error
-     error = xrtm_set_levels_z(d, levels_z)
-end subroutine xrtm_set_levels_z_f90
+     error = xrtm_set_F_iso_top_l_n(d, F_iso_top_l)
+end subroutine xrtm_set_F_iso_top_l_n_f90
 
 
-subroutine xrtm_get_levels_z_f90(d, levels_z, error)
+real(8) function xrtm_get_F_iso_top_l_f90(d, i_deriv)
      implicit none
      type(xrtm_type), intent(inout) :: d
-     real(8), intent(out) :: levels_z(:)
+     integer, intent(in) :: i_deriv
+     xrtm_get_F_iso_top_l_f90 = xrtm_get_F_iso_top_l(d, i_deriv)
+end function xrtm_get_F_iso_top_l_f90
+
+
+subroutine xrtm_set_F_iso_bot_f90(d, F_iso_bot, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(8), intent(in) :: F_iso_bot
      integer, intent(out) :: error
-     error = xrtm_get_levels_z(d, levels_z)
-end subroutine xrtm_get_levels_z_f90
+     error = xrtm_set_F_iso_bot(d, F_iso_bot)
+end subroutine xrtm_set_F_iso_bot_f90
+
+
+real(8) function xrtm_get_F_iso_bot_f90(d)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     xrtm_get_F_iso_bot_f90 = xrtm_get_F_iso_bot(d)
+end function xrtm_get_F_iso_bot_f90
+
+
+subroutine xrtm_set_F_iso_bot_l_1_f90(d, i_deriv, F_iso_bot_l, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer, intent(in) :: i_deriv
+     real(8), intent(in) :: F_iso_bot_l
+     integer, intent(out) :: error
+     error = xrtm_set_F_iso_bot_l_1(d, i_deriv, F_iso_bot_l)
+end subroutine xrtm_set_F_iso_bot_l_1_f90
+
+
+subroutine xrtm_set_F_iso_bot_l_n_f90(d, F_iso_bot_l, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(8), intent(in) :: F_iso_bot_l(:)
+     integer, intent(out) :: error
+     error = xrtm_set_F_iso_bot_l_n(d, F_iso_bot_l)
+end subroutine xrtm_set_F_iso_bot_l_n_f90
+
+
+real(8) function xrtm_get_F_iso_bot_l_f90(d, i_deriv)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer, intent(in) :: i_deriv
+     xrtm_get_F_iso_bot_l_f90 = xrtm_get_F_iso_bot_l(d, i_deriv)
+end function xrtm_get_F_iso_bot_l_f90
+
+
+subroutine xrtm_set_F_0_f90(d, F_0, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(8), intent(in) :: F_0
+     integer, intent(out) :: error
+     error = xrtm_set_F_0(d, F_0)
+end subroutine xrtm_set_F_0_f90
+
+
+real(8) function xrtm_get_F_0_f90(d)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     xrtm_get_F_0_f90 = xrtm_get_F_0(d)
+end function xrtm_get_F_0_f90
+
+
+subroutine xrtm_set_theta_0_f90(d, theta_0, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(8), intent(in) :: theta_0
+     integer, intent(out) :: error
+     error = xrtm_set_theta_0(d, theta_0)
+end subroutine xrtm_set_theta_0_f90
+
+
+real(8) function xrtm_get_theta_0_f90(d)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     xrtm_get_theta_0_f90 = xrtm_get_theta_0(d)
+end function xrtm_get_theta_0_f90
+
+
+subroutine xrtm_set_phi_0_f90(d, phi_0, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(8), intent(in) :: phi_0
+     integer, intent(out) :: error
+     error = xrtm_set_phi_0(d, phi_0)
+end subroutine xrtm_set_phi_0_f90
+
+
+real(8) function xrtm_get_phi_0_f90(d)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     xrtm_get_phi_0_f90 = xrtm_get_phi_0(d)
+end function xrtm_get_phi_0_f90
 
 
 subroutine xrtm_set_levels_b_f90(d, levels_b, error)
@@ -1714,6 +2025,78 @@ subroutine xrtm_get_levels_b_f90(d, levels_b, error)
      integer, intent(out) :: error
      error = xrtm_get_levels_b(d, levels_b)
 end subroutine xrtm_get_levels_b_f90
+
+
+subroutine xrtm_set_levels_b_l_1_f90(d, i_deriv, levels_b_l, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer, intent(in) :: i_deriv
+     real(8), intent(in) :: levels_b_l(:)
+     integer, intent(out) :: error
+     error = xrtm_set_levels_b_l_1(d, i_deriv, levels_b_l)
+end subroutine xrtm_set_levels_b_l_1_f90
+
+
+subroutine xrtm_set_levels_b_l_n_f90(d, levels_b_l, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(8), intent(in) :: levels_b_l(:,:)
+     integer, intent(out) :: error
+     error = xrtm_set_levels_b_l_n_bindx_f90(d, levels_b_l)
+end subroutine xrtm_set_levels_b_l_n_f90
+
+
+subroutine xrtm_get_levels_b_l_f90(d, i_deriv, levels_b_l, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer, intent(in) :: i_deriv
+     real(8), intent(out) :: levels_b_l(:)
+     integer, intent(out) :: error
+     error = xrtm_get_levels_b_l(d, i_deriv, levels_b_l)
+end subroutine xrtm_get_levels_b_l_f90
+
+
+subroutine xrtm_set_surface_b_f90(d, surface_b, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(8), intent(in) :: surface_b
+     integer, intent(out) :: error
+     error = xrtm_set_surface_b(d, surface_b)
+end subroutine xrtm_set_surface_b_f90
+
+
+real(8) function xrtm_get_surface_b_f90(d)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     xrtm_get_surface_b_f90 = xrtm_get_surface_b(d)
+end function xrtm_get_surface_b_f90
+
+
+subroutine xrtm_set_surface_b_l_1_f90(d, i_deriv, surface_b_l, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer, intent(in) :: i_deriv
+     real(8), intent(in) :: surface_b_l
+     integer, intent(out) :: error
+     error = xrtm_set_surface_b_l_1(d, i_deriv, surface_b_l)
+end subroutine xrtm_set_surface_b_l_1_f90
+
+
+subroutine xrtm_set_surface_b_l_n_f90(d, surface_b_l, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(8), intent(in) :: surface_b_l(:)
+     integer, intent(out) :: error
+     error = xrtm_set_surface_b_l_n(d, surface_b_l)
+end subroutine xrtm_set_surface_b_l_n_f90
+
+
+real(8) function xrtm_get_surface_b_l_f90(d, i_deriv)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     integer, intent(in) :: i_deriv
+     xrtm_get_surface_b_l_f90 = xrtm_get_surface_b_l(d, i_deriv)
+end function xrtm_get_surface_b_l_f90
 
 
 subroutine xrtm_set_g_1_f90(d, i_layer, g, error)
@@ -2034,22 +2417,6 @@ real(8) function xrtm_get_ltau_l_f90(d, i_layer, i_deriv)
 end function xrtm_get_ltau_l_f90
 
 
-subroutine xrtm_set_surface_b_f90(d, surface_b, error)
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     real(8), intent(in) :: surface_b
-     integer, intent(out) :: error
-     error = xrtm_set_surface_b(d, surface_b)
-end subroutine xrtm_set_surface_b_f90
-
-
-real(8) function xrtm_get_surface_b_f90(d)
-     implicit none
-     type(xrtm_type), intent(inout) :: d
-     xrtm_get_surface_b_f90 = xrtm_get_surface_b(d)
-end function xrtm_get_surface_b_f90
-
-
 subroutine xrtm_set_kernel_ampfac_f90(d, i_kernel, ampfac, error)
      implicit none
      type(xrtm_type), intent(inout) :: d
@@ -2190,13 +2557,49 @@ subroutine xrtm_update_varied_layers_f90(d, error)
 end subroutine xrtm_update_varied_layers_f90
 
 
-subroutine xrtm_solution_f90(d, solver, solutions, n_phis, phis, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l, error)
+subroutine xrtm_qx_f90(d, qx, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(8), intent(out) :: qx(:)
+     integer, intent(out) :: error
+     error = xrtm_qx(d, qx)
+end subroutine xrtm_qx_f90
+
+
+subroutine xrtm_qw_f90(d, qw, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(8), intent(out) :: qw(:)
+     integer, intent(out) :: error
+     error = xrtm_qw(d, qw)
+end subroutine xrtm_qw_f90
+
+
+subroutine xrtm_kernel_qx_f90(d, kernel_qx, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(8), intent(out) :: kernel_qx(:)
+     integer, intent(out) :: error
+     error = xrtm_kernel_qx(d, kernel_qx)
+end subroutine xrtm_kernel_qx_f90
+
+
+subroutine xrtm_kernel_qw_f90(d, kernel_qw, error)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     real(8), intent(out) :: kernel_qw(:)
+     integer, intent(out) :: error
+     error = xrtm_kernel_qw(d, kernel_qw)
+end subroutine xrtm_kernel_qw_f90
+
+
+subroutine xrtm_solution_f90(d, solver, solutions, n_out_phis, out_phis, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l, error)
      implicit none
      type(xrtm_type), intent(inout) :: d
      integer, intent(in) :: solver
      integer, intent(in) :: solutions
-     integer, intent(in) :: n_phis
-     real(8), intent(in) :: phis(:,:)
+     integer, intent(in) :: n_out_phis
+     real(8), intent(in) :: out_phis(:,:)
      real(8), intent(out) :: I_p(:,:,:,:)
      real(8), intent(out) :: I_m(:,:,:,:)
      real(8), intent(out) :: K_p(:,:,:,:,:)
@@ -2212,22 +2615,22 @@ subroutine xrtm_solution_f90(d, solver, solutions, n_phis, phis, I_p, I_m, K_p, 
      real(8), intent(out) :: flux_div(:)
      real(8), intent(out) :: flux_div_l(:,:)
      integer, intent(out) :: error
-     error = xrtm_solution_bindx_f90(d, solver, solutions, n_phis, phis, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l)
+     error = xrtm_solution_bindx_f90(d, solver, solutions, n_out_phis, out_phis, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l)
 end subroutine xrtm_solution_f90
 
 
-subroutine xrtm_radiance_f90(d, solver, n_phis, phis, I_p, I_m, K_p, K_m, error)
+subroutine xrtm_radiance_f90(d, solver, n_out_phis, out_phis, I_p, I_m, K_p, K_m, error)
      implicit none
      type(xrtm_type), intent(inout) :: d
      integer, intent(in) :: solver
-     integer, intent(in) :: n_phis
-     real(8), intent(in) :: phis(:,:)
+     integer, intent(in) :: n_out_phis
+     real(8), intent(in) :: out_phis(:,:)
      real(8), intent(out) :: I_p(:,:,:,:)
      real(8), intent(out) :: I_m(:,:,:,:)
      real(8), intent(out) :: K_p(:,:,:,:,:)
      real(8), intent(out) :: K_m(:,:,:,:,:)
      integer, intent(out) :: error
-     error = xrtm_radiance_bindx_f90(d, solver, n_phis, phis, I_p, I_m, K_p, K_m)
+     error = xrtm_radiance_bindx_f90(d, solver, n_out_phis, out_phis, I_p, I_m, K_p, K_m)
 end subroutine xrtm_radiance_f90
 
 

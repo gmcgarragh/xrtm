@@ -1,0 +1,444 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{Radiance}
+\label{sec:radiance}
+
+\subsection{Slab radiance}
+\label{sec:radiance-slab_radiance}
+
+\subsubsection{Forward}
+\label{sec:radiance-slab_radiance-forward}
+
+\begin{equation}
+\mathbf{I}^{+}_{1} = \mathbf{R}^{-}_{12}\mathbf{I}^{-}_{1} + \mathbf{T}^{+}_{12}\mathbf{I}^{+}_{2} + \mathbf{S}^{+}_{12}
+\label{eq:radiance-slab_radiance-forward_I_p_0}
+\end{equation}
+
+\begin{equation}
+\mathbf{I}^{-}_{2} = \mathbf{R}^{+}_{12}\mathbf{I}^{+}_{2} + \mathbf{T}^{-}_{12}\mathbf{I}^{-}_{1} + \mathbf{S}^{-}_{12}
+\label{eq:radiance-slab_radiance-forward_I_m_tau}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:radiance-slab_radiance-tangent_linear}
+
+\paragraph{U}
+\label{sec:radiance-boa_radiance-tangent_linear-u}
+
+\begin{equation}
+\mathbf{K}^{+}_{1} = \mathbf{R}^{-}_{12}\mathbf{K}^{-}_{1} + \mathbf{T}^{+}_{12}\mathbf{K}^{+}_{2}
+\label{eq:radiance-slab_radiance-tangent_linear-b_K_p_0}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{-}_{2} = \mathbf{R}^{+}_{12}\mathbf{K}^{+}_{2} + \mathbf{T}^{-}_{12}\mathbf{K}^{-}_{1}
+\label{eq:radiance-slab_radiance-tangent_linear-b_K_m_tau}
+\end{equation}
+
+
+\paragraph{S}
+\label{sec:radiance-boa_radiance-tangent_linear-s}
+
+\begin{equation}
+\mathbf{K}^{+}_{1} = \mathbf{R}^{-}_{12}\mathbf{K}^{-}_{1} + \mathbf{T}^{+}_{12}\mathbf{K}^{+}_{2} + \mathcal{L}(\mathbf{S}^{+}_{12})
+\label{eq:radiance-slab_radiance-tangent_linear-s_K_p_0}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{-}_{2} = \mathbf{R}^{+}_{12}\mathbf{K}^{+}_{2} + \mathbf{T}^{-}_{12}\mathbf{K}^{-}_{1} + \mathcal{L}(\mathbf{S}^{-}_{12})
+\label{eq:radiance-slab_radiance-tangent_linear-s_K_m_tau}
+\end{equation}
+
+
+\paragraph{L}
+\label{sec:radiance-boa_radiance-tangent_linear-l}
+
+\begin{equation}
+\mathbf{K}^{+}_{1} = \mathcal{L}(\mathbf{R}^{-}_{12})\mathbf{I}^{-}_{1} + \mathbf{R}^{-}_{12}\mathbf{K}^{-}_{1} + \mathcal{L}(\mathbf{T}^{+}_{12})\mathbf{I}^{+}_{2} + \mathbf{T}^{+}_{12}\mathbf{K}^{+}_{2}
+\label{eq:radiance-slab_radiance-tangent_linear-l_K_p_0}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{-}_{2} = \mathcal{L}(\mathbf{R}^{+}_{12})\mathbf{I}^{+}_{2} + \mathbf{R}^{+}_{12}\mathbf{K}^{+}_{2} + \mathcal{L}(\mathbf{T}^{-}_{12})\mathbf{I}^{-}_{1} + \mathbf{T}^{-}_{12}\mathbf{K}^{-}_{1}
+\label{eq:radiance-slab_radiance-tangent_linear-l_K_m_tau}
+\end{equation}
+
+
+\paragraph{B}
+\label{sec:radiance-boa_radiance-tangent_linear-b}
+
+\begin{equation}
+\mathbf{K}^{+}_{1} = \mathcal{L}(\mathbf{R}^{-}_{12})\mathbf{I}^{-}_{1} + \mathbf{R}^{-}_{12}\mathbf{K}^{-}_{1} + \mathcal{L}(\mathbf{T}^{+}_{12})\mathbf{I}^{+}_{2} + \mathbf{T}^{+}_{12}\mathbf{K}^{+}_{2} + \mathcal{L}(\mathbf{S}^{+}_{12})
+\label{eq:radiance-slab_radiance-tangent_linear-b_K_p_0}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{-}_{2} = \mathcal{L}(\mathbf{R}^{+}_{12})\mathbf{I}^{+}_{2} + \mathbf{R}^{+}_{12}\mathbf{K}^{+}_{2} + \mathcal{L}(\mathbf{T}^{-}_{12})\mathbf{I}^{-}_{1} + \mathbf{T}^{-}_{12}\mathbf{K}^{-}_{1} + \mathcal{L}(\mathbf{S}^{-}_{12})
+\label{eq:radiance-slab_radiance-tangent_linear-b_K_m_tau}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:radiance-slab_radiance-adjoint_of_tangent_linear}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}^{+}_{12}) = \mathcal{A}(\mathbf{R}^{+}_{12}) + \mathcal{A}(\mathbf{I}^{-}_{2})(\mathbf{I}^{+}_{2})^{T}
+\label{eq:radiance-slab_radiance-adjoint_of_tangent_linear-R_p_12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{I}^{+}_{2}) = \mathcal{A}(\mathbf{I}^{+}_{2}) + (\mathbf{R}^{+}_{12})^{T}\mathcal{A}(\mathbf{I}^{-}_{2})
+\label{eq:radiance-slab_radiance-adjoint_of_tangent_linear-I_p_2_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}^{-}_{12}) = \mathcal{A}(\mathbf{T}^{-}_{12}) + \mathcal{A}(\mathbf{I}^{-}_{2})(\mathbf{I}^{-}_{1})^{T}
+\label{eq:radiance-slab_radiance-adjoint_of_tangent_linear-T_m_12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{I}^{-}_{1}) = \mathcal{A}(\mathbf{I}^{-}_{1}) + (\mathbf{T}^{-}_{12})^{T}\mathcal{A}(\mathbf{I}^{-}_{2})
+\label{eq:radiance-slab_radiance-adjoint_of_tangent_linear-T_m_12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}^{-}_{12}) = \mathcal{A}(\mathbf{S}^{-}_{12}) + \mathcal{A}(\mathbf{I}^{-}_{2})
+\label{eq:radiance-slab_radiance-adjoint_of_tangent_linear-S_m_12_a}
+\end{equation}
+
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}^{-}_{12}) = \mathcal{A}(\mathbf{R}^{-}_{12}) + \mathcal{A}(\mathbf{I}^{+}_{1})(\mathbf{I}^{-}_{1})^{T}
+\label{eq:radiance-slab_radiance-adjoint_of_tangent_linear-R_m_12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{I}^{-}_{1}) = \mathcal{A}(\mathbf{I}^{-}_{1}) + (\mathbf{R}^{-}_{12})^{T}\mathcal{A}(\mathbf{I}^{+}_{1})
+\label{eq:radiance-slab_radiance-adjoint_of_tangent_linear-I_m_1_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}^{+}_{12}) = \mathcal{A}(\mathbf{T}^{+}_{12}) + \mathcal{A}(\mathbf{I}^{+}_{1})(\mathbf{I}^{+}_{2})^{T}
+\label{eq:radiance-slab_radiance-adjoint_of_tangent_linear-T_p_12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{I}^{+}_{2}) = \mathcal{A}(\mathbf{I}^{+}_{2}) + (\mathbf{T}^{+}_{12})^{T}\mathcal{A}(\mathbf{I}^{+}_{1})
+\label{eq:radiance-slab_radiance-adjoint_of_tangent_linear-I_p_2_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}^{+}_{12}) = \mathcal{A}(\mathbf{S}^{+}_{12}) + \mathcal{A}(\mathbf{I}^{+}_{1})
+\label{eq:radiance-slab_radiance-adjoint_of_tangent_linear-S_p_12_a}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{TOA radiance}
+\label{sec:toa_radiance}
+
+\subsubsection{Forward}
+\label{sec:radiance-toa_radiance-forward}
+
+
+\subsubsection{Tangent linear}
+\label{sec:radiance-toa_radiance-tangent_linear}
+
+
+\subsubsection{Adjoint of tangent linear}
+\label{sec:radiance-toa_radiance-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{BOA radiance}
+\label{sec:boa_radiance}
+
+\subsubsection{Forward}
+\label{sec:radiance-boa_radiance-forward}
+
+\begin{equation}
+\mathbf{P} = (\mathbf{E} - \mathbf{R}^{+}_{12}\mathbf{R}^{-}_{23})^{-1}
+\label{eq:radiance-boa_radiance-forward_P}
+\end{equation}
+
+\begin{equation}
+\mathbf{I}^{-}_{2} = \mathbf{P}(\mathbf{R}^{+}_{12}\mathbf{I}^{+}_{3} + \mathbf{T}^{-}_{12}\mathbf{I}^{-}_{1} + \mathbf{S}^{-}_{12})
+\label{eq:radiance-boa_radiance-forward_I_m_2}
+\end{equation}
+
+\begin{equation}
+\mathbf{I}^{+}_{2} = \mathbf{R}^{-}_{23}\mathbf{I}^{-}_{2} + \mathbf{I}^{+}_{3}
+\label{eq:radiance-boa_radiance-forward_I_p_2}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:radiance-boa_radiance-tangent_linear}
+
+\paragraph{U\_B}
+\label{sec:radiance-boa_radiance-tangent_linear-u_b}
+
+\begin{equation}
+\mathbf{Q} = \mathbf{R}^{+}_{12}\mathcal{L}(\mathbf{R}^{-}_{23})
+\label{eq:radiance-boa_radiance-tangent_linear-u_b_P}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{-}_{2} = \mathbf{P}(\mathbf{Q}\mathbf{I}^{-}_{2} + \mathbf{R}^{+}_{12}\mathbf{K}^{+}_{3} + \mathbf{T}^{-}_{12}\mathbf{K}^{-}_{1})
+\label{eq:radiance-boa_radiance-tangent_linear-u_b_K_m_2}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{+}_{2} = \mathcal{L}(\mathbf{R}^{-}_{23})\mathbf{I}^{-}_{2} + \mathbf{R}^{-}_{23}\mathbf{K}^{-}_{2} + \mathbf{K}^{+}_{3}
+\label{eq:radiance-boa_radiance-tangent_linear-u_b_K_p_2}
+\end{equation}
+
+
+\paragraph{L\_L}
+\label{sec:radiance-boa_radiance-tangent_linear-l_l}
+
+\begin{equation}
+\mathbf{Q} = \mathcal{L}(\mathbf{R}^{+}_{12})\mathbf{R}^{-}_{23} + \mathbf{R}^{+}_{12}\mathcal{L}(\mathbf{R}^{-}_{23})
+\label{eq:radiance-boa_radiance-tangent_linear-l_l_P}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{-}_{2} = \mathbf{P}(\mathbf{Q}\mathbf{I}^{-}_{2} + \mathcal{L}(\mathbf{R}^{+}_{12})\mathbf{I}^{+}_{3} + \mathcal{L}(\mathbf{T}^{-}_{12})\mathbf{I}^{-}_{1} + \mathbf{T}^{-}_{12}\mathbf{K}^{-}_{1})
+\label{eq:radiance-boa_radiance-tangent_linear-l_l_K_m_2}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{+}_{2} = \mathcal{L}(\mathbf{R}^{-}_{23})\mathbf{I}^{-}_{2} + \mathbf{R}^{-}_{23}\mathbf{K}^{-}_{2}
+\label{eq:radiance-boa_radiance-tangent_linear-l_l_K_p_2}
+\end{equation}
+
+
+
+\paragraph{B\_U}
+\label{sec:radiance-boa_radiance-tangent_linear-b_u}
+
+\begin{equation}
+\mathbf{Q} = \mathcal{L}(\mathbf{U}^{+}_{12})\mathbf{R}^{-}_{23}
+\label{eq:radiance-boa_radiance-tangent_linear-b_u_P}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{-}_{2} = \mathbf{P}(\mathbf{Q}\mathbf{I}^{-}_{2} + \mathcal{L}(\mathbf{R}^{+}_{12})\mathbf{I}^{+}_{3} + \mathbf{R}^{+}_{12}\mathbf{K}^{+}_{3} + \mathcal{L}(\mathbf{T}^{-}_{12})\mathbf{I}^{-}_{1} + \mathbf{T}^{-}_{12}\mathbf{K}^{-}_{1} + \mathbf{V}^{-}_{12})
+\label{eq:radiance-boa_radiance-tangent_linear-b_u_K_m_2}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{+}_{2} = \mathbf{R}^{-}_{23}\mathbf{K}^{-}_{2} + \mathbf{K}^{+}_{3}
+\label{eq:radiance-boa_radiance-tangent_linear-b_u_K_p_2}
+\end{equation}
+
+
+\paragraph{B\_S}
+\label{sec:radiance-boa_radiance-tangent_linear-b_s}
+
+\begin{equation}
+\mathbf{Q} = \mathcal{L}(\mathbf{R}^{+}_{12})\mathbf{R}^{-}_{23}
+\label{eq:radiance-boa_radiance-tangent_linear-b_s_P}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{-}_{2} = \mathbf{P}(\mathbf{Q}\mathbf{I}^{-}_{2} + \mathcal{L}(\mathbf{R}^{+}_{12})\mathbf{I}^{+}_{3} + \mathbf{R}^{+}_{12}\mathbf{K}^{+}_{3} + \mathcal{L}(\mathbf{T}^{-}_{12})\mathbf{I}^{-}_{1} + \mathbf{T}^{-}_{12}\mathbf{K}^{-}_{1} + \mathcal{L}(\mathbf{S}^{-}_{12}))
+\label{eq:radiance-boa_radiance-tangent_linear-b_s_K_m_2}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{+}_{2} = \mathbf{R}^{-}_{23}\mathbf{K}^{-}_{2} + \mathbf{K}^{+}_{3}
+\label{eq:radiance-boa_radiance-tangent_linear-b_s_K_p_2}
+\end{equation}
+
+
+\paragraph{B\_L}
+\label{sec:radiance-boa_radiance-tangent_linear-b_l}
+
+\begin{equation}
+\mathbf{Q} = \mathcal{L}(\mathbf{R}^{+}_{12})\mathbf{R}^{-}_{23} + \mathbf{R}^{+}_{12}\mathcal{L}(\mathbf{R}^{-}_{23})
+\label{eq:radiance-boa_radiance-tangent_linear-b_l_P}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{-}_{2} = \mathbf{P}(\mathbf{Q}\mathbf{I}^{-}_{2} + \mathcal{L}(\mathbf{R}^{+}_{12})\mathbf{I}^{+}_{3} + \mathcal{L}(\mathbf{T}^{-}_{12})\mathbf{I}^{-}_{1} + \mathbf{T}^{-}_{12}\mathbf{K}^{-}_{1} + \mathcal{L}(\mathbf{S}^{-}_{12}))
+\label{eq:radiance-boa_radiance-tangent_linear-b_l_K_m_2}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{+}_{2} = \mathcal{L}(\mathbf{R}^{-}_{23})\mathbf{I}^{-}_{2} + \mathbf{R}^{-}_{23}\mathbf{K}^{-}_{2}
+\label{eq:radiance-boa_radiance-tangent_linear-b_l_K_p_2}
+\end{equation}
+
+
+\paragraph{B\_B}
+\label{sec:radiance-boa_radiance-tangent_linear-b_b}
+
+\begin{equation}
+\mathbf{Q} = \mathcal{L}(\mathbf{R}^{+}_{12})\mathbf{R}^{-}_{23} + \mathbf{R}^{+}_{12}\mathcal{L}(\mathbf{R}^{-}_{23})
+\label{eq:radiance-boa_radiance-tangent_linear-b_b_P}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{-}_{2} = \mathbf{P}(\mathbf{Q}\mathbf{I}^{-}_{2} + \mathcal{L}(\mathbf{R}^{+}_{12})\mathbf{I}^{+}_{3} + \mathbf{R}^{+}_{12}\mathbf{K}^{+}_{3} + \mathcal{L}(\mathbf{T}^{-}_{12})\mathbf{I}^{-}_{1} + \mathbf{T}^{-}_{12}\mathbf{K}^{-}_{1} + \mathcal{L}(\mathbf{S}^{-}_{12}))
+\label{eq:radiance-boa_radiance-tangent_linear-b_b_K_m_2}
+\end{equation}
+
+\begin{equation}
+\mathbf{K}^{+}_{2} = \mathcal{L}(\mathbf{R}^{-}_{23})\mathbf{I}^{-}_{2} + \mathbf{R}^{-}_{23}\mathbf{K}^{-}_{2} + \mathbf{K}^{+}_{3}
+\label{eq:radiance-boa_radiance-tangent_linear-b_b_K_p_2}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:radiance-boa_radiance-adjoint_of_tangent_linear}
+
+\paragraph{U\_L}
+\label{sec:radiance-boa_radiance-adjoint_of_tangent_linear-u_l}
+
+
+\paragraph{L\_P}
+\label{sec:radiance-boa_radiance-adjoint_of_tangent_linear-l_p}
+
+
+\paragraph{L\_L}
+\label{sec:radiance-boa_radiance-adjoint_of_tangent_linear-l_l}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}^{-}_{23}) = \mathcal{A}(\mathbf{R}^{-}_{23}) + \mathcal{A}(\mathbf{I}^{+}_{2})(\mathbf{I}^{-}_{2})^{T}
+\label{eq:radiance-boa_radiance-adjoint_of_tangent_linear-l_l_R_m_23_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{I}^{-}_{2}) = \mathcal{A}(\mathbf{I}^{-}_{2}) + (\mathbf{R}^{-}_{23})^{T}\mathcal{A}(\mathbf{I}^{+}_{2})
+\label{eq:radiance-boa_radiance-adjoint_of_tangent_linear-l_l_I_m_2_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{I}^{+}_{3}) = \mathcal{A}(\mathbf{I}^{+}_{3}) + \mathcal{A}(\mathbf{I}^{+}_{2})
+\label{eq:radiance-boa_radiance-adjoint_of_tangent_linear-l_l_I_p_3_a}
+\end{equation}
+
+\begin{equation}
+t = \mathbf{P}\mathcal{A}(\mathbf{I}^{-}_{2})
+\label{eq:radiance-boa_radiance-adjoint_of_tangent_linear-l_l_t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{Q}) =\mathcal{A}(\mathbf{Q}) + t (\mathbf{I}^{-}_{2})^{T}
+\label{eq:radiance-boa_radiance-adjoint_of_tangent_linear-l_l_Q_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}^{+}_{12}) = \mathcal{A}(\mathbf{R}^{+}_{12}) + t (\mathbf{I}^{+}_{3})^{T}
+\label{eq:radiance-boa_radiance-adjoint_of_tangent_linear-l_l_R_p_12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{I}^{+}_{3}) = \mathcal{A}(\mathbf{I}^{+}_{3}) + (\mathbf{R}^{+}_{12})^{T} t
+\label{eq:radiance-boa_radiance-adjoint_of_tangent_linear-l_l_I_p_3_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{T}^{-}_{12}) = \mathcal{A}(\mathbf{T}^{-}_{12}) + t (\mathbf{I}^{-}_{1})^{T}
+\label{eq:radiance-boa_radiance-adjoint_of_tangent_linear-l_l_T_m_12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{I}^{-}_{1}) = \mathcal{A}(\mathbf{I}^{-}_{1}) + (\mathbf{T}^{-}_{12})^{T} t
+\label{eq:radiance-boa_radiance-adjoint_of_tangent_linear-l_l_I_m_1_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{S}^{-}_{12}) = \mathcal{A}(\mathbf{S}^{-}_{12}) + t
+\label{eq:radiance-boa_radiance-adjoint_of_tangent_linear-l_l_S_m_12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}^{+}_{12}) = \mathcal{A}(\mathbf{R}^{+}_{12}) + \mathcal{A}(\mathbf{Q}) (\mathbf{R}^{-}_{23})^{T}
+\label{eq:radiance-boa_radiance-adjoint_of_tangent_linear-l_l_R_p_12_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{R}^{-}_{23}) = \mathcal{A}(\mathbf{R}^{-}_{23}) + (\mathbf{R}^{+}_{12})^{T} \mathcal{A}(\mathbf{Q})
+\label{eq:radiance-boa_radiance-adjoint_of_tangent_linear-l_l_R_m_23_a}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Internal radiance}
+\label{sec:radiance-internal_radiance}
+
+
+\subsubsection{Forward}
+\label{sec:radiance-internal_radiance-forward}
+
+\begin{equation}
+\mathbf{P}_{31} = (\mathbf{E} - \mathbf{R}^{-}_{23}\mathbf{R}^{+}_{12})^{-1}
+\label{eq:radiance-internal_radiance-P31}
+\end{equation}
+
+\begin{equation}
+\mathbf{I}^{+}_{2} = \mathbf{P}_{31} \left[\mathbf{R}^{-}_{23}\mathbf{T}^{-}_{12}\mathbf{I}^{-}_{1} + \mathbf{T}^{+}_{23}\mathbf{I}^{+}_{3} + \mathbf{R}^{-}_{23}\mathbf{S}^{-}_{12} + \mathbf{S}^{+}_{23}\right]
+\label{eq:radiance-internal_radiance-I_p_2_0}
+\end{equation}
+
+\begin{equation}
+\mathbf{P}_{13} = (\mathbf{E} - \mathbf{R}^{+}_{12}\mathbf{R}^{-}_{23})^{-1}
+\label{eq:radiance-internal_radiance-P13}
+\end{equation}
+
+\begin{equation}
+\mathbf{I}^{-}_{2} = \mathbf{P}_{13} \left[\mathbf{R}^{+}_{12}\mathbf{T}^{+}_{23}\mathbf{I}^{+}_{3} + \mathbf{T}^{-}_{12}\mathbf{I}^{-}_{1} + \mathbf{R}^{+}_{12}\mathbf{S}^{+}_{23} + \mathbf{S}^{-}_{12}\right]
+\label{eq:radiance-internal_radiance-I_m_1_tau}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:radiance-internal_radiance-tangent_linear}
+
+\begin{equation}
+	\begin{split}
+		\mathbf{K}^{+}_{2} &= \mathbf{P}_{31}\left[\mathcal{L}(\mathbf{R}^{-}_{23})\mathbf{R}^{+}_{12}\mathbf{I}^{+}_{2} + \mathbf{R}^{-}_{23}\mathcal{L}(\mathbf{R}^{+}_{12})\mathbf{I}^{+}_{2} + \mathcal{L}(\mathbf{R}^{-}_{23})\mathbf{T}^{-}_{12}\mathbf{I}^{-}_{1} + \mathbf{R}^{-}_{23}(\mathcal{L}(\mathbf{T}^{-}_{12})\mathbf{I}^{-}_{1} + \mathbf{T}^{-}_{12}\mathbf{K}^{-}_{1}) \right. \\
+		                   &+ \left.\mathcal{L}(\mathbf{T}^{+}_{23})\mathbf{I}^{+}_{3} + \mathbf{T}^{+}_{23}\mathbf{K}^{+}_{3} + \mathcal{L}(\mathbf{R}^{-}_{23})\mathbf{S}^{-}_{12} + \mathbf{R}^{-}_{23}\mathcal{L}(\mathbf{S}^{-}_{12}) + \mathcal{L}(\mathbf{S}^{+}_{23})\right]
+	\end{split}
+	\label{eq:radiance-internal_radiance-K_p_2_0}
+\end{equation}
+
+\begin{equation}
+	\begin{split}
+		\mathbf{K}^{-}_{2} &= \mathbf{P}_{13}\left[\mathcal{L}(\mathbf{R}^{+}_{12})\mathbf{R}^{-}_{23}\mathbf{I}^{-}_{2} + \mathbf{R}^{+}_{12}\mathcal{L}(\mathbf{R}^{-}_{23})\mathbf{I}^{-}_{2} + \mathcal{L}(\mathbf{R}^{+}_{12})\mathbf{T}^{+}_{23}\mathbf{I}^{+}_{3} + \mathbf{R}^{+}_{12}(\mathcal{L}(\mathbf{T}^{+}_{23})\mathbf{I}^{+}_{3} + \mathbf{T}^{+}_{23}\mathbf{K}^{+}_{3}) \right. \\
+		                   &+ \left.\mathcal{L}(\mathbf{T}^{-}_{12})\mathbf{I}^{-}_{1} + \mathbf{T}^{-}_{12}\mathbf{K}^{-}_{1} + \mathcal{L}(\mathbf{R}^{+}_{12})\mathbf{S}^{+}_{23} + \mathbf{R}^{+}_{12}\mathcal{L}(\mathbf{S}^{+}_{23}) + \mathcal{L}(\mathbf{S}^{-}_{12})\right]
+	\end{split}
+	\label{eq:radiance-internal_radiance-K_m_2_0}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:radiance-internal_radiance-adjoint_of_tangent_linear}

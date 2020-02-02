@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 1998-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 1998-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -27,6 +27,26 @@ void XCAT(prefix_, gemm_)(const char *, const char *, long *, long *, long *,
 #endif
 
 #endif
+
+
+void XCAT(prefix_, mat_print)(type_ **a, long m, long n) {
+
+     long i;
+     long j;
+
+     for (i = 0; i < m; ++i) {
+          for (j = 0; j < n; ++j) {
+#if is_complex_ == 0
+               printf("%e ", a[i][j]);
+#else
+               printf("(%e, %e) ", creal(a[i][j]), cimag(a[i][j]));
+#endif
+          }
+          printf("\n");
+     }
+}
+
+
 
 void XCAT(prefix_, mat_zero)(type_ **a, long m, long n) {
 /*
@@ -120,7 +140,7 @@ double XCAT(prefix_, mat_p_one_norm)(type_ **a, long m, long n) {
      for (j = 0; j < n; ++j) {
           sum = 0.;
           for (i = 0; i < m; ++i) {
-               sum += XCAT(cprefix_, abs)(a[i][j]);
+               sum += xabs_(a[i][j]);
           }
           if (sum > max)
                max = sum;
@@ -142,7 +162,7 @@ double XCAT(prefix_, mat_p_inf_norm)(type_ **a, long m, long n) {
      for (i = 0; i < n; ++i) {
           sum = 0.;
           for (j = 0; j < m; ++j) {
-               sum += XCAT(cprefix_, abs)(a[i][j]);
+               sum += xabs_(a[i][j]);
           }
           if (sum > max)
                max = sum;
@@ -163,7 +183,7 @@ double XCAT(prefix_, mat_frob_norm)(type_ **a, long m, long n) {
      sum = 0.;
      for (i = 0; i < m; ++i) {
           for (j = 0; j < n; ++j) {
-               sum += (double) xreal(a[i][j]) * (double) xreal(a[i][j]);
+               sum += (double) xreal_(a[i][j]) * (double) xreal_(a[i][j]);
           }
      }
 
@@ -202,7 +222,7 @@ void XCAT(prefix_, mat_add_trans)(type_ **a, type_ **c, long m, long n) {
 
 
 
-void XCAT(prefix_, mat_add_diag)(type_ **a, type_ *b, type_ **c, long m) {
+void XCAT(prefix_, mat_add_diag)(type_ **a, const type_ *b, type_ **c, long m) {
 
      long i;
      long j;
@@ -248,7 +268,7 @@ void XCAT(prefix_, mat_sub_trans)(type_ **a, type_ **c, long m, long n) {
 
 
 
-void XCAT(prefix_, mat_sub_diag)(type_ **a, type_ *b, type_ **c, long m) {
+void XCAT(prefix_, mat_sub_diag)(type_ **a, const type_ *b, type_ **c, long m) {
 
      long i;
      long j;
@@ -264,7 +284,7 @@ void XCAT(prefix_, mat_sub_diag)(type_ **a, type_ *b, type_ **c, long m) {
 
 
 
-void XCAT(prefix_, mat_diag_sub)(type_ *a, type_ **b, type_ **c, long m) {
+void XCAT(prefix_, mat_diag_sub)(const type_ *a, type_ **b, type_ **c, long m) {
 
      long i;
      long j;
@@ -310,7 +330,7 @@ void XCAT(prefix_, mat_scale)(type_ alpha, type_ **b, type_ **c, long m, long n)
 
 
 
-void XCAT(prefix_, m_v_mul)(type_ **a, type_ *b, long m, long o, type_ *c) {
+void XCAT(prefix_, m_v_mul)(type_ **a, const type_ *b, long m, long o, type_ *c) {
 #ifdef USE_BLAS
      long incb = 1;
      long incy = 1;
@@ -318,7 +338,7 @@ void XCAT(prefix_, m_v_mul)(type_ **a, type_ *b, long m, long o, type_ *c) {
      type_ alpha = 1.;
      type_ beta  = 0.;
 
-     XCAT(prefix_, gemv_)("t", &o, &m, &alpha, *a, &o, b, &incb, &beta, c, &incy);
+     XCAT(prefix_, gemv_)("t", &o, &m, &alpha, *a, &o, (type_ *) b, &incb, &beta, c, &incy);
 #else
      long i;
      long k;
@@ -337,14 +357,14 @@ void XCAT(prefix_, m_v_mul)(type_ **a, type_ *b, long m, long o, type_ *c) {
 
 
 
-void XCAT(prefix_, mat_gxvxmx)(int trans_a, type_ **a, type_ *b, type_ alpha, type_ *c, type_ beta, long m, long o) {
+void XCAT(prefix_, mat_gxvxmx)(int trans_a, type_ **a, const type_ *b, type_ alpha, type_ *c, type_ beta, long m, long o) {
 #ifdef USE_BLAS
      char transa = trans_a ? 'n' : 't';
 
      long incb = 1;
      long incy = 1;
 
-     XCAT(prefix_, gemv_)(&transa, &o, &m, &alpha, *a, &o, b, &incb, &beta, c, &incy);
+     XCAT(prefix_, gemv_)(&transa, &o, &m, &alpha, *a, &o, (type_ *) b, &incb, &beta, c, &incy);
 #else
 
 #endif
@@ -352,14 +372,14 @@ void XCAT(prefix_, mat_gxvxmx)(int trans_a, type_ **a, type_ *b, type_ alpha, ty
 
 
 
-void XCAT(prefix_, v_m_mul)(type_ *a, type_ **b, long m, type_ **c) {
+void XCAT(prefix_, v_m_mul)(const type_ *a, type_ **b, long m, type_ **c) {
 
-     XCAT(prefix_, mat_mul)(&a, b, m, m, 1, c);
+     XCAT(prefix_, mat_mul)((type_ **) &a, b, m, m, 1, c);
 }
 
 
 
-void XCAT(prefix_, m_v_diag_mul)(type_ *a, type_ *b, type_ *c, long m) {
+void XCAT(prefix_, m_v_diag_mul)(const type_ *a, const type_ *b, type_ *c, long m) {
 
      long i;
 
@@ -370,7 +390,7 @@ void XCAT(prefix_, m_v_diag_mul)(type_ *a, type_ *b, type_ *c, long m) {
 
 
 
-void XCAT(prefix_, m_v_dinv_mul)(type_ *a, type_ *b, type_ *c, long m) {
+void XCAT(prefix_, m_v_dinv_mul)(const type_ *a, const type_ *b, type_ *c, long m) {
 
      long i;
 
@@ -498,7 +518,7 @@ void XCAT(prefix_, mat_gxgxmx)(int trans_a, type_ **a, int trans_b, type_ **b,
 
 
 
-void XCAT(prefix_, mat_mul_diag)(type_ **a, type_ *b, type_ **c,
+void XCAT(prefix_, mat_mul_diag)(type_ **a, const type_ *b, type_ **c,
                                  long m, long n) {
 
      long i;
@@ -513,7 +533,7 @@ void XCAT(prefix_, mat_mul_diag)(type_ **a, type_ *b, type_ **c,
 
 
 
-void XCAT(prefix_, mat_gxdxmx)(int trans_a, type_ **a, type_ *b, type_ alpha, type_ **c, type_ beta, long m, long n) {
+void XCAT(prefix_, mat_gxdxmx)(int trans_a, type_ **a, const type_ *b, type_ alpha, type_ **c, type_ beta, long m, long n) {
 
      long i;
      long j;
@@ -622,7 +642,7 @@ void XCAT(prefix_, mat_gxdxmx)(int trans_a, type_ **a, type_ *b, type_ alpha, ty
 
 
 
-void XCAT(prefix_, mat_mul_dinv)(type_ **a, type_ *b, type_ **c,
+void XCAT(prefix_, mat_mul_dinv)(type_ **a, const type_ *b, type_ **c,
                                  long m, long n) {
 
      long i;
@@ -637,7 +657,7 @@ void XCAT(prefix_, mat_mul_dinv)(type_ **a, type_ *b, type_ **c,
 
 
 
-void XCAT(prefix_, mat_diag_mul)(type_ *a, type_ **b, type_ **c,
+void XCAT(prefix_, mat_diag_mul)(const type_ *a, type_ **b, type_ **c,
                                  long m, long n) {
 
      long i;
@@ -652,7 +672,7 @@ void XCAT(prefix_, mat_diag_mul)(type_ *a, type_ **b, type_ **c,
 
 
 
-void XCAT(prefix_, mat_dinv_mul)(type_ *a, type_ **b, type_ **c,
+void XCAT(prefix_, mat_dinv_mul)(const type_ *a, type_ **b, type_ **c,
                                  long m, long n) {
 
      long i;
@@ -667,7 +687,7 @@ void XCAT(prefix_, mat_dinv_mul)(type_ *a, type_ **b, type_ **c,
 
 
 
-void XCAT(prefix_, mat_vxvtmx)(type_ *a, type_ *b, double alpha,
+void XCAT(prefix_, mat_vxvtmx)(const type_ *a, const type_ *b, double alpha,
                                type_ **c, double beta, long m, long n) {
 
      int i;
@@ -891,7 +911,7 @@ double XCAT(prefix_, mat_pocon)(type_ **a, int n, double anorm, int *iwork, doub
 
      XCAT(prefix_, pocon_)("l", &n, *a, &n, &anorm, &rcond, dwork, iwork, &info);
      if (info) {
-          printf("ERROR: dpocon() info = %d\n", info);
+          fprintf(stderr, "ERROR: dpocon() info = %d\n", info);
           exit(1);
      }
 
@@ -908,7 +928,7 @@ double XCAT(prefix_, mat_gecon)(char norm, type_ **a, int n, double anorm, int *
 
      XCAT(prefix_, gecon_)(&norm, &n, *a, &n, &anorm, &rcond, dwork, iwork, &info);
      if (info) {
-          printf("ERROR: dgecon() info = %d\n", info);
+          fprintf(stderr, "ERROR: dgecon() info = %d\n", info);
           exit(1);
      }
 
@@ -923,7 +943,7 @@ void XCAT(prefix_, mat_potrf)(type_ **a, int n) {
 
      XCAT(prefix_, potrf_)("l", &n, *a, &n, &info);
      if (info) {
-          printf("ERROR: dpotrf() info = %d\n", info);
+          fprintf(stderr, "ERROR: dpotrf() info = %d\n", info);
           exit(1);
      }
 }
@@ -936,7 +956,7 @@ void XCAT(prefix_, mat_potri)(type_ **a, int n) {
 
      XCAT(prefix_, potri_)("l", &n, *a, &n, &info);
      if (info) {
-          printf("ERROR: dpotri() info = %d\n", info);
+          fprintf(stderr, "ERROR: dpotri() info = %d\n", info);
           exit(1);
      }
 }
@@ -950,7 +970,7 @@ void XCAT(prefix_, mat_potrs)(type_ **a, type_ **b, int n, int nrhs) {
      XCAT(prefix_, potrs_)("l", &n, &nrhs, *a, &n, *b, &nrhs, &info);
 
      if (info) {
-          printf("ERROR: dpotrs() info = %d\n", info);
+          fprintf(stderr, "ERROR: dpotrs() info = %d\n", info);
           exit(1);
      }
 }
@@ -963,7 +983,7 @@ void XCAT(prefix_, mat_getrf)(type_ **a, int m, int n, int *ipiv) {
 
      XCAT(prefix_, getrf_)(&m, &n, *a, &n, ipiv, &info);
      if (info) {
-          printf("ERROR: dgetrf() info = %d\n", info);
+          fprintf(stderr, "ERROR: dgetrf() info = %d\n", info);
           exit(1);
      }
 }
@@ -987,7 +1007,7 @@ void XCAT(prefix_, mat_getri)(type_ **a, int n, int *ipiv) {
      twork = (type_ *) malloc((size_t) size[0] * sizeof(type_));
      XCAT(prefix_, getri_)(&n, *a, &n, ipiv, twork, &lwork, &info);
      if (info) {
-          printf("ERROR: dgetri() info = %d\n", info);
+          fprintf(stderr, "ERROR: dgetri() info = %d\n", info);
           exit(1);
      }
 
@@ -1012,7 +1032,7 @@ void XCAT(prefix_, mat_getrs2)(char trans, type_ **a, type_ **b, int n, int nrhs
      XCAT(prefix_, getrs_)(&trans, &n, &nrhs, *a, &n, ipiv, *b, &n, &info);
 
      if (info) {
-          printf("ERROR: dgetrs() info = %d\n", info);
+          fprintf(stderr, "ERROR: dgetrs() info = %d\n", info);
           exit(1);
      }
 }
@@ -1025,7 +1045,7 @@ void XCAT(prefix_, mat_gttrf)(type_ *dl, type_ *d, type_ *du, type_ *du2, int n,
 
      XCAT(prefix_, gttrf_)(&n, dl, d, du, du2, ipiv, &info);
      if (info) {
-          printf("ERROR: dgttrf() info = %d\n", info);
+          fprintf(stderr, "ERROR: dgttrf() info = %d\n", info);
           exit(1);
      }
 }
@@ -1039,7 +1059,7 @@ void XCAT(prefix_, mat_gttrs)(type_ *dl, type_ *d, type_ *du, type_ *du2, type_ 
      XCAT(prefix_, gttrs_)("n", &n, &nrhs, dl, d, du, du2, ipiv, *b, &n, &info);
 
      if (info) {
-          printf("ERROR: dgttrs() info = %d\n", info);
+          fprintf(stderr, "ERROR: dgttrs() info = %d\n", info);
           exit(1);
      }
 }

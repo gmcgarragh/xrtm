@@ -1,0 +1,29 @@
+~/src/cproto-4.6/cproto -I${HOME}/grmlib -I../../rtutil ../src/xrtm_model.c > cproto_latex.out
+
+
+cat ~/bibtex/journal_names.bib ~/bibtex/bibliography.bib | aux2bib xrtm.aux > xrtm.bib
+
+bibutil -subset_entries citefile.txt -bibfile ~/bibtex/journal_names.bib -bibfile ~/bibtex/bibliography.bib > xrtm.bib
+
+
+~/src/tth_C-4.00/tth -\?
+
+~/src/tth_C-4.00/tth -Lxrtm -s < xrtm.tex | sed 's/\&times;</\&times; </g' | ~/src/tthgold/tthsplit
+sed 's|href="chap|href="sec|g' index.html > temp.out
+sed 's|Callxrtm input format</a><br />|Callxrtm input format</a><br /><a href="refs.html">Bibliography</a><br />|g' temp.out > index.html
+rm -f temp.out
+
+~/src/tth_C-4.03/tth -\?
+
+~/src/tth_C-4.03/tth -Lxrtm -s < xrtm.tex | sed 's/\&times;</\&times; </g' | ~/src/tthgold/tthsplit
+sed 's|href="chap|href="sec|g' index.html > temp.out
+sed 's|Callxrtm input format</a><br />|Callxrtm input format</a><br /><a href="refs.html">Bibliography</a><br />|g' temp.out > index.html
+rm -f temp.out
+
+
+~/src/tthgold/tthsplit < xrtm.html
+
+
+~/src/ttmC/ttm -\?
+
+~/src/ttmC/ttm -Lxrtm < xrtm.tex > xrtm.html

@@ -1,0 +1,337 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{Source function integration}
+\label{sec:source_function_integration}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Local source, classical}
+\label{sec:source_function_integration-local_source_classical}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Upward}
+\label{sec:source_function_integration-local_source_classical-upward}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Forward}
+\label{sec:source_function_integration-local_source_classical-upward-forward}
+
+\begin{equation}
+e_{1,i} = e^{-(x_{k} - \upsilon_{k}) / \mu_{i}}
+\label{eq:source_function_integration-local_source_classical-upward-forward-e_1_i}
+\end{equation}
+
+\begin{equation}
+I^{+}_{l,i} = I^{+}_{l-1,i} e_{1,i}
+\label{eq:source_function_integration-local_source_classical-upward-forward-I_p_l_i_1}
+\end{equation}
+
+
+\subparagraph{Solar source}
+\label{sec:source_function_integration-local_source_classical-upward-forward-solar_source}
+
+\begin{equation}
+\mathbf{F}^{+}_{\mathrm{u}} = \frac{F_{0}\omega}{4\pi}\mathbf{P}^{+-}_{\mathrm{u0}} + (1 + \delta_{0,m}) \frac{\omega}{4}(\mathbf{P}^{++}_{\mathrm{uq}}\mathbf{W}\mathbf{F}^{+} + \mathbf{P}^{-+}_{\mathrm{uq}}\mathbf{W}\mathbf{F}^{-})
+\label{eq:source_function_integration-local_source_classical-upward-forward-solar_source-F_p_u}
+\end{equation}
+
+\begin{equation}
+e_{2,i} = e^{-\upsilon_{k} / \mu_{i}}
+\label{eq:source_function_integration-local_source_classical-upward-forward-solar_source-e_2_i}
+\end{equation}
+
+\begin{equation}
+E^{+}_{0,i} = \frac{e_{2,i} - \mathcal{X}_{\mathrm{b},k} e_{1,i}}{1 + \mu_{i} \lambda_{k}} 
+\label{eq:source_function_integration-local_source_classical-upward-forward-solar_source-E_p_0_i}
+\end{equation}
+
+\begin{equation}
+I^{+}_{l,i} = I^{+}_{l,i} + F^{+}_{i} E^{+}_{0,i}
+\label{eq:source_function_integration-local_source_classical-upward-forward-solar_source-I_p_l_i_1}
+\end{equation}
+
+
+\subparagraph{Thermal source}
+\label{sec:source_function_integration-local_source_classical-upward-forward-thermal_source}
+
+\begin{equation}
+\mathbf{A}^{+}_{\mathrm{u},i} = \frac{\omega}{2}(\mathbf{P}^{++}_{\mathrm{uq}}\mathbf{W}\mathbf{A}^{+}_{i} + \mathbf{P}^{-+}_{\mathrm{uq}}\mathbf{W}\mathbf{A}^{-}_{i})
+\label{eq:source_function_integration-local_source_classical-upward-forward-thermal_source-A_p_u_i}
+\end{equation}
+
+\begin{equation}
+z_{0,j} = 1 - e_{1,j}
+\label{eq:source_function_integration-local_source_classical-upward-forward-thermal_source-series}
+\end{equation}
+
+\begin{equation}
+z_{i,j} = \upsilon^{i} - x^{i} e_{1,j} + i \mu_{j} z_{i-1,j}
+\label{eq:source_function_integration-local_source_classical-upward-forward-thermal_source-series}
+\end{equation}
+
+\begin{equation}
+I^{+}_{l,j} = I^{+}_{l,j} + \sum^{2}_{i = 0} (\mathbf{A}^{+}_{\mathrm{u},i,j} + (1 - \omega) c_{j}) z_{i,j}
+\label{eq:source_function_integration-local_source_classical-upward-forward-thermal_source-I_p_l_i_1}
+\end{equation}
+
+
+\subparagraph{Homogeneous solution}
+\label{sec:source_function_integration-local_source_classical-upward-forward-homogeneous_solution}
+
+\begin{equation}
+\mathbf{X}^{+}_{\mathrm{u}} = \mathbf{P}^{++}_{\mathrm{uq}}\mathbf{W}\mathbf{X}^{+} + \mathbf{P}^{-+}_{\mathrm{uq}}\mathbf{W}\mathbf{X}^{-}
+\label{eq:source_function_integration-local_source_classical-upward-forward-solar_source-X_p_u}
+\end{equation}
+
+\begin{equation}
+\mathbf{X}^{-}_{\mathrm{u}} = \mathbf{P}^{++}_{\mathrm{uq}}\mathbf{W}\mathbf{X}^{-} + \mathbf{P}^{-+}_{\mathrm{uq}}\mathbf{W}\mathbf{X}^{+}
+\label{eq:source_function_integration-local_source_classical-upward-forward-homogeneous_solution-X_m_u}
+\end{equation}
+
+\begin{equation}
+e_{3,i} = e^{-\nu_{i}\upsilon}
+\label{eq:source_function_integration-local_source_classical-upward-forward-homogeneous_solution-e_3_i}
+\end{equation}
+
+\begin{equation}
+e_{4,i} = e^{-\nu_{i}x}
+\label{eq:source_function_integration-local_source_classical-upward-forward-homogeneous_solution-e_4_i}
+\end{equation}
+
+\begin{equation}
+e_{5,i} = e^{-\nu_{i}(x - \upsilon)}
+\label{eq:source_function_integration-local_source_classical-upward-forward-homogeneous_solution-e_5_i}
+\end{equation}
+
+\begin{equation}
+E^{+}_{i,j} = \frac{e_{3,j} - e_{4,j}e_{1,i}}{1 + \mu_{i}\nu_{j}}
+\label{eq:source_function_integration-local_source_classical-upward-forward-homogeneous_solution-E_p}
+\end{equation}
+
+\begin{equation}
+E^{-}_{i,j} = \frac{e_{5,j} -        e_{1,i}}{1 - \mu_{i}\nu_{j}}
+\label{eq:source_function_integration-local_source_classical-upward-forward-homogeneous_solution-E_m}
+\end{equation}
+
+\begin{equation}
+I^{+}_{l,i} = I^{+}_{l,i} + \sum^{N}_{j = 0} \omega (b^{+}_{j}\mathbf{X}^{+}_{i,j}E^{+}_{i,j} + b^{-}_{j}\mathbf{X}^{-}_{i,j}E^{-}_{i,j})
+\label{eq:source_function_integration-local_source_classical-upward-forward-homogeneous_solution-I_p_l_i_2}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Tangent linear}
+\label{sec:source_function_integration-local_source_classical-upward-tangent_linear}
+
+\subparagraph{Solar source}
+\label{sec:source_function_integration-local_source_classical-upward-tangent_linear-solar_source}
+
+\subparagraph{Thermal source}
+\label{sec:source_function_integration-local_source_classical-upward-tangent_linear-thermal_source}
+
+\subparagraph{Homogeneous solution}
+\label{sec:source_function_integration-local_source_classical-upward-tangent_linear-homogeneous_solution}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Adjoint of tangent linear}
+\label{sec:source_function_integration-local_source_classical-upward-adjoint_of_tangent_linear}
+
+\subparagraph{Solar source}
+\label{sec:source_function_integration-local_source_classical-upward-adjoint_of_tangent_linear-solar_source}
+
+\subparagraph{Thermal source}
+\label{sec:source_function_integration-local_source_classical-upward-adjoint_of_tangent_linear-thermal_source}
+
+\subparagraph{Homogeneous solution}
+\label{sec:source_function_integration-local_source_classical-upward-adjoint_of_tangent_linear-homogeneous_solution}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Downward}
+\label{sec:source_function_integration-local_source_classical-downward}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Forward}
+\label{sec:source_function_integration-local_source_classical-downward-forward}
+
+\subparagraph{Solar source}
+\label{sec:source_function_integration-local_source_classical-downward-forward-solar_source}
+
+\subparagraph{Thermal source}
+\label{sec:source_function_integration-local_source_classical-downward-forward-thermal_source}
+
+\subparagraph{Homogeneous solution}
+\label{sec:source_function_integration-local_source_classical-downward-forward-homogeneous_solution}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Tangent linear}
+\label{sec:source_function_integration-local_source_classical-downward-tangent_linear}
+
+\subparagraph{Solar source}
+\label{sec:source_function_integration-local_source_classical-downward-tanget_linear-solar_source}
+
+\subparagraph{Thermal source}
+\label{sec:source_function_integration-local_source_classical-downward-tanget_linear-thermal_source}
+
+\subparagraph{Homogeneous solution}
+\label{sec:source_function_integration-local_source_classical-downward-tanget_linear-homogeneous_solution}
+
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Adjoint of tangent linear}
+\label{sec:source_function_integration-local_source_classical-downward-adjoint_of_tangent_linear}
+
+\subparagraph{Solar source}
+\label{sec:source_function_integration-local_source_classical-downward-adjoint_of_tanget_linear-solar_source}
+
+\subparagraph{Thermal source}
+\label{sec:source_function_integration-local_source_classical-downward-adjoint_of_tanget_linear-thermal_source}
+
+\subparagraph{Homogeneous solution}
+\label{sec:source_function_integration-local_source_classical-downward-adjoint_of_tanget_linear-homogeneous_solution}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Local source, Green's function}
+\label{sec:source_function_integration-local_source_greens_function}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Upward}
+\label{sec:source_function_integration-local_source_greens_function-upward}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Forward}
+\label{sec:source_function_integration-local_source_greens_function-upward-forward}
+
+
+\subparagraph{Solar source}
+\label{sec:source_function_integration-local_source_greens_function-upward-forward-solar_source}
+
+
+\subparagraph{Thermal source}
+\label{sec:source_function_integration-local_source_greens_function-upward-forward-thermal_source}
+
+
+\subparagraph{Homogeneous solution}
+\label{sec:source_function_integration-local_source_greens_function-upward-forward-homogeneous_solution}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Tangent linear}
+\label{sec:source_function_integration-local_source_greens_function-upward-tangent_linear}
+
+\subparagraph{Solar source}
+\label{sec:source_function_integration-local_source_greens_function-upward-tangent_linear-solar_source}
+
+\subparagraph{Thermal source}
+\label{sec:source_function_integration-local_source_greens_function-upward-tangent_linear-thermal_source}
+
+\subparagraph{Homogeneous solution}
+\label{sec:source_function_integration-local_source_greens_function-upward-tangent_linear-homogeneous_solution}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Adjoint of tangent linear}
+\label{sec:source_function_integration-local_source_greens_function-upward-adjoint_of_tangent_linear}
+
+\subparagraph{Solar source}
+\label{sec:source_function_integration-local_source_greens_function-upward-adjoint_of_tangent_linear-solar_source}
+
+\subparagraph{Thermal source}
+\label{sec:source_function_integration-local_source_greens_function-upward-adjoint_of_tangent_linear-thermal_source}
+
+\subparagraph{Homogeneous solution}
+\label{sec:source_function_integration-local_source_greens_function-upward-adjoint_of_tangent_linear-homogeneous_solution}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Downward}
+\label{sec:source_function_integration-local_source_greens_function-downward}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Forward}
+\label{sec:source_function_integration-local_source_greens_function-downward-forward}
+
+\subparagraph{Solar source}
+\label{sec:source_function_integration-local_source_greens_function-downward-forward-solar_source}
+
+\subparagraph{Thermal source}
+\label{sec:source_function_integration-local_source_greens_function-downward-forward-thermal_source}
+
+\subparagraph{Homogeneous solution}
+\label{sec:source_function_integration-local_source_greens_function-downward-forward-homogeneous_solution}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Tangent linear}
+\label{sec:source_function_integration-local_source_greens_function-downward-tangent_linear}
+
+\subparagraph{Solar source}
+\label{sec:source_function_integration-local_source_greens_function-downward-tanget_linear-solar_source}
+
+\subparagraph{Thermal source}
+\label{sec:source_function_integration-local_source_greens_function-downward-tanget_linear-thermal_source}
+
+\subparagraph{Homogeneous solution}
+\label{sec:source_function_integration-local_source_greens_function-downward-tanget_linear-homogeneous_solution}
+
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\paragraph{Adjoint of tangent linear}
+\label{sec:source_function_integration-local_source_greens_function-downward-adjoint_of_tangent_linear}
+
+\subparagraph{Solar source}
+\label{sec:source_function_integration-local_source_greens_function-downward-adjoint_of_tanget_linear-solar_source}
+
+\subparagraph{Thermal source}
+\label{sec:source_function_integration-local_source_greens_function-downward-adjoint_of_tanget_linear-thermal_source}
+
+\subparagraph{Homogeneous solution}
+\label{sec:source_function_integration-local_source_greens_function-downward-adjoint_of_tanget_linear-homogeneous_solution}

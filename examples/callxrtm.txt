@@ -7,7 +7,7 @@ problems.  Please see the xrtm documentation for details on running callxrtm.
 
 
 The following two examples are for the same scenario given in the example
-programs.
+programs.  Please see the description given in the source files for details.
 
 Example using an xrtm input file (.xif):
 

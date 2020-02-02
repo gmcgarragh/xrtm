@@ -9,15 +9,17 @@
 #include "xrtm_int_cpp.h"
 
 
-xrtm_int_cpp::xrtm_int_cpp(int options, int solvers, int max_coef, int n_quad, int n_stokes, int n_derivs, int n_layers, int n_kernels, int n_kernel_quad, xrtm_int_cpp::kernel_type *kernels, int n_out_levels, int n_out_thetas) {
+xrtm_int_cpp::xrtm_int_cpp(int options, int solvers, int max_coef, int n_quad, int n_stokes, int n_derivs, int n_layers, int n_theta_0s, int n_kernels, int n_kernel_quad, xrtm_int_cpp::kernel_type *kernels, int n_out_levels, int n_out_thetas)
+{
      int r;
-     r = xrtm_create(&d, options, solvers, max_coef, n_quad, n_stokes, n_derivs, n_layers, n_kernels, n_kernel_quad, (enum xrtm_kernel_type *) kernels, n_out_levels, n_out_thetas);
+     r = xrtm_create(&d, options, solvers, max_coef, n_quad, n_stokes, n_derivs, n_layers, n_theta_0s, n_kernels, n_kernel_quad, (enum xrtm_kernel_type *) kernels, n_out_levels, n_out_thetas);
      if (r == XRTM_INT_ERROR)
           throw xrtm_int_cpp::ERROR;
 }
 
 
-xrtm_int_cpp::~xrtm_int_cpp() {
+xrtm_int_cpp::~xrtm_int_cpp()
+{
      int r;
      r = xrtm_destroy(&d);
      if (r == XRTM_INT_ERROR)
@@ -25,7 +27,8 @@ xrtm_int_cpp::~xrtm_int_cpp() {
 }
 
 
-int xrtm_int_cpp::get_options() {
+int xrtm_int_cpp::get_options()
+{
      int r;
      r = xrtm_get_options(&d);
      if (r == XRTM_INT_ERROR)
@@ -34,7 +37,8 @@ int xrtm_int_cpp::get_options() {
 }
 
 
-int xrtm_int_cpp::get_solvers() {
+int xrtm_int_cpp::get_solvers()
+{
      int r;
      r = xrtm_get_solvers(&d);
      if (r == XRTM_INT_ERROR)
@@ -43,7 +47,8 @@ int xrtm_int_cpp::get_solvers() {
 }
 
 
-int xrtm_int_cpp::get_max_coef() {
+int xrtm_int_cpp::get_max_coef()
+{
      int r;
      r = xrtm_get_max_coef(&d);
      if (r == XRTM_INT_ERROR)
@@ -52,7 +57,8 @@ int xrtm_int_cpp::get_max_coef() {
 }
 
 
-int xrtm_int_cpp::get_n_quad() {
+int xrtm_int_cpp::get_n_quad()
+{
      int r;
      r = xrtm_get_n_quad(&d);
      if (r == XRTM_INT_ERROR)
@@ -61,7 +67,8 @@ int xrtm_int_cpp::get_n_quad() {
 }
 
 
-int xrtm_int_cpp::get_n_stokes() {
+int xrtm_int_cpp::get_n_stokes()
+{
      int r;
      r = xrtm_get_n_stokes(&d);
      if (r == XRTM_INT_ERROR)
@@ -70,7 +77,8 @@ int xrtm_int_cpp::get_n_stokes() {
 }
 
 
-int xrtm_int_cpp::get_n_derivs() {
+int xrtm_int_cpp::get_n_derivs()
+{
      int r;
      r = xrtm_get_n_derivs(&d);
      if (r == XRTM_INT_ERROR)
@@ -79,7 +87,8 @@ int xrtm_int_cpp::get_n_derivs() {
 }
 
 
-int xrtm_int_cpp::get_n_layers() {
+int xrtm_int_cpp::get_n_layers()
+{
      int r;
      r = xrtm_get_n_layers(&d);
      if (r == XRTM_INT_ERROR)
@@ -88,7 +97,8 @@ int xrtm_int_cpp::get_n_layers() {
 }
 
 
-int xrtm_int_cpp::get_n_kernels() {
+int xrtm_int_cpp::get_n_kernels()
+{
      int r;
      r = xrtm_get_n_kernels(&d);
      if (r == XRTM_INT_ERROR)
@@ -97,7 +107,8 @@ int xrtm_int_cpp::get_n_kernels() {
 }
 
 
-int xrtm_int_cpp::get_n_kernel_quad() {
+int xrtm_int_cpp::get_n_kernel_quad()
+{
      int r;
      r = xrtm_get_n_kernel_quad(&d);
      if (r == XRTM_INT_ERROR)
@@ -106,7 +117,8 @@ int xrtm_int_cpp::get_n_kernel_quad() {
 }
 
 
-int xrtm_int_cpp::get_kernel(int i_kernel) {
+int xrtm_int_cpp::get_kernel(int i_kernel)
+{
      int r;
      r = xrtm_get_kernel(&d, i_kernel);
      if (r == XRTM_INT_ERROR)
@@ -115,7 +127,8 @@ int xrtm_int_cpp::get_kernel(int i_kernel) {
 }
 
 
-int xrtm_int_cpp::get_n_out_levels() {
+int xrtm_int_cpp::get_n_out_levels()
+{
      int r;
      r = xrtm_get_n_out_levels(&d);
      if (r == XRTM_INT_ERROR)
@@ -124,7 +137,8 @@ int xrtm_int_cpp::get_n_out_levels() {
 }
 
 
-int xrtm_int_cpp::get_n_out_thetas() {
+int xrtm_int_cpp::get_n_out_thetas()
+{
      int r;
      r = xrtm_get_n_out_thetas(&d);
      if (r == XRTM_INT_ERROR)
@@ -133,7 +147,8 @@ int xrtm_int_cpp::get_n_out_thetas() {
 }
 
 
-void xrtm_int_cpp::set_doub_d_tau(double d_tau) {
+void xrtm_int_cpp::set_doub_d_tau(double d_tau)
+{
      int r;
      r = xrtm_set_doub_d_tau(&d, d_tau);
      if (r == XRTM_INT_ERROR)
@@ -141,7 +156,8 @@ void xrtm_int_cpp::set_doub_d_tau(double d_tau) {
 }
 
 
-double xrtm_int_cpp::get_doub_d_tau() {
+double xrtm_int_cpp::get_doub_d_tau()
+{
      double r;
      r = xrtm_get_doub_d_tau(&d);
      if (r == XRTM_DBL_ERROR)
@@ -150,7 +166,8 @@ double xrtm_int_cpp::get_doub_d_tau() {
 }
 
 
-void xrtm_int_cpp::set_pade_params(int pade_s, int pade_r) {
+void xrtm_int_cpp::set_pade_params(int pade_s, int pade_r)
+{
      int r;
      r = xrtm_set_pade_params(&d, pade_s, pade_r);
      if (r == XRTM_INT_ERROR)
@@ -158,16 +175,17 @@ void xrtm_int_cpp::set_pade_params(int pade_s, int pade_r) {
 }
 
 
-int xrtm_int_cpp::get_pade_params(int *pade_s, int *pade_r) {
+void xrtm_int_cpp::get_pade_params(int *pade_s, int *pade_r)
+{
      int r;
      r = xrtm_get_pade_params(&d, pade_s, pade_r);
      if (r == XRTM_INT_ERROR)
           throw xrtm_int_cpp::ERROR;
-     return r;
 }
 
 
-void xrtm_int_cpp::set_sos_params(int max_os, double max_tau, double sos_tol) {
+void xrtm_int_cpp::set_sos_params(int max_os, double max_tau, double sos_tol)
+{
      int r;
      r = xrtm_set_sos_params(&d, max_os, max_tau, sos_tol);
      if (r == XRTM_INT_ERROR)
@@ -175,16 +193,17 @@ void xrtm_int_cpp::set_sos_params(int max_os, double max_tau, double sos_tol) {
 }
 
 
-int xrtm_int_cpp::get_sos_params(int *max_os, double *max_tau, double *sos_tol) {
+void xrtm_int_cpp::get_sos_params(int *max_os, double *max_tau, double *sos_tol)
+{
      int r;
      r = xrtm_get_sos_params(&d, max_os, max_tau, sos_tol);
      if (r == XRTM_INT_ERROR)
           throw xrtm_int_cpp::ERROR;
-     return r;
 }
 
 
-void xrtm_int_cpp::set_fourier_tol(double fourier_tol) {
+void xrtm_int_cpp::set_fourier_tol(double fourier_tol)
+{
      int r;
      r = xrtm_set_fourier_tol(&d, fourier_tol);
      if (r == XRTM_INT_ERROR)
@@ -192,7 +211,8 @@ void xrtm_int_cpp::set_fourier_tol(double fourier_tol) {
 }
 
 
-double xrtm_int_cpp::get_fourier_tol() {
+double xrtm_int_cpp::get_fourier_tol()
+{
      double r;
      r = xrtm_get_fourier_tol(&d);
      if (r == XRTM_DBL_ERROR)
@@ -201,7 +221,8 @@ double xrtm_int_cpp::get_fourier_tol() {
 }
 
 
-void xrtm_int_cpp::set_lambda(double lambda) {
+void xrtm_int_cpp::set_lambda(double lambda)
+{
      int r;
      r = xrtm_set_lambda(&d, lambda);
      if (r == XRTM_INT_ERROR)
@@ -209,7 +230,8 @@ void xrtm_int_cpp::set_lambda(double lambda) {
 }
 
 
-double xrtm_int_cpp::get_lambda() {
+double xrtm_int_cpp::get_lambda()
+{
      double r;
      r = xrtm_get_lambda(&d);
      if (r == XRTM_DBL_ERROR)
@@ -218,123 +240,8 @@ double xrtm_int_cpp::get_lambda() {
 }
 
 
-void xrtm_int_cpp::set_F_0(double F_0) {
-     int r;
-     r = xrtm_set_F_0(&d, F_0);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-double xrtm_int_cpp::get_F_0() {
-     double r;
-     r = xrtm_get_F_0(&d);
-     if (r == XRTM_DBL_ERROR)
-          throw xrtm_int_cpp::ERROR;
-     return r;
-}
-
-
-void xrtm_int_cpp::set_theta_0(double theta_0) {
-     int r;
-     r = xrtm_set_theta_0(&d, theta_0);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-double xrtm_int_cpp::get_theta_0() {
-     double r;
-     r = xrtm_get_theta_0(&d);
-     if (r == XRTM_DBL_ERROR)
-          throw xrtm_int_cpp::ERROR;
-     return r;
-}
-
-
-void xrtm_int_cpp::set_phi_0(double phi_0) {
-     int r;
-     r = xrtm_set_phi_0(&d, phi_0);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-double xrtm_int_cpp::get_phi_0() {
-     double r;
-     r = xrtm_get_phi_0(&d);
-     if (r == XRTM_DBL_ERROR)
-          throw xrtm_int_cpp::ERROR;
-     return r;
-}
-
-
-void xrtm_int_cpp::set_out_levels(int *out_levels) {
-     int r;
-     r = xrtm_set_out_levels(&d, out_levels);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::get_out_levels(int *out_levels) {
-     int r;
-     r = xrtm_get_out_levels(&d, out_levels);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_out_taus(double *out_taus) {
-     int r;
-     r = xrtm_set_out_taus(&d, out_taus);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::get_out_taus(double *out_taus) {
-     int r;
-     r = xrtm_get_out_taus(&d, out_taus);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_out_thetas(double *out_thetas) {
-     int r;
-     r = xrtm_set_out_thetas(&d, out_thetas);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::get_out_thetas(double *out_thetas) {
-     int r;
-     r = xrtm_get_out_thetas(&d, out_thetas);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_top_b(double top_b) {
-     int r;
-     r = xrtm_set_top_b(&d, top_b);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-double xrtm_int_cpp::get_top_b() {
-     double r;
-     r = xrtm_get_top_b(&d);
-     if (r == XRTM_DBL_ERROR)
-          throw xrtm_int_cpp::ERROR;
-     return r;
-}
-
-
-void xrtm_int_cpp::set_planet_r(double planet_r) {
+void xrtm_int_cpp::set_planet_r(double planet_r)
+{
      int r;
      r = xrtm_set_planet_r(&d, planet_r);
      if (r == XRTM_INT_ERROR)
@@ -342,7 +249,8 @@ void xrtm_int_cpp::set_planet_r(double planet_r) {
 }
 
 
-double xrtm_int_cpp::get_planet_r() {
+double xrtm_int_cpp::get_planet_r()
+{
      double r;
      r = xrtm_get_planet_r(&d);
      if (r == XRTM_DBL_ERROR)
@@ -351,7 +259,8 @@ double xrtm_int_cpp::get_planet_r() {
 }
 
 
-void xrtm_int_cpp::set_levels_z(double *levels_z) {
+void xrtm_int_cpp::set_levels_z(double *levels_z)
+{
      int r;
      r = xrtm_set_levels_z(&d, levels_z);
      if (r == XRTM_INT_ERROR)
@@ -359,7 +268,8 @@ void xrtm_int_cpp::set_levels_z(double *levels_z) {
 }
 
 
-void xrtm_int_cpp::get_levels_z(double *levels_z) {
+void xrtm_int_cpp::get_levels_z(double *levels_z)
+{
      int r;
      r = xrtm_get_levels_z(&d, levels_z);
      if (r == XRTM_INT_ERROR)
@@ -367,7 +277,213 @@ void xrtm_int_cpp::get_levels_z(double *levels_z) {
 }
 
 
-void xrtm_int_cpp::set_levels_b(double *levels_b) {
+void xrtm_int_cpp::set_out_levels(int *out_levels)
+{
+     int r;
+     r = xrtm_set_out_levels(&d, out_levels);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::get_out_levels(int *out_levels)
+{
+     int r;
+     r = xrtm_get_out_levels(&d, out_levels);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_out_taus(double *out_taus)
+{
+     int r;
+     r = xrtm_set_out_taus(&d, out_taus);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::get_out_taus(double *out_taus)
+{
+     int r;
+     r = xrtm_get_out_taus(&d, out_taus);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_out_thetas(double *out_thetas)
+{
+     int r;
+     r = xrtm_set_out_thetas(&d, out_thetas);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::get_out_thetas(double *out_thetas)
+{
+     int r;
+     r = xrtm_get_out_thetas(&d, out_thetas);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_F_iso_top(double F_iso_top)
+{
+     int r;
+     r = xrtm_set_F_iso_top(&d, F_iso_top);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+double xrtm_int_cpp::get_F_iso_top()
+{
+     double r;
+     r = xrtm_get_F_iso_top(&d);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_F_iso_top_l_1(int i_deriv, double F_iso_top_l)
+{
+     int r;
+     r = xrtm_set_F_iso_top_l_1(&d, i_deriv, F_iso_top_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_F_iso_top_l_n(double *F_iso_top_l)
+{
+     int r;
+     r = xrtm_set_F_iso_top_l_n(&d, F_iso_top_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+double xrtm_int_cpp::get_F_iso_top_l(int i_deriv)
+{
+     double r;
+     r = xrtm_get_F_iso_top_l(&d, i_deriv);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_F_iso_bot(double F_iso_bot)
+{
+     int r;
+     r = xrtm_set_F_iso_bot(&d, F_iso_bot);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+double xrtm_int_cpp::get_F_iso_bot()
+{
+     double r;
+     r = xrtm_get_F_iso_bot(&d);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_F_iso_bot_l_1(int i_deriv, double F_iso_bot_l)
+{
+     int r;
+     r = xrtm_set_F_iso_bot_l_1(&d, i_deriv, F_iso_bot_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_F_iso_bot_l_n(double *F_iso_bot_l)
+{
+     int r;
+     r = xrtm_set_F_iso_bot_l_n(&d, F_iso_bot_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+double xrtm_int_cpp::get_F_iso_bot_l(int i_deriv)
+{
+     double r;
+     r = xrtm_get_F_iso_bot_l(&d, i_deriv);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_F_0(double F_0)
+{
+     int r;
+     r = xrtm_set_F_0(&d, F_0);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+double xrtm_int_cpp::get_F_0()
+{
+     double r;
+     r = xrtm_get_F_0(&d);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_theta_0(double theta_0)
+{
+     int r;
+     r = xrtm_set_theta_0(&d, theta_0);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+double xrtm_int_cpp::get_theta_0()
+{
+     double r;
+     r = xrtm_get_theta_0(&d);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_phi_0(double phi_0)
+{
+     int r;
+     r = xrtm_set_phi_0(&d, phi_0);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+double xrtm_int_cpp::get_phi_0()
+{
+     double r;
+     r = xrtm_get_phi_0(&d);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_levels_b(double *levels_b)
+{
      int r;
      r = xrtm_set_levels_b(&d, levels_b);
      if (r == XRTM_INT_ERROR)
@@ -375,7 +491,8 @@ void xrtm_int_cpp::set_levels_b(double *levels_b) {
 }
 
 
-void xrtm_int_cpp::get_levels_b(double *levels_b) {
+void xrtm_int_cpp::get_levels_b(double *levels_b)
+{
      int r;
      r = xrtm_get_levels_b(&d, levels_b);
      if (r == XRTM_INT_ERROR)
@@ -383,280 +500,35 @@ void xrtm_int_cpp::get_levels_b(double *levels_b) {
 }
 
 
-void xrtm_int_cpp::set_g_1(int i_layer, double g) {
+void xrtm_int_cpp::set_levels_b_l_1(int i_deriv, double *levels_b_l)
+{
      int r;
-     r = xrtm_set_g_1(&d, i_layer, g);
+     r = xrtm_set_levels_b_l_1(&d, i_deriv, levels_b_l);
      if (r == XRTM_INT_ERROR)
           throw xrtm_int_cpp::ERROR;
 }
 
 
-void xrtm_int_cpp::set_g_n(double *g) {
+void xrtm_int_cpp::set_levels_b_l_n(double **levels_b_l)
+{
      int r;
-     r = xrtm_set_g_n(&d, g);
+     r = xrtm_set_levels_b_l_n(&d, levels_b_l);
      if (r == XRTM_INT_ERROR)
           throw xrtm_int_cpp::ERROR;
 }
 
 
-double xrtm_int_cpp::get_g(int i_layer) {
-     double r;
-     r = xrtm_get_g(&d, i_layer);
-     if (r == XRTM_DBL_ERROR)
-          throw xrtm_int_cpp::ERROR;
-     return r;
-}
-
-
-void xrtm_int_cpp::set_g_l_11(int i_layer, int i_deriv, double g_l) {
+void xrtm_int_cpp::get_levels_b_l(int i_deriv, double *levels_b_l)
+{
      int r;
-     r = xrtm_set_g_l_11(&d, i_layer, i_deriv, g_l);
+     r = xrtm_get_levels_b_l(&d, i_deriv, levels_b_l);
      if (r == XRTM_INT_ERROR)
           throw xrtm_int_cpp::ERROR;
 }
 
 
-void xrtm_int_cpp::set_g_l_n1(int i_deriv, double *g_l) {
-     int r;
-     r = xrtm_set_g_l_n1(&d, i_deriv, g_l);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_g_l_1n(int i_layer, double *g_l) {
-     int r;
-     r = xrtm_set_g_l_1n(&d, i_layer, g_l);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_g_l_nn(double **g_l) {
-     int r;
-     r = xrtm_set_g_l_nn(&d, g_l);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-double xrtm_int_cpp::get_g_l(int i_layer, int i_deriv) {
-     double r;
-     r = xrtm_get_g_l(&d, i_layer, i_deriv);
-     if (r == XRTM_DBL_ERROR)
-          throw xrtm_int_cpp::ERROR;
-     return r;
-}
-
-
-void xrtm_int_cpp::set_coef_1(int i_layer, int n_coef_layer, double **coef) {
-     int r;
-     r = xrtm_set_coef_1(&d, i_layer, n_coef_layer, coef);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_coef_n(int *n_coef_layer, double ***coef) {
-     int r;
-     r = xrtm_set_coef_n(&d, n_coef_layer, coef);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-int xrtm_int_cpp::get_n_coef(int i_layer) {
-     int r;
-     r = xrtm_get_n_coef(&d, i_layer);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-     return r;
-}
-
-
-double xrtm_int_cpp::get_coef(int i_layer, int i_elem, int i_coef) {
-     double r;
-     r = xrtm_get_coef(&d, i_layer, i_elem, i_coef);
-     if (r == XRTM_DBL_ERROR)
-          throw xrtm_int_cpp::ERROR;
-     return r;
-}
-
-
-void xrtm_int_cpp::set_coef_l_11(int i_layer, int i_deriv, double **coef_l) {
-     int r;
-     r = xrtm_set_coef_l_11(&d, i_layer, i_deriv, coef_l);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_coef_l_n1(int i_deriv, double ***coef_l) {
-     int r;
-     r = xrtm_set_coef_l_n1(&d, i_deriv, coef_l);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_coef_l_1n(int i_layer, double ***coef_l) {
-     int r;
-     r = xrtm_set_coef_l_1n(&d, i_layer, coef_l);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_coef_l_nn(double ****coef_l) {
-     int r;
-     r = xrtm_set_coef_l_nn(&d, coef_l);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-double xrtm_int_cpp::get_coef_l(int i_layer, int i_deriv, int i_elem, int i_coef) {
-     double r;
-     r = xrtm_get_coef_l(&d, i_layer, i_deriv, i_elem, i_coef);
-     if (r == XRTM_DBL_ERROR)
-          throw xrtm_int_cpp::ERROR;
-     return r;
-}
-
-
-void xrtm_int_cpp::set_omega_1(int i_layer, double omega) {
-     int r;
-     r = xrtm_set_omega_1(&d, i_layer, omega);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_omega_n(double *omega) {
-     int r;
-     r = xrtm_set_omega_n(&d, omega);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-double xrtm_int_cpp::get_omega(int i_layer) {
-     double r;
-     r = xrtm_get_omega(&d, i_layer);
-     if (r == XRTM_DBL_ERROR)
-          throw xrtm_int_cpp::ERROR;
-     return r;
-}
-
-
-void xrtm_int_cpp::set_omega_l_11(int i_layer, int i_deriv, double omega_l) {
-     int r;
-     r = xrtm_set_omega_l_11(&d, i_layer, i_deriv, omega_l);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_omega_l_n1(int i_deriv, double *omega_l) {
-     int r;
-     r = xrtm_set_omega_l_n1(&d, i_deriv, omega_l);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_omega_l_1n(int i_layer, double *omega_l) {
-     int r;
-     r = xrtm_set_omega_l_1n(&d, i_layer, omega_l);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_omega_l_nn(double **omega_l) {
-     int r;
-     r = xrtm_set_omega_l_nn(&d, omega_l);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-double xrtm_int_cpp::get_omega_l(int i_layer, int i_deriv) {
-     double r;
-     r = xrtm_get_omega_l(&d, i_layer, i_deriv);
-     if (r == XRTM_DBL_ERROR)
-          throw xrtm_int_cpp::ERROR;
-     return r;
-}
-
-
-void xrtm_int_cpp::set_ltau_1(int i_layer, double ltau) {
-     int r;
-     r = xrtm_set_ltau_1(&d, i_layer, ltau);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_ltau_n(double *ltau) {
-     int r;
-     r = xrtm_set_ltau_n(&d, ltau);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-double xrtm_int_cpp::get_ltau(int i_layer) {
-     double r;
-     r = xrtm_get_ltau(&d, i_layer);
-     if (r == XRTM_DBL_ERROR)
-          throw xrtm_int_cpp::ERROR;
-     return r;
-}
-
-
-void xrtm_int_cpp::set_ltau_l_11(int i_layer, int i_deriv, double ltau_l) {
-     int r;
-     r = xrtm_set_ltau_l_11(&d, i_layer, i_deriv, ltau_l);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_ltau_l_n1(int i_deriv, double *ltau_l) {
-     int r;
-     r = xrtm_set_ltau_l_n1(&d, i_deriv, ltau_l);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_ltau_l_1n(int i_layer, double *ltau_l) {
-     int r;
-     r = xrtm_set_ltau_l_1n(&d, i_layer, ltau_l);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-void xrtm_int_cpp::set_ltau_l_nn(double **ltau_l) {
-     int r;
-     r = xrtm_set_ltau_l_nn(&d, ltau_l);
-     if (r == XRTM_INT_ERROR)
-          throw xrtm_int_cpp::ERROR;
-}
-
-
-double xrtm_int_cpp::get_ltau_l(int i_layer, int i_deriv) {
-     double r;
-     r = xrtm_get_ltau_l(&d, i_layer, i_deriv);
-     if (r == XRTM_DBL_ERROR)
-          throw xrtm_int_cpp::ERROR;
-     return r;
-}
-
-
-void xrtm_int_cpp::set_surface_b(double surface_b) {
+void xrtm_int_cpp::set_surface_b(double surface_b)
+{
      int r;
      r = xrtm_set_surface_b(&d, surface_b);
      if (r == XRTM_INT_ERROR)
@@ -664,7 +536,8 @@ void xrtm_int_cpp::set_surface_b(double surface_b) {
 }
 
 
-double xrtm_int_cpp::get_surface_b() {
+double xrtm_int_cpp::get_surface_b()
+{
      double r;
      r = xrtm_get_surface_b(&d);
      if (r == XRTM_DBL_ERROR)
@@ -673,7 +546,342 @@ double xrtm_int_cpp::get_surface_b() {
 }
 
 
-void xrtm_int_cpp::set_kernel_ampfac(int i_kernel, double ampfac) {
+void xrtm_int_cpp::set_surface_b_l_1(int i_deriv, double surface_b_l)
+{
+     int r;
+     r = xrtm_set_surface_b_l_1(&d, i_deriv, surface_b_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_surface_b_l_n(double *surface_b_l)
+{
+     int r;
+     r = xrtm_set_surface_b_l_n(&d, surface_b_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+double xrtm_int_cpp::get_surface_b_l(int i_deriv)
+{
+     double r;
+     r = xrtm_get_surface_b_l(&d, i_deriv);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_g_1(int i_layer, double g)
+{
+     int r;
+     r = xrtm_set_g_1(&d, i_layer, g);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_g_n(double *g)
+{
+     int r;
+     r = xrtm_set_g_n(&d, g);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+double xrtm_int_cpp::get_g(int i_layer)
+{
+     double r;
+     r = xrtm_get_g(&d, i_layer);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_g_l_11(int i_layer, int i_deriv, double g_l)
+{
+     int r;
+     r = xrtm_set_g_l_11(&d, i_layer, i_deriv, g_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_g_l_n1(int i_deriv, double *g_l)
+{
+     int r;
+     r = xrtm_set_g_l_n1(&d, i_deriv, g_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_g_l_1n(int i_layer, double *g_l)
+{
+     int r;
+     r = xrtm_set_g_l_1n(&d, i_layer, g_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_g_l_nn(double **g_l)
+{
+     int r;
+     r = xrtm_set_g_l_nn(&d, g_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+double xrtm_int_cpp::get_g_l(int i_layer, int i_deriv)
+{
+     double r;
+     r = xrtm_get_g_l(&d, i_layer, i_deriv);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_coef_1(int i_layer, int n_coef_layer, double **coef)
+{
+     int r;
+     r = xrtm_set_coef_1(&d, i_layer, n_coef_layer, coef);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_coef_n(int *n_coef_layer, double ***coef)
+{
+     int r;
+     r = xrtm_set_coef_n(&d, n_coef_layer, coef);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+int xrtm_int_cpp::get_n_coef(int i_layer)
+{
+     int r;
+     r = xrtm_get_n_coef(&d, i_layer);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+double xrtm_int_cpp::get_coef(int i_layer, int i_elem, int i_coef)
+{
+     double r;
+     r = xrtm_get_coef(&d, i_layer, i_elem, i_coef);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_coef_l_11(int i_layer, int i_deriv, double **coef_l)
+{
+     int r;
+     r = xrtm_set_coef_l_11(&d, i_layer, i_deriv, coef_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_coef_l_n1(int i_deriv, double ***coef_l)
+{
+     int r;
+     r = xrtm_set_coef_l_n1(&d, i_deriv, coef_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_coef_l_1n(int i_layer, double ***coef_l)
+{
+     int r;
+     r = xrtm_set_coef_l_1n(&d, i_layer, coef_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_coef_l_nn(double ****coef_l)
+{
+     int r;
+     r = xrtm_set_coef_l_nn(&d, coef_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+double xrtm_int_cpp::get_coef_l(int i_layer, int i_deriv, int i_elem, int i_coef)
+{
+     double r;
+     r = xrtm_get_coef_l(&d, i_layer, i_deriv, i_elem, i_coef);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_omega_1(int i_layer, double omega)
+{
+     int r;
+     r = xrtm_set_omega_1(&d, i_layer, omega);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_omega_n(double *omega)
+{
+     int r;
+     r = xrtm_set_omega_n(&d, omega);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+double xrtm_int_cpp::get_omega(int i_layer)
+{
+     double r;
+     r = xrtm_get_omega(&d, i_layer);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_omega_l_11(int i_layer, int i_deriv, double omega_l)
+{
+     int r;
+     r = xrtm_set_omega_l_11(&d, i_layer, i_deriv, omega_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_omega_l_n1(int i_deriv, double *omega_l)
+{
+     int r;
+     r = xrtm_set_omega_l_n1(&d, i_deriv, omega_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_omega_l_1n(int i_layer, double *omega_l)
+{
+     int r;
+     r = xrtm_set_omega_l_1n(&d, i_layer, omega_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_omega_l_nn(double **omega_l)
+{
+     int r;
+     r = xrtm_set_omega_l_nn(&d, omega_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+double xrtm_int_cpp::get_omega_l(int i_layer, int i_deriv)
+{
+     double r;
+     r = xrtm_get_omega_l(&d, i_layer, i_deriv);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_ltau_1(int i_layer, double ltau)
+{
+     int r;
+     r = xrtm_set_ltau_1(&d, i_layer, ltau);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_ltau_n(double *ltau)
+{
+     int r;
+     r = xrtm_set_ltau_n(&d, ltau);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+double xrtm_int_cpp::get_ltau(int i_layer)
+{
+     double r;
+     r = xrtm_get_ltau(&d, i_layer);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_ltau_l_11(int i_layer, int i_deriv, double ltau_l)
+{
+     int r;
+     r = xrtm_set_ltau_l_11(&d, i_layer, i_deriv, ltau_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_ltau_l_n1(int i_deriv, double *ltau_l)
+{
+     int r;
+     r = xrtm_set_ltau_l_n1(&d, i_deriv, ltau_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_ltau_l_1n(int i_layer, double *ltau_l)
+{
+     int r;
+     r = xrtm_set_ltau_l_1n(&d, i_layer, ltau_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::set_ltau_l_nn(double **ltau_l)
+{
+     int r;
+     r = xrtm_set_ltau_l_nn(&d, ltau_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+double xrtm_int_cpp::get_ltau_l(int i_layer, int i_deriv)
+{
+     double r;
+     r = xrtm_get_ltau_l(&d, i_layer, i_deriv);
+     if (r == XRTM_DBL_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
+void xrtm_int_cpp::set_kernel_ampfac(int i_kernel, double ampfac)
+{
      int r;
      r = xrtm_set_kernel_ampfac(&d, i_kernel, ampfac);
      if (r == XRTM_INT_ERROR)
@@ -681,7 +889,8 @@ void xrtm_int_cpp::set_kernel_ampfac(int i_kernel, double ampfac) {
 }
 
 
-double xrtm_int_cpp::get_kernel_ampfac(int i_kernel) {
+double xrtm_int_cpp::get_kernel_ampfac(int i_kernel)
+{
      double r;
      r = xrtm_get_kernel_ampfac(&d, i_kernel);
      if (r == XRTM_DBL_ERROR)
@@ -690,7 +899,8 @@ double xrtm_int_cpp::get_kernel_ampfac(int i_kernel) {
 }
 
 
-void xrtm_int_cpp::set_kernel_params_1(int i_kernel, int i_param, double param) {
+void xrtm_int_cpp::set_kernel_params_1(int i_kernel, int i_param, double param)
+{
      int r;
      r = xrtm_set_kernel_params_1(&d, i_kernel, i_param, param);
      if (r == XRTM_INT_ERROR)
@@ -698,7 +908,8 @@ void xrtm_int_cpp::set_kernel_params_1(int i_kernel, int i_param, double param) 
 }
 
 
-void xrtm_int_cpp::set_kernel_params_n(int i_kernel, double *params) {
+void xrtm_int_cpp::set_kernel_params_n(int i_kernel, double *params)
+{
      int r;
      r = xrtm_set_kernel_params_n(&d, i_kernel, params);
      if (r == XRTM_INT_ERROR)
@@ -706,7 +917,8 @@ void xrtm_int_cpp::set_kernel_params_n(int i_kernel, double *params) {
 }
 
 
-double xrtm_int_cpp::get_kernel_params(int i_kernel, int i_param) {
+double xrtm_int_cpp::get_kernel_params(int i_kernel, int i_param)
+{
      double r;
      r = xrtm_get_kernel_params(&d, i_kernel, i_param);
      if (r == XRTM_DBL_ERROR)
@@ -715,7 +927,8 @@ double xrtm_int_cpp::get_kernel_params(int i_kernel, int i_param) {
 }
 
 
-void xrtm_int_cpp::set_kernel_ampfac_l_1(int i_kernel, int i_deriv, double ampfac_l) {
+void xrtm_int_cpp::set_kernel_ampfac_l_1(int i_kernel, int i_deriv, double ampfac_l)
+{
      int r;
      r = xrtm_set_kernel_ampfac_l_1(&d, i_kernel, i_deriv, ampfac_l);
      if (r == XRTM_INT_ERROR)
@@ -723,7 +936,8 @@ void xrtm_int_cpp::set_kernel_ampfac_l_1(int i_kernel, int i_deriv, double ampfa
 }
 
 
-void xrtm_int_cpp::set_kernel_ampfac_l_n(int i_kernel, double *ampfac_l) {
+void xrtm_int_cpp::set_kernel_ampfac_l_n(int i_kernel, double *ampfac_l)
+{
      int r;
      r = xrtm_set_kernel_ampfac_l_n(&d, i_kernel, ampfac_l);
      if (r == XRTM_INT_ERROR)
@@ -731,7 +945,8 @@ void xrtm_int_cpp::set_kernel_ampfac_l_n(int i_kernel, double *ampfac_l) {
 }
 
 
-double xrtm_int_cpp::get_kernel_ampfac_l(int i_kernel, int i_deriv) {
+double xrtm_int_cpp::get_kernel_ampfac_l(int i_kernel, int i_deriv)
+{
      double r;
      r = xrtm_get_kernel_ampfac_l(&d, i_kernel, i_deriv);
      if (r == XRTM_DBL_ERROR)
@@ -740,7 +955,8 @@ double xrtm_int_cpp::get_kernel_ampfac_l(int i_kernel, int i_deriv) {
 }
 
 
-void xrtm_int_cpp::set_kernel_params_l_11(int i_kernel, int i_deriv, int i_param, double param_l) {
+void xrtm_int_cpp::set_kernel_params_l_11(int i_kernel, int i_deriv, int i_param, double param_l)
+{
      int r;
      r = xrtm_set_kernel_params_l_11(&d, i_kernel, i_deriv, i_param, param_l);
      if (r == XRTM_INT_ERROR)
@@ -748,7 +964,8 @@ void xrtm_int_cpp::set_kernel_params_l_11(int i_kernel, int i_deriv, int i_param
 }
 
 
-void xrtm_int_cpp::set_kernel_params_l_1n(int i_kernel, int i_deriv, double *params_l) {
+void xrtm_int_cpp::set_kernel_params_l_1n(int i_kernel, int i_deriv, double *params_l)
+{
      int r;
      r = xrtm_set_kernel_params_l_1n(&d, i_kernel, i_deriv, params_l);
      if (r == XRTM_INT_ERROR)
@@ -756,7 +973,8 @@ void xrtm_int_cpp::set_kernel_params_l_1n(int i_kernel, int i_deriv, double *par
 }
 
 
-void xrtm_int_cpp::set_kernel_params_l_n1(int i_kernel, int i_param, double *params_l) {
+void xrtm_int_cpp::set_kernel_params_l_n1(int i_kernel, int i_param, double *params_l)
+{
      int r;
      r = xrtm_set_kernel_params_l_n1(&d, i_kernel, i_param, params_l);
      if (r == XRTM_INT_ERROR)
@@ -764,7 +982,8 @@ void xrtm_int_cpp::set_kernel_params_l_n1(int i_kernel, int i_param, double *par
 }
 
 
-void xrtm_int_cpp::set_kernel_params_l_nn(int i_kernel, double **params_l) {
+void xrtm_int_cpp::set_kernel_params_l_nn(int i_kernel, double **params_l)
+{
      int r;
      r = xrtm_set_kernel_params_l_nn(&d, i_kernel, params_l);
      if (r == XRTM_INT_ERROR)
@@ -772,7 +991,8 @@ void xrtm_int_cpp::set_kernel_params_l_nn(int i_kernel, double **params_l) {
 }
 
 
-double xrtm_int_cpp::get_kernel_params_l(int i_kernel, int i_deriv, int i_param) {
+double xrtm_int_cpp::get_kernel_params_l(int i_kernel, int i_deriv, int i_param)
+{
      double r;
      r = xrtm_get_kernel_params_l(&d, i_kernel, i_deriv, i_param);
      if (r == XRTM_DBL_ERROR)
@@ -781,7 +1001,8 @@ double xrtm_int_cpp::get_kernel_params_l(int i_kernel, int i_deriv, int i_param)
 }
 
 
-void xrtm_int_cpp::update_varied_layers() {
+void xrtm_int_cpp::update_varied_layers()
+{
      int r;
      r = xrtm_update_varied_layers(&d);
      if (r == XRTM_INT_ERROR)
@@ -789,23 +1010,62 @@ void xrtm_int_cpp::update_varied_layers() {
 }
 
 
-void xrtm_int_cpp::solution(xrtm_int_cpp::solver_mask solver, int solutions, int n_phis, double **phis, double ****I_p, double ****I_m, double *****K_p, double *****K_m, double *mean_p, double *mean_m, double **mean_p_l, double **mean_m_l, double *flux_p, double *flux_m, double **flux_p_l, double **flux_m_l, double *flux_div, double **flux_div_l) {
+void xrtm_int_cpp::qx(double *qx)
+{
      int r;
-     r = xrtm_solution(&d, (enum xrtm_solver_mask) solver, solutions, n_phis, phis, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l);
+     r = xrtm_qx(&d, qx);
      if (r == XRTM_INT_ERROR)
           throw xrtm_int_cpp::ERROR;
 }
 
 
-void xrtm_int_cpp::radiance(xrtm_int_cpp::solver_mask solver, int n_phis, double **phis, double ****I_p, double ****I_m, double *****K_p, double *****K_m) {
+void xrtm_int_cpp::qw(double *qw)
+{
      int r;
-     r = xrtm_radiance(&d, (enum xrtm_solver_mask) solver, n_phis, phis, I_p, I_m, K_p, K_m);
+     r = xrtm_qw(&d, qw);
      if (r == XRTM_INT_ERROR)
           throw xrtm_int_cpp::ERROR;
 }
 
 
-void xrtm_int_cpp::mean_radiance(xrtm_int_cpp::solver_mask solver, double *mean_p, double *mean_m, double **mean_p_l, double **mean_m_l) {
+void xrtm_int_cpp::kernel_qx(double *kernel_qx)
+{
+     int r;
+     r = xrtm_kernel_qx(&d, kernel_qx);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::kernel_qw(double *kernel_qw)
+{
+     int r;
+     r = xrtm_kernel_qw(&d, kernel_qw);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::solution(xrtm_int_cpp::solver_mask solver, int solutions, int n_out_phis, double **out_phis, double ****I_p, double ****I_m, double *****K_p, double *****K_m, double *mean_p, double *mean_m, double **mean_p_l, double **mean_m_l, double *flux_p, double *flux_m, double **flux_p_l, double **flux_m_l, double *flux_div, double **flux_div_l)
+{
+     int r;
+     r = xrtm_solution(&d, (enum xrtm_solver_mask) solver, solutions, n_out_phis, out_phis, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::radiance(xrtm_int_cpp::solver_mask solver, int n_out_phis, double **out_phis, double ****I_p, double ****I_m, double *****K_p, double *****K_m)
+{
+     int r;
+     r = xrtm_radiance(&d, (enum xrtm_solver_mask) solver, n_out_phis, out_phis, I_p, I_m, K_p, K_m);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+}
+
+
+void xrtm_int_cpp::mean_radiance(xrtm_int_cpp::solver_mask solver, double *mean_p, double *mean_m, double **mean_p_l, double **mean_m_l)
+{
      int r;
      r = xrtm_mean_radiance(&d, (enum xrtm_solver_mask) solver, mean_p, mean_m, mean_p_l, mean_m_l);
      if (r == XRTM_INT_ERROR)
@@ -813,7 +1073,8 @@ void xrtm_int_cpp::mean_radiance(xrtm_int_cpp::solver_mask solver, double *mean_
 }
 
 
-void xrtm_int_cpp::flux(xrtm_int_cpp::solver_mask solver, double *flux_p, double *flux_m, double **flux_p_l, double **flux_m_l) {
+void xrtm_int_cpp::flux(xrtm_int_cpp::solver_mask solver, double *flux_p, double *flux_m, double **flux_p_l, double **flux_m_l)
+{
      int r;
      r = xrtm_flux(&d, (enum xrtm_solver_mask) solver, flux_p, flux_m, flux_p_l, flux_m_l);
      if (r == XRTM_INT_ERROR)
@@ -821,7 +1082,8 @@ void xrtm_int_cpp::flux(xrtm_int_cpp::solver_mask solver, double *flux_p, double
 }
 
 
-void xrtm_int_cpp::flux_divergence(xrtm_int_cpp::solver_mask solver, double *flux_div, double **flux_div_l) {
+void xrtm_int_cpp::flux_divergence(xrtm_int_cpp::solver_mask solver, double *flux_div, double **flux_div_l)
+{
      int r;
      r = xrtm_flux_divergence(&d, (enum xrtm_solver_mask) solver, flux_div, flux_div_l);
      if (r == XRTM_INT_ERROR)

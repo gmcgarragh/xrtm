@@ -13,6 +13,14 @@ c***********************************************************************
 
       integer error
 
+c     Memory reserved for XRTM instance the contents of which should never be
+c     modfied by the user.
+      byte xrtm(N_BYTES_XRTM_TYPE)
+
+
+c     ******************************************************************
+c     * Define inputs.
+c     ******************************************************************
       integer options
       integer solvers
       integer max_coef
@@ -25,6 +33,8 @@ c***********************************************************************
       parameter (n_derivs = 3)
       integer n_layers
       parameter (n_layers = 4)
+      integer n_theta_0s
+      parameter (n_theta_0s = 1)
       integer n_kernels
       parameter (n_kernels = 1)
       integer n_kernel_quad
@@ -118,8 +128,6 @@ c***********************************************************************
       real*8  K_m(n_stokes, n_out_phis,
      &            n_out_thetas, n_derivs, n_out_levels)
 
-      byte xrtm(N_BYTES_XRTM_TYPE)
-
 
 c     ******************************************************************
 c     *
@@ -128,6 +136,8 @@ c     ******************************************************************
       options = ior(options, XRTM_OPTION_CALC_DERIVS)
       options = ior(options, XRTM_OPTION_DELTA_M)
       options = ior(options, XRTM_OPTION_N_T_TMS)
+      options = ior(options, XRTM_OPTION_OUTPUT_AT_LEVELS)
+      options = ior(options, XRTM_OPTION_SOURCE_SOLAR)
 
       solvers = 0
       solvers = ior(solvers, XRTM_SOLVER_EIG_ADD)
@@ -150,11 +160,11 @@ c     ******************************************************************
 
 
 c     ******************************************************************
-c     *
+c     * Create an XRTM instance.
 c     ******************************************************************
       call xrtm_create_f77(xrtm, options, solvers, max_coef, n_quad,
-     &                     n_stokes, n_derivs, n_layers, n_kernels,
-     &                     n_kernel_quad, kernels, n_out_levels,
+     &                     n_stokes, n_derivs, n_layers, n_theta_0s,
+     &                     n_kernels, n_kernel_quad, kernels, n_out_levels,
      &                     n_out_thetas, error)
       if (error /= 0) then
            write (0, *) 'error calling xrtm_create_f77()'
@@ -163,11 +173,41 @@ c     ******************************************************************
 
 
 c     ******************************************************************
-c     *
+c     * Set inputs.
+c
+c     * Inputs must be set before the first model run.  For subsequent
+c     * runs only the inputs that change need to be set.  For example
+c     * calculating the radiance across the O2-A band spectrum, assuming
+c     * constant scattering properites, would require only updating ltau
+c     * and omega for each point.
 c     ******************************************************************
+      call xrtm_set_out_levels_f77(xrtm, out_levels, error)
+      if (error .ne. 0) then
+           write (0, *) 'error calling xrtm_set_out_levels_f77()'
+           stop
+      endif
+
+      call xrtm_set_out_thetas_f77(xrtm, out_thetas, error)
+      if (error .ne. 0) then
+           write (0, *) 'error calling xrtm_set_out_thetas,_f77()'
+           stop
+      endif
+
       call xrtm_set_fourier_tol_f77(xrtm, .0001d0, error)
       if (error .ne. 0) then
            write (0, *) 'error calling xrtm_set_fourier_tol_f77()'
+           stop
+      endif
+
+      call xrtm_set_F_iso_top_f77(xrtm, 0.d0, error)
+      if (error .ne. 0) then
+           write (0, *) 'error calling xrtm_set_F_iso_top_f77()'
+           stop
+      endif
+
+      call xrtm_set_F_iso_bot_f77(xrtm, 0.d0, error)
+      if (error .ne. 0) then
+           write (0, *) 'error calling xrtm_set_F_iso_bot_f77()'
            stop
       endif
 
@@ -189,19 +229,8 @@ c     ******************************************************************
            stop
       endif
 
-      call xrtm_set_out_levels_f77(xrtm, out_levels, error)
-      if (error .ne. 0) then
-           write (0, *) 'error calling xrtm_set_out_levels_f77()'
-           stop
-      endif
 
-      call xrtm_set_out_thetas_f77(xrtm, out_thetas, error)
-      if (error .ne. 0) then
-           write (0, *) 'error calling xrtm_set_out_thetas,_f77()'
-           stop
-      endif
-
-
+c     Set optical property inputs
       call xrtm_set_ltau_n_f77(xrtm, ltau, error)
       if (error .ne. 0) then
            write (0, *) 'error calling xrtm_set_ltau_n_f77()'
@@ -220,6 +249,7 @@ c     ******************************************************************
            stop
       endif
 
+c     Alternatively the inputs can be set one layer at a time.
       do i = 1, n_layers
            call xrtm_set_ltau_1_f77(xrtm, i - 1, ltau(i), error)
            if (error .ne. 0) then
@@ -241,6 +271,7 @@ c     ******************************************************************
            endif
       enddo
 
+c     Set surface albedo
       call xrtm_set_kernel_ampfac_f77(xrtm, 0, albedo, error)
       if (error .ne. 0) then
            write (0, *) 'error calling xrtm_set_kernel_ampfac_f77()'
@@ -249,7 +280,7 @@ c     ******************************************************************
 
 
 c     ******************************************************************
-c     *
+c     * Set linearized inputs.
 c     ******************************************************************
       call xrtm_set_ltau_l_11_f77(xrtm, 2, 0, 1.d0, error)
       if (error .ne. 0) then
@@ -277,7 +308,10 @@ c     ******************************************************************
 
 
 c     ******************************************************************
-c     *
+c     * Run the model for radiances and associated derivatives.  If this
+c     * is the initial run and all the required inputs have not been
+c     * initialized then XRTM will print a appropriate message and
+c     * return < 0.
 c     ******************************************************************
       call xrtm_radiance_f77(xrtm, XRTM_SOLVER_EIG_ADD, n_out_phis,
      &                       out_phis, I_p, I_m, K_p, K_m, error)
@@ -288,21 +322,21 @@ c     ******************************************************************
 
 
 c     ******************************************************************
-c     *
+c     * Output results.
 c     ******************************************************************
       do i = 1, n_out_levels
            print '("level: ", I1)', i
            print '("     intensity:")'
            do j = 1, n_out_thetas
                 print '("          theta = ", ES9.2,
-     &                ", I_p = ", ES13.6, ", I_m = ", ES13.6)',
+     &                  ", I_p = ", ES13.6, ", I_m = ", ES13.6)',
      &                out_thetas(j), I_p(1,1,j,i), I_m(1,1,j,i)
            enddo
            do j = 1, n_derivs
                 print '("     derivative: ", I1)', j
                 do k = 1, n_out_thetas
                      print '("          theta = ", ES9.2,
-     &                    ", K_p = ", ES13.6, ", K_m = ", ES13.6)',
+     &                       ", K_p = ", ES13.6, ", K_m = ", ES13.6)',
      &                    out_thetas(k), K_p(1,1,k,j,i), K_m(1,1,k,j,i)
                 enddo
            enddo
@@ -310,7 +344,7 @@ c     ******************************************************************
 
 
 c     ******************************************************************
-c     *
+c     * Destroy the model.
 c     ******************************************************************
       call xrtm_destroy_f77(xrtm, error)
 

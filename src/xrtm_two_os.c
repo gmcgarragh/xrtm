@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -13,6 +13,7 @@
 #define NO_WORK_CAST
 
 #include "xrtm.h"
+#include "xrtm_derivs.h"
 #include "xrtm_sos.h"
 #include "xrtm_two_os.h"
 #include "xrtm_utility.h"
@@ -24,7 +25,7 @@
 int rtm_two_os(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
                double qf, double *qx_v, double *qw_v, double F_0, double mu_0,
                int *ulevels, double *utaus, int n_ulevels,
-               double *umus_v, int n_umus, 
+               double *umus_v, int n_umus,
                double *omega, double **omega_l, double *ltau, double **ltau_l,
                double *Rs_q0, double **Rs_q0_l, double **Rs_qq, double ***Rs_qq_l,
                double *btran, double **btran_l,
@@ -35,7 +36,7 @@ int rtm_two_os(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
                double ****P_qq_pp_l, double ****P_qq_mp_l, double ****P_qq_mm_l, double ****P_qq_pm_l,
                double **I_p, double **I_m, double ***I_p_l, double ***I_m_l,
                int sfi, int surface, int utau_output, int vector, int flag,
-               uchar **derivs_h, uchar **derivs_p, work_data work) {
+               derivs_data *derivs, work_data work) {
 
      int i;
      int j;
@@ -296,8 +297,8 @@ if (0)
       *-----------------------------------------------------------------------*/
      for (i = 0; i < n_layers; ++i) {
           for (k = 0; k < n_quad_v_x; ++k) {
-               r_0[i][k] = omega[i] * P_q0_pm[i][k]; 
-               t_0[i][k] = omega[i] * P_q0_mm[i][k]; 
+               r_0[i][k] = omega[i] * P_q0_pm[i][k];
+               t_0[i][k] = omega[i] * P_q0_mm[i][k];
           }
 
           for (j = 0; j < n_derivs; ++j) {
@@ -305,7 +306,7 @@ if (0)
                     r_0_l[i][j][k] = omega_l[i][j] * P_q0_pm[i][k];
                     t_0_l[i][j][k] = omega_l[i][j] * P_q0_mm[i][k];
 
-                    if (derivs_h[i][j]) {
+                    if (derivs->layers[i][j]) {
                          r_0_l[i][j][k] += omega[i] * P_q0_pm_l[i][j][k];
                          t_0_l[i][j][k] += omega[i] * P_q0_mm_l[i][j][k];
                     }
@@ -368,7 +369,7 @@ if (0)
      else {
           dvec_copy(i_p[0][n_layers], Rs_q0, n_quad_v_x);
           for (j = 0; j < n_derivs; ++j) {
-               if (! derivs_h[n_layers][j])
+               if (! derivs->layers[n_layers][j])
                     init_array1_d(i_p_l[0][n_layers][j], n_quad_v_x, 0.);
                else
                     dvec_copy(i_p_l[0][n_layers][j], Rs_q0_l[j], n_quad_v_x);
@@ -396,7 +397,7 @@ if (0)
 */
                     b = (-v1[k] * as_0_l[j][l] / (x[k] + as_0[j])) * v3[k] + v4[k] * -Psi1_l[j][l][k];
 
-                    if (derivs_h[j][l])
+                    if (derivs->layers[j][l])
                          b += v2[k] * r_0_l[j][l][k];
 
                     i_p_l[0][j][l][k] = Psi1_l[j][l][k] * i_p[0][j+1][k] + Psi1[j][k] * i_p_l[0][j+1][l][k] + a * b;
@@ -448,7 +449,7 @@ if (0) {
                     i_m_l[0][j+1][l][k] = Psi2_l[j][l][k] * i_m[0][j][k] + Psi2[j][k] * i_m_l[0][j][l][k] +
                                         c * v5[k] + v6[k] * (-v1[k] * as_0_l[j][l] / (as_0[j] - x[k])) + v7[k] * Phi1_l[j][l][k];
 
-                    if (derivs_h[j][l])
+                    if (derivs->layers[j][l])
                          i_m_l[0][j+1][l][k] += v3[k] * t_0_l[j][l][k];
                }
           }
@@ -489,19 +490,19 @@ if (0) {
                dvec_scale(a * omega_l[i][j], qw_v, v2, n_quad_v_x);
 
                dmat_mul_diag(P_qq_pm[i], v2, r_m_l[i][j], n_xmus_v, n_quad_v_x);
-               if (derivs_h[i][j]) {
+               if (derivs->layers[i][j]) {
                     dmat_mul_diag(P_qq_pm_l[i][j], v1, w1, n_xmus_v, n_quad_v_x);
                     dmat_add(r_m_l[i][j], w1, r_m_l[i][j], n_xmus_v, n_quad_v_x);
                }
 /*
                dmat_mul_diag(P_qq_mp[i], v2, r_p_l[i][j], n_xmus_v, n_quad_v_x);
-               if (derivs_h[i][j]) {
+               if (derivs->layers[i][j]) {
                     dmat_mul_diag(P_qq_mp_l[i][j], v1, w1, n_xmus_v, n_quad_v_x);
                     dmat_add(r_p_l[i][j], w1, r_p_l[i][j], n_xmus_v, n_quad_v_x);
                }
 */
                dmat_mul_diag(P_qq_pp[i], v2, t_p_l[i][j], n_xmus_v, n_quad_v_x);
-               if (derivs_h[i][j]) {
+               if (derivs->layers[i][j]) {
                     dmat_mul_diag(P_qq_pp_l[i][j], v1, w1, n_xmus_v, n_quad_v_x);
                     dmat_add(t_p_l[i][j], w1, t_p_l[i][j], n_xmus_v, n_quad_v_x);
                }
@@ -516,13 +517,13 @@ if (0) {
                     dvec_scale(a * omega_l[i][j], qw_v, v2, n_quad_v_x);
 
                     dmat_mul_diag(P_qq_pm[i], v2, r_m_l[i][j], n_xmus_v, n_quad_v_x);
-                    if (derivs_h[i][j]) {
+                    if (derivs->layers[i][j]) {
                          dmat_mul_diag(P_qq_pm_l[i][j], v1, w1, n_xmus_v, n_quad_v_x);
                          dmat_add(r_m_l[i][j], w1, r_m_l[i][j], n_xmus_v, n_quad_v_x);
                     }
 
                     dmat_mul_diag(P_qq_mm[i], v2, t_m_l[i][j], n_xmus_v, n_quad_v_x);
-                    if (derivs_h[i][j]) {
+                    if (derivs->layers[i][j]) {
                          dmat_mul_diag(P_qq_mm_l[i][j], v1, w1, n_xmus_v, n_quad_v_x);
                          dmat_add(t_m_l[i][j], w1, t_m_l[i][j], n_xmus_v, n_quad_v_x);
                     }
@@ -571,7 +572,7 @@ if (0) {
           dmat_mul_diag(R_p[n_layers], x, R_p[n_layers], n_xmus_v, n_quad_v_x);
 
           for (j = 0; j < n_derivs; ++j) {
-               if (! derivs_h[n_layers][j]) {
+               if (! derivs->layers[n_layers][j]) {
                     dmat_zero(R_p_l[n_layers][j], n_xmus_v, n_quad_v_x);
                }
                else {
@@ -619,7 +620,7 @@ if (0) {
           for (j = 0; j < n_derivs; ++j) {
                dm_v_mul(Rs_qq, i_m_l[1-i][n_layers][j], n_xmus_v, n_quad_v_x, i_p_l[i][n_layers][j]);
 
-               if (derivs_h[n_layers][j]) {
+               if (derivs->layers[n_layers][j]) {
                     dm_v_mul(Rs_qq_l[j], i_m[1-i][n_layers], n_xmus_v, n_quad_v_x, v1);
                     dvec_add(i_p_l[i][n_layers][j], v1, i_p_l[i][n_layers][j], n_quad_v_x);
                }
@@ -709,7 +710,7 @@ if (0) {
                          b = Phi2_l[j][m][k][l] * i_p[1-i][j+1][l] + Phi2[j][k][l] * i_p_l[1-i][j+1][m][l] +
                              r_0[j][l] * (-w1[k][l] * (4. * (as_0_l[j][m] * (y[k] + as_0[j]) + (x[l] + as_0[j]) * as_0_l[j][m])) / (4. * (x[l] + as_0[j]) * (y[k] + as_0[j]))) * w2[k][l] + w3[k][l] * (- Psi1_l[j][m][k] - as_0_l[j][m] * Phi2[j][k][l]  - (y[k] + as_0[j]) * Phi2_l[j][m][k][l]);
 
-                         if (derivs_h[j][m])
+                         if (derivs->layers[j][m])
                               b += r_0_l[j][m][l] * w4[k][l];
 
                          a += t_p_l[j][m][k][l] * (Phi2[j][k][l] * i_p[1-i][j+1][l] + r_0[j][l] * w4[k][l]) + t_p[j][k][l] * b;
@@ -742,7 +743,7 @@ if (0) {
                          a += (Phi3_l[j][m][k][l] * R_p[j+1][k][l] + Phi3[j][k][l] * R_p_l[j+1][m][k][l] +
                                r_m_l[j][m][k][l] * w4[k][l] + r_m[j][k][l] * w1[k][l] * as_0_l[j][m] * (x[l] + y[k]) / ((y[k] + as_0[j]) * (x[l] + y[k])) * w2[k][l] + w3[k][l] * (- Psi1_l[j][m][k] - as_0_l[j][m] * Phi3[j][k][l] - (y[k] + as_0[j]) * Phi3_l[j][m][k][l])) * t_0[j][l];
 
-                         if (derivs_h[j][m])
+                         if (derivs->layers[j][m])
                               a += (Phi3[j][k][l] * R_p[j+1][k][l] + r_m[j][k][l] * w4[k][l]) * t_0_l[j][m][l];
                     }
 

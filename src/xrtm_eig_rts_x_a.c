@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -118,7 +118,7 @@ void CALC_GLOBAL_R_AND_T_A(int n_quad,
                w1[i][j] = T_a[i][j];
           }
      }
-     
+
      T_a2 = w1;
 #endif
      xmat_copy(q_a, T_a2, n_quad, n_quad);
@@ -134,7 +134,7 @@ void CALC_GLOBAL_R_AND_T_A(int n_quad,
                w1[i][j] = R_a[i][j];
           }
      }
-     
+
      R_a2 = w1;
 #endif
      xmat_gxgxmx(0, R_a2, 1, save->b, 1., q_a, 1., n_quad, n_quad, n_quad);

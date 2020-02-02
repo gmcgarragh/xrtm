@@ -1,0 +1,290 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{Single scattering}
+\label{sec:single_scattering}
+
+\subsection{Forward}
+\label{sec:single_scattering-forward}
+
+\subsubsection{Up}
+\label{sec:single_scattering-forward-up}
+
+\begin{equation}
+a = \frac{1 - e^{- (\tau_{l} - \tau) / \mu}e^{- (\tau_{l} - \tau) \lambda_{l}}}{1/\mu + \lambda_{l}}
+\label{eq:single_scattering-forward-up-a}
+\end{equation}
+
+\begin{equation}
+b = \mathcal{T}_{b,l-1} e^{-(\tau - \tau_{l-1}) \lambda_{l}} \omega_{l} P_{l}(\mu, \mu_0) a
+\label{eq:single_scattering-forward-up-b}
+\end{equation}
+
+\begin{equation}
+I^{\uparrow}_{\mathrm{ss}}(\tau) = \frac{F_{0}}{\mu} \sum^{0}_{l = L-1} I_{\mathrm{ss},l + 1} e^{-(\tau_{l} - \tau) / \mu} + b
+\label{eq:single_scattering-forward-up-I_up_ss}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Down}
+\label{sec:single_scattering-forward-down}
+
+\begin{equation}
+c = \frac{e^{- (\tau - \tau_{l-1}) / \mu} - e^{- (\tau - \tau_{l-1}) \lambda_{l}}}{\lambda_{l} - 1/\mu}
+\label{eq:single_scattering-forward-down-c}
+\end{equation}
+
+\begin{equation}
+d = \mathcal{T}_{b,l-1} \omega_{l} P_{l}(\mu, \mu_0) c
+\label{eq:single_scattering-forward-down-d}
+\end{equation}
+
+\begin{equation}
+I^{\downarrow}_{\mathrm{ss}}(\tau) = \frac{F_{0}}{\mu} \sum^{L}_{l = 1} I_{\mathrm{ss},l - 1} e^{-(\tau - \tau_{l-1}) / \mu} + d
+\label{eq:single_scattering-forward-down-I_down-ss}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Tangent linear}
+\label{sec:single_scattering-tangent_linear}
+
+\subsubsection{Up}
+\label{sec:single_scattering-tangent_linear-up}
+
+\begin{adjustwidth}{-1in}{-1in}
+\center
+\begin{equation}
+\mathcal{L}(a) = \frac{\left[\mathcal{L}(\tau_{l}) - \mathcal{L}(\tau)\right] / \mu e^{-(\tau_{l} - \tau) / \mu}e^{-(\tau_{l} - \tau) \lambda_{l}} - e^{- (\tau_{l} - \tau) / \mu} \left\{-\right[\mathcal{L}(\tau_{l}) - \mathcal{L}(\tau)\left]\lambda_{l} - (\tau_{l} - \tau)\mathcal{L}(\lambda_{l})\right\} e^{- (\tau_{l} - \tau) \lambda_{l}} - a \mathcal{L}(\lambda_{l})}{1/\mu + \lambda_{l}}
+\label{eq:single_scattering-tangent_linear-up-a_l}
+\end{equation}
+\end{adjustwidth}
+
+\begin{eqnarray}
+\mathcal{L}(b) & = & \mathcal{L}(\mathcal{T}_{b,l-1}) e^{-(\tau - \tau_{l-1}) \lambda_{l}} \omega_{l} P_{l}(\mu, \mu_0) a \\
+               & + & - \mathcal{T}_{b,l-1} \left\{\left[\mathcal{L}(\tau) - \mathcal{L}(\tau_{l-1})\right] \lambda_{l} + (\tau - \tau_{l-1}) \mathcal{L}(\lambda_{l})\right\} e^{-(\tau - \tau_{l-1}) \lambda_{l}} \omega_{l} P_{l}(\mu, \mu_0) a \nonumber \\
+               & + & \mathcal{T}_{b,l-1} e^{-(\tau - \tau_{l-1}) \lambda_{l}} \mathcal{L}(\omega_{l}) P_{l}(\mu, \mu_0) a \nonumber \\
+               & + & \mathcal{T}_{b,l-1} e^{-(\tau - \tau_{l-1}) \lambda_{l}} \omega_{l} \mathcal{L}\left[P_{l}(\mu, \mu_0)\right] a \nonumber \\
+               & + & \mathcal{T}_{b,l-1} e^{-(\tau - \tau_{l-1}) \lambda_{l}} \omega_{l} P_{l}(\mu, \mu_0) \mathcal{L}(a) \nonumber
+\label{eq:single_scattering-tangent_linear-up-b_l}
+\end{eqnarray}
+
+\begin{equation}
+K^{\uparrow}_{\mathrm{ss}}(\tau) = \frac{F_{0}}{\mu} \sum^{0}_{l = L-1} K^{\uparrow}_{\mathrm{ss},l + 1} e^{-(\tau_{l} - \tau) / \mu} - I^{\uparrow}_{\mathrm{ss},l + 1} \left[\mathcal{L}(\tau_{l}) - \mathcal{L}(\tau) \right] / \mu e^{-(\tau_{l} - \tau) / \mu} + b
+\label{eq:single_scattering-tangent_linear-up-K_up_ss}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Down}
+\label{sec:single_scattering-tangent_linear-down}
+
+\begin{adjustwidth}{-1in}{-1in}
+\center
+\begin{equation}
+\mathcal{L}(c) = \frac{-\left[\mathcal{L}(\tau) - \mathcal{L}(\tau_{l-1})\right] / \mu e^{-(\tau - \tau_{l-1}) / \mu} - \left\{-\left[(\mathcal{L}(\tau) - \mathcal{L}(\tau_{l-1})\right] \lambda_{l} - (\tau - \tau_{l-1}) \mathcal{L}(\lambda_{l})\right\} e^{- (\tau - \tau_{l-1}) \lambda_{l}} - c \mathcal{L}(\lambda_{l})}{\lambda_{l} - 1/\mu}
+\label{eq:single_scattering-tangent_linear-down-c_l}
+\end{equation}
+\end{adjustwidth}
+
+\begin{eqnarray}
+\mathcal{L}(d) & = & \mathcal{L}(\mathcal{T}_{b,l-1}) \omega_{l} P_{l}(\mu, \mu_0) c \\
+               & +  & \mathcal{T}_{b,l-1} \mathcal{L}(\omega_{l}) P_{l}(\mu, \mu_0) c \nonumber \\
+               & +  & \mathcal{T}_{b,l-1} \omega_{l} \mathcal{L}\left[P_{l}(\mu, \mu_0)\right] c \nonumber \\
+               & +  & \mathcal{T}_{b,l-1} \omega_{l} P_{l}(\mu, \mu_0) \mathcal{L}(c) \nonumber
+\label{eq:single_scattering-tangent_linear-down-d_l}
+\end{eqnarray}
+
+\begin{equation}
+K^{\downarrow}_{\mathrm{ss}}(\tau) = \frac{F_{0}}{\mu} \sum^{L}_{l = 1} K^{\downarrow}_{\mathrm{ss},l - 1} e^{- (\tau - \tau_{l-1}) / \mu} - I^{\downarrow}_{\mathrm{ss},l - 1} \left[\mathcal{L}(\tau) - \mathcal{L}(\tau_{l-1}) \right] / \mu e^{-(\tau - \tau_{l-1}) / \mu} + d
+\label{eq:single_scattering-tangent_linear-down-K_down-ss}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Adjoint of tangent linear}
+\label{sec:single_scattering-adjoint_of_tangent_linear}
+
+\subsubsection{Up}
+\label{sec:single_scattering-adjoint_of_tangent_linear-up}
+
+\begin{equation}
+\mathcal{A}(I^{\uparrow}_{\mathrm{ss,l+1}}) = \mathcal{A}(I^{\uparrow}_{\mathrm{ss,l+1}}) + \mathcal{A}\left[I^{\uparrow}_{\mathrm{ss}}(\tau)\right]\frac{F_{0}}{\mu} e^{-(\tau_{l} - \tau) / \mu}
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-I_up_ss_l_p_1}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\tau_{l}) = \mathcal{A}(\tau_{l}) - \mathcal{A}\left[I^{\uparrow}_{\mathrm{ss}}(\tau)\right] I^{\uparrow}_{\mathrm{ss,l+1}} \frac{F_{0}}{\mu^{2}} e^{-(\tau_{l} - \tau) / \mu}
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-tau_l_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\tau) = \mathcal{A}(\tau) + \mathcal{A}\left[I^{\uparrow}_{\mathrm{ss}}(\tau)\right] I^{\uparrow}_{\mathrm{ss,l+1}} \frac{F_{0}}{\mu^{2}} e^{-(\tau_{l} - \tau) / \mu}
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-tau_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(b) = \mathcal{A}(b) + \mathcal{A}\left[I^{\uparrow}_{\mathrm{ss}}(\tau)\right]\frac{F_{0}}{\mu}
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-b_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathcal{T}_{b,l-1}) = \mathcal{A}(\mathcal{T}_{b,l-1}) + \mathcal{A}(b) e^{-(\tau - \tau_{l-1})\lambda_{l}} \omega_{l} P_{l}(\mu, \mu_0) a
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-t_s_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\tau) = \mathcal{A}(\tau) - \mathcal{A}(b) \mathcal{T}_{b,l-1} \lambda_{l} e^{-(\tau - \tau_{l-1})\lambda_{l}} \omega_{l} P_{l}(\mu, \mu_0) a
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-tau_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\tau_{l-1}) = \mathcal{A}(\tau_{l-1}) + \mathcal{A}(b) \mathcal{T}_{b,l-1} \lambda_{l} e^{-(\tau - \tau_{l-1})\lambda_{l}} \omega_{l} P_{l}(\mu, \mu_0) a
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-tau_l_m_1_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\lambda_{l}) = \mathcal{A}(\lambda_{l}) - \mathcal{A}(b) \mathcal{T}_{b,l-1} (\tau - \tau_{l-1}) e^{-(\tau - \tau_{l-1})\lambda_{l}} \omega_{l} P_{l}(\mu, \mu_0) a
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-lambda_l_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\omega_{l}) = \mathcal{A}(\omega_{l}) + \mathcal{A}(b) \mathcal{T}_{b,l-1} e^{-(\tau - \tau_{l-1})\lambda_{l}} P_{l}(\mu, \mu_0) a
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-omega_l_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}\left[P_{l}(\mu, \mu_0)\right] = \mathcal{A}\left[P_{l}(\mu, \mu_0)\right] + \mathcal{A}(b) \mathcal{T}_{b,l-1} e^{-(\tau - \tau_{l-1})\lambda_{l}} \omega_{l} a
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-P_l_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(a) = \mathcal{A}(a) + \mathcal{A}(b) \mathcal{T}_{b,l-1} e^{-(\tau - \tau_{l-1})\lambda_{l}} \omega_{l} P_{l}(\mu, \mu_0)
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-a_a}
+\end{equation}
+
+\begin{equation}
+t = \frac{\mathcal{A}(a)}{1 / \mu + \lambda_{l}}
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\tau_{l}) = \mathcal{A}(\tau_{l}) + t \frac{1}{\mu} e^{-(\tau_{l} - \tau) / \mu} e^{-(\tau_{l} - \tau) \lambda_{l}}
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-tau_l_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\tau) = \mathcal{A}(\tau) - t \frac{1}{\mu} e^{-(\tau_{l} - \tau) / \mu} e^{-(\tau_{l} - \tau) \lambda_{l}}
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-tau_a3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\tau_{l}) = \mathcal{A}(\tau_{l})+ t e^{-(\tau_{l} - \tau) / \mu} \lambda_{l} e^{-(\tau_{l} - \tau) \lambda_{l}}
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-tau_l_a3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\tau) = \mathcal{A}(\tau) - t e^{-(\tau_{l} - \tau) / \mu} \lambda_{l} e^{-(\tau_{l} - \tau) \lambda_{l}}
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-tau_a4}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\lambda_{l}) = \mathcal{A}(\lambda_{l}) + t e^{-(\tau_{l} - \tau) / \mu} (\tau_{l} - \tau) e^{-(\tau_{l} - \tau) \lambda_{l}}
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-lambda_l_a3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\lambda_{l}) = \mathcal{A}(\lambda_{l}) - t a
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-lambda_l_a4}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Down}
+\label{sec:single_scattering-adjoint_of_tangent_linear-down}
+
+\begin{equation}
+\mathcal{A}(I^{\downarrow}_{\mathrm{ss,l-1}}) = \mathcal{A}(I^{\downarrow}_{\mathrm{ss,l-1}}) + \mathcal{A}\left[I^{\downarrow}_{\mathrm{ss}}(\tau)\right]\frac{F_{0}}{\mu} e^{-(\tau - \tau_{l-1}) / \mu}
+\label{eq:single_scattering-adjoint_of_tangent_linear-down-I_down-ss_l_m_1}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\tau) = \mathcal{A}(\tau) - \mathcal{A}\left[I^{\downarrow}_{\mathrm{ss}}(\tau)\right] I^{\downarrow}_{\mathrm{ss,l-1}} \frac{F_{0}}{\mu^{2}} e^{-(\tau - \tau_{l-1}) / \mu}
+\label{eq:single_scattering-adjoint_of_tangent_linear-down-tau_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\tau_{l-1}) = \mathcal{A}(\tau_{l-1}) + \mathcal{A}\left[I^{\downarrow}_{\mathrm{ss}}(\tau)\right] I^{\downarrow}_{\mathrm{ss,l-1}} \frac{F_{0}}{\mu^{2}} e^{-(\tau - \tau_{l-1}) / \mu}
+\label{eq:single_scattering-adjoint_of_tangent_linear-down-tau_l_m_1_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(d) = \mathcal{A}(d) + \mathcal{A}\left[I^{\downarrow}_{\mathrm{ss}}(\tau)\right] \frac{F_{0}}{\mu}
+\label{eq:single_scattering-adjoint_of_tangent_linear-down-d_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathcal{T}_{b,l-1}) = \mathcal{A}(\mathcal{T}_{b,l-1}) + \mathcal{A}(d) \omega_{l} P_{l}(\mu, \mu_0) c
+\label{eq:single_scattering-adjoint_of_tangent_linear-down-tau_l_m_1_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\omega_{l}) = \mathcal{A}(\omega_{l}) + \mathcal{A}(d) \mathcal{T}_{b,l-1} P_{l}(\mu, \mu_0) c
+\label{eq:single_scattering-adjoint_of_tangent_linear-down-omega_l_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}\left[P_{l}(\mu, \mu_0)\right] = \mathcal{A}\left[P_{l}(\mu, \mu_0)\right] + \mathcal{A}(d) \mathcal{T}_{b,l-1} \omega_{l} c
+\label{eq:single_scattering-adjoint_of_tangent_linear-down-p_l_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(c) = \mathcal{A}(c) + \mathcal{A}(d) \mathcal{T}_{b,l-1} \omega_{l} P_{l}(\mu, \mu_0)
+\label{eq:single_scattering-adjoint_of_tangent_linear-down-c_a}
+\end{equation}
+
+\begin{equation}
+t = \frac{\mathcal{A}(c)}{\lambda_{l} - 1 / \mu}
+\label{eq:single_scattering-adjoint_of_tangent_linear-down-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\tau) = \mathcal{A}(\tau) - t \frac{1}{\mu} e^{-(\tau - \tau_{l-1}) / \mu}
+\label{eq:single_scattering-adjoint_of_tangent_linear-down-tau_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\tau_{l-1}) = \mathcal{A}(\tau_{l-1}) + t \frac{1}{\mu} e^{-(\tau - \tau_{l-1}) / \mu}
+\label{eq:single_scattering-adjoint_of_tangent_linear-down-tau_l_m_1_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\tau) = \mathcal{A}(\tau) + t \lambda_{l} e^{-(\tau - \tau_{l-1})\lambda_{l}}
+\label{eq:single_scattering-adjoint_of_tangent_linear-down-tau_a3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\tau_{l-1}) = \mathcal{A}(\tau_{l-1}) - t \lambda_{l} e^{-(\tau - \tau_{l-1})\lambda_{l}}
+\label{eq:single_scattering-adjoint_of_tangent_linear-down-tau_l_m_1_a3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\lambda_{l}) = \mathcal{A}(\lambda_{l}) + t (\tau - \tau_{l-1}) e^{-(\tau - \tau_{l-1}) \lambda_{l}}
+\label{eq:single_scattering-adjoint_of_tangent_linear-up-lambda_l_a3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\lambda_{l}) = \mathcal{A}(\lambda_{l}) - t c
+\label{eq:single_scattering-adjoint_of_tangent_linear-down-lambda_l_a2}
+\end{equation}

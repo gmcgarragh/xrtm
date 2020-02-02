@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -320,7 +320,7 @@ static void phase_func_get_a(xrtm_data *d, int n_coef, int i_layer, double mu, d
      if (d->options & XRTM_OPTION_PHASE_MATRIX_GC) {
           c = scat_angle(d->mu_0, d->phi_0, mu, phi);
 
-          scat_vector_rotate_a(d->n_stokes, d->mu_0, mu, c, phi - d->phi_0, P_a, P_a);
+          scat_vector_rotate_hovenier_a(d->n_stokes, d->mu_0, mu, c, phi - d->phi_0, P_a, P_a);
           build_scat_vector_gc_a(n_coef, d->n_stokes, (double **) polys, coef_a[i_layer], P_a);
      }
      else
@@ -329,7 +329,7 @@ static void phase_func_get_a(xrtm_data *d, int n_coef, int i_layer, double mu, d
      }
 #ifdef DEBUG
      else {
-         eprintf("ERROR: get_phase_func(): end of if / else if\n");
+         fprintf(stderr, "ERROR: get_phase_func(): end of if / else if\n");
          exit(1);
      }
 #endif
@@ -454,7 +454,7 @@ static int phase_vecs_get_a(xrtm_data *d, int i_four, int i_layer, int n_mus1, d
 */
 #ifdef DEBUG
      else {
-         eprintf("ERROR: phase_vecs_get_a(): end of if / else if\n");
+         fprintf(stderr, "ERROR: phase_vecs_get_a(): end of if / else if\n");
          exit(1);
      }
 #endif
@@ -481,7 +481,7 @@ static int phase_vecs_get_all_a(xrtm_data *d, int i_four, int n_mus1, double *mu
 
           for (i = 0; i < d->n_layers; ++i) {
                if (phase_vecs_get_a(d, i_four, i, n_mus1, mus1, mu2, Y1, Y2, alpha1, NULL, NULL, P_pp_a[i], P_pm_a[i], 0, flag2, flag3, work_type, work)) {
-                    eprintf("ERROR: get_phase_vecs_a(), i_four = %d, i_layer = %d\n", i_four, i);
+                    fprintf(stderr, "ERROR: get_phase_vecs_a(), i_four = %d, i_layer = %d\n", i_four, i);
                     return -1;
                }
           }
@@ -509,7 +509,7 @@ static int get_phase_vecs_q0_a(xrtm_data *d, int i_four, int i_layer,
      }
 
      if (phase_vecs_get_a(d, i_four, i_layer, d->n_quad_x, d->qx, -d->mu_0, Y_p, Y_0, d->alpha1, NULL, NULL, P_q0_mm_a, P_q0_pm_a, flag, 1, 1, WORK_DX, work)) {
-          eprintf("ERROR: phase_vecs_get_a(), i_four = %d, i_layer = %d\n", i_four, i_layer);
+          fprintf(stderr, "ERROR: phase_vecs_get_a(), i_four = %d, i_layer = %d\n", i_four, i_layer);
           return -1;
      }
 
@@ -532,7 +532,7 @@ static int get_phase_vecs_q0_all_a(xrtm_data *d, int i_four,
      }
 
      if (phase_vecs_get_all_a(d, i_four, d->n_quad_x, d->qx, -d->mu_0, Y_p, Y_0, d->alpha1, P_q0_mm_a, P_q0_pm_a, flag, 1, 1, WORK_DX, work)) {
-          eprintf("ERROR: phase_vecs_get_all_a(), i_four = %d\n", i_four);
+          fprintf(stderr, "ERROR: phase_vecs_get_all_a(), i_four = %d\n", i_four);
           return -1;
      }
 
@@ -559,7 +559,7 @@ static int get_phase_vecs_u0_a(xrtm_data *d, int i_four, int i_layer,
      }
 
      if (phase_vecs_get_a(d, i_four, i_layer, d->n_umus, d->umus, -d->mu_0, Y_u, Y_0, d->alpha1 + d->n_quad_v, NULL, NULL, P_u0_mm_a, P_u0_pm_a, flag, 0, 1, WORK_DU, work)) {
-          eprintf("ERROR: phase_vecs_get_a(), i_four = %d, i_layer = %d\n", i_four, i_layer);
+          fprintf(stderr, "ERROR: phase_vecs_get_a(), i_four = %d, i_layer = %d\n", i_four, i_layer);
           return -1;
      }
 
@@ -582,7 +582,7 @@ static int get_phase_vecs_u0_all_a(xrtm_data *d, int i_four,
      }
 
      if (phase_vecs_get_all_a(d, i_four, d->n_umus, d->umus, -d->mu_0, Y_u, Y_0, d->alpha1 + d->n_quad_v, P_u0_mm_a, P_u0_pm_a, flag, 0, 1, WORK_DU, work)) {
-          eprintf("ERROR: phase_vecs_get_all_a(), i_four = %d\n", i_four);
+          fprintf(stderr, "ERROR: phase_vecs_get_all_a(), i_four = %d\n", i_four);
           return -1;
      }
 
@@ -664,7 +664,7 @@ static int phase_mats_get_a(xrtm_data *d, int i_four, int i_layer, int n_mus1, i
 */
 #ifdef DEBUG
      else {
-         eprintf("ERROR: phase_mats_get(): end of if / else if\n");
+         fprintf(stderr, "ERROR: phase_mats_get(): end of if / else if\n");
          exit(1);
      }
 #endif
@@ -691,7 +691,7 @@ static int phase_mats_get_all_a(xrtm_data *d, int i_four, int n_mus1, int n_mus2
 
           for (i = 0; i < d->n_layers; ++i) {
                if (phase_mats_get_a(d, i_four, i, n_mus1, n_mus2, mus1, mus2, Y1, Y2, alpha1, alpha2, NULL, NULL, NULL, NULL, P_pp_a[i], P_mp_a[i], P_mm_a[i], P_pm_a[i], 0, flag2, flag3, work_type, work)) {
-                    eprintf("ERROR: phase_mats_get_a(), i_four = %d, i_layer = %d\n", i_four, i);
+                    fprintf(stderr, "ERROR: phase_mats_get_a(), i_four = %d, i_layer = %d\n", i_four, i);
                     return -1;
                }
           }
@@ -716,7 +716,7 @@ static int get_phase_mats_qq_a(xrtm_data *d, int i_four, int i_layer,
           get_Y_p(d, i_four, &Y_p);
 
      if (phase_mats_get_a(d, i_four, i_layer, d->n_quad_x, d->n_quad_x, d->qx, d->qx, Y_p, Y_p, d->alpha1, d->alpha2, NULL, NULL, NULL, NULL, P_qq_pp_a, P_qq_mp_a, P_qq_mm_a, P_qq_pm_a, flag, 1, 1, WORK_DXX, work)) {
-          eprintf("ERROR: phase_mats_get_a(), i_four = %d, i_layer = %d,\n", i_four, i_layer);
+          fprintf(stderr, "ERROR: phase_mats_get_a(), i_four = %d, i_layer = %d,\n", i_four, i_layer);
           return -1;
      }
 
@@ -736,7 +736,7 @@ static int get_phase_mats_qq_all_a(xrtm_data *d, int i_four,
           get_Y_p(d, i_four, &Y_p);
 
      if (phase_mats_get_all_a(d, i_four, d->n_quad_x, d->n_quad_x, d->qx, d->qx, Y_p, Y_p, d->alpha1, d->alpha2, NULL, NULL, NULL, NULL, P_qq_pp_a, P_qq_mp_a, P_qq_mm_a, P_qq_pm_a, flag, 1, 1, WORK_DXX, work)) {
-          eprintf("ERROR: phase_mats_get_all(), i_four = %d\n", i_four);
+          fprintf(stderr, "ERROR: phase_mats_get_all(), i_four = %d\n", i_four);
           return -1;
      }
 
@@ -763,7 +763,7 @@ static int get_phase_mats_uq_a(xrtm_data *d, int i_four, int i_layer,
      }
 
      if (phase_mats_get_a(d, i_four, i_layer, d->n_umus, d->n_quad_x, d->umus, d->qx, Y_u, Y_p, d->alpha1 + d->n_quad_v, d->alpha2, NULL, NULL, NULL, NULL, P_uq_pp_a, P_uq_mp_a, P_uq_mm_a, P_uq_pm_a, flag, 0, 1, WORK_DUX, work)) {
-          eprintf("ERROR: phase_mats_get_a(), i_four = %d, i_layer = %d\n", i_four, i_layer);
+          fprintf(stderr, "ERROR: phase_mats_get_a(), i_four = %d, i_layer = %d\n", i_four, i_layer);
           return -1;
      }
 
@@ -786,7 +786,7 @@ static int get_phase_mats_uq_all_a(xrtm_data *d, int i_four,
      }
 
      if (phase_mats_get_all_a(d, i_four, d->n_umus, d->n_quad_x, d->umus, d->qx, Y_u, Y_p, d->alpha1 + d->n_quad_v, d->alpha2, NULL, NULL, NULL, NULL, P_uq_pp_a, P_uq_mp_a, P_uq_mm_a, P_uq_pm_a, flag, 0, 1, WORK_DUX, work)) {
-          eprintf("ERROR: phase_mats_get_all_a(), i_four = %d\n", i_four);
+          fprintf(stderr, "ERROR: phase_mats_get_all_a(), i_four = %d\n", i_four);
           return -1;
      }
 
@@ -910,7 +910,7 @@ static int get_local_r_t_u_w_a
       *
       *-----------------------------------------------------------------------*/
      if (get_phase_mats_qq_a(d, i_four, i_layer, P_qq_pp_a, P_qq_mp_a, P_qq_mm_a, P_qq_pm_a, 1, &work2)) {
-          eprintf("ERROR: get_phase_mats_qq()\n");
+          fprintf(stderr, "ERROR: get_phase_mats_qq()\n");
           return -1;
      }
 
@@ -949,14 +949,14 @@ static int get_local_r_t_u_w_all_a
           for (i = 0; i < d->n_layers; ++i) {
                save_tree_recode_i(&save_tree, i, i == 0);
 
-               if (d->derivs_h_union[i]) {
+               if (d->derivs.layers_union[i]) {
                     if (d->options & XRTM_OPTION_VECTOR) {
                          r_m_a2 = r_m_a[i];
                          t_m_a2 = t_m_a[i];
                     }
 
                     if (get_local_r_t_u_w_a(d, i_four, i, NULL, NULL, NULL, NULL, r_p_a[i], t_p_a[i], r_m_a2, t_m_a2, 0, save_tree, work)) {
-                         eprintf("ERROR: get_local_r_t_u_w_a()\n");
+                         fprintf(stderr, "ERROR: get_local_r_t_u_w_a()\n");
                          return -1;
                     }
                }
@@ -985,7 +985,7 @@ static void call_solver_a
       double *P_q0_mm_a, double *P_q0_pm_a,
       double **r_p_a, double **t_p_a, double **r_m_a, double **t_m_a,
       double **R_p_a, double **T_p_a, double **R_m_a, double **T_m_a,
-      double *S_p_a,  double *S_m_a, uchar derivs_h, uchar derivs_p,
+      double *S_p_a,  double *S_m_a, uchar derivs_layers, uchar derivs_beam,
       save_tree_data save_tree, work_data work) {
 
      int thermal;
@@ -1027,7 +1027,7 @@ static void call_solver_a
      else
 */
      if (solver & XRTM_SOLVER_EIG_ADD) {
-          rtm_eig_rts_a  (d->n_quad_x, d->n_stokes, d->F_0, d->qx_v, d->qw_v, planck0, planck1, omega, omega_a, ltau, ltau_a, as_0, as_0_a, atran, atran_a, P_q0_mm, P_q0_pm, r_p, t_p, r_m, t_m, R_p, T_p, R_m, T_m, S_p, S_m, P_q0_mm_a, P_q0_pm_a, r_p_a, t_p_a, r_m_a, t_m_a, R_p_a, T_p_a, R_x_a, T_x_a, S_p_a, S_m_a, symmetric, thermal, vector, eigen_solver_real, eigen_solver_complex, derivs_h, derivs_p, save_tree, work);
+          rtm_eig_rts_a  (d->n_quad_x, d->n_stokes, d->F_0, d->qx_v, d->qw_v, planck0, planck1, omega, omega_a, ltau, ltau_a, as_0, as_0_a, atran, atran_a, P_q0_mm, P_q0_pm, r_p, t_p, r_m, t_m, R_p, T_p, R_m, T_m, S_p, S_m, P_q0_mm_a, P_q0_pm_a, r_p_a, t_p_a, r_m_a, t_m_a, R_p_a, T_p_a, R_x_a, T_x_a, S_p_a, S_m_a, symmetric, thermal, vector, eigen_solver_real, eigen_solver_complex, derivs_layers, derivs_beam, save_tree, work);
      }
 /*
      else
@@ -1037,7 +1037,7 @@ static void call_solver_a
 */
 #ifdef DEBUG
      else {
-         eprintf("ERROR: call_solver(): end of if / else if\n");
+         fprintf(stderr, "ERROR: call_solver(): end of if / else if\n");
          exit(1);
      }
 #endif
@@ -1193,15 +1193,15 @@ static int get_layer_R_T_S_U_W_V_a
                b1 = d->levels_b[i_layer + 1];
           }
 
-          call_solver_a(d, solver, i_four, b0, b1, d->omega[i_layer], &d->omega_a[i_layer], d->ltau[i_layer], &d->ltau_a[i_layer], d->as_0[i_layer], &d->as_0_a[i_layer], d->atran[i_layer], &d->atran_a[i_layer], save->P_q0_mm, save->P_q0_pm, save->r_p, save->t_p, save->r_m, save->t_m, R_p, T_p, R_m, T_m, S_p, S_m, P_q0_mm_a, P_q0_pm_a, r_p_a, t_p_a, r_m_a, t_m_a, R_p_a, T_p_a, R_m_a, T_m_a, S_p_a, S_m_a, d->derivs_h_union[i_layer], d->derivs_d_union[i_layer], save_tree, work2);
-if (d->derivs_h_union[i_layer]) {
+          call_solver_a(d, solver, i_four, b0, b1, d->omega[i_layer], &d->omega_a[i_layer], d->ltau[i_layer], &d->ltau_a[i_layer], d->as_0[i_layer], &d->as_0_a[i_layer], d->atran[i_layer], &d->atran_a[i_layer], save->P_q0_mm, save->P_q0_pm, save->r_p, save->t_p, save->r_m, save->t_m, R_p, T_p, R_m, T_m, S_p, S_m, P_q0_mm_a, P_q0_pm_a, r_p_a, t_p_a, r_m_a, t_m_a, R_p_a, T_p_a, R_m_a, T_m_a, S_p_a, S_m_a, d->derivs.layers_union[i_layer], d->derivs.beam_union[i_layer], save_tree, work2);
+if (d->derivs.layers_union[i_layer]) {
           if (get_local_r_t_u_w_a(d, i_four, i_layer, save->r_p, save->t_p, save->r_m, save->t_m, r_p_a, t_p_a, r_m_a, t_m_a, 1, save_tree, &work2)) {
-               eprintf("ERROR: get_local_r_t_u_w()\n");
+               fprintf(stderr, "ERROR: get_local_r_t_u_w()\n");
                return -1;
           }
 
           if (get_phase_vecs_q0_a(d, i_four, i_layer, P_q0_mm_a, P_q0_pm_a, 1, &work2)) {
-               eprintf("ERROR: get_phase_vecs_q0()\n");
+               fprintf(stderr, "ERROR: get_phase_vecs_q0()\n");
                return -1;
           }
 }
@@ -1218,7 +1218,7 @@ if (d->derivs_h_union[i_layer]) {
 /*
      if (i_four == 0) {
           if (check_R_and_T_norm_a(d->n_quad, d->n_stokes, R_p_a, T_p_a) != 0) {
-               eprintf("ERROR: check_R_and_T_norm_a()\n");
+               fprintf(stderr, "ERROR: check_R_and_T_norm_a()\n");
                return -1;
           }
      }
@@ -1289,7 +1289,7 @@ static int get_total_TOA_R_S_U_V_a
       double **R_m, double *S_p, double **R_m_a, double *S_p_a,
       int surface, int flag, save_tree_data save_tree, work_data *work) {
 
-     uchar *derivs_u_union;
+     uchar *derivs_adding_up_union;
 
      int i;
 
@@ -1363,9 +1363,9 @@ static int get_total_TOA_R_S_U_V_a
       *
       *-----------------------------------------------------------------------*/
      if (i_four == 0)
-          derivs_u_union = d->derivs_u_union;
+          derivs_adding_up_union = d->derivs.adding_up_union;
      else
-          derivs_u_union = d->derivs_um_union;
+          derivs_adding_up_union = d->derivs.adding_up_m_union;
 
 
      /*-------------------------------------------------------------------------
@@ -1398,7 +1398,7 @@ static int get_total_TOA_R_S_U_V_a
           if (! surface && i == d->n_layers - 1)
                layer_copy_ref(R2_m_a, S3_p_a, R1_m_a, S1_p_a, d->n_quad_v_x);
           else {
-               layer_add_ref_a(save->R2_m[i], save->T2_m[i], save->S3_m[i], save->R2_p[i], save->T2_p[i], save->S3_p[i], save->R1_m[i], save->S1_p[i], NULL, NULL, R2_m_a, T2_m_a, S3_m_a, R2_p_a, T2_p_a, S3_p_a, R3_m_a, S4_p_a, R1_m_a, S1_p_a, d->n_quad_v_x, 1., &trans_a, derivs_u_union[i], 0, 1, save_tree, work3);
+               layer_add_ref_a(save->R2_m[i], save->T2_m[i], save->S3_m[i], save->R2_p[i], save->T2_p[i], save->S3_p[i], save->R1_m[i], save->S1_p[i], NULL, NULL, R2_m_a, T2_m_a, S3_m_a, R2_p_a, T2_p_a, S3_p_a, R3_m_a, S4_p_a, R1_m_a, S1_p_a, d->n_quad_v_x, 1., &trans_a, derivs_adding_up_union[i], 0, 1, save_tree, work3);
 
                layer_copy_ref(R1_m_a, S1_p_a, R3_m_a, S4_p_a, d->n_quad_v_x);
                layer_zero_ref(R3_m_a, S4_p_a, d->n_quad_v_x);
@@ -1409,7 +1409,7 @@ static int get_total_TOA_R_S_U_V_a
           update_beam_params_a(d, i, work3);
 
           if (get_layer_R_T_S_U_W_V_a(d, i_four, i, solver, save->R2_p[i], save->T2_p[i], save->R2_m[i], save->T2_m[i], save->S2_p[i], save->S2_m[i], R2_p_a, T2_p_a, R2_m_a, T2_m_a, S2_p_a, S2_m_a, 1, save_tree, &work3)) {
-               eprintf("ERROR: get_layer_R_T_S_U_W_V()\n");
+               fprintf(stderr, "ERROR: get_layer_R_T_S_U_W_V()\n");
                return -1;
           }
      }
@@ -1618,7 +1618,7 @@ static int get_total_R_T_S_U_W_V_a
                               R1_m_a, T1_m_a, S1_m_a, R1_p_a, T1_p_a, S1_p_a,
                               d->n_quad_v_x);
           else {
-               layer_add_all_a(save->R1_m[i], save->T1_m[i], save->S1_m[i], save->R1_p[i], save->T1_p[i], save->S1_p[i], save->R2_m[i], save->T2_m[i], save->S3_m[i], save->R2_p[i], save->T2_p[i], save->S3_p[i], NULL, NULL, NULL, NULL, NULL, NULL, R3_m_a, T3_m_a, S4_m_a, R3_p_a, T3_p_a, S4_p_a, R2_m_a, T2_m_a, S3_m_a, R2_p_a, T2_p_a, S3_p_a, R1_m_a, T1_m_a, S1_m_a, R1_p_a, T1_p_a, S1_p_a, d->n_quad_v_x, 1., &trans_a, d->derivs_d_union[i], save_tree, work3);
+               layer_add_all_a(save->R1_m[i], save->T1_m[i], save->S1_m[i], save->R1_p[i], save->T1_p[i], save->S1_p[i], save->R2_m[i], save->T2_m[i], save->S3_m[i], save->R2_p[i], save->T2_p[i], save->S3_p[i], NULL, NULL, NULL, NULL, NULL, NULL, R3_m_a, T3_m_a, S4_m_a, R3_p_a, T3_p_a, S4_p_a, R2_m_a, T2_m_a, S3_m_a, R2_p_a, T2_p_a, S3_p_a, R1_m_a, T1_m_a, S1_m_a, R1_p_a, T1_p_a, S1_p_a, d->n_quad_v_x, 1., &trans_a, d->derivs.adding_down_union[i], save_tree, work3);
 
                layer_copy_all(R1_m_a, T1_m_a, S1_m_a, R1_p_a, T1_p_a, S1_p_a, R3_m_a, T3_m_a, S4_m_a, R3_p_a, T3_p_a, S4_p_a, d->n_quad_v_x);
                layer_zero_all(R3_m_a, T3_m_a, S4_m_a, R3_p_a, T3_p_a, S4_p_a, d->n_quad_v_x);
@@ -1629,7 +1629,7 @@ static int get_total_R_T_S_U_W_V_a
           update_beam_params_a(d, i, work3);
 
           if (get_layer_R_T_S_U_W_V_a(d, i_four, i, solver, save->R2_p[i], save->T2_p[i], save->R2_m[i], save->T2_m[i], save->S2_p[i], save->S2_m[i], R2_p_a, T2_p_a, R2_m_a, T2_m_a, S2_p_a, S2_m_a, 1, save_tree, &work3)) {
-               eprintf("ERROR: get_layer_R_T_S_U_W_V_a()\n");
+               fprintf(stderr, "ERROR: get_layer_R_T_S_U_W_V_a()\n");
                return -1;
           }
      }
@@ -2191,7 +2191,7 @@ static int fourier_get_add_bottom_up_a(xrtm_data *d, int i_four, int solver, dou
       *-----------------------------------------------------------------------*/
      if ( ! (d->options & XRTM_OPTION_CALC_DERIVS) || ! (d->options & XRTM_OPTION_STACK_REUSE_ADDING)) {
           if (get_total_TOA_R_S_U_V_a(d, i_four, solver, save->Rs_qq, d->In_p[i_four], Rs_qq_a, d->In_p_a[i_four], save->R_m, save->S_p, R_m_a, S_p_a, surface, 1, save_tree, &work)) {
-               eprintf("ERROR: get_total_TOA_R_S_U_V_a()\n");
+               fprintf(stderr, "ERROR: get_total_TOA_R_S_U_V_a()\n");
                return -1;
           }
      }
@@ -2347,7 +2347,7 @@ static int fourier_get_add_both_ways_a(xrtm_data *d, int i_four, int solver, dou
                     radiance_slab_a(d->n_quad_v_x, save->R_p, save->T_m, save->S_m, R_p_a, T_m_a, S_m_a, d->I1_m[i_four], d->In_p[i_four], d->I1_m_a[i_four], d->In_p_a[i_four], I_m[i], I_m_a[i], work);
 #ifdef DEBUG
                else {
-                   eprintf("ERROR: fourier_get_add_both_ways(): end of if / else if\n");
+                   fprintf(stderr, "ERROR: fourier_get_add_both_ways(): end of if / else if\n");
                    exit(1);
                }
 #endif
@@ -2397,7 +2397,7 @@ static int fourier_get_add_both_ways_a(xrtm_data *d, int i_four, int solver, dou
      if ( ! (d->options & XRTM_OPTION_CALC_DERIVS) ||
           ! (d->options & XRTM_OPTION_STACK_REUSE_ADDING)) {
           if (get_total_R_T_S_U_W_V_a(d, i_four, solver, save->R_p, save->T_p, save->R_m, save->T_m, save->S_p, save->S_m, R_p_a, T_p_a, R_m_a, T_m_a, S_p_a, S_m_a, 1, save_tree, &work)) {
-               eprintf("ERROR: get_total_R_T_S_U_W_V_a()\n");
+               fprintf(stderr, "ERROR: get_total_R_T_S_U_W_V_a()\n");
                return -1;
           }
      }
@@ -2684,25 +2684,25 @@ static int fourier_get_bvp_a(xrtm_data *d, int i_four, int solver, double **I_p,
       *
       *-----------------------------------------------------------------------*/
      if (solver & XRTM_SOLVER_EIG_BVP)
-          rtm_eig_bvp_a(i_four, d->n_quad,   d->n_stokes, d->n_layers, d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->umus_v, d->n_umus, d->levels_b, d->omega, d->omega_a, d->ltau, d->ltau_a, save->Rs_qq, Rs_qq_a, save->Rs_u0, Rs_u0_a, save->Rs_uq, Rs_uq_a,                     d->btran, d->btran_a, d->as_0, d->as_0_a, d->atran, d->atran_a, save->P_q0_mm, save->P_q0_pm, save->P_u0_mm, save->P_u0_pm, save->P_uq_pp, save->P_uq_mp, save->P_uq_mm, save->P_uq_pm, save->r_p, save->t_p, save->r_m, save->t_m, P_q0_mm_a, P_q0_pm_a, P_u0_mm_a, P_u0_pm_a, P_uq_pp_a, P_uq_mp_a, P_uq_mm_a, P_uq_pm_a, r_p_a, t_p_a, r_m_a, t_m_a, d->I1_m[i_four], d->I1_m_a[i_four], d->In_p[i_four], d->In_p_a[i_four], I_p, I_m, I_p_a, I_m_a, d->options & XRTM_OPTION_SFI, surface, thermal, d->options & XRTM_OPTION_UPWELLING_OUTPUT, d->options & XRTM_OPTION_DOWNWELLING_OUTPUT, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, d->derivs_h_union, d->derivs_d_union, save_tree, work);
+          rtm_eig_bvp_a(i_four, d->n_quad,   d->n_stokes, d->n_layers, d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->umus_v, d->n_umus, d->levels_b, d->omega, d->omega_a, d->ltau, d->ltau_a, save->Rs_qq, Rs_qq_a, save->Rs_u0, Rs_u0_a, save->Rs_uq, Rs_uq_a,                     d->btran, d->btran_a, d->as_0, d->as_0_a, d->atran, d->atran_a, save->P_q0_mm, save->P_q0_pm, save->P_u0_mm, save->P_u0_pm, save->P_uq_pp, save->P_uq_mp, save->P_uq_mm, save->P_uq_pm, save->r_p, save->t_p, save->r_m, save->t_m, P_q0_mm_a, P_q0_pm_a, P_u0_mm_a, P_u0_pm_a, P_uq_pp_a, P_uq_mp_a, P_uq_mm_a, P_uq_pm_a, r_p_a, t_p_a, r_m_a, t_m_a, d->I1_m[i_four], d->I1_m_a[i_four], d->In_p[i_four], d->In_p_a[i_four], I_p, I_m, I_p_a, I_m_a, d->options & XRTM_OPTION_SFI, surface, thermal, d->options & XRTM_OPTION_UPWELLING_OUTPUT, d->options & XRTM_OPTION_DOWNWELLING_OUTPUT, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, d->derivs.layers_union, d->derivs.beam_union, save_tree, work);
 /*
      else
      if (solver & XRTM_SOLVER_MEM_BVP)
-          rtm_mem_bvp_a(i_four, d->n_quad,   d->n_stokes, d->n_layers, d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->umus_v, d->n_umus,              d->omega, d->omega_a, d->ltau, d->ltau_a, Rs_qq, Rs_qq_a, Rs_u0, Rs_u0_a, Rs_uq, Rs_uq_a, d->btau, d->btau_a, d->btran, d->btran_a, d->as_0, d->as_0_a, d->atran, d->atran_a, P_q0_mm, P_q0_pm, P_u0_mm, P_u0_pm, P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm, r_p, t_p, r_m, t_m, P_q0_mm_a, P_q0_pm_a, P_u0_mm_a, P_u0_pm_a, P_uq_pp_a, P_uq_mp_a, P_uq_mm_a, P_uq_pm_a, r_p_a, t_p_a, r_m_a, t_m_a, d->I1_m[i_four], I1_m_a, d->In_p[i_four], In_p_a, I_p, I_m, I_p_a, I_m_a, d->options & XRTM_OPTION_SFI, surface,                                                                                                  d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, d->misc_input.eigen_solver_gen_real, d->misc_input.eigen_solver_gen_complex, d->derivs_h, d->derivs_d, save_tree, work);
+          rtm_mem_bvp_a(i_four, d->n_quad,   d->n_stokes, d->n_layers, d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->umus_v, d->n_umus,              d->omega, d->omega_a, d->ltau, d->ltau_a, Rs_qq, Rs_qq_a, Rs_u0, Rs_u0_a, Rs_uq, Rs_uq_a, d->btau, d->btau_a, d->btran, d->btran_a, d->as_0, d->as_0_a, d->atran, d->atran_a, P_q0_mm, P_q0_pm, P_u0_mm, P_u0_pm, P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm, r_p, t_p, r_m, t_m, P_q0_mm_a, P_q0_pm_a, P_u0_mm_a, P_u0_pm_a, P_uq_pp_a, P_uq_mp_a, P_uq_mm_a, P_uq_pm_a, r_p_a, t_p_a, r_m_a, t_m_a, d->I1_m[i_four], I1_m_a, d->In_p[i_four], In_p_a, I_p, I_m, I_p_a, I_m_a, d->options & XRTM_OPTION_SFI, surface,                                                                                                  d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, d->misc_input.eigen_solver_gen_real, d->misc_input.eigen_solver_gen_complex, d->derivs.layers_union, d->derivs.beam_union, save_tree, work);
      else
      if (solver & XRTM_SOLVER_SOS)
-          rtm_sos_a    (i_four, d->n_quad_x, d->n_stokes, d->n_layers, d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->omega, d->omega_a, d->ltau, d->ltau_a, Rs_qq,               Rs_qq_a, d->btran, d->btran_a, d->as_0, d->as_0_a, d->atran, d->atran_a, P_q0_mm, P_q0_pm, P_qq_pp, P_qq_mp, P_qq_mm, P_qq_pm, P_q0_mm_a, P_q0_pm_a, P_qq_pp_a, P_qq_mp_a, P_qq_mm_a, P_qq_pm_a, d->I1_m[i_four], I1_m_a, d->In_p[i_four], In_p_a, I_p, I_m, I_p_a, I_m_a, d->sos_max_os, d->sos_max_tau, d->sos_tol, d->options & XRTM_OPTION_SFI, surface, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, d->derivs_h, d->derivs_d, work);
+          rtm_sos_a    (i_four, d->n_quad_x, d->n_stokes, d->n_layers, d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->omega, d->omega_a, d->ltau, d->ltau_a, Rs_qq,               Rs_qq_a, d->btran, d->btran_a, d->as_0, d->as_0_a, d->atran, d->atran_a, P_q0_mm, P_q0_pm, P_qq_pp, P_qq_mp, P_qq_mm, P_qq_pm, P_q0_mm_a, P_q0_pm_a, P_qq_pp_a, P_qq_mp_a, P_qq_mm_a, P_qq_pm_a, d->I1_m[i_four], I1_m_a, d->In_p[i_four], In_p_a, I_p, I_m, I_p_a, I_m_a, d->sos_max_os, d->sos_max_tau, d->sos_tol, d->options & XRTM_OPTION_SFI, surface, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, d->derivs.layers_union, d->derivs.beam_union, work);
      else
      if (solver & XRTM_SOLVER_TWO_OS) {
           if (! (d->options & XRTM_OPTION_SFI))
-               rtm_two_os_a(i_four, d->n_quad,   d->n_stokes, d->n_layers, d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->umus_v, d->n_umus, d->omega, d->omega_a, d->ltau, d->ltau_a, Rs_q0, Rs_q0_a, Rs_qq, Rs_qq_a, d->btran, d->btran_a, d->as_0, d->as_0_a, d->atran, d->atran_a, P_q0_mm, P_q0_pm, P_qq_pp, P_qq_mp, P_qq_mm, P_qq_pm, P_q0_mm_a, P_q0_pm_a, P_qq_pp_a, P_qq_mp_a, P_qq_mm_a, P_qq_pm_a,                         I_p, I_m, I_p_a, I_m_a,                                            d->options & XRTM_OPTION_SFI, surface, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, 0, d->derivs_h, d->derivs_d, work);
+               rtm_two_os_a(i_four, d->n_quad,   d->n_stokes, d->n_layers, d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->umus_v, d->n_umus, d->omega, d->omega_a, d->ltau, d->ltau_a, Rs_q0, Rs_q0_a, Rs_qq, Rs_qq_a, d->btran, d->btran_a, d->as_0, d->as_0_a, d->atran, d->atran_a, P_q0_mm, P_q0_pm, P_qq_pp, P_qq_mp, P_qq_mm, P_qq_pm, P_q0_mm_a, P_q0_pm_a, P_qq_pp_a, P_qq_mp_a, P_qq_mm_a, P_qq_pm_a,                         I_p, I_m, I_p_a, I_m_a,                                            d->options & XRTM_OPTION_SFI, surface, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, 0, d->derivs.layers_union, d->derivs.beam_union, work);
           else
-               rtm_two_os_a(i_four, d->n_quad_x, d->n_stokes, d->n_layers, d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->umus_v, d->n_umus, d->omega, d->omega_a, d->ltau, d->ltau_a, Rs_q0, Rs_q0_a, Rs_uq, Rs_uq_a, d->btran, d->btran_a, d->as_0, d->as_0_a, d->atran, d->atran_a, P_q0_mm, P_q0_pm, P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm, P_q0_mm_a, P_q0_pm_a, P_uq_pp_a, P_uq_mp_a, P_uq_mm_a, P_uq_pm_a,                         I_p, I_m, I_p_a, I_m_a,                                            d->options & XRTM_OPTION_SFI, surface, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, 1, d->derivs_h, d->derivs_d, work);
+               rtm_two_os_a(i_four, d->n_quad_x, d->n_stokes, d->n_layers, d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->umus_v, d->n_umus, d->omega, d->omega_a, d->ltau, d->ltau_a, Rs_q0, Rs_q0_a, Rs_uq, Rs_uq_a, d->btran, d->btran_a, d->as_0, d->as_0_a, d->atran, d->atran_a, P_q0_mm, P_q0_pm, P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm, P_q0_mm_a, P_q0_pm_a, P_uq_pp_a, P_uq_mp_a, P_uq_mm_a, P_uq_pm_a,                         I_p, I_m, I_p_a, I_m_a,                                            d->options & XRTM_OPTION_SFI, surface, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, 1, d->derivs.layers_union, d->derivs.beam_union, work);
      }
 */
 #ifdef DEBUG
      else {
-         eprintf("ERROR: fourier_get_bvp(): end of if / else if\n");
+         fprintf(stderr, "ERROR: fourier_get_bvp(): end of if / else if\n");
          exit(1);
      }
 #endif
@@ -2727,33 +2727,33 @@ static int fourier_get_bvp_a(xrtm_data *d, int i_four, int solver, double **I_p,
 
      if (solver & XRTM_SOLVER_EIG_BVP || solver & XRTM_SOLVER_MEM_BVP) {
           if (get_local_r_t_u_w_all_a(d, i_four, NULL, NULL, NULL, NULL, r_p_a, t_p_a, r_m_a, t_m_a, 1, save_tree, &work)) {
-               eprintf("ERROR: get_local_r_t_u_w_all_a()\n");
+               fprintf(stderr, "ERROR: get_local_r_t_u_w_all_a()\n");
                return -1;
           }
      }
 
      if (get_phase_vecs_q0_all_a(d, i_four, P_q0_mm_a, P_q0_pm_a, 1, &work)) {
-          eprintf("ERROR: get_phase_vecs_q0_all_a()\n");
+          fprintf(stderr, "ERROR: get_phase_vecs_q0_all_a()\n");
           return -1;
      }
 
      if (solver & XRTM_SOLVER_SOS || (solver & XRTM_SOLVER_TWO_OS && ! (d->options & XRTM_OPTION_SFI))) {
           if (get_phase_mats_qq_all_a(d, i_four, P_qq_pp_a, P_qq_mp_a, P_qq_mm_a, P_qq_pm_a, 1, &work)) {
-               eprintf("ERROR: get_phase_mats_qq_all_a()\n");
+               fprintf(stderr, "ERROR: get_phase_mats_qq_all_a()\n");
                return -1;
           }
      }
 
      if (d->options & XRTM_OPTION_SFI && d->n_umus > 0) {
           if (get_phase_vecs_u0_all_a(d, i_four, P_u0_mm_a, P_u0_pm_a, 1, &work)) {
-               eprintf("ERROR: get_phase_vecs_u0_all_a()\n");
+               fprintf(stderr, "ERROR: get_phase_vecs_u0_all_a()\n");
                return -1;
           }
      }
 
      if (d->options & XRTM_OPTION_SFI && d->n_umus > 0) {
           if (get_phase_mats_uq_all_a(d, i_four, P_uq_pp_a, P_uq_mp_a, P_uq_mm_a, P_uq_pm_a, 1, &work)) {
-               eprintf("ERROR: get_phase_mats_uq_all_a()\n");
+               fprintf(stderr, "ERROR: get_phase_mats_uq_all_a()\n");
                return -1;
           }
      }
@@ -2799,7 +2799,7 @@ static int get_fourier_a(xrtm_data *d, int i_four, int solver, double **I_p, dou
           if (d->options & XRTM_OPTION_TOP_DOWN_ADDING) {
 /*
                if (fourier_get_add_top_down_a(d, i_four, solver, I_p, I_m, I_p_a, I_m_a, save_tree, work)) {
-                    eprintf("ERROR: fourier_get_add_top_down_a()\n");
+                    fprintf(stderr, "ERROR: fourier_get_add_top_down_a()\n");
                     return -1;
                }
 */
@@ -2807,26 +2807,26 @@ static int get_fourier_a(xrtm_data *d, int i_four, int solver, double **I_p, dou
           else
           if (d->options & XRTM_OPTION_BOTTOM_UP_ADDING) {
                if (fourier_get_add_bottom_up_a(d, i_four, solver, I_p, I_m, I_p_a, I_m_a, save_tree, work)) {
-                    eprintf("ERROR: fourier_get_add_bottom_up_a()\n");
+                    fprintf(stderr, "ERROR: fourier_get_add_bottom_up_a()\n");
                     return -1;
                }
           }
           else {
                if (fourier_get_add_both_ways_a(d, i_four, solver, I_p, I_m, I_p_a, I_m_a, save_tree, work)) {
-                    eprintf("ERROR: fourier_get_add_both_ways_a()\n");
+                    fprintf(stderr, "ERROR: fourier_get_add_both_ways_a()\n");
                     return -1;
                }
           }
      }
      else if (solver & XRTM_SOLVERS_BVP) {
           if (fourier_get_bvp_a(d, i_four, solver, I_p, I_m, I_p_a, I_m_a, save_tree, work)) {
-               eprintf("ERROR: fourier_get_bvp_a()\n");
+               fprintf(stderr, "ERROR: fourier_get_bvp_a()\n");
                return -1;
           }
      }
 #ifdef DEBUG
      else {
-         eprintf("ERROR: get_fourier(): end of if / else if\n");
+         fprintf(stderr, "ERROR: get_fourier(): end of if / else if\n");
          exit(1);
      }
 #endif
@@ -3220,13 +3220,13 @@ static int apply_corrections_fourier_a(xrtm_data *d, int i_four, double **I_p, d
 
           if (d->options & XRTM_OPTION_SFI && d->n_umus > 0) {
                if (get_phase_vecs_u0_all_a(d, i_four, P_u0_mm_a, P_u0_pm_a, 1, &work)) {
-                    eprintf("ERROR: get_phase_vecs_u0_all_a()\n");
+                    fprintf(stderr, "ERROR: get_phase_vecs_u0_all_a()\n");
                     return -1;
                }
           }
 
           if (get_phase_vecs_q0_all_a(d, i_four, P_q0_mm_a, P_q0_pm_a, 1, &work)) {
-               eprintf("ERROR: get_phase_vecs_q0_all_a()\n");
+               fprintf(stderr, "ERROR: get_phase_vecs_q0_all_a()\n");
                return -1;
           }
 
@@ -3463,7 +3463,7 @@ int get_solution_internal_a(xrtm_data *d, enum xrtm_solver_mask solver, int solu
            *
            *------------------------------------------------------------------*/
           if (apply_corrections_fourier_a(d, i, save->i_p[i], save->i_m[i], i_p_a, i_m_a, save_tree, work)) {
-               eprintf("ERROR: apply_corrections_fourier_a()\n");
+               fprintf(stderr, "ERROR: apply_corrections_fourier_a()\n");
                return -1;
           }
 
@@ -3472,7 +3472,7 @@ int get_solution_internal_a(xrtm_data *d, enum xrtm_solver_mask solver, int solu
            *
            *------------------------------------------------------------------*/
           if (get_fourier_a(d, i, solver, save->i_p[i], save->i_m[i], i_p_a, i_m_a, save_tree, work)) {
-               eprintf("ERROR: get_fourier()\n");
+               fprintf(stderr, "ERROR: get_fourier()\n");
                return -1;
           }
      }
@@ -3484,7 +3484,7 @@ int get_solution_internal_a(xrtm_data *d, enum xrtm_solver_mask solver, int solu
       *
       *-----------------------------------------------------------------------*/
      if (apply_corrections_radiance_a(d, n_phis, phis, I_p, I_m, I_p_a, I_m_a, save_tree, work)) {
-          eprintf("ERROR: apply_corrections_radiance_a()\n");
+          fprintf(stderr, "ERROR: apply_corrections_radiance_a()\n");
           return -1;
      }
 
@@ -3508,7 +3508,7 @@ static int get_solution_a(xrtm_data *d, enum xrtm_solver_mask solver, int soluti
 
      if (solver & XRTM_SOLVERS_INTERNAL) {
           if (get_solution_internal_a(d, solver, solutions, n_phis, phis, I_p, I_m, I_p_a, I_m_a, mean_p, mean_m, mean_p_a, mean_m_a, flux_p, flux_m, flux_p_a, flux_m_a, flux_div, flux_div_a, save_tree, work)) {
-               eprintf("ERROR: get_solution_internal_a()\n");
+               fprintf(stderr, "ERROR: get_solution_internal_a()\n");
                return -1;
           }
      }
@@ -3528,29 +3528,29 @@ static int get_solution_a(xrtm_data *d, enum xrtm_solver_mask solver, int soluti
 int xrtm_solution_a(xrtm_data *d, enum xrtm_solver_mask solver, int solutions, int n_phis, double **phis, double ****I_p, double ****I_m, double ****I_p_a, double ****I_m_a, double *mean_p, double *mean_m, double *mean_p_a, double *mean_m_a, double *flux_p, double *flux_m, double *flux_p_a, double *flux_m_a, double *flux_div, double *flux_div_a) {
 
      if (! (solver & XRTM_SOLVERS_ALL)) {
-          eprintf("ERROR: invalid value for solver\n");
+          fprintf(stderr, "ERROR: invalid value for solver\n");
           return -1;
      }
 
      if (! (solver & d->solvers)) {
-          eprintf("ERROR: model not initialized for solver %s\n",
-                  xrtm_solver_name2(solver));
+          fprintf(stderr, "ERROR: model not initialized for solver %s\n",
+                  xrtm_solver_mask_to_name(solver));
           return -1;
      }
 
      if (! (solutions & XRTM_SOLUTION_ALL)) {
-          eprintf("ERROR: invalid value for solution\n");
+          fprintf(stderr, "ERROR: invalid value for solution\n");
           return -1;
      }
 
      if (n_phis <= 0) {
-          eprintf("ERROR: invalid value for n_phis: %d, must be > zero\n", n_phis);
+          fprintf(stderr, "ERROR: invalid value for n_phis: %d, must be > zero\n", n_phis);
           return -1;
      }
 #ifdef INCLUDE_DEV_SOURCE
 /*
      if (check_dev_solvers_solution(d, n_phis)) {
-          eprintf("ERROR: check_dev_solvers_solution()\n");
+          fprintf(stderr, "ERROR: check_dev_solvers_solution()\n");
           return -1;
      }
 */
@@ -3559,7 +3559,7 @@ int xrtm_solution_a(xrtm_data *d, enum xrtm_solver_mask solver, int solutions, i
      SOLUTION_PREPROCESS();
 */
      if (get_solution_a(d, solver, solutions, n_phis, phis, I_p, I_m, I_p_a, I_m_a, mean_p, mean_m, mean_p_a, mean_m_a, flux_p, flux_m, flux_p_a, flux_m_a, flux_div, flux_div_a, d->save_tree, d->work)) {
-          eprintf("ERROR: get_solution_a()\n");
+          fprintf(stderr, "ERROR: get_solution_a()\n");
           return -1;
      }
 

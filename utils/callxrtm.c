@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -11,7 +11,7 @@
 
 #include <rtutil_support.h>
 
-#include <xrtm_fd.h>
+#include <xrtm_fd_interface.h>
 #include <xrtm_interface.h>
 #include <xrtm_support.h>
 
@@ -21,7 +21,7 @@
 #ifdef NAME
 #undef NAME
 #endif
-#define NAME    "callxrtm"
+#define NAME "callxrtm"
 
 
 typedef struct {
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
 
      const char *defaults  = "-n_quad 16 -n_stokes 1 -n_derivs 0 -n_layers 1 -n_kernels 0 -n_kernel_quad 16 -n_out_levels 1 -n_out_thetas 0";
 
-     const char *defaults2 = "-doub_d_tau 1.e-9 -pade_params 4,5 -sos_params 128,.005,1.e-9 -fourier_tol 0. -F_0 1. -theta_0 0. -phi_0 0.";
+     const char *defaults2 = "-doub_d_tau 1.e-9 -pade_params 4,5 -sos_params 128,.005,1.e-9 -fourier_tol 0. -F_iso_top 0. -F_iso_bot 0. -phi_0 0.";
 
      int i;
      int ii;
@@ -107,8 +107,8 @@ int main(int argc, char *argv[]) {
      double ****I_p;
      double ****I_m;
 
-     double *****K_p;
-     double *****K_m;
+     double *****I_p_l;
+     double *****I_m_l;
 
      double *mean_p;
      double *mean_m;
@@ -200,8 +200,8 @@ int main(int argc, char *argv[]) {
                     o.flux_divergence = 1;
                else if (strcmp(argv[i], "-solver") == 0) {
                     check_arg_count(i, argc, 1, argv[i]);
-                    if ((solver = xrtm_solver_mask2(argv[++i])) == 0) {
-                         printf("ERROR: xrtm_solver_mask2()\n");
+                    if ((solver = xrtm_solver_name_to_mask(argv[++i])) == 0) {
+                         printf("ERROR: xrtm_solver_name_to_mask()\n");
                          exit(1);
                     }
                }
@@ -246,7 +246,7 @@ int main(int argc, char *argv[]) {
       *-----------------------------------------------------------------------*/
      if (o.input_file) {
           if (xrtm_fread_input(&d, &fd, &md, input, 1, 0, 0, 1)) {
-               eprintf("ERROR: xrtm_fread_input(): %s\n", input);
+               fprintf(stderr, "ERROR: xrtm_fread_input(): %s\n", input);
                exit(1);
           }
      }
@@ -254,7 +254,7 @@ int main(int argc, char *argv[]) {
      if (o.input_string) {
           input2 = strstr(input, "::");
           if (! input2) {
-               eprintf("ERROR: must have :: in input string\n");
+               fprintf(stderr, "ERROR: must have :: in input string\n");
                exit(1);
           }
 
@@ -288,7 +288,7 @@ int main(int argc, char *argv[]) {
           input3[ii++] = '\0';
 
           if (xrtm_sread_input(&d, &fd, &md, input3, 0, 1, 1, 0)) {
-               eprintf("ERROR: xrtm_sread_input()\n");
+               fprintf(stderr, "ERROR: xrtm_sread_input()\n");
                exit(1);
           }
 
@@ -296,7 +296,7 @@ int main(int argc, char *argv[]) {
      }
      else {
           if (xrtm_fread_input(&d, &fd, &md, "-", 1, 0, 0, 1)) {
-               eprintf("ERROR: xrtm_fread_input()\n");
+               fprintf(stderr, "ERROR: xrtm_fread_input()\n");
                exit(1);
           }
      }
@@ -312,10 +312,10 @@ int main(int argc, char *argv[]) {
      if (solver == 0) {
           mask = xrtm_get_solvers(&d);
 
-          n = xrtm_solvers_n();
+          n = xrtm_solver_n();
 
           for (i = 0; i < n; ++i) {
-               mask2 = xrtm_solver_mask(i);
+               mask2 = xrtm_solver_index_to_mask(i);
                if (mask & mask2) {
                     solver = mask2;
                     break;
@@ -350,11 +350,17 @@ int main(int argc, char *argv[]) {
 
      if (options & XRTM_OPTION_OUTPUT_AT_LEVELS) {
           out_levels = alloc_array1_i(n_out_levels);
-          xrtm_get_out_levels(&d, out_levels);
+          if (xrtm_get_out_levels(&d, out_levels)) {
+               fprintf(stderr, "ERROR: xrtm_get_out_levels()\n");
+               exit(1);
+          }
      }
      else {
           out_taus   = alloc_array1_d(n_out_levels);
-          xrtm_get_out_taus  (&d, out_taus);
+          if (xrtm_get_out_taus  (&d, out_taus)) {
+               fprintf(stderr, "ERROR: xrtm_get_out_taus()\n");
+               exit(1);
+          }
      }
 
 
@@ -363,7 +369,7 @@ int main(int argc, char *argv[]) {
       *-----------------------------------------------------------------------*/
      if (options & XRTM_OPTION_CALC_DERIVS) {
           if (xrtm_update_varied_layers(&d)) {
-               eprintf("ERROR: xrtm_update_varied_layers()\n");
+               fprintf(stderr, "ERROR: xrtm_update_varied_layers()\n");
                exit(1);
           }
      }
@@ -386,8 +392,8 @@ int main(int argc, char *argv[]) {
           I_m = alloc_array4_d(n_out_levels, n_out_thetas2, n_out_phis, n_stokes);
 
           if (o.derivs) {
-               K_p = alloc_array5_d(n_out_levels, n_derivs, n_out_thetas2, n_out_phis, n_stokes);
-               K_m = alloc_array5_d(n_out_levels, n_derivs, n_out_thetas2, n_out_phis, n_stokes);
+               I_p_l = alloc_array5_d(n_out_levels, n_derivs, n_out_thetas2, n_out_phis, n_stokes);
+               I_m_l = alloc_array5_d(n_out_levels, n_derivs, n_out_thetas2, n_out_phis, n_stokes);
           }
      }
 
@@ -438,21 +444,21 @@ int main(int argc, char *argv[]) {
           if (1) {
 */
           if (! (options & XRTM_OPTION_REVERSE_DERIVS)) {
-               if (xrtm_solution(&d, (enum xrtm_solver_mask) solver, solutions, n_out_phis, out_phis2, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l)) {
-                    eprintf("ERROR: xrtm_solution()\n");
+               if (xrtm_solution(&d, (enum xrtm_solver_mask) solver, solutions, n_out_phis, out_phis2, I_p, I_m, I_p_l, I_m_l, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l)) {
+                    fprintf(stderr, "ERROR: xrtm_solution()\n");
                     exit(1);
                }
           }
           else {
-               if (xrtm_solution_2(&d, (enum xrtm_solver_mask) solver, solutions, n_out_phis, out_phis2, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l)) {
-                    eprintf("ERROR: xrtm_solution_2()\n");
+               if (xrtm_solution_2(&d, (enum xrtm_solver_mask) solver, solutions, n_out_phis, out_phis2, I_p, I_m, I_p_l, I_m_l, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l)) {
+                    fprintf(stderr, "ERROR: xrtm_solution_2()\n");
                     exit(1);
                }
           }
      }
      else {
-          if (xrtm_fd_solution(&fd, (enum xrtm_solver_mask) solver, solutions, FD_METHOD_CENTRAL, n_out_phis, out_phis2, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l)) {
-               eprintf("ERROR: xrtm_fd_solution()\n");
+          if (xrtm_fd_solution(&fd, (enum xrtm_solver_mask) solver, solutions, XRTM_FD_METHOD_CENTRAL, n_out_phis, out_phis2, I_p, I_m, I_p_l, I_m_l, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l)) {
+               fprintf(stderr, "ERROR: xrtm_fd_solution()\n");
                exit(1);
           }
      }
@@ -463,21 +469,21 @@ int main(int argc, char *argv[]) {
           for (i_timing_loop = 0; i_timing_loop < n_timing_loop; ++i_timing_loop) {
                if (md.fd_method < 0) {
                     if (! (options & XRTM_OPTION_REVERSE_DERIVS)) {
-                         if (xrtm_solution(&d, (enum xrtm_solver_mask) solver, solutions, n_out_phis, out_phis2, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l)) {
-                              eprintf("ERROR: xrtm_solution()\n");
+                         if (xrtm_solution(&d, (enum xrtm_solver_mask) solver, solutions, n_out_phis, out_phis2, I_p, I_m, I_p_l, I_m_l, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l)) {
+                              fprintf(stderr, "ERROR: xrtm_solution()\n");
                               exit(1);
                          }
                     }
                     else {
-                         if (xrtm_solution_2(&d, (enum xrtm_solver_mask) solver, solutions, n_out_phis, out_phis2, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l)) {
-                              eprintf("ERROR: xrtm_solution_2()\n");
+                         if (xrtm_solution_2(&d, (enum xrtm_solver_mask) solver, solutions, n_out_phis, out_phis2, I_p, I_m, I_p_l, I_m_l, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l)) {
+                              fprintf(stderr, "ERROR: xrtm_solution_2()\n");
                               exit(1);
                          }
                     }
                }
                else {
-                    if (xrtm_fd_solution(&fd, (enum xrtm_solver_mask) solver, solutions, FD_METHOD_CENTRAL, n_out_phis, out_phis2, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l)) {
-                         eprintf("ERROR: xrtm_fd_solution()\n");
+                    if (xrtm_fd_solution(&fd, (enum xrtm_solver_mask) solver, solutions, XRTM_FD_METHOD_CENTRAL, n_out_phis, out_phis2, I_p, I_m, I_p_l, I_m_l, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l)) {
+                         fprintf(stderr, "ERROR: xrtm_fd_solution()\n");
                          exit(1);
                     }
                }
@@ -536,7 +542,7 @@ int main(int argc, char *argv[]) {
                                    if (options & XRTM_OPTION_OUTPUT_AT_LEVELS)
                                         printf("%14d", out_levels[i]);
                                    else
-                                        printf("%14e", out_taus  [i]); 
+                                        printf("%14e", out_taus  [i]);
                                    printf("%14e%14e%10d", acos(qx[i_out_thetas2 + j])*R2D, out_phis[k], l);
                                    if (output_up)
                                         printf("%14e", I_p[i][j][k][l]);
@@ -545,9 +551,9 @@ int main(int argc, char *argv[]) {
                                    if (o.derivs) {
                                         for (m = 0; m < n_derivs; ++m) {
                                              if (output_up)
-                                                  printf("%14e", K_p[i][m][j][k][l]);
+                                                  printf("%14e", I_p_l[i][m][j][k][l]);
                                              if (output_down)
-                                                  printf("%14e", K_m[i][m][j][k][l]);
+                                                  printf("%14e", I_m_l[i][m][j][k][l]);
                                         }
                                    }
                                    printf("\n");
@@ -584,7 +590,7 @@ int main(int argc, char *argv[]) {
                     if (options & XRTM_OPTION_OUTPUT_AT_LEVELS)
                          printf("%14d", out_levels[i]);
                     else
-                         printf("%14e", out_taus  [i]); 
+                         printf("%14e", out_taus  [i]);
                     if (output_up)
                          printf("%14e", mean_p[i]);
                     if (output_down)
@@ -634,7 +640,7 @@ int main(int argc, char *argv[]) {
                     if (options & XRTM_OPTION_OUTPUT_AT_LEVELS)
                          printf("%14d", out_levels[i]);
                     else
-                         printf("%14e", out_taus  [i]); 
+                         printf("%14e", out_taus  [i]);
                     if (output_up)
                          printf("%14e", flux_p[i]);
                     if (output_down)
@@ -672,7 +678,7 @@ int main(int argc, char *argv[]) {
       *
       *-----------------------------------------------------------------------*/
      if (o.timing)
-          printf("%.2f\n", (double) (time2 - time1) / (double) CLOCKS_PER_SEC);
+          fprintf(stderr, "%.2f\n", (double) (time2 - time1) / (double) CLOCKS_PER_SEC);
 
 
      /*-------------------------------------------------------------------------
@@ -705,8 +711,8 @@ int main(int argc, char *argv[]) {
           free_array4_d(I_m);
 
           if (o.derivs) {
-               free_array5_d(K_p);
-               free_array5_d(K_m);
+               free_array5_d(I_p_l);
+               free_array5_d(I_m_l);
           }
      }
 
@@ -745,12 +751,16 @@ int main(int argc, char *argv[]) {
 
 void usage() {
 
-     printf("%s <options>\n", NAME);
+     printf("%s <flags ...>\n", NAME);
+     printf("\n");
+
+     printf("See the XRTM documentation for details on running %s.\n", NAME);
 }
 
 
 
 void version() {
 
-     printf("%s version %s\n", NAME, VERSION);
+     printf("%s, version %s, build SHA-1: %s, build date: %s\n",
+            NAME, VERSION, build_sha_1, build_date);
 }

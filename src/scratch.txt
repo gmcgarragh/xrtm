@@ -1,0 +1,38 @@
+for (i = 0; i < n_quad_v; ++i)
+     printf("%e\n", v1[i]);
+printf("\n");
+
+
+for (i = 0; i < n_quad_v; ++i) {
+     for (j = 0; j < n_quad_v; ++j) {
+          printf("%e ", w11[i][j]);
+     }
+     printf("\n");
+}
+printf("\n");
+
+
+for (i = 0; i < n_quad_v; ++i)
+     printf("(%e,%e)\n", creal(v1[i]), cimag(v1[i]));
+printf("\n");
+
+
+for (i = 0; i < n_quad_v; ++i) {
+     for (j = 0; j < n_quad_v; ++j) {
+          printf("(%e,%e) ", creal(w11[i][j]), cimag(w11[i][j]));
+     }
+     printf("\n");
+}
+printf("\n");
+
+
+for (i = 0; i < n_umus_v; ++i) {
+     for (j = 0; j < n_quad_v; ++j) {
+          printf("%e ", w11u1[i][j]);
+     }
+     for (j = 0; j < n_umus_v; ++j) {
+          printf("%e ", j == i ? w11u2[i] : 0.);
+     }
+     printf("\n");
+}
+printf("\n");

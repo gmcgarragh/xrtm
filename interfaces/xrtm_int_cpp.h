@@ -29,6 +29,8 @@ public:
           OPTION_NO_AZIMUTHAL = XRTM_OPTION_NO_AZIMUTHAL,
           OPTION_OUTPUT_AT_LEVELS = XRTM_OPTION_OUTPUT_AT_LEVELS,
           OPTION_OUTPUT_AT_TAUS = XRTM_OPTION_OUTPUT_AT_TAUS,
+          OPTION_PART_SOL_CLASSICAL = XRTM_OPTION_PART_SOL_CLASSICAL,
+          OPTION_PART_SOL_GREENS = XRTM_OPTION_PART_SOL_GREENS,
           OPTION_PHASE_SCALAR = XRTM_OPTION_PHASE_SCALAR,
           OPTION_PHASE_MATRIX_GC = XRTM_OPTION_PHASE_MATRIX_GC,
           OPTION_PHASE_MATRIX_LC = XRTM_OPTION_PHASE_MATRIX_LC,
@@ -56,11 +58,14 @@ public:
           SOLVER_DOUB_ADD = XRTM_SOLVER_DOUB_ADD,
           SOLVER_EIG_ADD = XRTM_SOLVER_EIG_ADD,
           SOLVER_EIG_BVP = XRTM_SOLVER_EIG_BVP,
+          SOLVER_FOUR_STREAM = XRTM_SOLVER_FOUR_STREAM,
           SOLVER_MEM_BVP = XRTM_SOLVER_MEM_BVP,
           SOLVER_PADE_ADD = XRTM_SOLVER_PADE_ADD,
           SOLVER_SINGLE = XRTM_SOLVER_SINGLE,
+          SOLVER_SIX_STREAM = XRTM_SOLVER_SIX_STREAM,
           SOLVER_SOS = XRTM_SOLVER_SOS,
-          SOLVER_TWO_OS = XRTM_SOLVER_TWO_OS
+          SOLVER_TWO_OS = XRTM_SOLVER_TWO_OS,
+          SOLVER_TWO_STREAM = XRTM_SOLVER_TWO_STREAM
      };
 
      enum output_mask {
@@ -72,6 +77,7 @@ public:
 
      enum kernel_type {
           KERNEL_LAMBERTIAN = XRTM_KERNEL_LAMBERTIAN,
+          KERNEL_DIRECT_AND_DIFFUSE = XRTM_KERNEL_DIRECT_AND_DIFFUSE,
           KERNEL_ROUJEAN = XRTM_KERNEL_ROUJEAN,
           KERNEL_LI_SPARSE = XRTM_KERNEL_LI_SPARSE,
           KERNEL_LI_DENSE = XRTM_KERNEL_LI_DENSE,
@@ -79,11 +85,12 @@ public:
           KERNEL_ROSS_THICK = XRTM_KERNEL_ROSS_THICK,
           KERNEL_HAPKE = XRTM_KERNEL_HAPKE,
           KERNEL_RAHMAN = XRTM_KERNEL_RAHMAN,
-          KERNEL_COX_MUNK = XRTM_KERNEL_COX_MUNK
+          KERNEL_COX_MUNK = XRTM_KERNEL_COX_MUNK,
+          KERNEL_USER_DEFINED = XRTM_KERNEL_USER_DEFINED
      };
 
 
-     xrtm_int_cpp(int options, int solvers, int max_coef, int n_quad, int n_stokes, int n_derivs, int n_layers, int n_kernels, int n_kernel_quad, kernel_type *kernels, int n_out_levels, int n_out_thetas);
+     xrtm_int_cpp(int options, int solvers, int max_coef, int n_quad, int n_stokes, int n_derivs, int n_layers, int n_theta_0s, int n_kernels, int n_kernel_quad, kernel_type *kernels, int n_out_levels, int n_out_thetas);
      ~xrtm_int_cpp();
      int get_options();
      int get_solvers();
@@ -100,33 +107,49 @@ public:
      void set_doub_d_tau(double d_tau);
      double get_doub_d_tau();
      void set_pade_params(int pade_s, int pade_r);
-     int get_pade_params(int *pade_s, int *pade_r);
+     void get_pade_params(int *pade_s, int *pade_r);
      void set_sos_params(int max_os, double max_tau, double sos_tol);
-     int get_sos_params(int *max_os, double *max_tau, double *sos_tol);
+     void get_sos_params(int *max_os, double *max_tau, double *sos_tol);
      void set_fourier_tol(double fourier_tol);
      double get_fourier_tol();
      void set_lambda(double lambda);
      double get_lambda();
-     void set_F_0(double F_0);
-     double get_F_0();
-     void set_theta_0(double theta_0);
-     double get_theta_0();
-     void set_phi_0(double phi_0);
-     double get_phi_0();
+     void set_planet_r(double planet_r);
+     double get_planet_r();
+     void set_levels_z(double *levels_z);
+     void get_levels_z(double *levels_z);
      void set_out_levels(int *out_levels);
      void get_out_levels(int *out_levels);
      void set_out_taus(double *out_taus);
      void get_out_taus(double *out_taus);
      void set_out_thetas(double *out_thetas);
      void get_out_thetas(double *out_thetas);
-     void set_top_b(double top_b);
-     double get_top_b();
-     void set_planet_r(double planet_r);
-     double get_planet_r();
-     void set_levels_z(double *levels_z);
-     void get_levels_z(double *levels_z);
+     void set_F_iso_top(double F_iso_top);
+     double get_F_iso_top();
+     void set_F_iso_top_l_1(int i_deriv, double F_iso_top_l);
+     void set_F_iso_top_l_n(double *F_iso_top_l);
+     double get_F_iso_top_l(int i_deriv);
+     void set_F_iso_bot(double F_iso_bot);
+     double get_F_iso_bot();
+     void set_F_iso_bot_l_1(int i_deriv, double F_iso_bot_l);
+     void set_F_iso_bot_l_n(double *F_iso_bot_l);
+     double get_F_iso_bot_l(int i_deriv);
+     void set_F_0(double F_0);
+     double get_F_0();
+     void set_theta_0(double theta_0);
+     double get_theta_0();
+     void set_phi_0(double phi_0);
+     double get_phi_0();
      void set_levels_b(double *levels_b);
      void get_levels_b(double *levels_b);
+     void set_levels_b_l_1(int i_deriv, double *levels_b_l);
+     void set_levels_b_l_n(double **levels_b_l);
+     void get_levels_b_l(int i_deriv, double *levels_b_l);
+     void set_surface_b(double surface_b);
+     double get_surface_b();
+     void set_surface_b_l_1(int i_deriv, double surface_b_l);
+     void set_surface_b_l_n(double *surface_b_l);
+     double get_surface_b_l(int i_deriv);
      void set_g_1(int i_layer, double g);
      void set_g_n(double *g);
      double get_g(int i_layer);
@@ -160,8 +183,6 @@ public:
      void set_ltau_l_1n(int i_layer, double *ltau_l);
      void set_ltau_l_nn(double **ltau_l);
      double get_ltau_l(int i_layer, int i_deriv);
-     void set_surface_b(double surface_b);
-     double get_surface_b();
      void set_kernel_ampfac(int i_kernel, double ampfac);
      double get_kernel_ampfac(int i_kernel);
      void set_kernel_params_1(int i_kernel, int i_param, double param);
@@ -176,8 +197,12 @@ public:
      void set_kernel_params_l_nn(int i_kernel, double **params_l);
      double get_kernel_params_l(int i_kernel, int i_deriv, int i_param);
      void update_varied_layers();
-     void solution(solver_mask solver, int solutions, int n_phis, double **phis, double ****I_p, double ****I_m, double *****K_p, double *****K_m, double *mean_p, double *mean_m, double **mean_p_l, double **mean_m_l, double *flux_p, double *flux_m, double **flux_p_l, double **flux_m_l, double *flux_div, double **flux_div_l);
-     void radiance(solver_mask solver, int n_phis, double **phis, double ****I_p, double ****I_m, double *****K_p, double *****K_m);
+     void qx(double *qx);
+     void qw(double *qw);
+     void kernel_qx(double *kernel_qx);
+     void kernel_qw(double *kernel_qw);
+     void solution(solver_mask solver, int solutions, int n_out_phis, double **out_phis, double ****I_p, double ****I_m, double *****K_p, double *****K_m, double *mean_p, double *mean_m, double **mean_p_l, double **mean_m_l, double *flux_p, double *flux_m, double **flux_p_l, double **flux_m_l, double *flux_div, double **flux_div_l);
+     void radiance(solver_mask solver, int n_out_phis, double **out_phis, double ****I_p, double ****I_m, double *****K_p, double *****K_m);
      void mean_radiance(solver_mask solver, double *mean_p, double *mean_m, double **mean_p_l, double **mean_m_l);
      void flux(solver_mask solver, double *flux_p, double *flux_m, double **flux_p_l, double **flux_m_l);
      void flux_divergence(solver_mask solver, double *flux_div, double **flux_div_l);

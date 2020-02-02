@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 1998-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 1998-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -8,6 +8,20 @@
 *******************************************************************************/
 
 #include "gutil.h"
+
+
+void XCAT(prefix_, vec_print)(type_ *a, long n) {
+
+     long i;
+
+     for (i = 0; i < n; ++i)
+#if is_complex_ == 0
+          printf("%e\n", a[i]);
+#else
+          printf("(%e, %e)\n", creal(a[i]), cimag(a[i]));
+#endif
+}
+
 
 
 void XCAT(prefix_, vec_zero)(type_ *a, long n) {
@@ -30,7 +44,7 @@ void XCAT(prefix_, vec_init)(type_ *a, type_ alpha, long n) {
 
 
 
-void XCAT(prefix_, vec_copy)(type_ *a2, type_ *a1, long n) {
+void XCAT(prefix_, vec_copy)(type_ *a2, const type_ *a1, long n) {
 
      long i;
 
@@ -40,7 +54,7 @@ void XCAT(prefix_, vec_copy)(type_ *a2, type_ *a1, long n) {
 
 
 
-void XCAT(prefix_, vec_scale)(type_ s, type_ *a, type_ *b, long n) {
+void XCAT(prefix_, vec_scale)(type_ s, const type_ *a, type_ *b, long n) {
 
      long i;
 
@@ -51,7 +65,7 @@ void XCAT(prefix_, vec_scale)(type_ s, type_ *a, type_ *b, long n) {
           }
           else {
                for (i = 0; i < n; ++i)
-                    a[i] *= s;
+                    b[i] *= s;
           }
      }
      else {
@@ -73,7 +87,7 @@ void XCAT(prefix_, vec_scale)(type_ s, type_ *a, type_ *b, long n) {
 
 
 
-void XCAT(prefix_, vec_add)(type_ *a, type_ *b, type_ *c, long n) {
+void XCAT(prefix_, vec_add)(const type_ *a, const type_ *b, type_ *c, long n) {
 
      long i;
 
@@ -83,7 +97,7 @@ void XCAT(prefix_, vec_add)(type_ *a, type_ *b, type_ *c, long n) {
 
 
 
-void XCAT(prefix_, vec_sub)(type_ *a, type_ *b, type_ *c, long n) {
+void XCAT(prefix_, vec_sub)(const type_ *a, const type_ *b, type_ *c, long n) {
 
      long i;
 
@@ -93,8 +107,8 @@ void XCAT(prefix_, vec_sub)(type_ *a, type_ *b, type_ *c, long n) {
 
 
 
-void XCAT(prefix_, vec_comb)(type_ *a1, type_ r1,
-                             type_ *a2, type_ r2, type_ *b, long n) {
+void XCAT(prefix_, vec_lin_cmb)(const type_ *a1, type_ r1,
+                                const type_ *a2, type_ r2, type_ *b, long n) {
 
      long i;
 
@@ -104,7 +118,7 @@ void XCAT(prefix_, vec_comb)(type_ *a1, type_ r1,
 
 
 
-type_ XCAT(prefix_, vec_dot)(type_ *a, type_ *b, long n) {
+type_ XCAT(prefix_, vec_dot)(const type_ *a, const type_ *b, long n) {
      long i;
 
      type_ x = 0.;
@@ -117,14 +131,14 @@ type_ XCAT(prefix_, vec_dot)(type_ *a, type_ *b, long n) {
 
 
 
-type_ XCAT(prefix_, vec_mag)(type_ *a, long n) {
+type_ XCAT(prefix_, vec_mag)(const type_ *a, long n) {
 
-     return sqrt(XCAT(prefix_, vec_dot)(a, a, n));
+     return xsqrt_(XCAT(prefix_, vec_dot)(a, a, n));
 }
 
 
 
-void XCAT(prefix_, vec_unit)(type_ *a, type_ *u, long n) {
+void XCAT(prefix_, vec_unit)(const type_ *a, type_ *u, long n) {
 
      long i;
 
@@ -138,10 +152,30 @@ void XCAT(prefix_, vec_unit)(type_ *a, type_ *u, long n) {
 
 
 
-void XCAT(prefix_, vec_inv)(type_ *a, type_ *b, long n) {
+void XCAT(prefix_, vec_inv_elem)(const type_ *a, type_ *b, long n) {
 
      long i;
 
      for (i = 0; i < n; ++i)
           b[i] = 1. / a[i];
+}
+
+
+
+void XCAT(prefix_, vec_mul_elem)(const type_ *a, const type_ *b, type_ *c, long n) {
+
+     long i;
+
+     for (i = 0; i < n; ++i)
+          c[i] = a[i] * b[i];
+}
+
+
+
+void XCAT(prefix_, vec_div_elem)(const type_ *a, const type_ *b, type_ *c, long n) {
+
+     long i;
+
+     for (i = 0; i < n; ++i)
+          c[i] = a[i] / b[i];
 }

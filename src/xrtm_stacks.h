@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -31,6 +31,9 @@ typedef struct stack_data_ {
      double **S_p;
      double **S_m;
 
+     double **Sl_p;
+     double **Sl_m;
+
      double ***R_p;
      double ***T_p;
      double ***R_m;
@@ -38,6 +41,9 @@ typedef struct stack_data_ {
 
      double ***S_p_l;
      double ***S_m_l;
+
+     double ***Sl_p_l;
+     double ***Sl_m_l;
 
      double ****R_p_l;
      double ****T_p_l;

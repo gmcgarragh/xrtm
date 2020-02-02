@@ -2,9 +2,9 @@
 int layer_add_aux_alloc(layer_add_aux_data *d, int n);
 void layer_add_aux_free(layer_add_aux_data *d);
 void layer_zero_ref(double **R_m, double *S_p, int n);
-void layer_zero_ref_l(double **R_m, double *S_p, double ***R_m_l, double **S_p_l, int n, int n_derivs, uchar *derivs_h, uchar *derivs_p);
+void layer_zero_ref_l(double **R_m, double *S_p, double ***R_m_l, double **S_p_l, int n, int n_derivs, uchar *derivs_layers, uchar *derivs_sources);
 void layer_copy_ref(double **R_m2, double *S_p2, double **R_m1, double *S_p1, int n);
-void layer_copy_ref_l(double **R_m2, double *S_p2, double **R_m1, double *S_p1, double ***R_m_l2, double **S_p_l2, double ***R_m_l1, double **S_p_l1, int n, int n_derivs, uchar *derivs_h, uchar *derivs_p);
+void layer_copy_ref_l(double **R_m2, double *S_p2, double **R_m1, double *S_p1, double ***R_m_l2, double **S_p_l2, double ***R_m_l1, double **S_p_l1, int n, int n_derivs, uchar *derivs_layers, uchar *derivs_sources);
 void layer_add_ref(double **R12, double **T12, double *S12, double **R21, double **T21, double *S21, double **R23, double *S32, double **R13, double *S31, double ***R12_l, double ***T12_l, double **S12_l, double ***R21_l, double ***T21_l, double **S21_l, double ***R23_l, double **S32_l, double ***R13_l, double **S31_l, int n, int n_derivs, double atran, double *atran_l, uchar *derivs, int flag, int flag2, save_tree_data save_tree, work_data work);
 void layer_add_ref2(double **R12, double **T12, double *S12, double **R21, double **T21, double *S21, double **R23, double *S32, double **R13, double *S31, double ***R12_l, double ***T12_l, double **S12_l, double ***R21_l, double ***T21_l, double **S21_l, double ***R23_l, double **S32_l, double ***R13_l, double **S31_l, int n, int n_derivs, double atran, double *atran_l, uchar *derivs, int flag, int flag2, int flag3, work_data work, layer_add_aux_data *d);
 void layer_zero_all(double **R_m, double **T_m, double *S_m, double **R_p, double **T_p, double *S_p, int n);

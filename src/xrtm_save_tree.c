@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -58,8 +58,6 @@ static void save_node_free(save_node_data *d) {
 
 int save_tree_init(save_tree_data *d) {
 
-     d->temp = (char *) malloc(1024);
-
      d->i = 0;
 
      d->hash = (ulong *) malloc(128 * sizeof(ulong));
@@ -75,8 +73,6 @@ int save_tree_init(save_tree_data *d) {
 
 
 void save_tree_free(save_tree_data *d) {
-
-     free(d->temp);
 
      free(d->hash);
 
@@ -94,26 +90,30 @@ void save_tree_encode_s(save_tree_data *d, const char *s) {
 
 
 void save_tree_encode_i(save_tree_data *d, int i) {
+
+     char temp[16];
 /*
-     sprintf(d->temp, "%d", i);
+     snprintf(temp, 16, "%d", i);
 */
      int ii;
 
-     d->temp[0] = 48 + i % 10;
+     temp[0] = 48 + i % 10;
      for (ii = 1; i /= 10; ++ii)
-          d->temp[ii] = 48 + i % 10;
-     d->temp[ii] = '\0';
+          temp[ii] = 48 + i % 10;
+     temp[ii] = '\0';
 
-     save_tree_encode_s(d, d->temp);
+     save_tree_encode_s(d, temp);
 }
 
 
 
 void save_tree_encode_i_j(save_tree_data *d, int i, int j) {
 
-     sprintf(d->temp, "%d_%d", i, j);
+     char temp[32];
 
-     save_tree_encode_s(d, d->temp);
+     snprintf(temp, 32, "%d_%d", i, j);
+
+     save_tree_encode_s(d, temp);
 }
 
 

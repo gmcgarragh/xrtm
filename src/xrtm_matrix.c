@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -208,7 +208,7 @@ int positive_definite(double **a, int n) {
 
      dsyev_("N", "L", &n, *b, &n, evals, dwork, &lwork, &info);
      if (info) {
-          eprintf("ERROR: dsyev() info = %d\n", info);
+          fprintf(stderr, "ERROR: dsyev() info = %d\n", info);
           exit(1);
      }
 
@@ -690,6 +690,88 @@ void dmat_complex(double **dr, double **di, dcomplex **z, long m, long n) {
 
 
 
+void dmat_complex2(double **dr, double **di, double alpha, dcomplex **z, double beta, long m, long n) {
+
+     long i;
+     long j;
+
+     if (alpha == 0.) {
+          if (beta == 0.) {
+
+          }
+          else
+          if (beta == 1.) {
+
+          }
+          else
+          if (beta == -1.) {
+
+          }
+          else {
+          }
+     }
+     else
+     if (alpha == 1.) {
+          if (beta == 0.) {
+               for (i = 0; i < m; ++i) {
+                    for (j = 0; j < n; ++j) {
+                         z[i][j] = dr[i][j] + _Complex_I * di[i][j];
+                    }
+               }
+          }
+          else
+          if (beta == 1.) {
+               for (i = 0; i < m; ++i) {
+                    for (j = 0; j < n; ++j) {
+                         z[i][j] += dr[i][j] + _Complex_I * di[i][j];
+                    }
+               }
+          }
+          else
+          if (beta == -1.) {
+               for (i = 0; i < m; ++i) {
+                    for (j = 0; j < n; ++j) {
+                         z[i][j] = dr[i][j] + _Complex_I * di[i][j] - z[i][j];
+                    }
+               }
+          }
+          else {
+          }
+     }
+     else
+     if (alpha == -1.) {
+          if (beta == 0.) {
+               for (i = 0; i < m; ++i) {
+                    for (j = 0; j < n; ++j) {
+                         z[i][j] = -(dr[i][j] + _Complex_I * di[i][j]);
+                    }
+               }
+          }
+          else
+          if (beta == 1.) {
+               for (i = 0; i < m; ++i) {
+                    for (j = 0; j < n; ++j) {
+                         z[i][j] -= dr[i][j] + _Complex_I * di[i][j];
+                    }
+               }
+          }
+          else
+          if (beta == -1.) {
+               for (i = 0; i < m; ++i) {
+                    for (j = 0; j < n; ++j) {
+                         z[i][j] = -(dr[i][j] + _Complex_I * di[i][j]) - z[i][j];
+                    }
+               }
+          }
+          else {
+          }
+     }
+     else {
+     }
+}
+
+
+
 void dzmat_diag_mul(double *a, dcomplex **b, dcomplex **c, long m, long n) {
 
      long i;
@@ -739,101 +821,15 @@ void dzmat_mul2(double **a, dcomplex **b, long m, long n, long o, dcomplex **c,
 
 
 
-/*******************************************************************************
- *
- ******************************************************************************/
-void copy_to_band_storage_d(double **ab, double **a, double alpha,
-                            int m, int n, int kl, int ku, int i1, int j1) {
+void dzmat_gxgxmx(int trans_a, double **a, int trans_b, dcomplex **b, double alpha, dcomplex **c, double beta, long m, long n, long o, double **don, double **dmn1, double **dmn2) {
 
-     int ii;
-     int i;
-     int j;
-     int jj;
-     int k;
+     zmat_real(b, don, o, n);
+     dmat_mul(a, don, m, n, o, dmn1);
 
-     k = kl + ku + 1;
+     zmat_imag(b, don, o, n);
+     dmat_mul(a, don, m, n, o, dmn2);
 
-     ii = i1 + k - 1;
-
-     if (alpha ==  1.) {
-          for (i = 0; i < m; ++i) {
-               jj = j1;
-               for (j = 0; j < n; ++j) {
-                    ab[jj][ii - jj] =  a[i][j];
-                    jj++;
-               }
-               ii++;
-          }
-     }
-     else
-     if (alpha == -1.) {
-          for (i = 0; i < m; ++i) {
-               jj = j1;
-               for (j = 0; j < n; ++j) {
-                    ab[jj][ii - jj] = -a[i][j];
-                    jj++;
-               }
-               ii++;
-          }
-     }
-     else {
-          for (i = 0; i < m; ++i) {
-               jj = j1;
-               for (j = 0; j < n; ++j) {
-                    ab[jj][ii - jj] =  a[i][j] * alpha;
-                    jj++;
-               }
-               ii++;
-          }
-     }
-}
-
-
-
-void copy_to_band_storage2_d(double **ab, double **a, double alpha, double *beta,
-                             int m, int n, int kl, int ku, int i1, int j1) {
-
-     int ii;
-     int i;
-     int j;
-     int jj;
-     int k;
-
-     k = kl + ku + 1;
-
-     ii = i1 + k - 1;
-
-     if (alpha ==  1.) {
-          for (i = 0; i < m; ++i) {
-               jj = j1;
-               for (j = 0; j < n; ++j) {
-                    ab[jj][ii - jj] =  a[i][j] * beta[j];
-                    jj++;
-               }
-               ii++;
-          }
-     }
-     else
-     if (alpha == -1.) {
-          for (i = 0; i < m; ++i) {
-               jj = j1;
-               for (j = 0; j < n; ++j) {
-                    ab[jj][ii - jj] = -a[i][j] * beta[j];
-                    jj++;
-               }
-               ii++;
-          }
-     }
-     else {
-          for (i = 0; i < m; ++i) {
-               jj = j1;
-               for (j = 0; j < n; ++j) {
-                    ab[jj][ii - jj] =  a[i][j] * alpha * beta[j];
-                    jj++;
-               }
-               ii++;
-          }
-     }
+     dmat_complex2(dmn1, dmn2, alpha, c, beta, m, n);
 }
 
 
@@ -841,14 +837,221 @@ void copy_to_band_storage2_d(double **ab, double **a, double alpha, double *beta
 /*******************************************************************************
  *
  ******************************************************************************/
-void copy_to_band_storage_dc(dcomplex **ab, dcomplex **a, dcomplex alpha,
-                             int m, int n, int kl, int ku, int i1, int j1) {
+void insert_vector1_d(int n, int i, double *a, double alpha, double *b) {
+
+     int ii;
+     int iii;
+
+     i *= n;
+
+     if (alpha ==  1.) {
+          for (ii = i, iii = 0; iii < n; ++ii, ++iii) {
+               a[ii] =  b[iii];
+          }
+     }
+     else
+     if (alpha == -1.) {
+          for (ii = i, iii = 0; iii < n; ++ii, ++iii) {
+               a[ii] = -b[iii];
+          }
+     }
+     else {
+          for (ii = i, iii = 0; iii < n; ++ii, ++iii) {
+               a[ii] = alpha * b[iii];
+          }
+     }
+}
+
+
+
+void insert_matrix1_d(int m, int n, int i, int j, double **a, double alpha, double **b) {
+
+     int ii;
+     int iii;
+     int jj;
+     int jjj;
+
+     i *= m;
+     j *= n;
+
+     if (alpha ==  1.) {
+          for (ii = i, iii = 0; iii < m; ++ii, ++iii) {
+               for (jj = j, jjj = 0; jjj < n; ++jj, ++jjj) {
+                    a[ii][jj] =  b[iii][jjj];
+               }
+          }
+     }
+     else
+     if (alpha == -1.) {
+          for (ii = i, iii = 0; iii < m; ++ii, ++iii) {
+               for (jj = j, jjj = 0; jjj < n; ++jj, ++jjj) {
+                    a[ii][jj] = -b[iii][jjj];
+               }
+          }
+     }
+     else {
+          for (ii = i, iii = 0; iii < m; ++ii, ++iii) {
+               for (jj = j, jjj = 0; jjj < n; ++jj, ++jjj) {
+                    a[ii][jj] = alpha * b[iii][jjj];
+               }
+          }
+     }
+}
+
+
+
+void insert_matrix2_d(int m, int n, int i, int j, double **a, double alpha, double *d, double **b) {
+
+     int ii;
+     int iii;
+     int jj;
+     int jjj;
+
+     i *= m;
+     j *= m;
+
+     if (alpha ==  1.) {
+          for (ii = i, iii = 0; iii < m; ++ii, ++iii) {
+               for (jj = j, jjj = 0; jjj < n; ++jj, ++jjj) {
+                    a[ii][jj] =  b[iii][jjj] * d[jjj];
+               }
+          }
+     }
+     else
+     if (alpha == -1.) {
+          for (ii = i, iii = 0; iii < m; ++ii, ++iii) {
+               for (jj = j, jjj = 0; jjj < n; ++jj, ++jjj) {
+                    a[ii][jj] = -b[iii][jjj] * d[jjj];
+               }
+          }
+     }
+     else {
+          for (ii = i, iii = 0; iii < m; ++ii, ++iii) {
+               for (jj = j, jjj = 0; jjj < n; ++jj, ++jjj) {
+                    a[ii][jj] = alpha * b[iii][jjj] * d[jjj];
+               }
+          }
+     }
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+void insert_vector1_dc(int n, int i, dcomplex *a, dcomplex alpha, dcomplex *b) {
+
+     int ii;
+     int iii;
+
+     i *= n;
+
+     if (alpha ==  1.) {
+          for (ii = i, iii = 0; iii < n; ++ii, ++iii) {
+               a[ii] =  b[iii];
+          }
+     }
+     else
+     if (alpha == -1.) {
+          for (ii = i, iii = 0; iii < n; ++ii, ++iii) {
+               a[ii] = -b[iii];
+          }
+     }
+     else {
+          for (ii = i, iii = 0; iii < n; ++ii, ++iii) {
+               a[ii] = alpha * b[iii];
+          }
+     }
+}
+
+
+
+void insert_matrix1_dc(int m, int n, int i, int j, dcomplex **a, dcomplex alpha, dcomplex **b) {
+
+     int ii;
+     int iii;
+     int jj;
+     int jjj;
+
+     i *= m;
+     j *= n;
+
+     if (alpha ==  1.) {
+          for (ii = i, iii = 0; iii < m; ++ii, ++iii) {
+               for (jj = j, jjj = 0; jjj < n; ++jj, ++jjj) {
+                    a[ii][jj] =  b[iii][jjj];
+               }
+          }
+     }
+     else
+     if (alpha == -1.) {
+          for (ii = i, iii = 0; iii < m; ++ii, ++iii) {
+               for (jj = j, jjj = 0; jjj < n; ++jj, ++jjj) {
+                    a[ii][jj] = -b[iii][jjj];
+               }
+          }
+     }
+     else {
+          for (ii = i, iii = 0; iii < m; ++ii, ++iii) {
+               for (jj = j, jjj = 0; jjj < n; ++jj, ++jjj) {
+                    a[ii][jj] = alpha * b[iii][jjj];
+               }
+          }
+     }
+}
+
+
+
+void insert_matrix2_dc(int m, int n, int i, int j, dcomplex **a, dcomplex alpha, dcomplex *d, dcomplex **b) {
+
+     int ii;
+     int iii;
+     int jj;
+     int jjj;
+
+     i *= m;
+     j *= n;
+
+     if (alpha ==  1.) {
+          for (ii = i, iii = 0; iii < m; ++ii, ++iii) {
+               for (jj = j, jjj = 0; jjj < n; ++jj, ++jjj) {
+                    a[ii][jj] =  b[iii][jjj] * d[jjj];
+               }
+          }
+     }
+     else
+     if (alpha == -1.) {
+          for (ii = i, iii = 0; iii < m; ++ii, ++iii) {
+               for (jj = j, jjj = 0; jjj < n; ++jj, ++jjj) {
+                    a[ii][jj] = -b[iii][jjj] * d[jjj];
+               }
+          }
+     }
+     else {
+          for (ii = i, iii = 0; iii < m; ++ii, ++iii) {
+               for (jj = j, jjj = 0; jjj < n; ++jj, ++jjj) {
+                    a[ii][jj] = alpha * b[iii][jjj] * d[jjj];
+               }
+          }
+     }
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+void insert_matrix_band_storage1_d(int m, int n, int kl, int ku, int i1, int j1,
+                                   double **a, double alpha, double **b) {
 
      int ii;
      int i;
      int j;
      int jj;
      int k;
+
+     i1 *= m;
+     j1 *= n;
 
      k = kl + ku + 1;
 
@@ -858,7 +1061,7 @@ void copy_to_band_storage_dc(dcomplex **ab, dcomplex **a, dcomplex alpha,
           for (i = 0; i < m; ++i) {
                jj = j1;
                for (j = 0; j < n; ++j) {
-                    ab[jj][ii - jj] =  a[i][j];
+                    a[jj][ii - jj] =  b[i][j];
                     jj++;
                }
                ii++;
@@ -869,7 +1072,7 @@ void copy_to_band_storage_dc(dcomplex **ab, dcomplex **a, dcomplex alpha,
           for (i = 0; i < m; ++i) {
                jj = j1;
                for (j = 0; j < n; ++j) {
-                    ab[jj][ii - jj] = -a[i][j];
+                    a[jj][ii - jj] = -b[i][j];
                     jj++;
                }
                ii++;
@@ -879,7 +1082,7 @@ void copy_to_band_storage_dc(dcomplex **ab, dcomplex **a, dcomplex alpha,
           for (i = 0; i < m; ++i) {
                jj = j1;
                for (j = 0; j < n; ++j) {
-                    ab[jj][ii - jj] =  a[i][j] * alpha;
+                    a[jj][ii - jj] =  alpha * b[i][j];
                     jj++;
                }
                ii++;
@@ -889,15 +1092,17 @@ void copy_to_band_storage_dc(dcomplex **ab, dcomplex **a, dcomplex alpha,
 
 
 
-void copy_to_band_storage2_dc(dcomplex **ab, dcomplex **a,
-                              dcomplex alpha, dcomplex *beta,
-                              int m, int n, int kl, int ku, int i1, int j1) {
+void insert_matrix_band_storage2_d(int m, int n, int kl, int ku, int i1, int j1,
+                                   double **a, double alpha, double *d, double **b) {
 
      int ii;
      int i;
      int j;
      int jj;
      int k;
+
+     i1 *= m;
+     j1 *= n;
 
      k = kl + ku + 1;
 
@@ -907,7 +1112,7 @@ void copy_to_band_storage2_dc(dcomplex **ab, dcomplex **a,
           for (i = 0; i < m; ++i) {
                jj = j1;
                for (j = 0; j < n; ++j) {
-                    ab[jj][ii - jj] =  a[i][j] * beta[j];
+                    a[jj][ii - jj] =  d[j] * b[i][j];
                     jj++;
                }
                ii++;
@@ -918,7 +1123,7 @@ void copy_to_band_storage2_dc(dcomplex **ab, dcomplex **a,
           for (i = 0; i < m; ++i) {
                jj = j1;
                for (j = 0; j < n; ++j) {
-                    ab[jj][ii - jj] = -a[i][j] * beta[j];
+                    a[jj][ii - jj] = -d[j] * b[i][j];
                     jj++;
                }
                ii++;
@@ -928,7 +1133,112 @@ void copy_to_band_storage2_dc(dcomplex **ab, dcomplex **a,
           for (i = 0; i < m; ++i) {
                jj = j1;
                for (j = 0; j < n; ++j) {
-                    ab[jj][ii - jj] =  a[i][j] * alpha * beta[j];
+                    a[jj][ii - jj] =  alpha * d[j] * b[i][j];
+                    jj++;
+               }
+               ii++;
+          }
+     }
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+void insert_matrix_band_storage1_dc(int m, int n, int kl, int ku, int i1, int j1,
+                                    dcomplex **a, dcomplex alpha, dcomplex **b) {
+
+     int ii;
+     int i;
+     int j;
+     int jj;
+     int k;
+
+     i1 *= m;
+     j1 *= n;
+
+     k = kl + ku + 1;
+
+     ii = i1 + k - 1;
+
+     if (alpha ==  1.) {
+          for (i = 0; i < m; ++i) {
+               jj = j1;
+               for (j = 0; j < n; ++j) {
+                    a[jj][ii - jj] =  b[i][j];
+                    jj++;
+               }
+               ii++;
+          }
+     }
+     else
+     if (alpha == -1.) {
+          for (i = 0; i < m; ++i) {
+               jj = j1;
+               for (j = 0; j < n; ++j) {
+                    a[jj][ii - jj] = -b[i][j];
+                    jj++;
+               }
+               ii++;
+          }
+     }
+     else {
+          for (i = 0; i < m; ++i) {
+               jj = j1;
+               for (j = 0; j < n; ++j) {
+                    a[jj][ii - jj] =  alpha * b[i][j];
+                    jj++;
+               }
+               ii++;
+          }
+     }
+}
+
+
+
+void insert_matrix_band_storage2_dc(int m, int n, int kl, int ku, int i1, int j1,
+                                    dcomplex **a, dcomplex alpha, dcomplex *d, dcomplex **b) {
+
+     int ii;
+     int i;
+     int j;
+     int jj;
+     int k;
+
+     i1 *= m;
+     j1 *= n;
+
+     k = kl + ku + 1;
+
+     ii = i1 + k - 1;
+
+     if (alpha ==  1.) {
+          for (i = 0; i < m; ++i) {
+               jj = j1;
+               for (j = 0; j < n; ++j) {
+                    a[jj][ii - jj] =  d[j] * b[i][j];
+                    jj++;
+               }
+               ii++;
+          }
+     }
+     else
+     if (alpha == -1.) {
+          for (i = 0; i < m; ++i) {
+               jj = j1;
+               for (j = 0; j < n; ++j) {
+                    a[jj][ii - jj] = -d[j] * b[i][j];
+                    jj++;
+               }
+               ii++;
+          }
+     }
+     else {
+          for (i = 0; i < m; ++i) {
+               jj = j1;
+               for (j = 0; j < n; ++j) {
+                    a[jj][ii - jj] =  alpha * d[j] * b[i][j];
                     jj++;
                }
                ii++;

@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -8,6 +8,7 @@
 *******************************************************************************/
 
 #include <gutil.h>
+#include <gindex_name_value.h>
 #include <gmath_matrix.h>
 
 #include <rtutil_math.h>
@@ -21,10 +22,46 @@
 /*******************************************************************************
  *
  ******************************************************************************/
+static const char *xrtm_kernel_names[] = {
+     "lambertian",
+     "direct_and_diffuse",
+     "roujean",
+     "li_sparse",
+     "li_dense",
+     "ross_thin",
+     "ross_thick",
+     "hapke",
+     "rahman",
+     "cox_munk",
+     "user_defined"
+};
+
+static long xrtm_kernel_types[] = {
+     XRTM_KERNEL_LAMBERTIAN,
+     XRTM_KERNEL_DIRECT_AND_DIFFUSE,
+     XRTM_KERNEL_ROUJEAN,
+     XRTM_KERNEL_LI_SPARSE,
+     XRTM_KERNEL_LI_DENSE,
+     XRTM_KERNEL_ROSS_THIN,
+     XRTM_KERNEL_ROSS_THICK,
+     XRTM_KERNEL_HAPKE,
+     XRTM_KERNEL_RAHMAN,
+     XRTM_KERNEL_COX_MUNK,
+     XRTM_KERNEL_USER_DEFINED
+};
+
+
+GINDEX_NAME_VALUE_TEMPLATE(xrtm_kernel, "xrtm kernel", N_XRTM_KERNEL_TYPES)
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
 int kernel_is_valid(enum xrtm_kernel_type type) {
 
     if (type < 0 || type >= N_XRTM_KERNEL_TYPES) {
-         eprintf("ERROR: invalid kernel type: %d\n", type);
+         fprintf(stderr, "ERROR: invalid kernel type: %d\n", type);
          return 0;
     }
 
@@ -36,12 +73,12 @@ int kernel_is_valid(enum xrtm_kernel_type type) {
 /*******************************************************************************
  *
  ******************************************************************************/
-static int n_params_kernel[] = {0, 0, 2, 2, 0, 0, 3, 3, 2};
+static int n_params_kernel[] = {0, 4, 0, 2, 2, 0, 0, 3, 3, 2, MAX_KERNEL_PARAMS};
 
 int kernel_n_params(enum xrtm_kernel_type type) {
 
     if (! kernel_is_valid(type)) {
-         eprintf("ERROR: kernel_is_valid()\n");
+         fprintf(stderr, "ERROR: kernel_is_valid()\n");
          return -1;
     }
 
@@ -53,7 +90,7 @@ int kernel_n_params(enum xrtm_kernel_type type) {
 /*******************************************************************************
  *
  ******************************************************************************/
-static int kernel_needs_fourier[] = {0, 1, 1, 1, 1, 1, 1, 1, 1};
+static int kernel_needs_fourier[] = {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
 int brdf_needs_fourier(enum xrtm_kernel_type *kernels, int n_kernels) {
 
@@ -80,7 +117,7 @@ int brdf_aux_alloc(brdf_aux_data *aux, int n_quad, int n_kernel_quad) {
      aux->tan_theta2 = alloc_array1_d(n_quad + 1);
 
      if (! (aux->cos_theta && aux->sin_theta && aux->tan_theta && aux->tan_theta2)) {
-          eprintf("ERROR: alloc_array1_d(%d)\n", n_quad + 1);
+          fprintf(stderr, "ERROR: alloc_array1_d(%d)\n", n_quad + 1);
           return -1;
      }
 
@@ -89,7 +126,7 @@ int brdf_aux_alloc(brdf_aux_data *aux, int n_quad, int n_kernel_quad) {
      aux->sin_phi2   = alloc_array1_d(n_kernel_quad);
 
      if (! (aux->cos_phi && aux->sin_phi && aux->sin_phi2)) {
-          eprintf("ERROR: alloc_array1_d(%d)\n", n_kernel_quad);
+          fprintf(stderr, "ERROR: alloc_array1_d(%d)\n", n_kernel_quad);
           return -1;
      }
 
@@ -169,6 +206,13 @@ void brdf_aux_free(brdf_aux_data *aux) {
  *
  ******************************************************************************/
 typedef union {
+     struct /* direct_and_diffuse_data */ {
+          double rho_0v;
+          double rho_0d;
+          double rho_vd;
+          double rho_dd;
+     } direct_and_diffuse;
+
      struct /* roujean_aux_data */ {
           double a;
           double b;
@@ -251,14 +295,14 @@ static void lambertian_aux(brdf_aux_data *aux, void *aux2, int i, int j, int n_d
 
 
 
-static double lambertian_kernel(brdf_aux_data *aux, void *aux2, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
+static double lambertian_kernel(brdf_aux_data *aux, void *aux2, enum xrtm_brdf_geometry brdf_geom, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
 
      int ii;
 
      if (flags_or(derivs, n_derivs)) {
           for (ii = 0; ii < n_derivs; ++ii) {
                if (derivs[ii]) {
-                    f_l[ii] = 1.;
+                    f_l[ii] = 0.;
                }
           }
      }
@@ -268,7 +312,56 @@ static double lambertian_kernel(brdf_aux_data *aux, void *aux2, int i, int j, in
 
 
 /*
-static void lambertian_kernel_a(brdf_aux_data *aux, void *aux2, int i, int j, int k, double phi, double *p, double *p_a, double f_a) {
+static void lambertian_kernel_a(brdf_aux_data *aux, void *aux2, enum xrtm_brdf_geometry brdf_geom, int i, int j, int k, double phi, double *p, double *p_a, double f_a) {
+
+}
+*/
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+static void direct_and_diffuse_aux(brdf_aux_data *aux, void *aux2, int i, int j, int n_derivs, uchar *derivs, double *p, double **p_l) {
+
+}
+
+
+
+static double direct_diffuse_param(enum xrtm_brdf_geometry brdf_geom, double *p) {
+
+     switch(brdf_geom) {
+          case XRTM_BRDF_GEOMETRY_QQ:
+               return p[3];
+          case XRTM_BRDF_GEOMETRY_Q0:
+               return p[1];
+          case XRTM_BRDF_GEOMETRY_UQ:
+               return p[2];
+          case XRTM_BRDF_GEOMETRY_U0:
+               return p[0];
+          default:
+               fprintf(stderr, "ERROR: invalid brdf geometry: %d\n", brdf_geom);
+               exit(1);
+     }
+}
+
+static double direct_and_diffuse_kernel(brdf_aux_data *aux, void *aux2, enum xrtm_brdf_geometry brdf_geom, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
+
+     int ii;
+
+     if (flags_or(derivs, n_derivs)) {
+          for (ii = 0; ii < n_derivs; ++ii) {
+               if (derivs[ii]) {
+                    f_l[ii] = direct_diffuse_param(brdf_geom, p_l[ii]);
+               }
+          }
+     }
+
+     return direct_diffuse_param(brdf_geom, p);
+}
+
+
+/*
+static void direct_and_diffuse_kernel_a(brdf_aux_data *aux, void *aux2, enum xrtm_brdf_geometry brdf_geom, int i, int j, int k, double phi, double *p, double *p_a, double f_a) {
 
 }
 */
@@ -285,17 +378,17 @@ static void roujean_aux(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j,
      aux2->roujean.b = aux->tan_theta2[i] + aux->tan_theta2[j];
 
      a = aux->tan_theta[i] * aux->tan_theta[j];
-     aux2->roujean.c = a *  2.;
+     aux2->roujean.c = 2. * a;
      aux2->roujean.d = a / (2. * PI);
 }
 
 
 
-static double roujean_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
+static double roujean_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, enum xrtm_brdf_geometry brdf_geom, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
 
-     /* Roujean 1992, Wanner 1995, Spurr 2004 (contains a typo) */
+     /* Roujean 1992, Wanner 1995, Spurr 2004 (contains a typo in eq for f) */
 
-     double a = 1;
+     double a = 1.;
 
      double delta;
 
@@ -317,8 +410,8 @@ static void li_aux(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j, int 
      aux2->li.tan_theta_i_p  = p[0] * aux->tan_theta[i];
      aux2->li.tan_theta_r_p  = p[0] * aux->tan_theta[j];
 
-     aux2->li.tan_theta_i_p2 = aux2->li.tan_theta_i_p*aux2->li.tan_theta_i_p;
-     aux2->li.tan_theta_r_p2 = aux2->li.tan_theta_r_p*aux2->li.tan_theta_r_p;
+     aux2->li.tan_theta_i_p2 = aux2->li.tan_theta_i_p * aux2->li.tan_theta_i_p;
+     aux2->li.tan_theta_r_p2 = aux2->li.tan_theta_r_p * aux2->li.tan_theta_r_p;
 
      aux2->li.theta_i_p      = atan(aux2->li.tan_theta_i_p);
      aux2->li.theta_r_p      = atan(aux2->li.tan_theta_r_p);
@@ -343,9 +436,9 @@ static void li_aux(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j, int 
 
 
 
-static void li_common(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *p_, double *q) {
+static void li_common(brdf_aux_data *aux, kernel_aux_data *aux2, enum xrtm_brdf_geometry brdf_geom, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *p_, double *q) {
 
-     /* Wanner 1995, Spurr 2004 (contains a typo) */
+     /* Wanner 1995, Spurr 2004 (contains a typo in eq for d(x)) */
 
      double cos_ksi_p;
      double d;
@@ -371,28 +464,28 @@ static void li_common(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j, i
 
 
 
-static double li_sparse_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
+static double li_sparse_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, enum xrtm_brdf_geometry brdf_geom, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
 
      /* Wanner 1995, Spurr 2004 (contains a typo) */
 
      double p_;
      double q;
 
-     li_common(aux, aux2, i, j, k, phi, n_derivs, derivs, p, p_l, &p_, &q);
+     li_common(aux, aux2, brdf_geom, i, j, k, phi, n_derivs, derivs, p, p_l, &p_, &q);
 
      return .5 * p_ - q * aux2->li.r;
 }
 
 
 
-static double li_dense_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
+static double li_dense_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, enum xrtm_brdf_geometry brdf_geom, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
 
      /* Wanner 1995, Spurr 2004 (contains a typo) */
 
      double p_;
      double q;
 
-     li_common(aux, aux2, i, j, k, phi, n_derivs, derivs, p, p_l, &p_, &q);
+     li_common(aux, aux2, brdf_geom, i, j, k, phi, n_derivs, derivs, p, p_l, &p_, &q);
 
      return p_ / (q * aux2->li.r) - 2.;
 }
@@ -411,7 +504,7 @@ static void ross_aux(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j, in
 
 
 
-static double ross_thin_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
+static double ross_thin_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, enum xrtm_brdf_geometry brdf_geom, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
 
      /* Wanner 1995, Spurr 2004 */
 
@@ -427,7 +520,7 @@ static double ross_thin_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, int i,
 
 
 
-static double ross_thick_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
+static double ross_thick_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, enum xrtm_brdf_geometry brdf_geom, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
 
      /* Wanner 1995, Spurr 2004 */
 
@@ -473,7 +566,7 @@ static void hapke_aux(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j, i
 
 
 
-static double hapke_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
+static double hapke_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, enum xrtm_brdf_geometry brdf_geom, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
 
      /* Spurr 2004 (contains a typo) */
 
@@ -517,7 +610,7 @@ static void rahman_aux(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j, 
 
 
 
-static double rahman_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
+static double rahman_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, enum xrtm_brdf_geometry brdf_geom, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
 
      /* Rahman 1993b, Spurr 2004 (contains 2 errors) */
 
@@ -556,7 +649,7 @@ static void cox_munk_aux(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j
 
 
 
-static double cox_munk_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
+static double cox_munk_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, enum xrtm_brdf_geometry brdf_geom, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
 
      double a;
      double cos_ksi;
@@ -602,11 +695,14 @@ static double cox_munk_kernel(brdf_aux_data *aux, kernel_aux_data *aux2, int i, 
 /*******************************************************************************
  *
  ******************************************************************************/
-static double call_aux_func(brdf_aux_data *aux, kernel_aux_data *aux2, int kernel, int i, int j, int n_derivs, uchar *derivs, double *p, double **p_l) {
+static double call_aux_func(brdf_aux_data *aux, kernel_aux_data *aux2, int kernel, int i, int j, int n_derivs, uchar *derivs, double *p, double **p_l, brdf_kernel_func_data *func) {
 
      switch(kernel) {
           case XRTM_KERNEL_LAMBERTIAN:
                lambertian_aux(aux, aux2, i, j, n_derivs, derivs, p, p_l);
+               break;
+          case XRTM_KERNEL_DIRECT_AND_DIFFUSE:
+               direct_and_diffuse_aux(aux, aux2, i, j, n_derivs, derivs, p, p_l);
                break;
           case XRTM_KERNEL_ROUJEAN:
                roujean_aux   (aux, aux2, i, j, n_derivs, derivs, p, p_l);
@@ -628,8 +724,12 @@ static double call_aux_func(brdf_aux_data *aux, kernel_aux_data *aux2, int kerne
           case XRTM_KERNEL_COX_MUNK:
                cox_munk_aux  (aux, aux2, i, j, n_derivs, derivs, p, p_l);
                break;
-          default:
+          case XRTM_KERNEL_USER_DEFINED:
+               func->aux     (aux, aux2, i, j, n_derivs, derivs, p, p_l);
                break;
+          default:
+               fprintf(stderr, "ERROR: invalid brdf kernel: %d\n", kernel);
+               exit(1);
      }
 
      return 0.;
@@ -640,29 +740,34 @@ static double call_aux_func(brdf_aux_data *aux, kernel_aux_data *aux2, int kerne
 /*******************************************************************************
  *
  ******************************************************************************/
-static double call_kernel_func(brdf_aux_data *aux, kernel_aux_data *aux2, int kernel, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, double *f_l) {
+static double call_kernel_func(brdf_aux_data *aux, kernel_aux_data *aux2, enum xrtm_brdf_geometry brdf_geom, int kernel, int i, int j, int k, double phi, int n_derivs, uchar *derivs, double *p, double **p_l, brdf_kernel_func_data *func, double *f_l) {
 
      switch(kernel) {
           case XRTM_KERNEL_LAMBERTIAN:
-               return lambertian_kernel(aux, aux2, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
+               return lambertian_kernel(aux, aux2, brdf_geom, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
+          case XRTM_KERNEL_DIRECT_AND_DIFFUSE:
+               return direct_and_diffuse_kernel(aux, aux2, brdf_geom, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
           case XRTM_KERNEL_ROUJEAN:
-               return roujean_kernel   (aux, aux2, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
+               return roujean_kernel   (aux, aux2, brdf_geom, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
           case XRTM_KERNEL_LI_SPARSE:
-               return li_sparse_kernel (aux, aux2, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
+               return li_sparse_kernel (aux, aux2, brdf_geom, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
           case XRTM_KERNEL_LI_DENSE:
-               return li_dense_kernel  (aux, aux2, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
+               return li_dense_kernel  (aux, aux2, brdf_geom, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
           case XRTM_KERNEL_ROSS_THIN:
-               return ross_thin_kernel (aux, aux2, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
+               return ross_thin_kernel (aux, aux2, brdf_geom, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
           case XRTM_KERNEL_ROSS_THICK:
-               return ross_thick_kernel(aux, aux2, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
+               return ross_thick_kernel(aux, aux2, brdf_geom, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
           case XRTM_KERNEL_HAPKE:
-               return hapke_kernel     (aux, aux2, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
+               return hapke_kernel     (aux, aux2, brdf_geom, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
           case XRTM_KERNEL_RAHMAN:
-               return rahman_kernel    (aux, aux2, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
+               return rahman_kernel    (aux, aux2, brdf_geom, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
           case XRTM_KERNEL_COX_MUNK:
-               return cox_munk_kernel  (aux, aux2, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
+               return cox_munk_kernel  (aux, aux2, brdf_geom, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
+          case XRTM_KERNEL_USER_DEFINED:
+               return func->kernel     (aux, aux2, brdf_geom, i, j, k, phi, n_derivs, derivs, p, p_l, f_l);
           default:
-               break;
+               fprintf(stderr, "ERROR: invalid brdf kernel: %d\n", kernel);
+               exit(1);
      }
 
      return 0.;
@@ -673,7 +778,7 @@ static double call_kernel_func(brdf_aux_data *aux, kernel_aux_data *aux2, int ke
 /*******************************************************************************
  *
  ******************************************************************************/
-void brdf_build_kernel_vecs(int i_offset, int n_quad, int j_offset, int n_stokes, int n_derivs, int n_kernels, int n_kernel_quad, enum xrtm_kernel_type *kernels, double *ampfac, double **ampfac_l, double **params, double ***params_l, double *kernel_qx, double *kernel_qw, brdf_aux_data *aux, double **kernel_f, double ***kernel_f_l, uchar *derivs, work_data work) {
+void brdf_build_kernel_vecs(int i_offset, int n_quad, int j_offset, int n_stokes, int n_derivs, int n_kernels, int n_kernel_quad, enum xrtm_kernel_type *kernels, double *ampfac, double **ampfac_l, double **params, double ***params_l, brdf_kernel_func_data *func, double *kernel_qx, double *kernel_qw, brdf_aux_data *aux, enum xrtm_brdf_geometry brdf_geom, double **kernel_f, double ***kernel_f_l, uchar *derivs, work_data work) {
 
      int i;
      int j;
@@ -683,6 +788,7 @@ void brdf_build_kernel_vecs(int i_offset, int n_quad, int j_offset, int n_stokes
 
      int flag;
 
+     double f;
      double *f_l;
 
      double **params_l2;
@@ -709,11 +815,12 @@ void brdf_build_kernel_vecs(int i_offset, int n_quad, int j_offset, int n_stokes
 
           if (! flag) {
                for (j = 0; j < n_quad; ++j) {
-                    kernel_f[0][j] += call_kernel_func(aux, &aux2, kernels[i], j_offset, i_offset+j, 0, 0., n_derivs, derivs, params[i], params_l2, f_l) * ampfac[i];
+                    f = call_kernel_func(aux, &aux2, brdf_geom, kernels[i], j_offset, i_offset+j, 0, 0., n_derivs, derivs, params[i], params_l2, &func[i], f_l);
+                    kernel_f[0][j] += f * ampfac[i];
                     if (flags_or(derivs, n_derivs)) {
                          for (k = 0; k < n_derivs; ++k) {
                               if (derivs[k]) {
-                                   kernel_f_l[k][0][j] += f_l[k] * ampfac_l[i][k];
+                                   kernel_f_l[k][0][j] += f_l[k] * ampfac[i] + f * ampfac_l[i][k];
                               }
                          }
                     }
@@ -721,23 +828,25 @@ void brdf_build_kernel_vecs(int i_offset, int n_quad, int j_offset, int n_stokes
           }
           else {
                for (j = 0; j < n_quad; ++j) {
-                    call_aux_func(aux, &aux2, kernels[i], j_offset, i_offset+j, n_derivs, derivs, params[i], params_l2);
+                    call_aux_func(aux, &aux2, kernels[i], j_offset, i_offset+j, n_derivs, derivs, params[i], params_l2, &func[i]);
 
                     for (k = 0, kk = n_kernel_quad; k < n_kernel_quad; ++k, ++kk) {
-                         kernel_f[k +1][j] += call_kernel_func(aux, &aux2, kernels[i], j_offset, i_offset+j, k,  kernel_qx[k], n_derivs, derivs, params[i], params_l2, f_l) * ampfac[i];
+                         f = call_kernel_func(aux, &aux2, brdf_geom, kernels[i], j_offset, i_offset+j, k,  kernel_qx[k], n_derivs, derivs, params[i], params_l2, &func[i], f_l);
+                         kernel_f[k +1][j] += f * ampfac[i];
                          if (flags_or(derivs, n_derivs)) {
                               for (l = 0; l < n_derivs; ++l) {
                                    if (derivs[l]) {
-                                        kernel_f_l[l][k +1][j] += f_l[l] * ampfac_l[i][l];
+                                        kernel_f_l[l][k +1][j] += f_l[l] * ampfac[i] + f * ampfac_l[i][l];
                                    }
                               }
                          }
 
-                         kernel_f[kk+1][j] += call_kernel_func(aux, &aux2, kernels[i], j_offset, i_offset+j, k, -kernel_qx[k], n_derivs, derivs, params[i], params_l2, f_l) * ampfac[i];
+                         f = call_kernel_func(aux, &aux2, brdf_geom, kernels[i], j_offset, i_offset+j, k, -kernel_qx[k], n_derivs, derivs, params[i], params_l2, &func[i], f_l);
+                         kernel_f[kk+1][j] += f * ampfac[i];
                          if (flags_or(derivs, n_derivs)) {
                               for (l = 0; l < n_derivs; ++l) {
                                    if (derivs[l]) {
-                                        kernel_f_l[l][kk+1][j] += f_l[l] * ampfac_l[i][l];
+                                        kernel_f_l[l][kk+1][j] += f_l[l] * ampfac[i] + f * ampfac_l[i][l];
                                    }
                               }
                          }
@@ -809,7 +918,7 @@ void brdf_build_ref_vec(int i_four, int i_offset, int n_quad, int j_offset, int 
 /*******************************************************************************
  *
  ******************************************************************************/
-void brdf_build_kernel_mats(int i_offset, int n_quad1, int j_offset, int n_quad2, int n_stokes, int n_derivs, int n_kernels, int n_kernel_quad, enum xrtm_kernel_type *kernels, double *ampfac, double **ampfac_l, double **params, double ***params_l, double *kernel_qx, double *kernel_qw, brdf_aux_data *aux, double ***kernel_f, double ****kernel_f_l, uchar *derivs, work_data work) {
+void brdf_build_kernel_mats(int i_offset, int n_quad1, int j_offset, int n_quad2, int n_stokes, int n_derivs, int n_kernels, int n_kernel_quad, enum xrtm_kernel_type *kernels, double *ampfac, double **ampfac_l, double **params, double ***params_l, brdf_kernel_func_data *func, double *kernel_qx, double *kernel_qw, brdf_aux_data *aux, enum xrtm_brdf_geometry brdf_geom, double ***kernel_f, double ****kernel_f_l, uchar *derivs, work_data work) {
 
      int i;
      int j;
@@ -820,6 +929,7 @@ void brdf_build_kernel_mats(int i_offset, int n_quad1, int j_offset, int n_quad2
 
      int flag;
 
+     double f;
      double *f_l;
 
      double **params_l2;
@@ -847,11 +957,12 @@ void brdf_build_kernel_mats(int i_offset, int n_quad1, int j_offset, int n_quad2
           if (! flag) {
                for (j = 0; j < n_quad1; ++j) {
                     for (k = 0; k < n_quad2; ++k) {
-                         kernel_f[0][j][k] += call_kernel_func(aux, &aux2, kernels[i], j_offset+k, i_offset+j, 0, 0., n_derivs, derivs, params[i], params_l2, f_l) * ampfac[i];
+                         f = call_kernel_func(aux, &aux2, brdf_geom, kernels[i], j_offset+k, i_offset+j, 0, 0., n_derivs, derivs, params[i], params_l2, &func[i], f_l);
+                         kernel_f[0][j][k] += f * ampfac[i];
                          if (flags_or(derivs, n_derivs)) {
                               for (l = 0; l < n_derivs; ++l) {
                                    if (derivs[l]) {
-                                        kernel_f_l[l][0][j][k] += f_l[l] * ampfac_l[i][l];
+                                        kernel_f_l[l][0][j][k] += f_l[l] * ampfac[i] + f * ampfac_l[i][l];
                                    }
                               }
                          }
@@ -861,23 +972,25 @@ void brdf_build_kernel_mats(int i_offset, int n_quad1, int j_offset, int n_quad2
           else {
                for (j = 0; j < n_quad1; ++j) {
                     for (k = 0; k < n_quad2; ++k) {
-                         call_aux_func(aux, &aux2, kernels[i], j_offset+k, i_offset+j, n_derivs, derivs, params[i], params_l2);
+                         call_aux_func(aux, &aux2, kernels[i], j_offset+k, i_offset+j, n_derivs, derivs, params[i], params_l2, &func[i]);
 
                          for (l = 0, ll = n_kernel_quad; l < n_kernel_quad; ++l, ++ll) {
-                              kernel_f[l +1][j][k] += call_kernel_func(aux, &aux2, kernels[i], j_offset+k, i_offset+j, l,  kernel_qx[l], n_derivs, derivs, params[i], params_l2, f_l) * ampfac[i];
+                              f = call_kernel_func(aux, &aux2, brdf_geom, kernels[i], j_offset+k, i_offset+j, l,  kernel_qx[l], n_derivs, derivs, params[i], params_l2, &func[i], f_l);
+                              kernel_f[l +1][j][k] += f * ampfac[i];
                               if (flags_or(derivs, n_derivs)) {
                                    for (m = 0; m < n_derivs; ++m) {
                                         if (derivs[m]) {
-                                             kernel_f_l[m][l +1][j][k] += f_l[m] * ampfac_l[i][m];
+                                             kernel_f_l[m][l +1][j][k] += f_l[m] * ampfac[i] + f * ampfac_l[i][m];
                                         }
                                    }
                               }
 
-                              kernel_f[ll+1][j][k] += call_kernel_func(aux, &aux2, kernels[i], j_offset+k, i_offset+j, l, -kernel_qx[l], n_derivs, derivs, params[i], params_l2, f_l) * ampfac[i];
+                              f = call_kernel_func(aux, &aux2, brdf_geom, kernels[i], j_offset+k, i_offset+j, l, -kernel_qx[l], n_derivs, derivs, params[i], params_l2, &func[i], f_l);
+                              kernel_f[ll+1][j][k] += f * ampfac[i];
                               if (flags_or(derivs, n_derivs)) {
                                    for (m = 0; m < n_derivs; ++m) {
                                         if (derivs[m]) {
-                                             kernel_f_l[m][ll+1][j][k] += f_l[m] * ampfac_l[i][m];
+                                             kernel_f_l[m][ll+1][j][k] += f_l[m] * ampfac[i] + f * ampfac_l[i][m];
                                         }
                                    }
                               }

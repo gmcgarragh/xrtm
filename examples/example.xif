@@ -5,7 +5,8 @@
  * The first block represents the creation of an xrtm instance.  These are all
  * mandatory values and must be given before any other values.
  ******************************************************************************/
-options                  = ("calc_derivs", "delta_m", "n_t_tms")
+options                  = ("calc_derivs", "delta_m", "n_t_tms",
+                            "output_at_levels", "source_solar")
 solvers                  = ("eig_add")
 max_coef                 = 34
 n_quad                   = 8
@@ -23,6 +24,8 @@ n_out_thetas             = 3
  *
  ******************************************************************************/
 fourier_tol              = 1.e-4
+F_iso_top                = 0.
+F_iso_bot                = 0.
 F_0                      = 1.
 theta_0                  = 35.
 phi_0                    = 0.

@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -13,6 +13,9 @@
 #include "xrtm_work.h"
 #include "xrtm_utility.h"
 
+/*
+#define DEBUG
+*/
 
 /*******************************************************************************
  *
@@ -35,7 +38,7 @@ int work_init(work_data *work, int n_quad, int n_quad_x, int n_stokes, int n_der
      work->w = (work_shared *) malloc(sizeof(work_shared));
 
      if (! work->w) {
-          eprintf("ERROR: memory allocation failed\n");
+          fprintf(stderr, "ERROR: memory allocation failed\n");
           return -1;
      }
 
@@ -180,7 +183,7 @@ static size_t get_work_common(work_data *work, size_t length) {
           work->i_page++;
 
           if (work->i_page >= WORK_MAX_PAGES) {
-               eprintf("ERROR: number of required pages greater than WORK_MAX_PAGES\n");
+               fprintf(stderr, "ERROR: number of required pages greater than WORK_MAX_PAGES\n");
                exit(1);
           }
 
@@ -291,6 +294,57 @@ dcomplex **get_work_dc2(work_data *work, size_t m, size_t n) {
 /*******************************************************************************
  *
  ******************************************************************************/
+void **get_work_x2_m_flags(work_data *work, size_t m, size_t n, size_t size, uchar *flags) {
+
+     size_t i;
+
+     size_t i_byte;
+     size_t length;
+
+     void **v;
+
+     i_byte = get_work_common(work, m * sizeof(void **));
+
+     v = (void **) (work->w->pages[work->i_page] + i_byte);
+
+     length = array_mem_length1(n, size);
+
+     for (i = 0; i < m; ++i) {
+          if (! flags || flags[i]) {
+               i_byte = get_work_common(work, length);
+               v[i] = array_from_mem1(work->w->pages[work->i_page] + i_byte, n, size, 0);
+          }
+     }
+
+     return v;
+}
+
+
+
+int **get_work_i2_m_flags(work_data *work, size_t m, size_t n, uchar *flags) {
+
+     return (int **) get_work_x2_m_flags(work, m, n, sizeof(int), flags);
+}
+
+
+
+double **get_work_d2_m_flags(work_data *work, size_t m, size_t n, uchar *flags) {
+
+     return (double **) get_work_x2_m_flags(work, m, n, sizeof(double), flags);
+}
+
+
+
+dcomplex **get_work_dc2_m_flags(work_data *work, size_t m, size_t n, uchar *flags) {
+
+     return (dcomplex **) get_work_x2_m_flags(work, m, n, sizeof(dcomplex), flags);
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
 void ***get_work_x3(work_data *work, size_t m, size_t n, size_t o, size_t size) {
 
      size_t i_byte;
@@ -322,6 +376,113 @@ double ***get_work_d3(work_data *work, size_t m, size_t n, size_t o) {
 dcomplex ***get_work_dc3(work_data *work, size_t m, size_t n, size_t o) {
 
      return (dcomplex ***) get_work_x3(work, m, n, o, sizeof(dcomplex));
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+void ***get_work_x3_m_flags(work_data *work, size_t m, size_t n, size_t o, size_t size, uchar *flags) {
+
+     size_t i;
+
+     size_t i_byte;
+     size_t length;
+
+     void ***v;
+
+     i_byte = get_work_common(work, m * sizeof(void ***));
+
+     v = (void ***) (work->w->pages[work->i_page] + i_byte);
+
+     length = array_mem_length2(n, o, size);
+
+     for (i = 0; i < m; ++i) {
+          if (! flags || flags[i]) {
+               i_byte = get_work_common(work, length);
+               v[i] = array_from_mem2(work->w->pages[work->i_page] + i_byte, n, o, size, 0);
+          }
+     }
+
+     return v;
+}
+
+
+
+int ***get_work_i3_m_flags(work_data *work, size_t m, size_t n, size_t o, uchar *flags) {
+
+     return (int ***) get_work_x3_m_flags(work, m, n, o, sizeof(int), flags);
+}
+
+
+
+double ***get_work_d3_m_flags(work_data *work, size_t m, size_t n, size_t o, uchar *flags) {
+
+     return (double ***) get_work_x3_m_flags(work, m, n, o, sizeof(double), flags);
+}
+
+
+
+dcomplex ***get_work_dc3_m_flags(work_data *work, size_t m, size_t n, size_t o, uchar *flags) {
+
+     return (dcomplex ***) get_work_x3_m_flags(work, m, n, o, sizeof(dcomplex), flags);
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+void ***get_work_x3_m_n_flags(work_data *work, size_t m, size_t n, size_t o, size_t size, uchar **flags) {
+
+     size_t i;
+     size_t j;
+
+     size_t i_byte;
+     size_t length;
+
+     void ***v;
+
+     length = array_mem_length2(m, n, sizeof(void *));
+
+     i_byte = get_work_common(work, length);
+
+     v = (void ***) array_from_mem2(work->w->pages[work->i_page] + i_byte, m, n, sizeof(void *), 0);
+
+     length = array_mem_length1(o, size);
+
+     for (i = 0; i < m; ++i) {
+          for (j = 0; j < n; ++j) {
+               if (! flags || flags[i][j]) {
+                    i_byte = get_work_common(work, length);
+                    v[i][j] = array_from_mem1(work->w->pages[work->i_page] + i_byte, o, size, 0);
+               }
+          }
+     }
+
+     return v;
+}
+
+
+
+int ***get_work_i3_m_n_flags(work_data *work, size_t m, size_t n, size_t o, uchar **flags) {
+
+     return (int ***) get_work_x3_m_n_flags(work, m, n, o, sizeof(int), flags);
+}
+
+
+
+double ***get_work_d3_m_n_flags(work_data *work, size_t m, size_t n, size_t o, uchar **flags) {
+
+     return (double ***) get_work_x3_m_n_flags(work, m, n, o, sizeof(double), flags);
+}
+
+
+
+dcomplex ***get_work_dc3_m_n_flags(work_data *work, size_t m, size_t n, size_t o, uchar **flags) {
+
+     return (dcomplex ***) get_work_x3_m_n_flags(work, m, n, o, sizeof(dcomplex), flags);
 }
 
 
@@ -367,6 +528,62 @@ dcomplex ****get_work_dc4(work_data *work, size_t m, size_t n, size_t o, size_t 
 /*******************************************************************************
  *
  ******************************************************************************/
+void ****get_work_x4_m_n_flags(work_data *work, size_t m, size_t n, size_t o, size_t p, size_t size, uchar **flags) {
+
+     size_t i;
+     size_t j;
+
+     size_t i_byte;
+     size_t length;
+
+     void ****v;
+
+     length = array_mem_length2(m, n, sizeof(void *));
+
+     i_byte = get_work_common(work, length);
+
+     v = (void ****) array_from_mem2(work->w->pages[work->i_page] + i_byte, m, n, sizeof(void *), 0);
+
+     length = array_mem_length2(o, p, size);
+
+     for (i = 0; i < m; ++i) {
+          for (j = 0; j < n; ++j) {
+               if (! flags || flags[i][j]) {
+                    i_byte = get_work_common(work, length);
+                    v[i][j] = array_from_mem2(work->w->pages[work->i_page] + i_byte, o, p, size, 0);
+               }
+          }
+     }
+
+     return v;
+}
+
+
+
+int ****get_work_i4_m_n_flags(work_data *work, size_t m, size_t n, size_t o, size_t p, uchar **flags) {
+
+     return (int ****) get_work_x4_m_n_flags(work, m, n, o, p, sizeof(int), flags);
+}
+
+
+
+double ****get_work_d4_m_n_flags(work_data *work, size_t m, size_t n, size_t o, size_t p, uchar **flags) {
+
+     return (double ****) get_work_x4_m_n_flags(work, m, n, o, p, sizeof(double), flags);
+}
+
+
+
+dcomplex ****get_work_dc4_m_n_flags(work_data *work, size_t m, size_t n, size_t o, size_t p, uchar **flags) {
+
+     return (dcomplex ****) get_work_x4_m_n_flags(work, m, n, o, p, sizeof(dcomplex), flags);
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
 static void check_work_bounds(int i, int *n, void **data) {
 
      if (i >= *n) {
@@ -380,14 +597,42 @@ static void check_work_bounds(int i, int *n, void **data) {
 /*******************************************************************************
  *
  ******************************************************************************/
-#define GET_WORK1_VECTOR(i, n, max, alloc_vector, mm, data) do {		\
+void init_work_vector(int type, int n, void *data) {
+
+     if (type == 0)
+          init_array1_i (data, n, INT_MAX);
+     else
+     if (type == 1)
+          init_array1_d (data, n, DBL_MAX);
+     else
+     if (type == 2)
+          init_array1_dc(data, n, DBL_MAX);
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+#ifndef POISON_WORK_ARRAYS
+#define GET_WORK1_VECTOR(i, n, max, alloc_vector, mm, data, type) do {		\
 										\
      if (i >= n)								\
           get_work_vector(&i, &n, &max, alloc_vector, mm, (void ***) &data);	\
 										\
      return data[i++];								\
 } while (0)
-
+#else
+#define GET_WORK1_VECTOR(i, n, max, alloc_vector, mm, data, type) do {		\
+										\
+     if (i >= n)								\
+          get_work_vector(&i, &n, &max, alloc_vector, mm, (void ***) &data);	\
+										\
+     init_work_vector(type, mm, data[i]);					\
+										\
+     return data[i++];								\
+} while (0)
+#endif
 
 
 static void get_work_vector(WORK_I_TYPE *i, int *n, int *max, void **(*alloc_vector_x)(long m), int mm, void ***data) {
@@ -396,7 +641,7 @@ static void get_work_vector(WORK_I_TYPE *i, int *n, int *max, void **(*alloc_vec
 
      (*data)[*i] = alloc_vector_x(mm);
      if (! (*data)[*i]) {
-          eprintf("ERROR: memory allocation failed\n");
+          fprintf(stderr, "ERROR: memory allocation failed\n");
           exit(1);
      }
 
@@ -405,7 +650,7 @@ static void get_work_vector(WORK_I_TYPE *i, int *n, int *max, void **(*alloc_vec
 
 
 
-static void **get_work_vectors(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE *iq2, int *n2, int *max2, void **(*alloc_vector_x)(long m), int ll, int mm, void ****data1, void ***data2, uchar *flags) {
+static void **get_work_vectors(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE *iq2, int *n2, int *max2, void **(*alloc_vector_x)(long m), int ll, int mm, void ****data1, void ***data2, uchar *flags, int type) {
 
      int i;
 
@@ -417,7 +662,7 @@ static void **get_work_vectors(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE 
 
           (*data1)[*iq] = (void **) alloc_array1(ll, sizeof(void **));
           if (! (*data1)[*iq]) {
-               eprintf("ERROR: memory allocation failed\n");
+               fprintf(stderr, "ERROR: memory allocation failed\n");
                exit(1);
           }
 
@@ -432,7 +677,7 @@ static void **get_work_vectors(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE 
           for (i = *n2; i < *iq2 + count; ++i) {
                (*data2)[i] = alloc_vector_x(mm);
                if (! (*data2)[i]) {
-                    eprintf("ERROR: memory allocation failed\n");
+                    fprintf(stderr, "ERROR: memory allocation failed\n");
                     exit(1);
                }
           }
@@ -443,12 +688,19 @@ static void **get_work_vectors(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE 
      if (! flags) {
           for (i = 0; i < ll; ++i) {
                (*data1)[*iq][i] = (*data2)[(*iq2)++];
+#ifdef DEBUG
+               init_work_vector(type, mm, (*data1)[*iq][i]);
+#endif
           }
      }
      else {
           for (i = 0; i < ll; ++i) {
-               if (flags[i])
+               if (flags[i]) {
                     (*data1)[*iq][i] = (*data2)[(*iq2)++];
+#ifdef DEBUG
+                   init_work_vector(type, mm, (*data1)[*iq][i]);
+#endif
+               }
 #ifdef DEBUG
                else
                     (*data1)[*iq][i] = NULL;
@@ -461,7 +713,7 @@ static void **get_work_vectors(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE 
 
 
 
-static void ***get_work_vectors2(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE *iq2, int *n2, int *max2, void **(*alloc_vector_x)(long m), int ll1, int ll2, int mm, void *****data1, void ***data2, uchar **flags) {
+static void ***get_work_vectors2(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE *iq2, int *n2, int *max2, void **(*alloc_vector_x)(long m), int ll1, int ll2, int mm, void *****data1, void ***data2, uchar **flags, int type) {
 
      int i;
      int j;
@@ -473,7 +725,7 @@ static void ***get_work_vectors2(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYP
 
           (*data1)[*iq] = (void ***) alloc_array2(ll1, ll2, sizeof(void ***));
           if (! (*data1)[*iq]) {
-               eprintf("ERROR: memory allocation failed\n");
+               fprintf(stderr, "ERROR: memory allocation failed\n");
                exit(1);
           }
 
@@ -494,7 +746,7 @@ static void ***get_work_vectors2(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYP
           for (i = *n2; i < *iq2 + count; ++i) {
                (*data2)[i] = alloc_vector_x(mm);
                if (! (*data2)[i]) {
-                    eprintf("ERROR: memory allocation failed\n");
+                    fprintf(stderr, "ERROR: memory allocation failed\n");
                     exit(1);
                }
           }
@@ -506,14 +758,21 @@ static void ***get_work_vectors2(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYP
           for (i = 0; i < ll1; ++i) {
                for (j = 0; j < ll2; ++j) {
                     (*data1)[*iq][i][j] = (*data2)[(*iq2)++];
+#ifdef DEBUG
+                    init_work_vector(type, mm, (*data1)[*iq][i][j]);
+#endif
                }
           }
      }
      else {
           for (i = 0; i < ll1; ++i) {
                for (j = 0; j < ll2; ++j) {
-                    if (flags[i][j])
+                    if (flags[i][j]) {
                          (*data1)[*iq][i][j] = (*data2)[(*iq2)++];
+#ifdef DEBUG
+                         init_work_vector(type, mm, (*data1)[*iq][i][j]);
+#endif
+                    }
 #ifdef DEBUG
                     else
                          (*data1)[*iq][i][j] = NULL;
@@ -530,14 +789,42 @@ static void ***get_work_vectors2(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYP
 /*******************************************************************************
  *
  ******************************************************************************/
-#define GET_WORK1_MATRIX(i, n, max, alloc_matrix, mm, nn, data) do {			\
+void init_work_matrix(int type, int m, int n, void *data) {
+
+     if (type == 0)
+          init_array2_i (data, m, n, INT_MAX);
+     else
+     if (type == 1)
+          init_array2_d (data, m, n, DBL_MAX);
+     else
+     if (type == 2)
+          init_array2_dc(data, m, n, DBL_MAX);
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+#ifndef POISON_WORK_ARRAYS
+#define GET_WORK1_MATRIX(i, n, max, alloc_matrix, mm, nn, data, type) do {		\
 											\
      if (i >= n)									\
            get_work_matrix(&i, &n, &max, alloc_matrix, mm, nn, (void ****) &data);	\
 											\
      return data[i++];									\
 } while (0)
-
+#else
+#define GET_WORK1_MATRIX(i, n, max, alloc_matrix, mm, nn, data, type) do {		\
+											\
+     if (i >= n)									\
+           get_work_matrix(&i, &n, &max, alloc_matrix, mm, nn, (void ****) &data);	\
+											\
+     init_work_matrix(type, mm, nn, data[i]);						\
+											\
+     return data[i++];									\
+} while (0)
+#endif
 
 
 static void get_work_matrix(WORK_I_TYPE *i, int *n, int *max, void ** (*alloc_matrix_x)(long m, long n), int mm, int nn, void ****data) {
@@ -546,7 +833,7 @@ static void get_work_matrix(WORK_I_TYPE *i, int *n, int *max, void ** (*alloc_ma
 
      (*data)[*i] = alloc_matrix_x(mm, nn);
      if (! (*data)[*i]) {
-          eprintf("ERROR: memory allocation failed\n");
+          fprintf(stderr, "ERROR: memory allocation failed\n");
           exit(1);
      }
 
@@ -555,7 +842,7 @@ static void get_work_matrix(WORK_I_TYPE *i, int *n, int *max, void ** (*alloc_ma
 
 
 
-static void **get_work_matrices(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE *iq2, int *n2, int *max2, void **(*alloc_matrix_x)(long m, long n), int ll, int mm, int nn, void ****data1, void ****data2, uchar *flags) {
+static void **get_work_matrices(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE *iq2, int *n2, int *max2, void **(*alloc_matrix_x)(long m, long n), int ll, int mm, int nn, void ****data1, void ****data2, uchar *flags, int type) {
 
      int i;
 
@@ -566,7 +853,7 @@ static void **get_work_matrices(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE
 
           (*data1)[*iq] = (void **) alloc_array1(ll, sizeof(void **));
           if (! (*data1)[*iq]) {
-               eprintf("ERROR: memory allocation failed\n");
+               fprintf(stderr, "ERROR: memory allocation failed\n");
                exit(1);
           }
 
@@ -581,7 +868,7 @@ static void **get_work_matrices(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE
           for (i = *n2; i < *iq2 + count; ++i) {
                (*data2)[i] = alloc_matrix_x(mm, nn);
                if (! (*data2)[i]) {
-                    eprintf("ERROR: memory allocation failed\n");
+                    fprintf(stderr, "ERROR: memory allocation failed\n");
                     exit(1);
                }
           }
@@ -592,12 +879,19 @@ static void **get_work_matrices(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE
      if (! flags) {
           for (i = 0; i < ll; ++i) {
                (*data1)[*iq][i] = (*data2)[(*iq2)++];
+#ifdef DEBUG
+               init_work_matrix(type, mm, nn, (*data1)[*iq][i]);
+#endif
           }
      }
      else {
           for (i = 0; i < ll; ++i) {
-               if (flags[i])
+               if (flags[i]) {
                     (*data1)[*iq][i] = (*data2)[(*iq2)++];
+#ifdef DEBUG
+                    init_work_matrix(type, mm, nn, (*data1)[*iq][i]);
+#endif
+               }
 #ifdef DEBUG
                else
                     (*data1)[*iq][i] = NULL;
@@ -610,7 +904,7 @@ static void **get_work_matrices(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE
 
 
 
-static void ***get_work_matrices2(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE *iq2, int *n2, int *max2, void **(*alloc_matrix_x)(long m, long n), int ll1, int ll2, int mm, int nn, void *****data1, void ****data2, uchar **flags) {
+static void ***get_work_matrices2(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TYPE *iq2, int *n2, int *max2, void **(*alloc_matrix_x)(long m, long n), int ll1, int ll2, int mm, int nn, void *****data1, void ****data2, uchar **flags, int type) {
 
      int i;
      int j;
@@ -622,7 +916,7 @@ static void ***get_work_matrices2(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TY
 
           (*data1)[*iq] = (void ***) alloc_array2(ll1, ll2, sizeof(void **));
           if (! (*data1)[*iq]) {
-               eprintf("ERROR: memory allocation failed\n");
+               fprintf(stderr, "ERROR: memory allocation failed\n");
                exit(1);
           }
 
@@ -643,7 +937,7 @@ static void ***get_work_matrices2(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TY
           for (i = *n2; i < *iq2 + count; ++i) {
                (*data2)[i] = alloc_matrix_x(mm, nn);
                if (! (*data2)[i]) {
-                    eprintf("ERROR: memory allocation failed\n");
+                    fprintf(stderr, "ERROR: memory allocation failed\n");
                     exit(1);
                }
           }
@@ -655,14 +949,21 @@ static void ***get_work_matrices2(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TY
           for (i = 0; i < ll1; ++i) {
                for (j = 0; j < ll2; ++j) {
                     (*data1)[*iq][i][j] = (*data2)[(*iq2)++];
+#ifdef DEBUG
+                    init_work_matrix(type, mm, nn, (*data1)[*iq][i][j]);
+#endif
                }
           }
      }
      else {
           for (i = 0; i < ll1; ++i) {
                for (j = 0; j < ll2; ++j) {
-                    if (! flags || flags[i][j])
+                    if (! flags || flags[i][j]) {
                          (*data1)[*iq][i][j] = (*data2)[(*iq2)++];
+#ifdef DEBUG
+                         init_work_matrix(type, mm, nn, (*data1)[*iq][i][j]);
+#endif
+                    }
 #ifdef DEBUG
                     else
                          (*data1)[*iq][i][j] = NULL;
@@ -679,6 +980,12 @@ static void ***get_work_matrices2(WORK_I_TYPE *iq, int *n1, int *max1, WORK_I_TY
 /*******************************************************************************
  *
  ******************************************************************************/
+
+#define LEGACY
+
+
+#ifdef LEGACY
+
 void *work_get1(work_data *work, enum work_type type) {
 
      work_shared *w;
@@ -687,44 +994,44 @@ void *work_get1(work_data *work, enum work_type type) {
 
      switch(type) {
           case WORK_IX:
-               GET_WORK1_VECTOR(work->i_list[WORK_IX], w->n_list[WORK_IX], w->max_list[WORK_IX], (void **(*)(long)) alloc_array1_i, w->n_quad_v_x, w->lists[WORK_IX]);
+               GET_WORK1_VECTOR(work->i_list[WORK_IX],      w->n_list[WORK_IX],      w->max_list[WORK_IX],      (void **(*)(long))       alloc_array1_i,  w->n_quad_v_x,                        w->lists[WORK_IX],      0);
           case WORK_IX2:
-               GET_WORK1_VECTOR(work->i_list[WORK_IX2], w->n_list[WORK_IX2], w->max_list[WORK_IX2], (void **(*)(long)) alloc_array1_i, 2 * w->n_quad_v_x, w->lists[WORK_IX2]);
+               GET_WORK1_VECTOR(work->i_list[WORK_IX2],     w->n_list[WORK_IX2],     w->max_list[WORK_IX2],     (void **(*)(long))       alloc_array1_i,  2 * w->n_quad_v_x,                    w->lists[WORK_IX2],     0);
           case WORK_DQQ:
-               GET_WORK1_MATRIX(work->i_list[WORK_DQQ], w->n_list[WORK_DQQ], w->max_list[WORK_DQQ], (void **(*)(long, long)) alloc_array2_d, w->n_quad_v, w->n_quad_v, w->lists[WORK_DQQ]);
+               GET_WORK1_MATRIX(work->i_list[WORK_DQQ],     w->n_list[WORK_DQQ],     w->max_list[WORK_DQQ],     (void **(*)(long, long)) alloc_array2_d,  w->n_quad_v, w->n_quad_v,             w->lists[WORK_DQQ],     1);
           case WORK_DX:
-               GET_WORK1_VECTOR(work->i_list[WORK_DX], w->n_list[WORK_DX], w->max_list[WORK_DX], (void **(*)(long)) alloc_array1_d, w->n_quad_v_x, w->lists[WORK_DX]);
+               GET_WORK1_VECTOR(work->i_list[WORK_DX],      w->n_list[WORK_DX],      w->max_list[WORK_DX],      (void **(*)(long))       alloc_array1_d,  w->n_quad_v_x,                        w->lists[WORK_DX],      1);
           case WORK_DX2:
-               GET_WORK1_VECTOR(work->i_list[WORK_DX2], w->n_list[WORK_DX2], w->max_list[WORK_DX2], (void **(*)(long)) alloc_array1_d, 2 * w->n_quad_v_x, w->lists[WORK_DX2]);
+               GET_WORK1_VECTOR(work->i_list[WORK_DX2],     w->n_list[WORK_DX2],     w->max_list[WORK_DX2],     (void **(*)(long))       alloc_array1_d,  2 * w->n_quad_v_x,                    w->lists[WORK_DX2],     1);
           case WORK_DXX:
-               GET_WORK1_MATRIX(work->i_list[WORK_DXX], w->n_list[WORK_DXX], w->max_list[WORK_DXX], (void **(*)(long, long)) alloc_array2_d, w->n_quad_v_x, w->n_quad_v_x, w->lists[WORK_DXX]);
+               GET_WORK1_MATRIX(work->i_list[WORK_DXX],     w->n_list[WORK_DXX],     w->max_list[WORK_DXX],     (void **(*)(long, long)) alloc_array2_d,  w->n_quad_v_x, w->n_quad_v_x,         w->lists[WORK_DXX],     1);
           case WORK_DXX2:
-               GET_WORK1_MATRIX(work->i_list[WORK_DXX2], w->n_list[WORK_DXX2], w->max_list[WORK_DXX2], (void **(*)(long, long)) alloc_array2_d, 2 * w->n_quad_v_x, 2 * w->n_quad_v_x, w->lists[WORK_DXX2]);
+               GET_WORK1_MATRIX(work->i_list[WORK_DXX2],    w->n_list[WORK_DXX2],    w->max_list[WORK_DXX2],    (void **(*)(long, long)) alloc_array2_d,  2 * w->n_quad_v_x, 2 * w->n_quad_v_x, w->lists[WORK_DXX2],    1);
           case WORK_DD:
-               GET_WORK1_VECTOR(work->i_list[WORK_DD], w->n_list[WORK_DD], w->max_list[WORK_DD], (void **(*)(long)) alloc_array1_d, w->n_quad_v + w->n_umus_v, w->lists[WORK_DD]);
+               GET_WORK1_VECTOR(work->i_list[WORK_DD],      w->n_list[WORK_DD],      w->max_list[WORK_DD],      (void **(*)(long))       alloc_array1_d,  w->n_quad_v + w->n_umus_v,            w->lists[WORK_DD],      1);
           case WORK_DS:
-               GET_WORK1_VECTOR(work->i_list[WORK_DS], w->n_list[WORK_DS], w->max_list[WORK_DS], (void **(*)(long)) alloc_array1_d, w->n_stokes, w->lists[WORK_DS]);
+               GET_WORK1_VECTOR(work->i_list[WORK_DS],      w->n_list[WORK_DS],      w->max_list[WORK_DS],      (void **(*)(long))       alloc_array1_d,  w->n_stokes,                          w->lists[WORK_DS],      1);
           case WORK_DU:
-               GET_WORK1_VECTOR(work->i_list[WORK_DU], w->n_list[WORK_DU], w->max_list[WORK_DU], (void **(*)(long)) alloc_array1_d, w->n_umus_v, w->lists[WORK_DU]);
+               GET_WORK1_VECTOR(work->i_list[WORK_DU],      w->n_list[WORK_DU],      w->max_list[WORK_DU],      (void **(*)(long))       alloc_array1_d,  w->n_umus_v,                          w->lists[WORK_DU],      1);
           case WORK_DUX:
-               GET_WORK1_MATRIX(work->i_list[WORK_DUX], w->n_list[WORK_DUX], w->max_list[WORK_DUX], (void **(*)(long, long)) alloc_array2_d, w->n_umus_v, w->n_quad_v_x, w->lists[WORK_DUX]);
+               GET_WORK1_MATRIX(work->i_list[WORK_DUX],     w->n_list[WORK_DUX],     w->max_list[WORK_DUX],     (void **(*)(long, long)) alloc_array2_d,  w->n_umus_v, w->n_quad_v_x,           w->lists[WORK_DUX],     1);
           case WORK_DDERIVS:
-               GET_WORK1_VECTOR(work->i_list[WORK_DDERIVS], w->n_list[WORK_DDERIVS], w->max_list[WORK_DDERIVS], (void **(*)(long)) alloc_array1_d, w->n_derivs, w->lists[WORK_DDERIVS]);
+               GET_WORK1_VECTOR(work->i_list[WORK_DDERIVS], w->n_list[WORK_DDERIVS], w->max_list[WORK_DDERIVS], (void **(*)(long))       alloc_array1_d,  w->n_derivs,                          w->lists[WORK_DDERIVS], 1);
           case WORK_DLAYERS:
-               GET_WORK1_VECTOR(work->i_list[WORK_DLAYERS], w->n_list[WORK_DLAYERS], w->max_list[WORK_DLAYERS], (void **(*)(long)) alloc_array1_d, w->n_layers, w->lists[WORK_DLAYERS]);
+               GET_WORK1_VECTOR(work->i_list[WORK_DLAYERS], w->n_list[WORK_DLAYERS], w->max_list[WORK_DLAYERS], (void **(*)(long))       alloc_array1_d,  w->n_layers,                          w->lists[WORK_DLAYERS], 1);
           case WORK_DBOTH:
-               GET_WORK1_MATRIX(work->i_list[WORK_DBOTH], w->n_list[WORK_DBOTH], w->max_list[WORK_DBOTH], (void **(*)(long, long)) alloc_array2_d, w->n_layers, w->n_derivs, w->lists[WORK_DBOTH]);
+               GET_WORK1_MATRIX(work->i_list[WORK_DBOTH],   w->n_list[WORK_DBOTH],   w->max_list[WORK_DBOTH],   (void **(*)(long, long)) alloc_array2_d,  w->n_layers, w->n_derivs,             w->lists[WORK_DBOTH],   1);
           case WORK_ZX:
-               GET_WORK1_VECTOR(work->i_list[WORK_ZX], w->n_list[WORK_ZX], w->max_list[WORK_ZX], (void **(*)(long)) alloc_array1_dc, w->n_quad_v_x, w->lists[WORK_ZX]);
+               GET_WORK1_VECTOR(work->i_list[WORK_ZX],      w->n_list[WORK_ZX],      w->max_list[WORK_ZX],      (void **(*)(long))       alloc_array1_dc, w->n_quad_v_x,                        w->lists[WORK_ZX],      2);
           case WORK_ZXX:
-               GET_WORK1_MATRIX(work->i_list[WORK_ZXX], w->n_list[WORK_ZXX],  w->max_list[WORK_ZXX],  (void **(*)(long, long)) alloc_array2_dc, w->n_quad_v_x, w->n_quad_v_x, w->lists[WORK_ZXX]);
+               GET_WORK1_MATRIX(work->i_list[WORK_ZXX],     w->n_list[WORK_ZXX],     w->max_list[WORK_ZXX],     (void **(*)(long, long)) alloc_array2_dc, w->n_quad_v_x, w->n_quad_v_x,         w->lists[WORK_ZXX],     2);
           case WORK_ZU:
-               GET_WORK1_VECTOR(work->i_list[WORK_ZU], w->n_list[WORK_ZU], w->max_list[WORK_ZU], (void **(*)(long)) alloc_array1_dc, w->n_umus_v, w->lists[WORK_ZU]);
+               GET_WORK1_VECTOR(work->i_list[WORK_ZU],      w->n_list[WORK_ZU],      w->max_list[WORK_ZU],      (void **(*)(long))       alloc_array1_dc, w->n_umus_v,                          w->lists[WORK_ZU],      2);
           case WORK_ZUX:
-               GET_WORK1_MATRIX(work->i_list[WORK_ZUX], w->n_list[WORK_ZUX], w->max_list[WORK_ZUX], (void **(*)(long, long)) alloc_array2_dc, w->n_umus_v, w->n_quad_v_x, w->lists[WORK_ZUX]);
+               GET_WORK1_MATRIX(work->i_list[WORK_ZUX],     w->n_list[WORK_ZUX],     w->max_list[WORK_ZUX],     (void **(*)(long, long)) alloc_array2_dc, w->n_umus_v, w->n_quad_v_x,           w->lists[WORK_ZUX],     2);
           default:
 #ifdef DEBUG
-               eprintf("ERROR: invalid work type\n");
+               fprintf(stderr, "ERROR: invalid work type\n");
                exit(1);
 #endif
                break;
@@ -733,11 +1040,69 @@ void *work_get1(work_data *work, enum work_type type) {
      return NULL;
 }
 
+#else
 
+void *work_get1(work_data *work, enum work_type type) {
+
+     work_shared *w;
+
+     w = work->w;
+
+     switch(type) {
+          case WORK_IX:
+               return get_work_i1(work, w->n_quad_v_x);
+          case WORK_IX2:
+               return get_work_i1(work, w->n_quad_v_x * 2);
+          case WORK_DQQ:
+               return get_work_d2(work, w->n_quad_v, w->n_quad_v);
+          case WORK_DX:
+               return get_work_d1(work, w->n_quad_v_x);
+          case WORK_DX2:
+               return get_work_d1(work, w->n_quad_v_x * 2);
+          case WORK_DXX:
+               return get_work_d2(work, w->n_quad_v_x, w->n_quad_v_x);
+          case WORK_DXX2:
+               return get_work_d2(work, w->n_quad_v_x * 2, w->n_quad_v_x * 2);
+          case WORK_DD:
+               return get_work_d1(work, w->n_quad_v + w->n_umus_v);
+          case WORK_DS:
+               return get_work_d1(work, w->n_stokes);
+          case WORK_DU:
+               return get_work_d1(work, w->n_umus_v);
+          case WORK_DUX:
+               return get_work_d2(work, w->n_umus_v, w->n_quad_v_x);
+          case WORK_DDERIVS:
+               return get_work_d1(work, w->n_derivs);
+          case WORK_DLAYERS:
+               return get_work_d1(work, w->n_layers);
+          case WORK_DBOTH:
+               return get_work_d2(work, w->n_layers, w->n_derivs);
+          case WORK_ZX:
+               return get_work_dc1(work, w->n_quad_v_x);
+          case WORK_ZXX:
+               return get_work_dc2(work, w->n_quad_v_x, w->n_quad_v_x);
+          case WORK_ZU:
+               return get_work_dc1(work, w->n_umus_v);
+          case WORK_ZUX:
+               return get_work_dc2(work, w->n_umus_v, w->n_quad_v_x);
+          default:
+#ifdef DEBUG
+               fprintf(stderr, "ERROR: invalid work type\n");
+               exit(1);
+#endif
+               break;
+     }
+
+     return NULL;
+}
+
+#endif
 
 /*******************************************************************************
  *
  ******************************************************************************/
+#ifdef LEGACY
+
 void *work_get2(work_data *work, enum work_type type,
                 enum work_v_type v_type, uchar *flags) {
 
@@ -767,12 +1132,12 @@ void *work_get2(work_data *work, enum work_type type,
                i    = &(work->i_list_v[WORK_LAYERS_V]);
                n    = &(w->n_list_v[WORK_LAYERS_V]);
                max  = &(w->max_list_v[WORK_LAYERS_V]);
-               ll   = w->n_layers + 1;
+               ll   = w->n_layers;
                data = (void ****) &(w->lists_v[WORK_LAYERS_V]);
                break;
           default:
 #ifdef DEBUG
-               eprintf("ERROR: invalid work multi type\n");
+               fprintf(stderr, "ERROR: invalid work v type\n");
                exit(1);
 #endif
                break;
@@ -780,42 +1145,44 @@ void *work_get2(work_data *work, enum work_type type,
 
      switch(type) {
           case WORK_IX:
-               return get_work_vectors(i, n, max, &(work->i_list[WORK_IX]), &(w->n_list[WORK_IX]), &(w->max_list[WORK_IX]), (void **(*)(long)) alloc_array1_i, ll, w->n_quad_v_x, data, (void ***) &w->lists[WORK_IX], flags);
+               return get_work_vectors (i, n, max, &(work->i_list[WORK_IX]),      &(w->n_list[WORK_IX]),      &(w->max_list[WORK_IX]),      (void **(*)(long))       alloc_array1_i, ll, w->n_quad_v_x,                        data, (void ***)  &w->lists[WORK_IX],      flags, 0);
           case WORK_IX2:
-               return get_work_vectors(i, n, max, &(work->i_list[WORK_IX2]), &(w->n_list[WORK_IX2]), &(w->max_list[WORK_IX2]), (void **(*)(long)) alloc_array1_i, ll, 2 * w->n_quad_v_x, data, (void ***) &w->lists[WORK_IX2], flags);
+               return get_work_vectors (i, n, max, &(work->i_list[WORK_IX2]),     &(w->n_list[WORK_IX2]),     &(w->max_list[WORK_IX2]),     (void **(*)(long))       alloc_array1_i, ll, 2 * w->n_quad_v_x,                    data, (void ***)  &w->lists[WORK_IX2],     flags, 0);
           case WORK_DQQ:
-               return get_work_matrices(i, n, max, &(work->i_list[WORK_DQQ]), &(w->n_list[WORK_DQQ]), &(w->max_list[WORK_DQQ]), (void **(*)(long, long)) alloc_array2_d, ll, w->n_quad_v, w->n_quad_v, data, (void ****) &w->lists[WORK_DQQ], flags);
+               return get_work_matrices(i, n, max, &(work->i_list[WORK_DQQ]),     &(w->n_list[WORK_DQQ]),     &(w->max_list[WORK_DQQ]),     (void **(*)(long, long)) alloc_array2_d, ll, w->n_quad_v, w->n_quad_v,             data, (void ****) &w->lists[WORK_DQQ],     flags, 1);
           case WORK_DX:
-               return get_work_vectors(i, n, max, &(work->i_list[WORK_DX]), &(w->n_list[WORK_DX]), &(w->max_list[WORK_DX]), (void **(*)(long)) alloc_array1_d, ll, w->n_quad_v_x, data, (void ***) &w->lists[WORK_DX], flags);
+               return get_work_vectors (i, n, max, &(work->i_list[WORK_DX]),      &(w->n_list[WORK_DX]),      &(w->max_list[WORK_DX]),      (void **(*)(long))       alloc_array1_d, ll, w->n_quad_v_x,                        data, (void ***)  &w->lists[WORK_DX],      flags, 1);
           case WORK_DX2:
-               return get_work_vectors(i, n, max, &(work->i_list[WORK_DX2]), &(w->n_list[WORK_DX2]), &(w->max_list[WORK_DX2]), (void **(*)(long)) alloc_array1_d, ll, 2 * w->n_quad_v_x, data, (void ***) &w->lists[WORK_DX2], flags);
+               return get_work_vectors (i, n, max, &(work->i_list[WORK_DX2]),     &(w->n_list[WORK_DX2]),     &(w->max_list[WORK_DX2]),     (void **(*)(long))       alloc_array1_d, ll, 2 * w->n_quad_v_x,                    data, (void ***)  &w->lists[WORK_DX2],     flags, 1);
           case WORK_DXX:
-               return get_work_matrices(i, n, max, &(work->i_list[WORK_DXX]), &(w->n_list[WORK_DXX]), &(w->max_list[WORK_DXX]), (void **(*)(long, long)) alloc_array2_d, ll, w->n_quad_v_x, w->n_quad_v_x, data, (void ****) &w->lists[WORK_DXX], flags);
+               return get_work_matrices(i, n, max, &(work->i_list[WORK_DXX]),     &(w->n_list[WORK_DXX]),     &(w->max_list[WORK_DXX]),     (void **(*)(long, long)) alloc_array2_d, ll, w->n_quad_v_x, w->n_quad_v_x,         data, (void ****) &w->lists[WORK_DXX],     flags, 1);
           case WORK_DXX2:
-               return get_work_matrices(i, n, max, &(work->i_list[WORK_DXX2]), &(w->n_list[WORK_DXX2]), &(w->max_list[WORK_DXX2]), (void **(*)(long, long)) alloc_array2_d, ll, 2 * w->n_quad_v_x, 2 * w->n_quad_v_x, data, (void ****) &w->lists[WORK_DXX2], flags);
+               return get_work_matrices(i, n, max, &(work->i_list[WORK_DXX2]),    &(w->n_list[WORK_DXX2]),    &(w->max_list[WORK_DXX2]),    (void **(*)(long, long)) alloc_array2_d, ll, 2 * w->n_quad_v_x, 2 * w->n_quad_v_x, data, (void ****) &w->lists[WORK_DXX2],    flags, 1);
           case WORK_DD:
-               return get_work_vectors(i, n, max, &(work->i_list[WORK_DD]), &(w->n_list[WORK_DD]), &(w->max_list[WORK_DD]), (void **(*)(long)) alloc_array1_d, ll, w->n_quad_v + w->n_umus_v, data, (void ***) &w->lists[WORK_DD], flags);
+               return get_work_vectors (i, n, max, &(work->i_list[WORK_DD]),      &(w->n_list[WORK_DD]),      &(w->max_list[WORK_DD]),      (void **(*)(long))       alloc_array1_d, ll, w->n_quad_v + w->n_umus_v,            data, (void ***)  &w->lists[WORK_DD],      flags, 1);
           case WORK_DS:
-               return get_work_vectors(i, n, max, &(work->i_list[WORK_DS]), &(w->n_list[WORK_DS]), &(w->max_list[WORK_DS]), (void **(*)(long)) alloc_array1_d, ll, w->n_stokes, data, (void ***) &w->lists[WORK_DS], flags);
+               return get_work_vectors (i, n, max, &(work->i_list[WORK_DS]),      &(w->n_list[WORK_DS]),      &(w->max_list[WORK_DS]),      (void **(*)(long))       alloc_array1_d, ll, w->n_stokes,                          data, (void ***)  &w->lists[WORK_DS],      flags, 1);
           case WORK_DU:
-               return get_work_vectors(i, n, max, &(work->i_list[WORK_DU]), &(w->n_list[WORK_DU]), &(w->max_list[WORK_DU]), (void **(*)(long)) alloc_array1_d, ll, w->n_umus_v, data, (void ***) &w->lists[WORK_DU], flags);
+               return get_work_vectors (i, n, max, &(work->i_list[WORK_DU]),      &(w->n_list[WORK_DU]),      &(w->max_list[WORK_DU]),      (void **(*)(long))       alloc_array1_d, ll, w->n_umus_v,                          data, (void ***)  &w->lists[WORK_DU],      flags, 1);
           case WORK_DUX:
-               return get_work_matrices(i, n, max, &(work->i_list[WORK_DUX]), &(w->n_list[WORK_DUX]), &(w->max_list[WORK_DUX]), (void **(*)(long, long)) alloc_array2_d, ll, w->n_umus_v, w->n_quad_v_x, data, (void ****) &w->lists[WORK_DUX], flags);
+               return get_work_matrices(i, n, max, &(work->i_list[WORK_DUX]),     &(w->n_list[WORK_DUX]),     &(w->max_list[WORK_DUX]),     (void **(*)(long, long)) alloc_array2_d, ll, w->n_umus_v, w->n_quad_v_x,           data, (void ****) &w->lists[WORK_DUX],     flags, 1);
           case WORK_DDERIVS:
-               return get_work_vectors(i, n, max, &(work->i_list[WORK_DDERIVS]), &(w->n_list[WORK_DDERIVS]), &(w->max_list[WORK_DDERIVS]), (void **(*)(long)) alloc_array1_d, ll, w->n_derivs, data, (void ***) &w->lists[WORK_DDERIVS], flags);
+               return get_work_vectors (i, n, max, &(work->i_list[WORK_DDERIVS]), &(w->n_list[WORK_DDERIVS]), &(w->max_list[WORK_DDERIVS]), (void **(*)(long))       alloc_array1_d, ll, w->n_derivs,                          data, (void ***)  &w->lists[WORK_DDERIVS], flags, 1);
           case WORK_DLAYERS:
-               return get_work_vectors(i, n, max, &(work->i_list[WORK_DLAYERS]), &(w->n_list[WORK_DLAYERS]), &(w->max_list[WORK_DLAYERS]), (void **(*)(long)) alloc_array1_d, ll, w->n_layers, data, (void ***) &w->lists[WORK_DLAYERS], flags);
+               return get_work_vectors (i, n, max, &(work->i_list[WORK_DLAYERS]), &(w->n_list[WORK_DLAYERS]), &(w->max_list[WORK_DLAYERS]), (void **(*)(long))       alloc_array1_d, ll, w->n_layers,                          data, (void ***)  &w->lists[WORK_DLAYERS], flags, 1);
+          case WORK_DBOTH:
+               return get_work_matrices(i, n, max, &(work->i_list[WORK_DBOTH]),   &(w->n_list[WORK_DBOTH]),   &(w->max_list[WORK_DBOTH]),   (void **(*)(long, long)) alloc_array2_d, ll, w->n_layers, w->n_derivs,             data, (void ****) &w->lists[WORK_DBOTH],   flags, 1);
           case WORK_ZX:
-               return get_work_vectors(i, n, max, &(work->i_list[WORK_ZX]), &(w->n_list[WORK_ZX]), &(w->max_list[WORK_ZX]), (void **(*)(long)) alloc_array1_dc, ll, w->n_quad_v_x, data, (void ***) &w->lists[WORK_ZX], flags);
+               return get_work_vectors (i, n, max, &(work->i_list[WORK_ZX]),      &(w->n_list[WORK_ZX]),      &(w->max_list[WORK_ZX]),      (void **(*)(long))       alloc_array1_dc, ll, w->n_quad_v_x,                       data, (void ***)  &w->lists[WORK_ZX],      flags, 2);
           case WORK_ZXX:
-               return get_work_matrices(i, n, max, &(work->i_list[WORK_ZXX]), &(w->n_list[WORK_ZXX]), &(w->max_list[WORK_ZXX]), (void **(*)(long, long)) alloc_array2_dc, ll, w->n_quad_v_x, w->n_quad_v_x, data, (void ****) &w->lists[WORK_ZXX], flags);
+               return get_work_matrices(i, n, max, &(work->i_list[WORK_ZXX]),     &(w->n_list[WORK_ZXX]),     &(w->max_list[WORK_ZXX]),     (void **(*)(long, long)) alloc_array2_dc, ll, w->n_quad_v_x, w->n_quad_v_x,        data, (void ****) &w->lists[WORK_ZXX],     flags, 2);
           case WORK_ZU:
-               return get_work_vectors(i, n, max, &(work->i_list[WORK_ZU]), &(w->n_list[WORK_ZU]), &(w->max_list[WORK_ZU]), (void **(*)(long)) alloc_array1_dc, ll, w->n_umus_v, data, (void ***) &w->lists[WORK_ZU], flags);
+               return get_work_vectors (i, n, max, &(work->i_list[WORK_ZU]),      &(w->n_list[WORK_ZU]),      &(w->max_list[WORK_ZU]),      (void **(*)(long))       alloc_array1_dc, ll, w->n_umus_v,                         data, (void ***)  &w->lists[WORK_ZU],      flags, 2);
           case WORK_ZUX:
-               return get_work_matrices(i, n, max, &(work->i_list[WORK_ZUX]), &(w->n_list[WORK_ZUX]), &(w->max_list[WORK_ZUX]), (void **(*)(long, long)) alloc_array2_dc, ll, w->n_umus_v, w->n_quad_v_x, data, (void ****) &w->lists[WORK_ZUX], flags);
+               return get_work_matrices(i, n, max, &(work->i_list[WORK_ZUX]),     &(w->n_list[WORK_ZUX]),     &(w->max_list[WORK_ZUX]),     (void **(*)(long, long)) alloc_array2_dc, ll, w->n_umus_v, w->n_quad_v_x,          data, (void ****) &w->lists[WORK_ZUX],     flags, 2);
           default:
 #ifdef DEBUG
-               eprintf("ERROR: invalid work single type\n");
+               fprintf(stderr, "ERROR: invalid work type\n");
                exit(1);
 #endif
                break;
@@ -824,11 +1191,87 @@ void *work_get2(work_data *work, enum work_type type,
      return NULL;
 }
 
+#else
 
+void *work_get2(work_data *work, enum work_type type,
+                enum work_v_type v_type, uchar *flags) {
+
+     int m;
+
+     work_shared *w;
+
+     w = work->w;
+
+     switch(v_type) {
+          case WORK_DERIVS_V:
+               m = w->n_derivs;
+               break;
+          case WORK_LAYERS_V:
+               m = w->n_layers;
+               break;
+          default:
+#ifdef DEBUG
+               fprintf(stderr, "ERROR: invalid work v type\n");
+               exit(1);
+#endif
+               break;
+     }
+
+     switch(type) {
+          case WORK_IX:
+               return get_work_i2_m_flags(work, m, w->n_quad_v_x, flags);
+          case WORK_IX2:
+               return get_work_i2_m_flags(work, m, w->n_quad_v_x * 2, flags);
+          case WORK_DQQ:
+               return get_work_d3_m_flags(work, m, w->n_quad_v, w->n_quad_v, flags);
+          case WORK_DX:
+               return get_work_d2_m_flags(work, m, w->n_quad_v_x, flags);
+          case WORK_DX2:
+               return get_work_d2_m_flags(work, m, w->n_quad_v_x * 2, flags);
+          case WORK_DXX:
+               return get_work_d3_m_flags(work, m, w->n_quad_v_x, w->n_quad_v_x, flags);
+          case WORK_DXX2:
+               return get_work_d3_m_flags(work, m, w->n_quad_v_x * 2, w->n_quad_v_x * 2, flags);
+          case WORK_DD:
+               return get_work_d2_m_flags(work, m, w->n_quad_v + w->n_umus_v, flags);
+          case WORK_DS:
+               return get_work_d2_m_flags(work, m, w->n_stokes, flags);
+          case WORK_DU:
+               return get_work_d2_m_flags(work, m, w->n_umus_v, flags);
+          case WORK_DUX:
+               return get_work_d3_m_flags(work, m, w->n_umus_v, w->n_quad_v_x, flags);
+          case WORK_DDERIVS:
+               return get_work_d2_m_flags(work, m, w->n_derivs, flags);
+          case WORK_DLAYERS:
+               return get_work_d2_m_flags(work, m, w->n_layers, flags);
+          case WORK_DBOTH:
+               return get_work_d3_m_flags(work, m, w->n_layers, w->n_derivs, flags);
+          case WORK_ZX:
+               return get_work_dc2_m_flags(work, m, w->n_quad_v_x, flags);
+          case WORK_ZXX:
+               return get_work_dc3_m_flags(work, m, w->n_quad_v_x, w->n_quad_v_x, flags);
+          case WORK_ZU:
+               return get_work_dc2_m_flags(work, m, w->n_umus_v, flags);
+          case WORK_ZUX:
+               return get_work_dc3_m_flags(work, m, w->n_umus_v, w->n_quad_v_x, flags);
+          default:
+#ifdef DEBUG
+               fprintf(stderr, "ERROR: invalid work type\n");
+               exit(1);
+#endif
+               break;
+     }
+
+     return NULL;
+}
+
+#endif
 
 /*******************************************************************************
  *
  ******************************************************************************/
+#ifdef LEGACY
+
 void *work_get3(work_data *work, enum work_type type,
                 enum work_v_type v_type, uchar **flags) {
 
@@ -848,7 +1291,7 @@ void *work_get3(work_data *work, enum work_type type,
      w = work->w;
 
      if (v_type != WORK_BOTH_V) {
-          eprintf("ERROR: invalid work v type\n");
+          fprintf(stderr, "ERROR: invalid work v type\n");
           exit(1);
      }
 
@@ -861,42 +1304,44 @@ void *work_get3(work_data *work, enum work_type type,
 
      switch(type) {
           case WORK_IX:
-               return get_work_vectors2(i, n, max, &(work->i_list[WORK_IX]), &(w->n_list[WORK_IX]), &(w->max_list[WORK_IX]), (void **(*)(long)) alloc_array1_i, ll1, ll2, w->n_quad_v_x, data2, (void ***) &w->lists[WORK_IX], flags);
+               return get_work_vectors2 (i, n, max, &(work->i_list[WORK_IX]),      &(w->n_list[WORK_IX]),      &(w->max_list[WORK_IX]),      (void **(*)(long))       alloc_array1_i,  ll1, ll2, w->n_quad_v_x,                        data2, (void ***)  &w->lists[WORK_IX],      flags, 0);
           case WORK_IX2:
-               return get_work_vectors2(i, n, max, &(work->i_list[WORK_IX2]), &(w->n_list[WORK_IX2]), &(w->max_list[WORK_IX2]), (void **(*)(long)) alloc_array1_i, ll1, ll2, 2 * w->n_quad_v_x, data2, (void ***) &w->lists[WORK_IX2], flags);
+               return get_work_vectors2 (i, n, max, &(work->i_list[WORK_IX2]),     &(w->n_list[WORK_IX2]),     &(w->max_list[WORK_IX2]),     (void **(*)(long))       alloc_array1_i,  ll1, ll2, 2 * w->n_quad_v_x,                    data2, (void ***)  &w->lists[WORK_IX2],     flags, 0);
           case WORK_DQQ:
-               return get_work_matrices2(i, n, max, &(work->i_list[WORK_DQQ]), &(w->n_list[WORK_DQQ]), &(w->max_list[WORK_DQQ]), (void **(*)(long, long)) alloc_array2_d, ll1, ll2, w->n_quad_v, w->n_quad_v, data2, (void ****) &w->lists[WORK_DQQ], flags);
+               return get_work_matrices2(i, n, max, &(work->i_list[WORK_DQQ]),     &(w->n_list[WORK_DQQ]),     &(w->max_list[WORK_DQQ]),     (void **(*)(long, long)) alloc_array2_d,  ll1, ll2, w->n_quad_v, w->n_quad_v,             data2, (void ****) &w->lists[WORK_DQQ],     flags, 1);
           case WORK_DX:
-               return get_work_vectors2(i, n, max, &(work->i_list[WORK_DX]), &(w->n_list[WORK_DX]), &(w->max_list[WORK_DX]), (void **(*)(long)) alloc_array1_d, ll1, ll2, w->n_quad_v_x, data2, (void ***) &w->lists[WORK_DX], flags);
+               return get_work_vectors2 (i, n, max, &(work->i_list[WORK_DX]),      &(w->n_list[WORK_DX]),      &(w->max_list[WORK_DX]),      (void **(*)(long))       alloc_array1_d,  ll1, ll2, w->n_quad_v_x,                        data2, (void ***)  &w->lists[WORK_DX],      flags, 1);
           case WORK_DX2:
-               return get_work_vectors2(i, n, max, &(work->i_list[WORK_DX2]), &(w->n_list[WORK_DX2]), &(w->max_list[WORK_DX2]), (void **(*)(long)) alloc_array1_d, ll1, ll2, 2 * w->n_quad_v_x, data2, (void ***) &w->lists[WORK_DX2], flags);
+               return get_work_vectors2 (i, n, max, &(work->i_list[WORK_DX2]),     &(w->n_list[WORK_DX2]),     &(w->max_list[WORK_DX2]),     (void **(*)(long))       alloc_array1_d,  ll1, ll2, 2 * w->n_quad_v_x,                    data2, (void ***)  &w->lists[WORK_DX2],     flags, 1);
           case WORK_DXX:
-               return get_work_matrices2(i, n, max, &(work->i_list[WORK_DXX]), &(w->n_list[WORK_DXX]), &(w->max_list[WORK_DXX]), (void **(*)(long, long)) alloc_array2_d, ll1, ll2, w->n_quad_v_x, w->n_quad_v_x, data2, (void ****) &w->lists[WORK_DXX], flags);
+               return get_work_matrices2(i, n, max, &(work->i_list[WORK_DXX]),     &(w->n_list[WORK_DXX]),     &(w->max_list[WORK_DXX]),     (void **(*)(long, long)) alloc_array2_d,  ll1, ll2, w->n_quad_v_x, w->n_quad_v_x,         data2, (void ****) &w->lists[WORK_DXX],     flags, 1);
           case WORK_DXX2:
-               return get_work_matrices2(i, n, max, &(work->i_list[WORK_DXX2]), &(w->n_list[WORK_DXX2]), &(w->max_list[WORK_DXX2]), (void **(*)(long, long)) alloc_array2_d, ll1, ll2, 2 * w->n_quad_v_x, 2 * w->n_quad_v_x, data2, (void ****) &w->lists[WORK_DXX2], flags);
+               return get_work_matrices2(i, n, max, &(work->i_list[WORK_DXX2]),    &(w->n_list[WORK_DXX2]),    &(w->max_list[WORK_DXX2]),    (void **(*)(long, long)) alloc_array2_d,  ll1, ll2, 2 * w->n_quad_v_x, 2 * w->n_quad_v_x, data2, (void ****) &w->lists[WORK_DXX2],    flags, 1);
           case WORK_DD:
-               return get_work_vectors2(i, n, max, &(work->i_list[WORK_DD]), &(w->n_list[WORK_DD]), &(w->max_list[WORK_DD]), (void **(*)(long)) alloc_array1_d, ll1, ll2, w->n_quad_v + w->n_umus_v, data2, (void ***) &w->lists[WORK_DD], flags);
+               return get_work_vectors2 (i, n, max, &(work->i_list[WORK_DD]),      &(w->n_list[WORK_DD]),      &(w->max_list[WORK_DD]),      (void **(*)(long))       alloc_array1_d,  ll1, ll2, w->n_quad_v + w->n_umus_v,            data2, (void ***)  &w->lists[WORK_DD],      flags, 1);
           case WORK_DS:
-               return get_work_vectors2(i, n, max, &(work->i_list[WORK_DS]), &(w->n_list[WORK_DS]), &(w->max_list[WORK_DS]), (void **(*)(long)) alloc_array1_d, ll1, ll2, w->n_stokes, data2, (void ***) &w->lists[WORK_DS], flags);
+               return get_work_vectors2 (i, n, max, &(work->i_list[WORK_DS]),      &(w->n_list[WORK_DS]),      &(w->max_list[WORK_DS]),      (void **(*)(long))       alloc_array1_d,  ll1, ll2, w->n_stokes,                          data2, (void ***)  &w->lists[WORK_DS],      flags, 1);
           case WORK_DU:
-               return get_work_vectors2(i, n, max, &(work->i_list[WORK_DU]), &(w->n_list[WORK_DU]), &(w->max_list[WORK_DU]), (void **(*)(long)) alloc_array1_d, ll1, ll2, w->n_umus_v, data2, (void ***) &w->lists[WORK_DU], flags);
+               return get_work_vectors2 (i, n, max, &(work->i_list[WORK_DU]),      &(w->n_list[WORK_DU]),      &(w->max_list[WORK_DU]),      (void **(*)(long))       alloc_array1_d,  ll1, ll2, w->n_umus_v,                          data2, (void ***)  &w->lists[WORK_DU],      flags, 1);
           case WORK_DUX:
-               return get_work_matrices2(i, n, max, &(work->i_list[WORK_DUX]), &(w->n_list[WORK_DUX]), &(w->max_list[WORK_DUX]), (void **(*)(long, long)) alloc_array2_d, ll1, ll2, w->n_umus_v, w->n_quad_v_x, data2, (void ****) &w->lists[WORK_DUX], flags);
+               return get_work_matrices2(i, n, max, &(work->i_list[WORK_DUX]),     &(w->n_list[WORK_DUX]),     &(w->max_list[WORK_DUX]),     (void **(*)(long, long)) alloc_array2_d,  ll1, ll2, w->n_umus_v, w->n_quad_v_x,           data2, (void ****) &w->lists[WORK_DUX],     flags, 1);
           case WORK_DDERIVS:
-               return get_work_vectors2(i, n, max, &(work->i_list[WORK_DDERIVS]), &(w->n_list[WORK_DDERIVS]), &(w->max_list[WORK_DDERIVS]), (void **(*)(long)) alloc_array1_d, ll1, ll2, w->n_derivs, data2, (void ***) &w->lists[WORK_DDERIVS], flags);
+               return get_work_vectors2 (i, n, max, &(work->i_list[WORK_DDERIVS]), &(w->n_list[WORK_DDERIVS]), &(w->max_list[WORK_DDERIVS]), (void **(*)(long))       alloc_array1_d,  ll1, ll2, w->n_derivs,                          data2, (void ***)  &w->lists[WORK_DDERIVS], flags, 1);
           case WORK_DLAYERS:
-               return get_work_vectors2(i, n, max, &(work->i_list[WORK_DLAYERS]), &(w->n_list[WORK_DLAYERS]), &(w->max_list[WORK_DLAYERS]), (void **(*)(long)) alloc_array1_d, ll1, ll2, w->n_layers, data2, (void ***) &w->lists[WORK_DLAYERS], flags);
+               return get_work_vectors2 (i, n, max, &(work->i_list[WORK_DLAYERS]), &(w->n_list[WORK_DLAYERS]), &(w->max_list[WORK_DLAYERS]), (void **(*)(long))       alloc_array1_d,  ll1, ll2, w->n_layers,                          data2, (void ***)  &w->lists[WORK_DLAYERS], flags, 1);
+          case WORK_DBOTH:
+               return get_work_matrices2(i, n, max, &(work->i_list[WORK_DBOTH]),   &(w->n_list[WORK_DBOTH]),   &(w->max_list[WORK_DBOTH]),   (void **(*)(long, long)) alloc_array2_d,  ll1, ll2, w->n_layers, w->n_derivs,             data2, (void ****) &w->lists[WORK_DBOTH],   flags, 1);
           case WORK_ZX:
-               return get_work_vectors2(i, n, max, &(work->i_list[WORK_ZX]), &(w->n_list[WORK_ZX]), &(w->max_list[WORK_ZX]), (void **(*)(long)) alloc_array1_dc, ll1, ll2, w->n_quad_v_x, data2, (void ***) &w->lists[WORK_ZX], flags);
+               return get_work_vectors2 (i, n, max, &(work->i_list[WORK_ZX]),      &(w->n_list[WORK_ZX]),      &(w->max_list[WORK_ZX]),      (void **(*)(long))       alloc_array1_dc, ll1, ll2, w->n_quad_v_x,                        data2, (void ***)  &w->lists[WORK_ZX],      flags, 2);
           case WORK_ZXX:
-               return get_work_matrices2(i, n, max, &(work->i_list[WORK_ZXX]), &(w->n_list[WORK_ZXX]), &(w->max_list[WORK_ZXX]), (void **(*)(long, long)) alloc_array2_dc, ll1, ll2, w->n_quad_v_x, w->n_quad_v_x, data2, (void ****) &w->lists[WORK_ZXX], flags);
+               return get_work_matrices2(i, n, max, &(work->i_list[WORK_ZXX]),     &(w->n_list[WORK_ZXX]),     &(w->max_list[WORK_ZXX]),     (void **(*)(long, long)) alloc_array2_dc, ll1, ll2, w->n_quad_v_x, w->n_quad_v_x,         data2, (void ****) &w->lists[WORK_ZXX],     flags, 2);
           case WORK_ZU:
-               return get_work_vectors2(i, n, max, &(work->i_list[WORK_ZU]), &(w->n_list[WORK_ZU]), &(w->max_list[WORK_ZU]), (void **(*)(long)) alloc_array1_dc, ll1, ll2, w->n_umus_v, data2, (void ***) &w->lists[WORK_ZU], flags);
+               return get_work_vectors2 (i, n, max, &(work->i_list[WORK_ZU]),      &(w->n_list[WORK_ZU]),      &(w->max_list[WORK_ZU]),      (void **(*)(long))       alloc_array1_dc, ll1, ll2, w->n_umus_v,                          data2, (void ***)  &w->lists[WORK_ZU],      flags, 2);
           case WORK_ZUX:
-               return get_work_matrices2(i, n, max, &(work->i_list[WORK_ZUX]), &(w->n_list[WORK_ZUX]), &(w->max_list[WORK_ZUX]), (void **(*)(long, long)) alloc_array2_dc, ll1, ll2, w->n_umus_v, w->n_quad_v_x, data2, (void ****) &w->lists[WORK_ZUX], flags);
+               return get_work_matrices2(i, n, max, &(work->i_list[WORK_ZUX]),     &(w->n_list[WORK_ZUX]),     &(w->max_list[WORK_ZUX]),     (void **(*)(long, long)) alloc_array2_dc, ll1, ll2, w->n_umus_v, w->n_quad_v_x,           data2, (void ****) &w->lists[WORK_ZUX],     flags, 2);
           default:
 #ifdef DEBUG
-               eprintf("ERROR: invalid work single type\n");
+               fprintf(stderr, "ERROR: invalid work type\n");
                exit(1);
 #endif
                break;
@@ -904,3 +1349,73 @@ void *work_get3(work_data *work, enum work_type type,
 
      return NULL;
 }
+
+#else
+
+void *work_get3(work_data *work, enum work_type type,
+                enum work_v_type v_type, uchar **flags) {
+
+     int m;
+     int n;
+
+     work_shared *w;
+
+     w = work->w;
+
+     if (v_type != WORK_BOTH_V) {
+          fprintf(stderr, "ERROR: invalid work v type\n");
+          exit(1);
+     }
+
+     m = w->n_layers;
+     n = w->n_derivs;
+
+     switch(type) {
+          case WORK_IX:
+               return get_work_d3_m_n_flags(work, m, n, w->n_quad_v_x, flags);
+          case WORK_IX2:
+               return get_work_d3_m_n_flags(work, m, n, w->n_quad_v_x * 2, flags);
+          case WORK_DQQ:
+               return get_work_d4_m_n_flags(work, m, n, w->n_quad_v, w->n_quad_v, flags);
+          case WORK_DX:
+               return get_work_d3_m_n_flags(work, m, n, w->n_quad_v_x, flags);
+          case WORK_DX2:
+               return get_work_d3_m_n_flags(work, m, n, w->n_quad_v_x * 2, flags);
+          case WORK_DXX:
+               return get_work_d4_m_n_flags(work, m, n, w->n_quad_v_x, w->n_quad_v_x, flags);
+          case WORK_DXX2:
+               return get_work_d4_m_n_flags(work, m, n, w->n_quad_v_x * 2, w->n_quad_v_x * 2, flags);
+          case WORK_DD:
+               return get_work_d3_m_n_flags(work, m, n, w->n_quad_v + w->n_umus_v, flags);
+          case WORK_DS:
+               return get_work_d3_m_n_flags(work, m, n, w->n_stokes, flags);
+          case WORK_DU:
+               return get_work_d3_m_n_flags(work, m, n, w->n_umus_v, flags);
+          case WORK_DUX:
+               return get_work_d4_m_n_flags(work, m, n, w->n_umus_v, w->n_quad_v_x, flags);
+          case WORK_DDERIVS:
+               return get_work_d4_m_n_flags(work, m, n, w->n_umus_v, w->n_derivs, flags);
+          case WORK_DLAYERS:
+               return get_work_d4_m_n_flags(work, m, n, w->n_umus_v, w->n_layers, flags);
+          case WORK_DBOTH:
+               return get_work_d4_m_n_flags(work, m, n, w->n_layers, w->n_derivs, flags);
+          case WORK_ZX:
+               return get_work_dc3_m_n_flags(work, m, n, w->n_quad_v_x, flags);
+          case WORK_ZXX:
+               return get_work_dc4_m_n_flags(work, m, n, w->n_quad_v_x, w->n_quad_v_x, flags);
+          case WORK_ZU:
+               return get_work_dc3_m_n_flags(work, m, n, w->n_umus_v, flags);
+          case WORK_ZUX:
+               return get_work_dc4_m_n_flags(work, m, n, w->n_umus_v, w->n_quad_v_x, flags);
+          default:
+#ifdef DEBUG
+               fprintf(stderr, "ERROR: invalid work type\n");
+               exit(1);
+#endif
+               break;
+     }
+
+     return NULL;
+}
+
+#endif

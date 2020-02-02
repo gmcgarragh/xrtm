@@ -1,0 +1,203 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{Global $\mathbf{R}$ and $\mathbf{T}$ from Eigenvalues/matrix}
+\label{sec:global_r_and_t_from_eigenvalues_matrix}
+
+
+\subsubsection{Forward}
+\label{sec:global_r_and_t_from_eigenvalues_matrix-forward}
+
+\begin{equation}
+\mathbf{\Lambda} = \mathrm{diag}(e^{-\nu_{i}\opticalthickness})
+\label{eq:global_r_and_t_from_eigenvalues_matrix-forward-Lambda}
+\end{equation}
+
+\begin{equation}
+\mathbf{a} = \mathbf{X}_{+}\mathbf{\Lambda}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-forward-a}
+\end{equation}
+
+\begin{equation}
+\mathbf{b} = \mathbf{a}\mathbf{X}^{-1}_{-}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-forward-b}
+\end{equation}
+
+\begin{equation}
+\mathbf{c} = \mathbf{X}_{-} - \mathbf{b}\mathbf{a}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-forward-c}
+\end{equation}
+
+\begin{equation}
+\mathbf{d} = \mathbf{X}_{+}\mathbf{c}^{-1}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-forward-d}
+\end{equation}
+
+\begin{equation}
+\mathbf{e} = \mathbf{X}_{-}\mathbf{\Lambda}\mathbf{c}^{-1}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-forward-e}
+\end{equation}
+
+\begin{equation}
+\mathbf{R} = \mathbf{e}\mathbf{b} - \mathbf{d}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-forward-R}
+\end{equation}
+
+\begin{equation}
+\mathbf{T} = \mathbf{e} - \mathbf{d}\mathbf{b}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-forward-T}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:global_r_and_t_from_eigenvalues_matrix-tangent_linear}
+
+\begin{equation}
+\mathbf{\Lambda} = \mathrm{diag}(e^{-\nu_{i}\opticalthickness})
+\label{eq:global_r_and_t_from_eigenvalues_matrix-tangent_linear-Lambda}
+\end{equation}
+
+\begin{equation}
+\mathbf{f} = \mathcal{L}(\mathbf{a}) = \mathcal{L}(\mathbf{X}_{+})\mathbf{\Lambda} + \mathbf{X}_{+}\mathcal{L}(\mathbf{\Lambda})
+\label{eq:global_r_and_t_from_eigenvalues_matrix-tangent_linear-f}
+\end{equation}
+
+\begin{equation}
+\mathbf{g} = \mathcal{L}(\mathbf{b}) = \left[\mathbf{f} - \mathbf{b}\mathcal{L}(\mathbf{X}_{-})\right]\mathbf{X}^{-1}_{-}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-tangent_linear-g}
+\end{equation}
+
+\begin{equation}
+\mathbf{h} = \mathcal{L}(\mathbf{c}) = \mathcal{L}(\mathbf{X}_{-}) - \mathbf{g}\mathbf{a} - \mathbf{b}\mathbf{f}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-tangent_linear-h}
+\end{equation}
+
+\begin{equation}
+\mathbf{p} = \mathcal{L}(\mathbf{d}) = \left[\mathcal{L}(\mathbf{X}_{+}) - \mathbf{d}\mathbf{h}\right]\mathbf{c}^{-1}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-tangent_linear-p}
+\end{equation}
+
+\begin{equation}
+\mathbf{q} = \mathcal{L}(\mathbf{e}) = \left[\mathcal{L}(\mathbf{X}_{-})\mathbf{\Lambda} + \mathbf{X}_{-}\mathcal{L}(\mathbf{\Lambda}) - \mathbf{e}\mathbf{h}\right]\mathbf{c}^{-1}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-tangent_linear-q}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{R}) = \mathbf{q}\mathbf{b} + \mathbf{e}\mathbf{g} - \mathbf{p}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-tangent_linear-U}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{T}) = \mathbf{q} - \mathbf{p}\mathbf{b} - \mathbf{d}\mathbf{g}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-tangent_linear-W}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear}
+
+\begin{equation}
+\mathcal{A}(\mathbf{q}) = \mathcal{A}(\mathbf{T})
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-q_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{p}) = -\mathcal{A}(\mathbf{T})\mathbf{b}^{T}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-p_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{g}) = -\mathbf{d}^{T}\mathcal{A}(\mathbf{T})
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-g_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{q}) = \mathcal{A}(\mathbf{q}) + \mathcal{A}(\mathbf{R})\mathbf{b}^{T}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-q_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{g}) = \mathcal{A}(\mathbf{g}) + \mathbf{e}^{T}\mathcal{A}(\mathbf{R})
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-g_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{p}) = \mathcal{A}(\mathbf{p}) - \mathcal{A}(\mathbf{R})
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-p_a2}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathcal{A}(\mathbf{q})\mathbf{c}^{-T}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-t_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{X}_{-}) = \mathbf{t}\mathbf{\Lambda}^{T}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-X_m_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{\Lambda}) = \mathbf{X}^{T}_{-}\mathbf{t}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-lambda_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathcal{A}(\mathbf{p})\mathbf{c}^{-T}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-t_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{X}_{+}) = \mathbf{t}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-X_p_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{h}) = \mathcal{A}(\mathbf{h}) - \mathbf{d}^{T}\mathbf{t}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-h_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{X}_{-}) = \mathcal{A}(\mathbf{X}_{-}) + \mathcal{A}(\mathbf{h})
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-X_m_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{g}) = \mathcal{A}(\mathbf{g}) - \mathcal{A}(\mathbf{h}) \mathbf{a}^{T}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-g_a3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{f}) = -\mathbf{b}^{T} \mathcal{A}(\mathbf{h})
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-f_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathcal{A}(\mathbf{g})\mathbf{X}^{-T}_{-}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-t_a3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{f}) = \mathcal{A}(\mathbf{f}) + \mathbf{t}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-f_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{X}_{-}) = \mathcal{A}(\mathbf{X}_{-}) - \mathbf{b}^{T}\mathbf{t}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-X_m_a3}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{X}_{+}) = \mathcal{A}(\mathbf{X}_{+}) + \mathcal{A}(\mathbf{f})\mathbf{\Lambda}^{T}
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-X_p_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{\Lambda}) = \mathcal{A}(\mathbf{\Lambda}) + \mathbf{X}^{T}_{+}\mathcal{A}(\mathbf{f})
+\label{eq:global_r_and_t_from_eigenvalues_matrix-adjoint_of_tangent_linear-lambda_a2}
+\end{equation}

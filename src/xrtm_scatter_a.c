@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -21,12 +21,12 @@
 /*******************************************************************************
  *
  ******************************************************************************/
-void phase_func_a(int n_coef, double *p, double *chi_a, double P_a) {
+void phase_func_a(int n_coef, double *p, double *coefs_a, double P_a) {
 
      int i;
 
      for (i = 0; i < n_coef; ++i)
-          chi_a[i] += p[i] * P_a;
+          coefs_a[i] += p[i] * P_a;
 }
 
 
@@ -34,7 +34,7 @@ void phase_func_a(int n_coef, double *p, double *chi_a, double P_a) {
 /*******************************************************************************
  *
  ******************************************************************************/
-void build_phase_vecs_scalar_a(int i_four, int n_coef, int n_mus, double **Y1, double *Y2, int lda, double *chi_a, double *P_pp_a, double *P_mp_a) {
+void build_phase_vecs_scalar_a(int i_four, int n_coef, int n_mus, double **Y1, double *Y2, int lda, double *coefs_a, double *P_pp_a, double *P_mp_a) {
 
      int i;
      int k;
@@ -56,7 +56,7 @@ void build_phase_vecs_scalar_a(int i_four, int n_coef, int n_mus, double **Y1, d
           for (i = 0; i < n_mus; ++i) {
                a += P_pp_a[i] * Y1[i][k];
           }
-          chi_a[k] += a * Y2[k];
+          coefs_a[k] += a * Y2[k];
      }
 
      for (k = i_four + 1; k < n_coef; k += 2) {
@@ -64,7 +64,7 @@ void build_phase_vecs_scalar_a(int i_four, int n_coef, int n_mus, double **Y1, d
           for (i = 0; i < n_mus; ++i) {
                a += P_mp_a[i] * Y1[i][k];
           }
-          chi_a[k] += a * Y2[k];
+          coefs_a[k] += a * Y2[k];
      }
 
      for (i = 0; i < n_mus; ++i) {
@@ -78,7 +78,7 @@ void build_phase_vecs_scalar_a(int i_four, int n_coef, int n_mus, double **Y1, d
 /*******************************************************************************
  *
  ******************************************************************************/
-void build_phase_mats_scalar_a(int i_four, int n_coef, int n_mus1, int n_mus2, double **Y1, double **Y2, int lda, double *chi_a, double **P_pp_a, double **P_mp_a) {
+void build_phase_mats_scalar_a(int i_four, int n_coef, int n_mus1, int n_mus2, double **Y1, double **Y2, int lda, double *coefs_a, double **P_pp_a, double **P_mp_a) {
 
      int i;
      int j;
@@ -104,7 +104,7 @@ void build_phase_mats_scalar_a(int i_four, int n_coef, int n_mus1, int n_mus2, d
                for (j = 0; j < n_mus2; ++j) {
                     a += P_pp_a[i][j] * Y2[j][k];
                }
-               chi_a[k] += a * Y1[i][k];
+               coefs_a[k] += a * Y1[i][k];
           }
      }
 
@@ -114,7 +114,7 @@ void build_phase_mats_scalar_a(int i_four, int n_coef, int n_mus1, int n_mus2, d
                for (j = 0; j < n_mus2; ++j) {
                     a += P_mp_a[i][j] * Y2[j][k];
                }
-               chi_a[k] += a * Y1[i][k];
+               coefs_a[k] += a * Y1[i][k];
           }
      }
 
@@ -131,7 +131,7 @@ void build_phase_mats_scalar_a(int i_four, int n_coef, int n_mus1, int n_mus2, d
 /*******************************************************************************
  *
  ******************************************************************************/
-void build_scat_vector_gc_a(int n_coef, int n_stokes, double **gsf, double **chi_a, double *F_a) {
+void build_scat_vector_gc_a(int n_coef, int n_stokes, double **gsf, double **coefs_a, double *F_a) {
 
      int i;
      int ii;
@@ -139,12 +139,12 @@ void build_scat_vector_gc_a(int n_coef, int n_stokes, double **gsf, double **chi
      ii = 0;
 
      for (i = 0; i < n_coef; ++i)
-          chi_a[0][i] += F_a[ii] * gsf[0][i];
+          coefs_a[0][i] += F_a[ii] * gsf[0][i];
      ii++;
 
      if (n_stokes > 1) {
           for (i = 2; i < n_coef; ++i)
-               chi_a[4][i] += F_a[ii] * gsf[1][i];
+               coefs_a[4][i] += F_a[ii] * gsf[1][i];
           ii++;
      }
 }

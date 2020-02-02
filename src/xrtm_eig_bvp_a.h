@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -60,14 +60,14 @@ typedef struct {
      double **nu;
      double ***X_p;
      double ***X_m;
-     double **F_p;
-     double **F_m;
-     double **F_p2;
-     double **F_m2;
-     double **F0_p;
-     double **F0_m;
-     double **F1_p;
-     double **F1_m;
+     double **Fs_p;
+     double **Fs_m;
+     double **Fs_p2;
+     double **Fs_m2;
+     double **Ft0_p;
+     double **Ft0_m;
+     double **Ft1_p;
+     double **Ft1_m;
      double *B;
      dcomplex **nu_c;
      dcomplex***X_p_c;

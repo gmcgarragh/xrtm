@@ -38,7 +38,7 @@
 XRTM (X Radiative Transfer Model) is a plane-parallel multi-layer scalar/vector radiative transfer model with support for absorption, emission, and multiple scattering.   In addition to the radiances or Stokes vector elements, XRTM can analytically generate derivatives of these quantities with respect to model inputs either my forward propagation (tangent linear) or backward propagation (adjoint of the tangent linear).  XRTM implements several different radiative transfer solvers and includes several features some of which include Delta-M scaling [<a href="refs.html#wiscombe_w_j_1977a" id="CITEwiscombe_w_j_1977a">Wiscombe, 1977</a>], the Nakajima-Tanaka TMS correction [<a href="refs.html#nakajima_t_1988" id="CITEnakajima_t_1988">Nakajima and Tanaka, 1988</a>], a pseudo-spherical approximation for solar and line-of-sight beams [<a href="refs.html#dahlback_arne_1991" id="CITEdahlback_arne_1991">Dahlback and Stamnes, 1991</a>], a generalized BRDF formulation [<a href="refs.html#spurr_r_j_d_2004" id="CITEspurr_r_j_d_2004">Spurr, 2004</a>], and support to generate results for any number of view angles and/or levels simultaneously.
 
 <div class="p"><!----></div>
-XRTM's core library is coded in C with a well defined application programming interface (API) and is thread safe so that multiple instances can be called safely in shared memory multi-processor environments.  Interfaces are also provided for C++, Fortran 77, and Fortran 90 and as an alternative alternatively XRTM can be executed independently as a stand alone program.  Finally, example programs that call XRTM are provided for each language interface.
+XRTM's core library is coded in C with a well defined application programming interface (API) and is thread safe so that multiple instances can be called safely in shared memory multi-processor environments.  Interfaces are also provided for C++, Fortran 77, and Fortran 90 and, alternatively, XRTM can be executed independently as a stand alone program.  Finally, example programs that call XRTM are provided for each language interface.
 
 <div class="p"><!----></div>
 XRTM includes an extensive test suite that attempts to test the model over the entire range of solvers, features and possible imputes.
@@ -52,7 +52,7 @@ For up to date information regarding XRTM, to download the source code distribut
 </dl>
 
 <div class="p"><!----></div>
-For questions or comments or to report a bug email Greg at <a href="mailto:gregm@atmos.colostate.edu">gregm@atmos.colostate.edu</a>.  Bug reports are greatly appreciated!  If you would like to report a bug please include sample code that reproduces the bug, along with the inputs and expected outputs.
+For questions or comments or to report a bug email Greg at <a href="mailto:greg.mcgarragh@colostate.edu">greg.mcgarragh@colostate.edu</a>.  Bug reports are greatly appreciated!  If you would like to report a bug please include sample code that reproduces the bug, along with the inputs and expected outputs.
 
 <div class="p"><!----></div>
 
@@ -72,12 +72,10 @@ XRTM is licensed under the <a href="http://www.gnu.org/licenses/gpl.html">GNU Ge
 </a>
 
 <div class="p"><!----></div>
-Source code such as interface definitions and examples are typeset in <tt>typewriter font</tt>.  Source code identifiers such as variable names and function names are also typeset in bold while function argument types, modifiers, and names, are also typeset in italics.  For example a function name will be typeset in bold typewriter font as <tt><tt><b>func_name</b></tt></tt>, argument types in italic typewriter font as <tt><tt><i>int</i></tt></tt>, and argument names in bold italic typewriter font as <tt><tt><i><b>arg_name</b></i></tt></tt>.
+Source code such as interface definitions and examples are typeset in <tt>typewriter font</tt>.  Source code identifiers such as variable names and function names are also typeset in bold, while function argument types, modifiers, and names, are also typeset in italics.  For example, a function name will be typeset in bold typewriter font as <tt><tt><b>func_name</b></tt></tt>, argument types in italic typewriter font as <tt><tt><i>int</i></tt></tt>, and argument names in bold italic typewriter font as <tt><tt><i><b>arg_name</b></i></tt></tt>.
 
 <div class="p"><!----></div>
 Internet links are typeset in the standard color blue.  Links that are local to the manual are typeset in a dark red except for citations that link to their corresponding bibliography entries which are in a dark green.
-
-<div class="p"><!----></div>
 
 <hr /><table width="100%"><tr><td>
  <a href="index.html">HEAD</a></td><td align="right">

@@ -1,0 +1,161 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{Thermal source}
+\label{sec:thermal_source}
+
+
+\subsection{Local thermal source}
+\label{sec:thermal_source_local_thermal_source}
+
+
+\subsubsection{Forward}
+\label{sec:thermal_source_local_thermal_source-forward}
+
+\begin{equation}
+\mathbf{a} = \mathbf{A}^{-1}
+\left[
+\begin{array}{c}
++1 / \mu_{0} \\
+\vdots \\
++1 / \mu_{N} \\
+-1 / \mu_{0} \\
+\vdots \\
+-1 / \mu_{N}
+\end{array}
+\right]
+\label{eq:thermal_source_local_thermal_source-forward-a}
+\end{equation}
+
+\begin{equation}
+\mathbf{b} = (1 - \omega)\mathbf{a}
+\label{eq:thermal_source_local_thermal_source-forward-b}
+\end{equation}
+
+\begin{equation}
+\mathbf{c} = \mathbf{A}^{-1}\mathbf{b}
+\label{eq:thermal_source_local_thermal_source-forward-c}
+\end{equation}
+
+\begin{equation}
+a = (b_{0} - b_{1}) / x
+\label{eq:thermal_source_local_thermal_source-forward-a}
+\end{equation}
+
+\begin{equation}
+\mathbf{F0}^{+} = b_{0} \mathbf{b}^{+} - a \mathbf{c}^{+}
+\label{eq:thermal_source_local_thermal_source-forward-f0_p}
+\end{equation}
+
+\begin{equation}
+\mathbf{F0}^{-} = b_{0} \mathbf{b}^{-} - a \mathbf{c}^{-}
+\label{eq:thermal_source_local_thermal_source-forward-f0_m}
+\end{equation}
+
+\begin{equation}
+\mathbf{F1}^{+} = b_{1} \mathbf{b}^{+} - a \mathbf{c}^{+}
+\label{eq:thermal_source_local_thermal_source-forward-f1_p}
+\end{equation}
+
+\begin{equation}
+\mathbf{F1}^{-} = b_{1} \mathbf{b}^{-} - a \mathbf{c}^{-}
+\label{eq:thermal_source_local_thermal_source-forward-f1_m}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:thermal_source_local_thermal_source-tangent_linear}
+
+\begin{equation}
+\mathcal{L}(\mathbf{a}) = -\mathbf{A}^{-1}\mathcal{L}(\mathbf{A})\mathbf{a}
+\label{eq:thermal_source_local_thermal_source-tangent_linear-a_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{b}) = -\mathcal{L}(\omega)\mathbf{a} + (1 - \omega) \mathcal{L}(\mathbf{a})
+\label{eq:thermal_source_local_thermal_source-tangent_linear-b_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{c}) = \mathbf{A}^{-1}\left[-\mathcal{L}(\mathbf{A})\mathbf{c} + \mathcal{L}(\mathbf{b})\right]
+\label{eq:thermal_source_local_thermal_source-tangent_linear-c_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(a) = \frac{\left[\mathcal{L}(b_{0}) - \mathcal{L}(b_{1}) - a \mathcal{L}(x)\right]}{x}
+\label{eq:thermal_source_local_thermal_source-tangent_linear-a_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{F0}^{+}) = \mathcal{L}(b_{0}) \mathbf{b}^{+} + b_{0} \mathcal{L}(\mathbf{b}^{+}) - \mathcal{L}(a) \mathbf{c}^{+} - a \mathcal{L}(\mathbf{c}^{+})
+\label{eq:thermal_source_local_thermal_source-tangent_linear-f0_p_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{F0}^{-}) = \mathcal{L}(b_{0}) \mathbf{b}^{-} + b_{0} \mathcal{L}(\mathbf{b}^{-}) - \mathcal{L}(a) \mathbf{c}^{-} - a \mathcal{L}(\mathbf{c}^{-})
+\label{eq:thermal_source_local_thermal_source-tangent_linear-f0_m_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{F1}^{+}) = \mathcal{L}(b_{1}) \mathbf{b}^{+} + b_{1} \mathcal{L}(\mathbf{b}^{+}) - \mathcal{L}(a) \mathbf{c}^{+} - a \mathcal{L}(\mathbf{c}^{+})
+\label{eq:thermal_source_local_thermal_source-tangent_linear-f1_p_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{F1}^{-}) = \mathcal{L}(b_{1}) \mathbf{b}^{-} + b_{1} \mathcal{L}(\mathbf{b}^{-}) - \mathcal{L}(a) \mathbf{c}^{-} - a \mathcal{L}(\mathbf{c}^{-})
+\label{eq:thermal_source_local_thermal_source-tangent_linear-f1_m_l}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:thermal_source_local_thermal_source-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Global thermal source}
+\label{sec:thermal_source_global_thermal_source}
+
+\subsubsection{Forward}
+\label{sec:thermal_source_global_thermal_source-forward}
+
+\begin{equation}
+\mathbf{Sl}^{+} = \mathbf{F0}^{+} - \mathbf{T}^{+}\mathbf{F1}^{+} - \mathbf{R}^{-}\mathbf{F0}^{-}
+\label{eq:thermal_source_global_thermal_source-forward-sl_p}
+\end{equation}
+
+\begin{equation}
+\mathbf{Sl}^{-} = \mathbf{F1}^{-} - \mathbf{R}^{+}\mathbf{F1}^{+} - \mathbf{T}^{-}\mathbf{F0}^{-}
+\label{eq:thermal_source_global_thermal_source-forward-sl_m}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:thermal_source_global_thermal_source-tangent_linear}
+
+\begin{equation}
+\mathbf{Sl}^{+} = \mathcal{L}(\mathbf{F0}^{+}) - \mathcal{L}(\mathbf{T}^{+})\mathbf{F1}^{+} - \mathbf{T}^{+}\mathcal{L}(\mathbf{F1}^{+}) - \mathcal{L}(\mathbf{R}^{-})\mathbf{F0}^{-} - \mathbf{R}^{-}\mathcal{L}(\mathbf{F0}^{-})
+\label{eq:thermal_source_global_thermal_source-tangent_linear-sl_p_l}
+\end{equation}
+
+\begin{equation}
+\mathbf{Sl}^{-} = \mathcal{L}(\mathbf{F1}^{-}) - \mathcal{L}(\mathbf{R}^{+})\mathbf{F1}^{+} - \mathbf{R}^{+}\mathcal{L}(\mathbf{F1}^{+}) - \mathcal{L}(\mathbf{T}^{-})\mathbf{F0}^{-} - \mathbf{T}^{-}\mathcal{L}(\mathbf{F0}^{-})
+\label{eq:thermal_source_global_thermal_source-tangent_linear-sl_m_l}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:thermal_source_global_thermal_source-adjoint_of_tangent_linear}

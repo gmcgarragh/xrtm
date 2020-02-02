@@ -9,9 +9,6 @@
  * single scattering albedo in the aerosol layer and with intensity with respect
  * to the surface albedo are also determined.
  ******************************************************************************/
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <gutil.h>
 
 #include <xrtm_interface.h>
@@ -39,8 +36,9 @@ int main(int argc, char *argv[]) {
      /* Bit mask of XRTM options.  Use Delta-m scaling and the Nakajima and
         Tanka TMS correction.  See xrtm_model.h for other supported options. */
      int options        = XRTM_OPTION_CALC_DERIVS | XRTM_OPTION_DELTA_M |
-                          XRTM_OPTION_N_T_TMS;
-    
+                          XRTM_OPTION_N_T_TMS | XRTM_OPTION_OUTPUT_AT_LEVELS |
+                          XRTM_OPTION_SOURCE_SOLAR;
+
      /* Bit mask of solvers which will be used with this XRTM instance.  Use the
         eigen/adding solver (same method as radiant).  See xrtm_model.h for
         other supported solvers. */
@@ -51,6 +49,7 @@ int main(int argc, char *argv[]) {
      int n_stokes        = 1;
      int n_derivs        = 3;
      int n_layers        = 4;
+     int n_theta_0s      = 1;
      int n_kernels       = 1;
      int n_kernel_quad   = 16;	/* Not used for the Lambertian kernel */
      int kernels[]       = {XRTM_KERNEL_LAMBERTIAN};
@@ -124,11 +123,11 @@ int main(int argc, char *argv[]) {
 
 
      /*-------------------------------------------------------------------------
-      * Create the XRTM instance.
+      * Create an XRTM instance.
       *-----------------------------------------------------------------------*/
      if (xrtm_create(&xrtm, options, solvers, max_coef, n_quad, n_stokes, n_derivs,
-                     n_layers, n_kernels, n_kernel_quad, (enum xrtm_kernel_type *)
-                     kernels, n_out_levels, n_out_thetas)) {
+                     n_layers, n_theta_0s, n_kernels, n_kernel_quad,
+                     (enum xrtm_kernel_type *) kernels, n_out_levels, n_out_thetas)) {
           fprintf(stderr, "error calling xrtm_create()\n");
           exit(1);
      }
@@ -146,6 +145,22 @@ int main(int argc, char *argv[]) {
           fprintf(stderr, "ERROR: xrtm_set_fourier_tol()\n");
           exit(1);
      }
+     if (xrtm_set_out_levels(&xrtm, out_levels)) {
+          fprintf(stderr, "ERROR: xrtm_set_out_levels()\n");
+          exit(1);
+     }
+     if (xrtm_set_out_thetas(&xrtm, out_thetas)) {
+          fprintf(stderr, "ERROR: xrtm_set_out_thetas()\n");
+          exit(1);
+     }
+     if (xrtm_set_F_iso_top(&xrtm, 0.)) {
+          fprintf(stderr, "ERROR: xrtm_set_F_iso_top()\n");
+          exit(1);
+     }
+     if (xrtm_set_F_iso_bot(&xrtm, 0.)) {
+          fprintf(stderr, "ERROR: xrtm_set_F_iso_bot()\n");
+          exit(1);
+     }
      if (xrtm_set_F_0(&xrtm, F_0)) {
           fprintf(stderr, "ERROR: xrtm_set_F_0()\n");
           exit(1);
@@ -156,14 +171,6 @@ int main(int argc, char *argv[]) {
      }
      if (xrtm_set_phi_0(&xrtm, 0.)) {
           fprintf(stderr, "ERROR: xrtm_set_phi_0()\n");
-          exit(1);
-     }
-     if (xrtm_set_out_levels(&xrtm, out_levels)) {
-          fprintf(stderr, "ERROR: xrtm_set_out_levels()\n");
-          exit(1);
-     }
-     if (xrtm_set_out_thetas(&xrtm, out_thetas)) {
-          fprintf(stderr, "ERROR: xrtm_set_out_thetas()\n");
           exit(1);
      }
 
@@ -262,13 +269,13 @@ int main(int argc, char *argv[]) {
           printf("     intensity:\n");
           for (j = 0; j < n_out_thetas; ++j) {
                printf("          theta = %9.2E, I_p = %13.6E, I_m = %13.6E\n",
-                      out_thetas[j], I_p[i][0][j][0], I_m[i][0][j][0]);
+                      out_thetas[j], I_p[i][j][0][0], I_m[i][j][0][0]);
           }
           for (j = 0; j < n_derivs; ++j) {
                printf("     derivative: %d\n", j);
                for (k = 0; k < n_out_thetas; ++k) {
                     printf("          theta = %9.2E, K_p = %13.6E, K_m = %13.6E\n",
-                           out_thetas[k], K_p[i][j][0][k][0], K_m[i][j][0][k][0]);
+                           out_thetas[k], K_p[i][j][k][0][0], K_m[i][j][k][0][0]);
                }
           }
      }

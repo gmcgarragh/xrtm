@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 1998-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 1998-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -14,9 +14,9 @@
 /*******************************************************************************
  *
  ******************************************************************************/
-type_ *XCAT(alloc_array1_, postfix_)(long m) {
+type_ *XCAT(alloc_array1_, postfix_)(size_t m) {
 
-     long dimen[1];
+     size_t dimen[1];
 
      dimen[0] = m;
 
@@ -25,9 +25,9 @@ type_ *XCAT(alloc_array1_, postfix_)(long m) {
 
 
 
-type_ *XCAT(realloc_array1_, postfix_)(type_ *a, long m) {
+type_ *XCAT(realloc_array1_, postfix_)(type_ *a, size_t m) {
 
-     long dimen[1];
+     size_t dimen[1];
 
      dimen[0] = m;
 
@@ -36,9 +36,9 @@ type_ *XCAT(realloc_array1_, postfix_)(type_ *a, long m) {
 
 
 
-type_ *XCAT(array_from_mem1_, postfix_)(type_ *a, long m) {
+type_ *XCAT(array_from_mem1_, postfix_)(type_ *a, size_t m) {
 
-     long dimen[1];
+     size_t dimen[1];
 
      dimen[0] = m;
 
@@ -54,9 +54,9 @@ void XCAT(free_array1_, postfix_)(type_ *a) {
 
 
 
-void XCAT(init_array1_, postfix_)(type_ *a, long m, type_ x) {
+void XCAT(init_array1_, postfix_)(type_ *a, size_t m, type_ x) {
 
-     long i;
+     size_t i;
 
      for (i = 0; i < m; ++i)
           a[i] = x;
@@ -64,9 +64,9 @@ void XCAT(init_array1_, postfix_)(type_ *a, long m, type_ x) {
 
 
 
-void XCAT(copy_array1_, postfix_)(type_ *a2, type_ *a1, long m) {
+void XCAT(copy_array1_, postfix_)(type_ *a2, const type_ *a1, size_t m) {
 
-     long i;
+     size_t i;
 
      for (i = 0; i < m; ++i)
           a2[i] = a1[i];
@@ -74,12 +74,24 @@ void XCAT(copy_array1_, postfix_)(type_ *a2, type_ *a1, long m) {
 
 
 
+type_ *XCAT(dup_array1_, postfix_)(type_ *a1, size_t m) {
+
+     type_ *a2;
+
+     a2 = XCAT(alloc_array1_, postfix_)(m);
+     XCAT(copy_array1_, postfix_)(a2, a1, m);
+
+     return a2;
+}
+
+
+
 /*******************************************************************************
  *
  ******************************************************************************/
-type_ **XCAT(alloc_array2_, postfix_)(long m, long n) {
+type_ **XCAT(alloc_array2_, postfix_)(size_t m, size_t n) {
 
-     long dimen[2];
+     size_t dimen[2];
 
      dimen[0] = m;
      dimen[1] = n;
@@ -89,9 +101,9 @@ type_ **XCAT(alloc_array2_, postfix_)(long m, long n) {
 
 
 
-type_ **XCAT(realloc_array2_, postfix_)(type_ **a, long m, long n) {
+type_ **XCAT(realloc_array2_, postfix_)(type_ **a, size_t m, size_t n) {
 
-     long dimen[2];
+     size_t dimen[2];
 
      dimen[0] = m;
      dimen[1] = n;
@@ -101,9 +113,9 @@ type_ **XCAT(realloc_array2_, postfix_)(type_ **a, long m, long n) {
 
 
 
-type_ **XCAT(array_from_mem2_, postfix_)(type_ *a, long m, long n) {
+type_ **XCAT(array_from_mem2_, postfix_)(type_ *a, size_t m, size_t n) {
 
-     long dimen[2];
+     size_t dimen[2];
 
      dimen[0] = m;
      dimen[1] = n;
@@ -120,11 +132,11 @@ void XCAT(free_array2_, postfix_)(type_ **a) {
 
 
 
-void XCAT(init_array2_, postfix_)(type_ **a, long m, long n, type_ x) {
+void XCAT(init_array2_, postfix_)(type_ **a, size_t m, size_t n, type_ x) {
+/*
+     size_t i;
 
-     long i;
-
-     long size;
+     size_t size;
 
      type_ *a2 = *a;
 
@@ -132,15 +144,20 @@ void XCAT(init_array2_, postfix_)(type_ **a, long m, long n, type_ x) {
 
      for (i = 0; i < size; ++i)
           a2[i] = x;
+*/
+     size_t i;
+
+     for (i = 0; i < m; ++i)
+          XCAT(init_array1_, postfix_)(a[i], n, x);
 }
 
 
 
-void XCAT(copy_array2_, postfix_)(type_ **a2, type_ **a1, long m, long n) {
+void XCAT(copy_array2_, postfix_)(type_ **a2, type_ **a1, size_t m, size_t n) {
+/*
+     size_t i;
 
-     long i;
-
-     long size;
+     size_t size;
 
      type_ *a12 = *a1;
      type_ *a22 = *a2;
@@ -149,6 +166,23 @@ void XCAT(copy_array2_, postfix_)(type_ **a2, type_ **a1, long m, long n) {
 
      for (i = 0; i < size; ++i)
           a22[i] = a12[i];
+*/
+     size_t i;
+
+     for (i = 0; i < m; ++i)
+          XCAT(copy_array1_, postfix_)(a2[i], a1[i], n);
+}
+
+
+
+type_ **XCAT(dup_array2_, postfix_)(type_ **a1, size_t m, size_t n) {
+
+     type_ **a2;
+
+     a2 = XCAT(alloc_array2_, postfix_)(m, n);
+     XCAT(copy_array2_, postfix_)(a2, a1, m, n);
+
+     return a2;
 }
 
 
@@ -156,9 +190,9 @@ void XCAT(copy_array2_, postfix_)(type_ **a2, type_ **a1, long m, long n) {
 /*******************************************************************************
  *
  ******************************************************************************/
-type_ ***XCAT(alloc_array3_, postfix_)(long m, long n, long o) {
+type_ ***XCAT(alloc_array3_, postfix_)(size_t m, size_t n, size_t o) {
 
-     long dimen[3];
+     size_t dimen[3];
 
      dimen[0] = m;
      dimen[1] = n;
@@ -169,9 +203,9 @@ type_ ***XCAT(alloc_array3_, postfix_)(long m, long n, long o) {
 
 
 
-type_ ***XCAT(realloc_array3_, postfix_)(type_ ***a, long m, long n, long o) {
+type_ ***XCAT(realloc_array3_, postfix_)(type_ ***a, size_t m, size_t n, size_t o) {
 
-     long dimen[3];
+     size_t dimen[3];
 
      dimen[0] = m;
      dimen[1] = n;
@@ -182,9 +216,9 @@ type_ ***XCAT(realloc_array3_, postfix_)(type_ ***a, long m, long n, long o) {
 
 
 
-type_ ***XCAT(array_from_mem3_, postfix_)(type_ *a, long m, long n, long o) {
+type_ ***XCAT(array_from_mem3_, postfix_)(type_ *a, size_t m, size_t n, size_t o) {
 
-     long dimen[3];
+     size_t dimen[3];
 
      dimen[0] = m;
      dimen[1] = n;
@@ -202,11 +236,11 @@ void XCAT(free_array3_, postfix_)(type_ ***a) {
 
 
 
-void XCAT(init_array3_, postfix_)(type_ ***a, long m, long n, long o, type_ x) {
+void XCAT(init_array3_, postfix_)(type_ ***a, size_t m, size_t n, size_t o, type_ x) {
+/*
+     size_t i;
 
-     long i;
-
-     long size;
+     size_t size;
 
      type_ *a2 = **a;
 
@@ -214,15 +248,20 @@ void XCAT(init_array3_, postfix_)(type_ ***a, long m, long n, long o, type_ x) {
 
      for (i = 0; i < size; ++i)
           a2[i] = x;
+*/
+     size_t i;
+
+     for (i = 0; i < m; ++i)
+          XCAT(init_array2_, postfix_)(a[i], n, o, x);
 }
 
 
 
-void XCAT(copy_array3_, postfix_)(type_ ***a2, type_ ***a1, long m, long n, long o) {
+void XCAT(copy_array3_, postfix_)(type_ ***a2, type_ ***a1, size_t m, size_t n, size_t o) {
+/*
+     size_t i;
 
-     long i;
-
-     long size;
+     size_t size;
 
      type_ *a12 = **a1;
      type_ *a22 = **a2;
@@ -231,6 +270,23 @@ void XCAT(copy_array3_, postfix_)(type_ ***a2, type_ ***a1, long m, long n, long
 
      for (i = 0; i < size; ++i)
           a22[i] = a12[i];
+*/
+     size_t i;
+
+     for (i = 0; i < m; ++i)
+          XCAT(copy_array2_, postfix_)(a2[i], a1[i], n, o);
+}
+
+
+
+type_ ***XCAT(dup_array3_, postfix_)(type_ ***a1, size_t m, size_t n, size_t o) {
+
+     type_ ***a2;
+
+     a2 = XCAT(alloc_array3_, postfix_)(m, n, o);
+     XCAT(copy_array3_, postfix_)(a2, a1, m, n, o);
+
+     return a2;
 }
 
 
@@ -238,9 +294,9 @@ void XCAT(copy_array3_, postfix_)(type_ ***a2, type_ ***a1, long m, long n, long
 /*******************************************************************************
  *
  ******************************************************************************/
-type_ ****XCAT(alloc_array4_, postfix_)(long m, long n, long o, long p) {
+type_ ****XCAT(alloc_array4_, postfix_)(size_t m, size_t n, size_t o, size_t p) {
 
-     long dimen[4];
+     size_t dimen[4];
 
      dimen[0] = m;
      dimen[1] = n;
@@ -252,9 +308,9 @@ type_ ****XCAT(alloc_array4_, postfix_)(long m, long n, long o, long p) {
 
 
 
-type_ ****XCAT(realloc_array4_, postfix_)(type_ ****a, long m, long n, long o, long p) {
+type_ ****XCAT(realloc_array4_, postfix_)(type_ ****a, size_t m, size_t n, size_t o, size_t p) {
 
-     long dimen[4];
+     size_t dimen[4];
 
      dimen[0] = m;
      dimen[1] = n;
@@ -266,9 +322,9 @@ type_ ****XCAT(realloc_array4_, postfix_)(type_ ****a, long m, long n, long o, l
 
 
 
-type_ ****XCAT(array_from_mem4_, postfix_)(type_ *a, long m, long n, long o, long p) {
+type_ ****XCAT(array_from_mem4_, postfix_)(type_ *a, size_t m, size_t n, size_t o, size_t p) {
 
-     long dimen[4];
+     size_t dimen[4];
 
      dimen[0] = m;
      dimen[1] = n;
@@ -287,11 +343,11 @@ void XCAT(free_array4_, postfix_)(type_ ****a) {
 
 
 
-void XCAT(init_array4_, postfix_)(type_ ****a, long m, long n, long o, long p, type_ x) {
+void XCAT(init_array4_, postfix_)(type_ ****a, size_t m, size_t n, size_t o, size_t p, type_ x) {
+/*
+     size_t i;
 
-     long i;
-
-     long size;
+     size_t size;
 
      type_ *a2 = ***a;
 
@@ -299,15 +355,20 @@ void XCAT(init_array4_, postfix_)(type_ ****a, long m, long n, long o, long p, t
 
      for (i = 0; i < size; ++i)
           a2[i] = x;
+*/
+     size_t i;
+
+     for (i = 0; i < m; ++i)
+          XCAT(init_array3_, postfix_)(a[i], n, o, p, x);
 }
 
 
 
-void XCAT(copy_array4_, postfix_)(type_ ****a2, type_ ****a1, long m, long n, long o, long p) {
+void XCAT(copy_array4_, postfix_)(type_ ****a2, type_ ****a1, size_t m, size_t n, size_t o, size_t p) {
+/*
+     size_t i;
 
-     long i;
-
-     long size;
+     size_t size;
 
      type_ *a12 = ***a1;
      type_ *a22 = ***a2;
@@ -316,6 +377,11 @@ void XCAT(copy_array4_, postfix_)(type_ ****a2, type_ ****a1, long m, long n, lo
 
      for (i = 0; i < size; ++i)
           a22[i] = a12[i];
+*/
+     size_t i;
+
+     for (i = 0; i < m; ++i)
+          XCAT(copy_array3_, postfix_)(a2[i], a1[i], n, o, p);
 }
 
 
@@ -323,9 +389,9 @@ void XCAT(copy_array4_, postfix_)(type_ ****a2, type_ ****a1, long m, long n, lo
 /*******************************************************************************
  *
  ******************************************************************************/
-type_ *****XCAT(alloc_array5_, postfix_)(long m, long n, long o, long p, long q) {
+type_ *****XCAT(alloc_array5_, postfix_)(size_t m, size_t n, size_t o, size_t p, size_t q) {
 
-     long dimen[5];
+     size_t dimen[5];
 
      dimen[0] = m;
      dimen[1] = n;
@@ -338,9 +404,9 @@ type_ *****XCAT(alloc_array5_, postfix_)(long m, long n, long o, long p, long q)
 
 
 
-type_ *****XCAT(realloc_array5_, postfix_)(type_ *****a, long m, long n, long o, long p, long q) {
+type_ *****XCAT(realloc_array5_, postfix_)(type_ *****a, size_t m, size_t n, size_t o, size_t p, size_t q) {
 
-     long dimen[5];
+     size_t dimen[5];
 
      dimen[0] = m;
      dimen[1] = n;
@@ -353,9 +419,9 @@ type_ *****XCAT(realloc_array5_, postfix_)(type_ *****a, long m, long n, long o,
 
 
 
-type_ *****XCAT(array_from_mem5_, postfix_)(type_ *a, long m, long n, long o, long p, long q) {
+type_ *****XCAT(array_from_mem5_, postfix_)(type_ *a, size_t m, size_t n, size_t o, size_t p, size_t q) {
 
-     long dimen[5];
+     size_t dimen[5];
 
      dimen[0] = m;
      dimen[1] = n;
@@ -375,11 +441,11 @@ void XCAT(free_array5_, postfix_)(type_ *****a) {
 
 
 
-void XCAT(init_array5_, postfix_)(type_ *****a, long m, long n, long o, long p, long q, type_ x) {
+void XCAT(init_array5_, postfix_)(type_ *****a, size_t m, size_t n, size_t o, size_t p, size_t q, type_ x) {
+/*
+     size_t i;
 
-     long i;
-
-     long size;
+     size_t size;
 
      type_ *a2 = ****a;
 
@@ -387,15 +453,20 @@ void XCAT(init_array5_, postfix_)(type_ *****a, long m, long n, long o, long p, 
 
      for (i = 0; i < size; ++i)
           a2[i] = x;
+*/
+     size_t i;
+
+     for (i = 0; i < m; ++i)
+          XCAT(init_array4_, postfix_)(a[i], n, o, p, q, x);
 }
 
 
 
-void XCAT(copy_array5_, postfix_)(type_ *****a2, type_ *****a1, long m, long n, long o, long p, long q) {
+void XCAT(copy_array5_, postfix_)(type_ *****a2, type_ *****a1, size_t m, size_t n, size_t o, size_t p, size_t q) {
+/*
+     size_t i;
 
-     long i;
-
-     long size;
+     size_t size;
 
      type_ *a12 = ****a1;
      type_ *a22 = ****a2;
@@ -404,6 +475,11 @@ void XCAT(copy_array5_, postfix_)(type_ *****a2, type_ *****a1, long m, long n, 
 
      for (i = 0; i < size; ++i)
           a22[i] = a12[i];
+*/
+     size_t i;
+
+     for (i = 0; i < m; ++i)
+          XCAT(copy_array4_, postfix_)(a2[i], a1[i], n, o, p, q);
 }
 
 
@@ -411,9 +487,9 @@ void XCAT(copy_array5_, postfix_)(type_ *****a2, type_ *****a1, long m, long n, 
 /*******************************************************************************
  *
  ******************************************************************************/
-type_ ******XCAT(alloc_array6_, postfix_)(long m, long n, long o, long p, long q, long r) {
+type_ ******XCAT(alloc_array6_, postfix_)(size_t m, size_t n, size_t o, size_t p, size_t q, size_t r) {
 
-     long dimen[6];
+     size_t dimen[6];
 
      dimen[0] = m;
      dimen[1] = n;
@@ -427,9 +503,9 @@ type_ ******XCAT(alloc_array6_, postfix_)(long m, long n, long o, long p, long q
 
 
 
-type_ ******XCAT(realloc_array6_, postfix_)(type_ ******a, long m, long n, long o, long p, long q, long r) {
+type_ ******XCAT(realloc_array6_, postfix_)(type_ ******a, size_t m, size_t n, size_t o, size_t p, size_t q, size_t r) {
 
-     long dimen[6];
+     size_t dimen[6];
 
      dimen[0] = m;
      dimen[1] = n;
@@ -443,9 +519,9 @@ type_ ******XCAT(realloc_array6_, postfix_)(type_ ******a, long m, long n, long 
 
 
 
-type_ ******XCAT(array_from_mem6_, postfix_)(type_ *a, long m, long n, long o, long p, long q, long r) {
+type_ ******XCAT(array_from_mem6_, postfix_)(type_ *a, size_t m, size_t n, size_t o, size_t p, size_t q, size_t r) {
 
-     long dimen[6];
+     size_t dimen[6];
 
      dimen[0] = m;
      dimen[1] = n;
@@ -466,11 +542,11 @@ void XCAT(free_array6_, postfix_)(type_ ******a) {
 
 
 
-void XCAT(init_array6_, postfix_)(type_ ******a, long m, long n, long o, long p, long q, long r, type_ x) {
+void XCAT(init_array6_, postfix_)(type_ ******a, size_t m, size_t n, size_t o, size_t p, size_t q, size_t r, type_ x) {
+/*
+     size_t i;
 
-     long i;
-
-     long size;
+     size_t size;
 
      type_ *a2 = *****a;
 
@@ -478,15 +554,20 @@ void XCAT(init_array6_, postfix_)(type_ ******a, long m, long n, long o, long p,
 
      for (i = 0; i < size; ++i)
           a2[i] = x;
+*/
+     size_t i;
+
+     for (i = 0; i < m; ++i)
+          XCAT(init_array5_, postfix_)(a[i], n, o, p, q, r, x);
 }
 
 
 
-void XCAT(copy_array6_, postfix_)(type_ ******a2, type_ ******a1, long m, long n, long o, long p, long q, long r) {
+void XCAT(copy_array6_, postfix_)(type_ ******a2, type_ ******a1, size_t m, size_t n, size_t o, size_t p, size_t q, size_t r) {
+/*
+     size_t i;
 
-     long i;
-
-     long size;
+     size_t size;
 
      type_ *a12 = *****a1;
      type_ *a22 = *****a2;
@@ -495,4 +576,113 @@ void XCAT(copy_array6_, postfix_)(type_ ******a2, type_ ******a1, long m, long n
 
      for (i = 0; i < size; ++i)
           a22[i] = a12[i];
+*/
+     size_t i;
+
+     for (i = 0; i < m; ++i)
+          XCAT(copy_array5_, postfix_)(a2[i], a1[i], n, o, p, q, r);
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+type_ *******XCAT(alloc_array7_, postfix_)(size_t m, size_t n, size_t o, size_t p, size_t q, size_t r, size_t s) {
+
+     size_t dimen[7];
+
+     dimen[0] = m;
+     dimen[1] = n;
+     dimen[2] = o;
+     dimen[3] = p;
+     dimen[4] = q;
+     dimen[5] = r;
+     dimen[6] = s;
+
+     return (type_ *******) alloc_array(7, dimen, sizeof(type_));
+}
+
+
+
+type_ *******XCAT(realloc_array7_, postfix_)(type_ *******a, size_t m, size_t n, size_t o, size_t p, size_t q, size_t r, size_t s) {
+
+     size_t dimen[7];
+
+     dimen[0] = m;
+     dimen[1] = n;
+     dimen[2] = o;
+     dimen[3] = p;
+     dimen[4] = q;
+     dimen[5] = r;
+     dimen[6] = s;
+
+     return (type_ *******) realloc_array(a, 7, dimen, sizeof(type_));
+}
+
+
+
+type_ *******XCAT(array_from_mem7_, postfix_)(type_ *a, size_t m, size_t n, size_t o, size_t p, size_t q, size_t r, size_t s) {
+
+     size_t dimen[7];
+
+     dimen[0] = m;
+     dimen[1] = n;
+     dimen[2] = o;
+     dimen[3] = p;
+     dimen[4] = q;
+     dimen[5] = r;
+     dimen[6] = s;
+
+     return (type_ *******) array_from_mem(a, 7, dimen, sizeof(type_), 1);
+}
+
+
+
+void XCAT(free_array7_, postfix_)(type_ *******a) {
+
+     free_array(a, 7);
+}
+
+
+
+void XCAT(init_array7_, postfix_)(type_ *******a, size_t m, size_t n, size_t o, size_t p, size_t q, size_t r, size_t s, type_ x) {
+/*
+     size_t i;
+
+     size_t size;
+
+     type_ *a2 = ******a;
+
+     size = m * n * o * p * q * r * s;
+
+     for (i = 0; i < size; ++i)
+          a2[i] = x;
+*/
+     size_t i;
+
+     for (i = 0; i < m; ++i)
+          XCAT(init_array6_, postfix_)(a[i], n, o, p, q, r, s, x);
+}
+
+
+
+void XCAT(copy_array7_, postfix_)(type_ *******a2, type_ *******a1, size_t m, size_t n, size_t o, size_t p, size_t q, size_t r, size_t s) {
+/*
+     size_t i;
+
+     size_t size;
+
+     type_ *a12 = ******a1;
+     type_ *a22 = ******a2;
+
+     size = m * n * o * p * q * r * s;
+
+     for (i = 0; i < size; ++i)
+          a22[i] = a12[i];
+*/
+     size_t i;
+
+     for (i = 0; i < m; ++i)
+          XCAT(copy_array6_, postfix_)(a2[i], a1[i], n, o, p, q, r, s);
 }

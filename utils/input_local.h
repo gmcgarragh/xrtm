@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -12,7 +12,7 @@
 
 #include <gutil.h>
 
-#include <xrtm_fd.h>
+#include <xrtm_fd_interface.h>
 #include <xrtm_model.h>
 
 #include "input_util.h"
@@ -67,18 +67,22 @@ enum xrtm_input {
      XRTM_INPUT_SOS_PARAMS,
      XRTM_INPUT_FOURIER_TOL,
      XRTM_INPUT_LAMBDA,
-     XRTM_INPUT_F_0,
-     XRTM_INPUT_THETA_0,
-     XRTM_INPUT_PHI_0,
+     XRTM_INPUT_PLANET_R,
+     XRTM_INPUT_LEVELS_Z,
      XRTM_INPUT_OUT_LEVELS,
      XRTM_INPUT_OUT_TAUS,
      XRTM_INPUT_OUT_THETAS,
-     XRTM_INPUT_TOP_B,
-     XRTM_INPUT_TOP_B_L,
-     XRTM_INPUT_PLANET_R,
-     XRTM_INPUT_LEVELS_Z,
+     XRTM_INPUT_F_0,
+     XRTM_INPUT_THETA_0,
+     XRTM_INPUT_PHI_0,
+     XRTM_INPUT_F_ISO_TOP,
+     XRTM_INPUT_F_ISO_TOP_L,
+     XRTM_INPUT_F_ISO_BOT,
+     XRTM_INPUT_F_ISO_BOT_L,
      XRTM_INPUT_LEVELS_B,
      XRTM_INPUT_LEVELS_B_L,
+     XRTM_INPUT_SURFACE_B,
+     XRTM_INPUT_SURFACE_B_L,
      XRTM_INPUT_G,
      XRTM_INPUT_G_L,
      XRTM_INPUT_CHI,
@@ -89,22 +93,21 @@ enum xrtm_input {
      XRTM_INPUT_OMEGA_L,
      XRTM_INPUT_LTAU,
      XRTM_INPUT_LTAU_L,
-     XRTM_INPUT_SURFACE_B,
-     XRTM_INPUT_SURFACE_B_L,
      XRTM_INPUT_KERNEL_AMPFAC,
      XRTM_INPUT_KERNEL_AMPFAC_L,
      XRTM_INPUT_KERNEL_PARAMS,
      XRTM_INPUT_KERNEL_PARAMS_L,
 
      XRTM_INPUT_DELTA,
-     XRTM_INPUT_TOP_B_P,
+     XRTM_INPUT_F_ISO_TOP_P,
+     XRTM_INPUT_F_ISO_BOT_P,
      XRTM_INPUT_LEVELS_B_P,
+     XRTM_INPUT_SURFACE_B_P,
      XRTM_INPUT_G_P,
      XRTM_INPUT_COEF_P,
      XRTM_INPUT_COEF_FILES_P,
      XRTM_INPUT_OMEGA_P,
      XRTM_INPUT_LTAU_P,
-     XRTM_INPUT_SURFACE_B_P,
      XRTM_INPUT_KERNEL_AMPFAC_P,
      XRTM_INPUT_KERNEL_PARAMS_P,
 

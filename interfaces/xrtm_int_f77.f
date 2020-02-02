@@ -4,8 +4,8 @@ c***********************************************************************
 
 
       subroutine xrtm_create_f77(d, options, solvers, max_coef, n_quad,
-     &n_stokes, n_derivs, n_layers, n_kernels, n_kernel_quad, kernels,
-     &n_out_levels, n_out_thetas, error)
+     &n_stokes, n_derivs, n_layers, n_theta_0s, n_kernels,
+     &n_kernel_quad, kernels, n_out_levels, n_out_thetas, error)
       implicit none
       byte d(*)
       integer options
@@ -15,6 +15,7 @@ c***********************************************************************
       integer n_stokes
       integer n_derivs
       integer n_layers
+      integer n_theta_0s
       integer n_kernels
       integer n_kernel_quad
       integer kernels(*)
@@ -23,8 +24,8 @@ c***********************************************************************
       integer error
       integer xrtm_create_bindx_f77
       error = xrtm_create_bindx_f77(d, options, solvers, max_coef,
-     &n_quad, n_stokes, n_derivs, n_layers, n_kernels, n_kernel_quad,
-     &kernels, n_out_levels, n_out_thetas)
+     &n_quad, n_stokes, n_derivs, n_layers, n_theta_0s, n_kernels,
+     &n_kernel_quad, kernels, n_out_levels, n_out_thetas)
       end subroutine xrtm_create_f77
 
 
@@ -163,15 +164,15 @@ c***********************************************************************
       end subroutine xrtm_set_pade_params_f77
 
 
-      integer function xrtm_get_pade_params_f77(d, pade_s, pade_r)
+      subroutine xrtm_get_pade_params_f77(d, pade_s, pade_r, error)
       implicit none
       byte d(*)
-      integer pade_s(*)
-      integer pade_r(*)
+      integer pade_s
+      integer pade_r
+      integer error
       integer xrtm_get_pade_params_bindx_f77
-      xrtm_get_pade_params_f77 = xrtm_get_pade_params_bindx_f77(d,
-     &pade_s, pade_r)
-      end function xrtm_get_pade_params_f77
+      error = xrtm_get_pade_params_bindx_f77(d, pade_s, pade_r)
+      end subroutine xrtm_get_pade_params_f77
 
 
       subroutine xrtm_set_sos_params_f77(d, max_os, max_tau, sos_tol,
@@ -187,17 +188,17 @@ c***********************************************************************
       end subroutine xrtm_set_sos_params_f77
 
 
-      integer function xrtm_get_sos_params_f77(d, max_os, max_tau,
-     &sos_tol)
+      subroutine xrtm_get_sos_params_f77(d, max_os, max_tau, sos_tol,
+     &error)
       implicit none
       byte d(*)
-      integer max_os(*)
-      real*8 max_tau(*)
-      real*8 sos_tol(*)
+      integer max_os
+      real*8 max_tau
+      real*8 sos_tol
+      integer error
       integer xrtm_get_sos_params_bindx_f77
-      xrtm_get_sos_params_f77 = xrtm_get_sos_params_bindx_f77(d, max_os,
-     &max_tau, sos_tol)
-      end function xrtm_get_sos_params_f77
+      error = xrtm_get_sos_params_bindx_f77(d, max_os, max_tau, sos_tol)
+      end subroutine xrtm_get_sos_params_f77
 
 
       subroutine xrtm_set_fourier_tol_f77(d, fourier_tol, error)
@@ -236,58 +237,42 @@ c***********************************************************************
       end function xrtm_get_lambda_f77
 
 
-      subroutine xrtm_set_F_0_f77(d, F_0, error)
+      subroutine xrtm_set_planet_r_f77(d, planet_r, error)
       implicit none
       byte d(*)
-      real*8 F_0
+      real*8 planet_r
       integer error
-      integer xrtm_set_F_0_bindx_f77
-      error = xrtm_set_F_0_bindx_f77(d, F_0)
-      end subroutine xrtm_set_F_0_f77
+      integer xrtm_set_planet_r_bindx_f77
+      error = xrtm_set_planet_r_bindx_f77(d, planet_r)
+      end subroutine xrtm_set_planet_r_f77
 
 
-      real*8 function xrtm_get_F_0_f77(d)
+      real*8 function xrtm_get_planet_r_f77(d)
       implicit none
       byte d(*)
-      integer xrtm_get_F_0_bindx_f77
-      xrtm_get_F_0_f77 = xrtm_get_F_0_bindx_f77(d)
-      end function xrtm_get_F_0_f77
+      integer xrtm_get_planet_r_bindx_f77
+      xrtm_get_planet_r_f77 = xrtm_get_planet_r_bindx_f77(d)
+      end function xrtm_get_planet_r_f77
 
 
-      subroutine xrtm_set_theta_0_f77(d, theta_0, error)
+      subroutine xrtm_set_levels_z_f77(d, levels_z, error)
       implicit none
       byte d(*)
-      real*8 theta_0
+      real*8 levels_z(*)
       integer error
-      integer xrtm_set_theta_0_bindx_f77
-      error = xrtm_set_theta_0_bindx_f77(d, theta_0)
-      end subroutine xrtm_set_theta_0_f77
+      integer xrtm_set_levels_z_bindx_f77
+      error = xrtm_set_levels_z_bindx_f77(d, levels_z)
+      end subroutine xrtm_set_levels_z_f77
 
 
-      real*8 function xrtm_get_theta_0_f77(d)
+      subroutine xrtm_get_levels_z_f77(d, levels_z, error)
       implicit none
       byte d(*)
-      integer xrtm_get_theta_0_bindx_f77
-      xrtm_get_theta_0_f77 = xrtm_get_theta_0_bindx_f77(d)
-      end function xrtm_get_theta_0_f77
-
-
-      subroutine xrtm_set_phi_0_f77(d, phi_0, error)
-      implicit none
-      byte d(*)
-      real*8 phi_0
+      real*8 levels_z(*)
       integer error
-      integer xrtm_set_phi_0_bindx_f77
-      error = xrtm_set_phi_0_bindx_f77(d, phi_0)
-      end subroutine xrtm_set_phi_0_f77
-
-
-      real*8 function xrtm_get_phi_0_f77(d)
-      implicit none
-      byte d(*)
-      integer xrtm_get_phi_0_bindx_f77
-      xrtm_get_phi_0_f77 = xrtm_get_phi_0_bindx_f77(d)
-      end function xrtm_get_phi_0_f77
+      integer xrtm_get_levels_z_bindx_f77
+      error = xrtm_get_levels_z_bindx_f77(d, levels_z)
+      end subroutine xrtm_get_levels_z_f77
 
 
       subroutine xrtm_set_out_levels_f77(d, out_levels, error)
@@ -350,60 +335,158 @@ c***********************************************************************
       end subroutine xrtm_get_out_thetas_f77
 
 
-      subroutine xrtm_set_top_b_f77(d, top_b, error)
+      subroutine xrtm_set_F_iso_top_f77(d, F_iso_top, error)
       implicit none
       byte d(*)
-      real*8 top_b
+      real*8 F_iso_top
       integer error
-      integer xrtm_set_top_b_bindx_f77
-      error = xrtm_set_top_b_bindx_f77(d, top_b)
-      end subroutine xrtm_set_top_b_f77
+      integer xrtm_set_F_iso_top_bindx_f77
+      error = xrtm_set_F_iso_top_bindx_f77(d, F_iso_top)
+      end subroutine xrtm_set_F_iso_top_f77
 
 
-      real*8 function xrtm_get_top_b_f77(d)
+      real*8 function xrtm_get_F_iso_top_f77(d)
       implicit none
       byte d(*)
-      integer xrtm_get_top_b_bindx_f77
-      xrtm_get_top_b_f77 = xrtm_get_top_b_bindx_f77(d)
-      end function xrtm_get_top_b_f77
+      integer xrtm_get_F_iso_top_bindx_f77
+      xrtm_get_F_iso_top_f77 = xrtm_get_F_iso_top_bindx_f77(d)
+      end function xrtm_get_F_iso_top_f77
 
 
-      subroutine xrtm_set_planet_r_f77(d, planet_r, error)
+      subroutine xrtm_set_F_iso_top_l_1_f77(d, i_deriv, F_iso_top_l,
+     &error)
       implicit none
       byte d(*)
-      real*8 planet_r
+      integer i_deriv
+      real*8 F_iso_top_l
       integer error
-      integer xrtm_set_planet_r_bindx_f77
-      error = xrtm_set_planet_r_bindx_f77(d, planet_r)
-      end subroutine xrtm_set_planet_r_f77
+      integer xrtm_set_F_iso_top_l_1_bindx_f77
+      error = xrtm_set_F_iso_top_l_1_bindx_f77(d, i_deriv, F_iso_top_l)
+      end subroutine xrtm_set_F_iso_top_l_1_f77
 
 
-      real*8 function xrtm_get_planet_r_f77(d)
+      subroutine xrtm_set_F_iso_top_l_n_f77(d, F_iso_top_l, error)
       implicit none
       byte d(*)
-      integer xrtm_get_planet_r_bindx_f77
-      xrtm_get_planet_r_f77 = xrtm_get_planet_r_bindx_f77(d)
-      end function xrtm_get_planet_r_f77
-
-
-      subroutine xrtm_set_levels_z_f77(d, levels_z, error)
-      implicit none
-      byte d(*)
-      real*8 levels_z(*)
+      real*8 F_iso_top_l(*)
       integer error
-      integer xrtm_set_levels_z_bindx_f77
-      error = xrtm_set_levels_z_bindx_f77(d, levels_z)
-      end subroutine xrtm_set_levels_z_f77
+      integer xrtm_set_F_iso_top_l_n_bindx_f77
+      error = xrtm_set_F_iso_top_l_n_bindx_f77(d, F_iso_top_l)
+      end subroutine xrtm_set_F_iso_top_l_n_f77
 
 
-      subroutine xrtm_get_levels_z_f77(d, levels_z, error)
+      real*8 function xrtm_get_F_iso_top_l_f77(d, i_deriv)
       implicit none
       byte d(*)
-      real*8 levels_z(*)
+      integer i_deriv
+      integer xrtm_get_F_iso_top_l_bindx_f77
+      xrtm_get_F_iso_top_l_f77 = xrtm_get_F_iso_top_l_bindx_f77(d,
+     &i_deriv)
+      end function xrtm_get_F_iso_top_l_f77
+
+
+      subroutine xrtm_set_F_iso_bot_f77(d, F_iso_bot, error)
+      implicit none
+      byte d(*)
+      real*8 F_iso_bot
       integer error
-      integer xrtm_get_levels_z_bindx_f77
-      error = xrtm_get_levels_z_bindx_f77(d, levels_z)
-      end subroutine xrtm_get_levels_z_f77
+      integer xrtm_set_F_iso_bot_bindx_f77
+      error = xrtm_set_F_iso_bot_bindx_f77(d, F_iso_bot)
+      end subroutine xrtm_set_F_iso_bot_f77
+
+
+      real*8 function xrtm_get_F_iso_bot_f77(d)
+      implicit none
+      byte d(*)
+      integer xrtm_get_F_iso_bot_bindx_f77
+      xrtm_get_F_iso_bot_f77 = xrtm_get_F_iso_bot_bindx_f77(d)
+      end function xrtm_get_F_iso_bot_f77
+
+
+      subroutine xrtm_set_F_iso_bot_l_1_f77(d, i_deriv, F_iso_bot_l,
+     &error)
+      implicit none
+      byte d(*)
+      integer i_deriv
+      real*8 F_iso_bot_l
+      integer error
+      integer xrtm_set_F_iso_bot_l_1_bindx_f77
+      error = xrtm_set_F_iso_bot_l_1_bindx_f77(d, i_deriv, F_iso_bot_l)
+      end subroutine xrtm_set_F_iso_bot_l_1_f77
+
+
+      subroutine xrtm_set_F_iso_bot_l_n_f77(d, F_iso_bot_l, error)
+      implicit none
+      byte d(*)
+      real*8 F_iso_bot_l(*)
+      integer error
+      integer xrtm_set_F_iso_bot_l_n_bindx_f77
+      error = xrtm_set_F_iso_bot_l_n_bindx_f77(d, F_iso_bot_l)
+      end subroutine xrtm_set_F_iso_bot_l_n_f77
+
+
+      real*8 function xrtm_get_F_iso_bot_l_f77(d, i_deriv)
+      implicit none
+      byte d(*)
+      integer i_deriv
+      integer xrtm_get_F_iso_bot_l_bindx_f77
+      xrtm_get_F_iso_bot_l_f77 = xrtm_get_F_iso_bot_l_bindx_f77(d,
+     &i_deriv)
+      end function xrtm_get_F_iso_bot_l_f77
+
+
+      subroutine xrtm_set_F_0_f77(d, F_0, error)
+      implicit none
+      byte d(*)
+      real*8 F_0
+      integer error
+      integer xrtm_set_F_0_bindx_f77
+      error = xrtm_set_F_0_bindx_f77(d, F_0)
+      end subroutine xrtm_set_F_0_f77
+
+
+      real*8 function xrtm_get_F_0_f77(d)
+      implicit none
+      byte d(*)
+      integer xrtm_get_F_0_bindx_f77
+      xrtm_get_F_0_f77 = xrtm_get_F_0_bindx_f77(d)
+      end function xrtm_get_F_0_f77
+
+
+      subroutine xrtm_set_theta_0_f77(d, theta_0, error)
+      implicit none
+      byte d(*)
+      real*8 theta_0
+      integer error
+      integer xrtm_set_theta_0_bindx_f77
+      error = xrtm_set_theta_0_bindx_f77(d, theta_0)
+      end subroutine xrtm_set_theta_0_f77
+
+
+      real*8 function xrtm_get_theta_0_f77(d)
+      implicit none
+      byte d(*)
+      integer xrtm_get_theta_0_bindx_f77
+      xrtm_get_theta_0_f77 = xrtm_get_theta_0_bindx_f77(d)
+      end function xrtm_get_theta_0_f77
+
+
+      subroutine xrtm_set_phi_0_f77(d, phi_0, error)
+      implicit none
+      byte d(*)
+      real*8 phi_0
+      integer error
+      integer xrtm_set_phi_0_bindx_f77
+      error = xrtm_set_phi_0_bindx_f77(d, phi_0)
+      end subroutine xrtm_set_phi_0_f77
+
+
+      real*8 function xrtm_get_phi_0_f77(d)
+      implicit none
+      byte d(*)
+      integer xrtm_get_phi_0_bindx_f77
+      xrtm_get_phi_0_f77 = xrtm_get_phi_0_bindx_f77(d)
+      end function xrtm_get_phi_0_f77
 
 
       subroutine xrtm_set_levels_b_f77(d, levels_b, error)
@@ -424,6 +507,89 @@ c***********************************************************************
       integer xrtm_get_levels_b_bindx_f77
       error = xrtm_get_levels_b_bindx_f77(d, levels_b)
       end subroutine xrtm_get_levels_b_f77
+
+
+      subroutine xrtm_set_levels_b_l_1_f77(d, i_deriv, levels_b_l,
+     &error)
+      implicit none
+      byte d(*)
+      integer i_deriv
+      real*8 levels_b_l(*)
+      integer error
+      integer xrtm_set_levels_b_l_1_bindx_f77
+      error = xrtm_set_levels_b_l_1_bindx_f77(d, i_deriv, levels_b_l)
+      end subroutine xrtm_set_levels_b_l_1_f77
+
+
+      subroutine xrtm_set_levels_b_l_n_f77(d, levels_b_l, error)
+      implicit none
+      byte d(*)
+      real*8 levels_b_l(*)
+      integer error
+      integer xrtm_set_levels_b_l_n_bindx_f77
+      error = xrtm_set_levels_b_l_n_bindx_f77(d, levels_b_l)
+      end subroutine xrtm_set_levels_b_l_n_f77
+
+
+      subroutine xrtm_get_levels_b_l_f77(d, i_deriv, levels_b_l, error)
+      implicit none
+      byte d(*)
+      integer i_deriv
+      real*8 levels_b_l(*)
+      integer error
+      integer xrtm_get_levels_b_l_bindx_f77
+      error = xrtm_get_levels_b_l_bindx_f77(d, i_deriv, levels_b_l)
+      end subroutine xrtm_get_levels_b_l_f77
+
+
+      subroutine xrtm_set_surface_b_f77(d, surface_b, error)
+      implicit none
+      byte d(*)
+      real*8 surface_b
+      integer error
+      integer xrtm_set_surface_b_bindx_f77
+      error = xrtm_set_surface_b_bindx_f77(d, surface_b)
+      end subroutine xrtm_set_surface_b_f77
+
+
+      real*8 function xrtm_get_surface_b_f77(d)
+      implicit none
+      byte d(*)
+      integer xrtm_get_surface_b_bindx_f77
+      xrtm_get_surface_b_f77 = xrtm_get_surface_b_bindx_f77(d)
+      end function xrtm_get_surface_b_f77
+
+
+      subroutine xrtm_set_surface_b_l_1_f77(d, i_deriv, surface_b_l,
+     &error)
+      implicit none
+      byte d(*)
+      integer i_deriv
+      real*8 surface_b_l
+      integer error
+      integer xrtm_set_surface_b_l_1_bindx_f77
+      error = xrtm_set_surface_b_l_1_bindx_f77(d, i_deriv, surface_b_l)
+      end subroutine xrtm_set_surface_b_l_1_f77
+
+
+      subroutine xrtm_set_surface_b_l_n_f77(d, surface_b_l, error)
+      implicit none
+      byte d(*)
+      real*8 surface_b_l(*)
+      integer error
+      integer xrtm_set_surface_b_l_n_bindx_f77
+      error = xrtm_set_surface_b_l_n_bindx_f77(d, surface_b_l)
+      end subroutine xrtm_set_surface_b_l_n_f77
+
+
+      real*8 function xrtm_get_surface_b_l_f77(d, i_deriv)
+      implicit none
+      byte d(*)
+      integer i_deriv
+      integer xrtm_get_surface_b_l_bindx_f77
+      xrtm_get_surface_b_l_f77 = xrtm_get_surface_b_l_bindx_f77(d,
+     &i_deriv)
+      end function xrtm_get_surface_b_l_f77
 
 
       subroutine xrtm_set_g_1_f77(d, i_layer, g, error)
@@ -787,24 +953,6 @@ c***********************************************************************
       end function xrtm_get_ltau_l_f77
 
 
-      subroutine xrtm_set_surface_b_f77(d, surface_b, error)
-      implicit none
-      byte d(*)
-      real*8 surface_b
-      integer error
-      integer xrtm_set_surface_b_bindx_f77
-      error = xrtm_set_surface_b_bindx_f77(d, surface_b)
-      end subroutine xrtm_set_surface_b_f77
-
-
-      real*8 function xrtm_get_surface_b_f77(d)
-      implicit none
-      byte d(*)
-      integer xrtm_get_surface_b_bindx_f77
-      xrtm_get_surface_b_f77 = xrtm_get_surface_b_bindx_f77(d)
-      end function xrtm_get_surface_b_f77
-
-
       subroutine xrtm_set_kernel_ampfac_f77(d, i_kernel, ampfac, error)
       implicit none
       byte d(*)
@@ -979,15 +1127,55 @@ c***********************************************************************
       end subroutine xrtm_update_varied_layers_f77
 
 
-      subroutine xrtm_solution_f77(d, solver, solutions, n_phis, phis,
-     &I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p,
-     &flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l, error)
+      subroutine xrtm_qx_f77(d, qx, error)
+      implicit none
+      byte d(*)
+      real*8 qx(*)
+      integer error
+      integer xrtm_qx_bindx_f77
+      error = xrtm_qx_bindx_f77(d, qx)
+      end subroutine xrtm_qx_f77
+
+
+      subroutine xrtm_qw_f77(d, qw, error)
+      implicit none
+      byte d(*)
+      real*8 qw(*)
+      integer error
+      integer xrtm_qw_bindx_f77
+      error = xrtm_qw_bindx_f77(d, qw)
+      end subroutine xrtm_qw_f77
+
+
+      subroutine xrtm_kernel_qx_f77(d, kernel_qx, error)
+      implicit none
+      byte d(*)
+      real*8 kernel_qx(*)
+      integer error
+      integer xrtm_kernel_qx_bindx_f77
+      error = xrtm_kernel_qx_bindx_f77(d, kernel_qx)
+      end subroutine xrtm_kernel_qx_f77
+
+
+      subroutine xrtm_kernel_qw_f77(d, kernel_qw, error)
+      implicit none
+      byte d(*)
+      real*8 kernel_qw(*)
+      integer error
+      integer xrtm_kernel_qw_bindx_f77
+      error = xrtm_kernel_qw_bindx_f77(d, kernel_qw)
+      end subroutine xrtm_kernel_qw_f77
+
+
+      subroutine xrtm_solution_f77(d, solver, solutions, n_out_phis,
+     &out_phis, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l,
+     &flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l, error)
       implicit none
       byte d(*)
       integer solver
       integer solutions
-      integer n_phis
-      real*8 phis(*)
+      integer n_out_phis
+      real*8 out_phis(*)
       real*8 I_p(*)
       real*8 I_m(*)
       real*8 K_p(*)
@@ -1004,27 +1192,27 @@ c***********************************************************************
       real*8 flux_div_l(*)
       integer error
       integer xrtm_solution_bindx_f77
-      error = xrtm_solution_bindx_f77(d, solver, solutions, n_phis,
-     &phis, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l,
+      error = xrtm_solution_bindx_f77(d, solver, solutions, n_out_phis,
+     &out_phis, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l,
      &flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l)
       end subroutine xrtm_solution_f77
 
 
-      subroutine xrtm_radiance_f77(d, solver, n_phis, phis, I_p, I_m,
-     &K_p, K_m, error)
+      subroutine xrtm_radiance_f77(d, solver, n_out_phis, out_phis, I_p,
+     &I_m, K_p, K_m, error)
       implicit none
       byte d(*)
       integer solver
-      integer n_phis
-      real*8 phis(*)
+      integer n_out_phis
+      real*8 out_phis(*)
       real*8 I_p(*)
       real*8 I_m(*)
       real*8 K_p(*)
       real*8 K_m(*)
       integer error
       integer xrtm_radiance_bindx_f77
-      error = xrtm_radiance_bindx_f77(d, solver, n_phis, phis, I_p, I_m,
-     &K_p, K_m)
+      error = xrtm_radiance_bindx_f77(d, solver, n_out_phis, out_phis,
+     &I_p, I_m, K_p, K_m)
       end subroutine xrtm_radiance_f77
 
 

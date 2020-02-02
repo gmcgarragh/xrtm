@@ -1,0 +1,122 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{Phase matrices}
+\label{sec:phase_matrices}
+
+
+\subsection{Scalar}
+\label{sec:phase_matrices-scalar}
+
+
+\subsubsection{Forward}
+\label{sec:phase_matrices-scalar-forward}
+
+
+\subsubsection{Tangent linear}
+\label{sec:phase_matrices-scalar-tangent_linear}
+
+
+\subsubsection{Adjoint of tangent linear}
+\label{sec:phase_matrices-scalar-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Vector}
+\label{sec:phase_matrices-vector}
+
+
+\subsubsection{Forward}
+\label{sec:phase_matrices-vector-forward}
+
+\begin{equation}
+\mathbf{B}_{l} =
+\left[
+\begin{array}{cccc}
+ a_{1,l} & -b_{1,l} & 0        & 0  \\
+-b_{1,l} &  a_{2,l} & 0        & 0  \\
+0        & 0        &  a_{3,l} & b_{2,l}  \\
+0        & 0        & -b_{2,l} & a_{4,l}
+\end{array}
+\right]
+\label{eq:phase_matrices-vector-forward-B_l}
+\end{equation}
+
+\begin{equation}
+\mathbf{P}^{++} = \sum^{2n - 1}_{l = m}\mathbf{\Pi}_{l}\mathbf{B}_{l}\mathbf{\Pi}^{T}_{l}
+\label{eq:phase_matrices-vector-forward-P_pp}
+\end{equation}
+
+\begin{equation}
+f(x) = \left\{
+\begin{array}{ll}
+ 1 & \mbox{if mod$(x - m) = 0$} \\
+-1 & \mbox{otherwise}
+\end{array}
+\right.
+\label{eq:phase_matrices-vector-forward-a}
+\end{equation}
+
+\begin{equation}
+\mathbf{P}^{-+} = \sum^{2n - 1}_{l = m} f(l)\mathbf{\Pi}_{l}\mathbf{B}_{l}\mathbf{D}\mathbf{\Pi}^{T}_{l}
+\label{eq:phase_matrices-vector-forward-P_mp}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:phase_matrices-vector-tangent_linear}
+
+\begin{equation}
+\mathcal{L}(\mathbf{B}_{l}) =
+\left[
+\begin{array}{cccc}
+ \mathcal{L}(a_{1,l}) & -\mathcal{L}(b_{1,l}) & 0                     & 0  \\
+-\mathcal{L}(b_{1,l}) &  \mathcal{L}(a_{2,l}) & 0                     & 0  \\
+0                     & 0                     &  \mathcal{L}(a_{3,l}) & \mathcal{L}(b_{2,l})  \\
+0                     & 0                     & -\mathcal{L}(b_{2,l}) & \mathcal{L}(a_{4,l})
+\end{array}
+\right]
+\label{eq:phase_matrices-vector-tangent_linear-B_l_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{P}^{++}) = \sum^{2n - 1}_{l = m} \mathbf{\Pi}_{l}\mathcal{L}(\mathbf{B}_{l})\mathbf{\Pi}^{T}_{l}
+\label{eq:phase_matrices-vector-tangent_linear-P_pp_l}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{P}^{-+}) = \sum^{2n - 1}_{l = m} f(l) \mathbf{\Pi}_{l}\mathcal{L}(\mathbf{B}_{l})\mathbf{D}\mathbf{\Pi}^{T}_{l}
+\label{eq:phase_matrices-vector-tangent_linear-P_mp_l}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:phase_matrices-vector-adjoint_of_tangent_linear}
+
+\begin{equation}
+\mathcal{A}(\mathbf{B}_{l}) = \sum^{2n - 1}_{l = m} \mathbf{\Pi}^{T}_{l}\mathcal{A}(\mathbf{P}^{++})\mathbf{\Pi}_{l}
+\label{eq:phase_matrices-vector-adjoint_of_tangent_linear-P_pp_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{B}_{l}) = \mathcal{A}(\mathbf{B}_{l}) + \sum^{2n - 1}_{l = m} f(l) \mathbf{\Pi}^{T}_{l}\mathcal{A}(\mathbf{P}^{-+})\mathbf{\Pi}_{l}\mathbf{D}
+\label{eq:phase_matrices-vector-adjoint_of_tangent_linear-P_mp_a}
+\end{equation}
+
+\begin{eqnarray}
+\mathcal{A}(a_{1,l}) & = & \mathcal{A}(B_{l,1,1}) \\
+\mathcal{A}(a_{2,l}) & = & \mathcal{A}(B_{l,2,2}) \\
+\mathcal{A}(a_{3,l}) & = & \mathcal{A}(B_{l,3,3}) \\
+\mathcal{A}(a_{4,l}) & = & \mathcal{A}(B_{l,4,4}) \\
+\mathcal{B}(b_{1,l}) & = & -\mathcal{A}(B_{l,1,2}) - \mathcal{A}(B_{l,2,1}) \\
+\mathcal{B}(b_{2,l}) & = &  \mathcal{A}(B_{l,3,4}) - \mathcal{A}(B_{l,4,3})
+\label{eq:phase_matrices-vector-adjoint_of_tangent_linear-a_and_b_a}
+\end{eqnarray}

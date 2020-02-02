@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -11,7 +11,7 @@
 
 #include <rtutil_scat_io.h>
 
-#include <xrtm_fd.h>
+#include <xrtm_fd_interface.h>
 #include <xrtm_interface.h>
 #include <xrtm_support.h>
 
@@ -30,7 +30,7 @@ void input_error(locus_data *locus, const char *s, ...) {
 
      size_t size;
 
-     va_list ap; 
+     va_list ap;
 
      size = 7 + strlen(locus->file) + 1 + 16 + 1 + strlen(locus->statement) + 2 + strlen(s) + 2 + 1;
 
@@ -254,7 +254,7 @@ input_type_data parse_type(input_data *input, int type, int n, int *dimens) {
                return parse_double(input, n, dimens);
                break;
           default:
-               eprintf("ERROR: end of switch block error\n");
+               fprintf(stderr, "ERROR: end of switch block error\n");
                exit(1);
      }
 }
@@ -274,7 +274,7 @@ void free_type(input_type_data *input_type) {
                free_double(input_type);
                break;
           default:
-               eprintf("ERROR: end of switch block error\n");
+               fprintf(stderr, "ERROR: end of switch block error\n");
                exit(1);
      }
 }
@@ -295,7 +295,7 @@ void print_type(FILE *fp, format_data *d, input_type_data *input_type) {
                print_double(fp, d, input_type);
                break;
           default:
-               eprintf("ERROR: end of switch block error\n");
+               fprintf(stderr, "ERROR: end of switch block error\n");
                exit(1);
      }
 }
@@ -421,11 +421,11 @@ void print_list(FILE *fp, format_data *d, fdclist *list) {
 /*******************************************************************************
  *
  ******************************************************************************/
-int xrtm_string_list_to_mask(input_data *input, fdclist *list, int (*name_to_mask)(const char *)) {
+long xrtm_string_list_to_mask(input_data *input, fdclist *list, long (*name_to_mask)(const char *)) {
 
-     int mask;
+     long mask;
 
-     int options;
+     long options;
 
      fdcelem *elem;
      fdcelem *first;
@@ -445,20 +445,20 @@ int xrtm_string_list_to_mask(input_data *input, fdclist *list, int (*name_to_mas
 
 
 
-int *xrtm_string_list_to_vector(input_data *input, fdclist *list, int (*name_to_mask)(const char *)) {
+long *xrtm_string_list_to_vector(input_data *input, fdclist *list, long (*name_to_mask)(const char *)) {
 
      int i;
 
-     int mask;
+     long mask;
 
-     int *options;
+     long *options;
 
      fdcelem *elem;
      fdcelem *first;
 
      options = 0;
 
-     options = alloc_array1_i(fdclist_count(list));
+     options = alloc_array1_l(fdclist_count(list));
 
      if ((elem = first = fdclist_first(list))) {
           i = 0;
@@ -474,7 +474,7 @@ int *xrtm_string_list_to_vector(input_data *input, fdclist *list, int (*name_to_
 
 
 
-fdclist *xrtm_mask_to_string_list(input_data *input, int options, int (*count)(), int (*index_to_mask)(int), const char *(*index_to_name)(int)) {
+fdclist *xrtm_mask_to_string_list(input_data *input, long options, int (*count)(), long (*index_to_mask)(int), const char *(*index_to_name)(int)) {
 
      int i;
      int n;
@@ -498,44 +498,44 @@ fdclist *xrtm_mask_to_string_list(input_data *input, int options, int (*count)()
 
 
 
-int xrtm_string_list_to_options_mask(input_data *input, fdclist *list) {
+long xrtm_string_list_to_options_mask(input_data *input, fdclist *list) {
 
-     return xrtm_string_list_to_mask(input, list, (int (*)(const char*)) xrtm_option_mask2);
+     return xrtm_string_list_to_mask(input, list, (long (*)(const char*)) xrtm_option_name_to_mask);
 }
 
 
 
-enum xrtm_option_mask *xrtm_string_list_to_options_vector(input_data *input, fdclist *list) {
+long *xrtm_string_list_to_options_vector(input_data *input, fdclist *list) {
 
-     return (enum xrtm_option_mask *) xrtm_string_list_to_vector(input, list, (int (*)(const char*)) xrtm_option_mask2);
+     return xrtm_string_list_to_vector(input, list, (long (*)(const char*)) xrtm_option_name_to_mask);
 }
 
 
 
-fdclist *xrtm_options_mask_to_string_list(input_data *input, int options) {
+fdclist *xrtm_options_mask_to_string_list(input_data *input, long options) {
 
-     return xrtm_mask_to_string_list(input, options, xrtm_options_n, (int (*)(int)) xrtm_option_mask, xrtm_option_name);
+     return xrtm_mask_to_string_list(input, options, xrtm_option_n, (long (*)(int)) xrtm_option_index_to_mask, xrtm_option_index_to_name);
 }
 
 
 
-int xrtm_string_list_to_solvers_mask(input_data *input, fdclist *list) {
+long xrtm_string_list_to_solvers_mask(input_data *input, fdclist *list) {
 
-     return xrtm_string_list_to_mask(input, list, (int (*)(const char*)) xrtm_solver_mask2);
+     return xrtm_string_list_to_mask(input, list, (long (*)(const char*)) xrtm_solver_name_to_mask);
 }
 
 
 
-enum xrtm_solver_mask *xrtm_string_list_to_solvers_vector(input_data *input, fdclist *list) {
+long *xrtm_string_list_to_solvers_vector(input_data *input, fdclist *list) {
 
-     return (enum xrtm_solver_mask *) xrtm_string_list_to_vector(input, list, (int (*)(const char*)) xrtm_solver_mask2);
+     return xrtm_string_list_to_vector(input, list, (long (*)(const char*)) xrtm_solver_name_to_mask);
 }
 
 
 
-fdclist *xrtm_solvers_mask_to_string_list(input_data *input, int solvers) {
+fdclist *xrtm_solvers_mask_to_string_list(input_data *input, long solvers) {
 
-     return xrtm_mask_to_string_list(input, solvers, xrtm_solvers_n, (int (*)(int)) xrtm_solver_mask, xrtm_solver_name);
+     return xrtm_mask_to_string_list(input, solvers, xrtm_solver_n, (long (*)(int)) xrtm_solver_index_to_mask, xrtm_solver_index_to_name);
 }
 
 
@@ -556,7 +556,7 @@ int *xrtm_string_list_to_kernels_vector(input_data *input, fdclist *list) {
      if ((elem = first = fdclist_first(list))) {
           i = 0;
           do {
-               if ((code = kernel_code(fdcelem_value(elem).d.s)) < 0)
+               if ((code = xrtm_kernel_name_to_value(fdcelem_value(elem).d.s)) < 0)
                     return NULL;
                kernels[i++] = code;
           } while ((elem = fdcelem_advance(elem)) != first);
@@ -578,7 +578,7 @@ fdclist *xrtm_kernels_vector_to_string_list(input_data *input, enum xrtm_kernel_
      fdclist_set_print(list, (int (*)(FILE *, const void *)) print_type);
 
      for (i = 0; i < n; ++i)
-          fdclist_insert_end(list, input_type_strdup(input, kernel_name(kernels[i])));
+          fdclist_insert_end(list, input_type_strdup(input, xrtm_kernel_value_to_name(kernels[i])));
 
      return list;
 }
@@ -693,6 +693,24 @@ void parse_array_param_double(input_data *input, void *d, const char *name, int 
      }
 
      free_array1_double(x1, n);
+}
+
+
+
+void parse_array_param_double2(input_data *input, void *d, const char *name, int m, int n, int (*xrtm_set_x)(void *, void *)) {
+
+     double **x1;
+
+     parse_equal(input);
+
+     x1 = parse_array2_double(input, m, n);
+
+     if (xrtm_set_x(d, x1)) {
+          input_error(&input->locus, "xrtm_set_%s()\n", name);
+          exit(1);
+     }
+
+     free_array2_double(x1, m, n);
 }
 
 
@@ -1066,7 +1084,7 @@ void parse_coef_files(input_data *input) {
           x = parse_scaler_string(input);
 
           if ((n_coef_layer = load_scat_coefs(x, n_coef, &coef1, &flag)) < 0) {
-               eprintf("ERROR: load_scat_coefs(), layer %d\n", dimens[0]);
+               fprintf(stderr, "ERROR: load_scat_coefs(), layer %d\n", dimens[0]);
                exit(1);
           }
 
@@ -1095,7 +1113,7 @@ void parse_coef_files(input_data *input) {
 
           for (i = 0; i < n_layers; ++i) {
                if ((n_coef_layer2[i] = load_scat_coefs(x1[i], n_coef, &coef2[i], &flag)) < 0) {
-                    eprintf("ERROR: load_scat_coefs(), layer %d\n", i);
+                    fprintf(stderr, "ERROR: load_scat_coefs(), layer %d\n", i);
                     exit(1);
                }
           }
@@ -1167,13 +1185,15 @@ void parse_coef_files_l(input_data *input, void *d, int n_derivs, const char *ty
           n_coef_layer = xrtm_get_n_coef(input->d, dimens[0]);
 
           if ((n_coef2 = load_scat_coefs2(x, n_coef_layer, n_coef, &coef, &flag)) < 0) {
-               eprintf("ERROR: load_scat_coefs2(), layer %d, deriv %d\n", dimens[0], dimens[1]);
+               fprintf(stderr, "ERROR: load_scat_coefs2(), layer %d, deriv %d\n", dimens[0], dimens[1]);
                exit(1);
           }
 
           if (n_coef2 != n_coef_layer) {
+/*
                input_error(&input->locus, "# of phase function expansion coefficient derivatives != to that for corresponding base values");
                exit(1);
+*/
           }
 
           if (xrtm_set_coef_x_11(d, dimens[0], dimens[1], coef)) {
@@ -1201,13 +1221,15 @@ void parse_coef_files_l(input_data *input, void *d, int n_derivs, const char *ty
                n_coef_layer = xrtm_get_n_coef(input->d, i);
 
                if ((n_coef2 = load_scat_coefs2(x1[i], n_coef_layer, n_coef, &coef1[i], &flag)) < 0) {
-                    eprintf("ERROR: load_scat_coefs2(), layer %d, deriv %d\n", i, dimens[1]);
+                    fprintf(stderr, "ERROR: load_scat_coefs2(), layer %d, deriv %d\n", i, dimens[1]);
                     exit(1);
                }
 
                if (n_coef2 != n_coef_layer) {
+/*
                     input_error(&input->locus, "# of phase function expansion coefficient derivatives != to that for corresponding base values");
                     exit(1);
+*/
                }
           }
 
@@ -1239,13 +1261,15 @@ void parse_coef_files_l(input_data *input, void *d, int n_derivs, const char *ty
 
           for (i = 0; i < n_derivs; ++i) {
                if ((n_coef2 = load_scat_coefs2(x1[i], n_coef_layer, n_coef, &coef1[i], &flag)) < 0) {
-                    eprintf("ERROR: load_scat_coefs2(), layer %d, deriv %d\n", dimens[0], i);
+                    fprintf(stderr, "ERROR: load_scat_coefs2(), layer %d, deriv %d\n", dimens[0], i);
                     exit(1);
                }
 
                if (n_coef2 != n_coef_layer) {
+/*
                     input_error(&input->locus, "# of phase function expansion coefficient derivatives != to that for corresponding base values");
                     exit(1);
+*/
                }
           }
 
@@ -1280,13 +1304,15 @@ void parse_coef_files_l(input_data *input, void *d, int n_derivs, const char *ty
 
                for (j = 0; j < n_derivs; ++j) {
                     if ((n_coef2 = load_scat_coefs2(x2[i][j], n_coef_layer, n_coef, &coef2[i][j], &flag)) < 0) {
-                         eprintf("ERROR: load_scat_coefs2(), layer %d, deriv\n", i, j);
+                         fprintf(stderr, "ERROR: load_scat_coefs2(), layer %d, deriv %d\n", i, j);
                          exit(1);
                     }
 
                     if (n_coef2 != n_coef_layer) {
+/*
                          input_error(&input->locus, "# of phase function expansion coefficient derivatives != to that for corresponding base values");
                          exit(1);
+*/
                     }
                }
           }
@@ -1537,14 +1563,18 @@ int print_lhs_dimens(FILE *fp, format_data *d, const char *name, int n_dimens, i
 
      char *temp;
 
-     temp = (char *) malloc(strlen(name) + n_dimens * (1 + 20 + 1) + 1);
+     int length;
+
+     length = strlen(name) + n_dimens * (1 + 20 + 1) + 1;
+
+     temp = (char *) malloc(length);
 
      n = 0;
 
-     n = sprintf(temp+n, "%s", name);
+     n = snprintf(temp + n, length - n, "%s", name);
 
      for (i = 0; i < n_dimens; ++i)
-          n += sprintf(temp+n, "[%d]", dimens[i]);
+          n += snprintf(temp + n, length - n, "[%d]", dimens[i]);
 
      r = print_lhs(fp, d, temp);
 
@@ -1562,7 +1592,7 @@ int print_array_param_int(FILE *fp, format_data *f, xrtm_data *d, const char *na
      i1 = alloc_array1_i(n);
 
      if (xrtm_get_x(d, i1) == XRTM_INT_ERROR) {
-          eprintf("ERROR: xrtm_get_x()\n");
+          fprintf(stderr, "ERROR: xrtm_get_x()\n");
           return -1;
      }
 
@@ -1584,7 +1614,7 @@ int print_array_param_double(FILE *fp, format_data *f, xrtm_data *d, const char 
      x1 = alloc_array1_d(n);
 
      if (xrtm_get_x(d, x1) == XRTM_DBL_ERROR) {
-          eprintf("ERROR: xrtm_get_x()\n");
+          fprintf(stderr, "ERROR: xrtm_get_x()\n");
           return -1;
      }
 
@@ -1612,7 +1642,7 @@ int print_layer_param_double(FILE *fp, format_data *f, xrtm_data *d, const char 
      x1 = alloc_array1_d(n_layers);
      for (i = 0; i < n_layers; ++i) {
           if ((x1[i] = xrtm_get_x(d, i)) == XRTM_DBL_ERROR) {
-               eprintf("ERROR: xrtm_get_%s(), i_layer = %d\n", name, i);
+               fprintf(stderr, "ERROR: xrtm_get_%s(), i_layer = %d\n", name, i);
                return -1;
           }
      }
@@ -1644,7 +1674,7 @@ int print_layer_param_l_double(FILE *fp, format_data *f, xrtm_data *d, const cha
      for (i = 0; i < n_layers; ++i) {
           for (j = 0; j < n_derivs; ++j) {
                if ((x2[i][j] = xrtm_get_x_l(d, i, j)) == XRTM_DBL_ERROR) {
-                    eprintf("ERROR: xrtm_get_%s(), i_layer = %d, i_deriv = %d\n", name, i, j);
+                    fprintf(stderr, "ERROR: xrtm_get_%s(), i_layer = %d, i_deriv = %d\n", name, i, j);
                     return -1;
                }
           }
@@ -1686,7 +1716,7 @@ int print_coef(FILE *fp, format_data *f, xrtm_data *d, misc_data *md) {
                for (j = 0; j < n_elem; ++j) {
                     for (k = 0; k < n_coef2; ++k) {
                          if ((x2[k][j] = xrtm_get_coef(d, i, j, k)) == XRTM_DBL_ERROR) {
-                              eprintf("ERROR: xrtm_get_coef(), i_layer = %d, i_elem = %d, i_coef = %d\n", i, j, k);
+                              fprintf(stderr, "ERROR: xrtm_get_coef(), i_layer = %d, i_elem = %d, i_coef = %d\n", i, j, k);
                               return -1;
                          }
                     }
@@ -1741,7 +1771,7 @@ int print_coef_l(FILE *fp, format_data *f, xrtm_data *d, misc_data *md) {
                     for (k = 0; k < n_elem; ++k) {
                          for (l = 0; l < n_coef2; ++l) {
                               if ((x3[j][l][k] = xrtm_get_coef_l(d, i, j, k, l)) == XRTM_DBL_ERROR) {
-                                   eprintf("ERROR: xrtm_get_coef_l(), i_layer = %d, i_deriv = %d, i_elem = %d, i_coef = %d\n", i, j, k, l);
+                                   fprintf(stderr, "ERROR: xrtm_get_coef_l(), i_layer = %d, i_deriv = %d, i_elem = %d, i_coef = %d\n", i, j, k, l);
                                    return -1;
                               }
                          }
@@ -1779,7 +1809,7 @@ int print_kernel_ampfac_l(FILE *fp, format_data *f, xrtm_data *d, int i_kernel) 
      x1 = alloc_array1_d(n_derivs);
      for (i = 0; i < n_derivs; ++i) {
           if ((x1[i] = xrtm_get_kernel_ampfac_l(d, i_kernel, i)) == XRTM_DBL_ERROR) {
-               eprintf("ERROR: xrtm_get_kernel_ampfac_l(), i_kernel = %d, i_deriv = %d\n", i_kernel, i);
+               fprintf(stderr, "ERROR: xrtm_get_kernel_ampfac_l(), i_kernel = %d, i_deriv = %d\n", i_kernel, i);
                return -1;
           }
      }
@@ -1807,7 +1837,7 @@ int print_kernel_params(FILE *fp, format_data *f, xrtm_data *d, int i_kernel) {
      x1 = alloc_array1_d(n_params);
      for (i = 0; i < n_params; ++i) {
           if ((x1[i] = xrtm_get_kernel_params(d, i_kernel, i)) == XRTM_DBL_ERROR) {
-               eprintf("ERROR: xrtm_get_kernel_params(), i_kernel = %d, i_param = %d\n", i_kernel, i);
+               fprintf(stderr, "ERROR: xrtm_get_kernel_params(), i_kernel = %d, i_param = %d\n", i_kernel, i);
                return -1;
           }
      }
@@ -1839,7 +1869,7 @@ int print_kernel_params_l(FILE *fp, format_data *f, xrtm_data *d, int i_kernel) 
      for (i = 0; i < n_derivs; ++i) {
           for (j = 0; j < n_params; ++j) {
                if ((x2[i][j] = xrtm_get_kernel_params_l(d, i_kernel, i, j)) == XRTM_DBL_ERROR) {
-                    eprintf("ERROR: xrtm_get_kernel_params(), i_kernel = %d, i_param = %d, i_deriv = %d\n", i_kernel, i, j);
+                    fprintf(stderr, "ERROR: xrtm_get_kernel_params(), i_kernel = %d, i_param = %d, i_deriv = %d\n", i_kernel, i, j);
                     return -1;
                }
           }
@@ -1862,8 +1892,8 @@ void input_parse1(input_data *input) {
 
      int r;
 
-     int options       = 0;
-     int solvers       = 0;
+     long options      = 0;
+     long solvers      = 0;
      int n_coef        = -999;
      int n_quad        = -999;
      int n_stokes      = -999;
@@ -1896,7 +1926,7 @@ void input_parse1(input_data *input) {
                case XRTM_INPUT_OPTIONS:
                     parse_equal(input);
                     list = parse_list(input, INPUT_TYPE_STRING, 0, NULL);
-                    options |= xrtm_string_list_to_options_mask(input, list);
+                    options = xrtm_string_list_to_options_mask(input, list);
                     if (options < 0) {
                          input_error(&input->locus, "invalid option string");
                          exit(1);
@@ -1906,7 +1936,7 @@ void input_parse1(input_data *input) {
                case XRTM_INPUT_SOLVERS:
                     parse_equal(input);
                     list = parse_list(input, INPUT_TYPE_STRING, 0, NULL);
-                    solvers |= xrtm_string_list_to_solvers_mask(input, list);
+                    solvers = xrtm_string_list_to_solvers_mask(input, list);
                     if (solvers < 0) {
                          input_error(&input->locus, "invalid solver string");
                          exit(1);
@@ -1972,7 +2002,7 @@ void input_parse1(input_data *input) {
      }
 
 L1:  if (flag && options & XRTM_OPTION_CALC_DERIVS) {
-          eprintf("ERROR: cannot use \"fd\" and xrtm option \"calc_derivs\" together\n");
+          fprintf(stderr, "ERROR: cannot use \"fd\" and xrtm option \"calc_derivs\" together\n");
           exit(1);
      }
 
@@ -1983,14 +2013,14 @@ L1:  if (flag && options & XRTM_OPTION_CALC_DERIVS) {
           n_derivs3 = n_derivs;
      }
 
-     if (xrtm_create(input->d, (enum xrtm_option_mask) options, (enum xrtm_solver_mask) solvers, n_coef, n_quad, n_stokes, n_derivs2, n_layers, n_kernels, n_kernel_quad, (enum xrtm_kernel_type *) kernels, n_out_levels, n_out_thetas)) {
-          eprintf("ERROR: invalid model creation parameters\n");
+     if (xrtm_create(input->d, (enum xrtm_option_mask) options, (enum xrtm_solver_mask) solvers, n_coef, n_quad, n_stokes, n_derivs2, n_layers, 1, n_kernels, n_kernel_quad, (enum xrtm_kernel_type *) kernels, n_out_levels, n_out_thetas)) {
+          fprintf(stderr, "ERROR: invalid model creation parameters\n");
           exit(1);
      }
 
      if (flag) {
-          if (xrtm_fd_create(input->d, input->fd, n_derivs3)) {
-               eprintf("ERROR: invalid fd model creation parameters\n");
+          if (xrtm_fd_create(input->fd, input->d, n_derivs3)) {
+               fprintf(stderr, "ERROR: invalid fd model creation parameters\n");
                exit(1);
           }
      }
@@ -2006,6 +2036,7 @@ L1:  if (flag && options & XRTM_OPTION_CALC_DERIVS) {
 
 void input_parse2(input_data *input) {
 
+     int m;
      int n;
      int r;
 
@@ -2035,14 +2066,12 @@ void input_parse2(input_data *input) {
                case XRTM_INPUT_LAMBDA:
                     parse_scaler_param_double(input, "lambda", xrtm_set_lambda);
                     break;
-               case XRTM_INPUT_F_0:
-                    parse_scaler_param_double(input, "F_0", xrtm_set_F_0);
+               case XRTM_INPUT_PLANET_R:
+                    parse_scaler_param_double(input, "planet_r", xrtm_set_planet_r);
                     break;
-               case XRTM_INPUT_THETA_0:
-                    parse_scaler_param_double(input, "theta_0", xrtm_set_theta_0);
-                    break;
-               case XRTM_INPUT_PHI_0:
-                    parse_scaler_param_double(input, "phi_0", xrtm_set_phi_0);
+               case XRTM_INPUT_LEVELS_Z:
+                    n = xrtm_get_n_layers(input->d) + 1;
+                    parse_array_param_double(input, input->d, "levels_z", n, (int (*)(void *, void *)) xrtm_set_levels_z);
                     break;
                case XRTM_INPUT_OUT_LEVELS:
                     n = xrtm_get_n_out_levels(input->d);
@@ -2056,19 +2085,53 @@ void input_parse2(input_data *input) {
                     n = xrtm_get_n_out_thetas(input->d);
                     parse_array_param_double(input, input->d, "out_thetas", n, (int (*)(void *, void *)) xrtm_set_out_thetas);
                     break;
-               case XRTM_INPUT_TOP_B:
-                    parse_scaler_param_double(input, "top_b", xrtm_set_top_b);
+               case XRTM_INPUT_F_0:
+                    parse_scaler_param_double(input, "F_0", xrtm_set_F_0);
                     break;
-               case XRTM_INPUT_PLANET_R:
-                    parse_scaler_param_double(input, "planet_r", xrtm_set_planet_r);
+               case XRTM_INPUT_THETA_0:
+                    parse_scaler_param_double(input, "theta_0", xrtm_set_theta_0);
                     break;
-               case XRTM_INPUT_LEVELS_Z:
-                    n = xrtm_get_n_layers(input->d) + 1;
-                    parse_array_param_double(input, input->d, "levels_z", n, (int (*)(void *, void *)) xrtm_set_levels_z);
+               case XRTM_INPUT_PHI_0:
+                    parse_scaler_param_double(input, "phi_0", xrtm_set_phi_0);
+                    break;
+               case XRTM_INPUT_F_ISO_TOP:
+                    parse_scaler_param_double(input, "F_iso_top", xrtm_set_F_iso_top);
+                    break;
+               case XRTM_INPUT_F_ISO_TOP_L:
+                    parse_array_param_double(input, input->d, "F_iso_top_l", n_derivs, (int (*)(void *, void *)) xrtm_set_F_iso_top_l_n);
+                    break;
+               case XRTM_INPUT_F_ISO_TOP_P:
+                    parse_array_param_double(input, input->fd, "F_iso_top_p", n_derivs, (int (*)(void *, void *)) xrtm_fd_set_F_iso_top_p_n);
+                    break;
+               case XRTM_INPUT_F_ISO_BOT:
+                    parse_scaler_param_double(input, "F_iso_bot", xrtm_set_F_iso_bot);
+                    break;
+               case XRTM_INPUT_F_ISO_BOT_L:
+                    parse_array_param_double(input, input->d, "F_iso_bot_l", n_derivs, (int (*)(void *, void *)) xrtm_set_F_iso_bot_l_n);
+                    break;
+               case XRTM_INPUT_F_ISO_BOT_P:
+                    parse_array_param_double(input, input->fd, "F_iso_bot_p", n_derivs, (int (*)(void *, void *)) xrtm_fd_set_F_iso_bot_p_n);
                     break;
                case XRTM_INPUT_LEVELS_B:
                     n = xrtm_get_n_layers(input->d) + 1;
                     parse_array_param_double(input, input->d, "levels_b", n, (int (*)(void *, void *)) xrtm_set_levels_b);
+                    break;
+               case XRTM_INPUT_LEVELS_B_L:
+                    m = xrtm_get_n_layers(input->d) + 1;
+                    parse_array_param_double2(input, input->d, "levels_b_l", m, n_derivs, (int (*)(void *, void *)) xrtm_set_levels_b_l_n);
+                    break;
+               case XRTM_INPUT_LEVELS_B_P:
+                    m = xrtm_get_n_layers(input->d) + 1;
+                    parse_array_param_double2(input, input->fd, "levels_b_p", m, n_derivs, (int (*)(void *, void *)) xrtm_fd_set_levels_b_p_n);
+                    break;
+               case XRTM_INPUT_SURFACE_B:
+                    parse_scaler_param_double(input, "surface_b", xrtm_set_surface_b);
+                    break;
+               case XRTM_INPUT_SURFACE_B_L:
+                    parse_array_param_double(input, input->d, "surface_b_l_n", n_derivs, (int (*)(void *, void *)) xrtm_set_surface_b_l_n);
+                    break;
+               case XRTM_INPUT_SURFACE_B_P:
+                    parse_array_param_double(input, input->fd, "surface_b_p_n", n_derivs, (int (*)(void *, void *)) xrtm_fd_set_surface_b_p_n);
                     break;
                case XRTM_INPUT_G:
                     parse_layer_param_double(input, "g", xrtm_set_g_1, xrtm_set_g_n);
@@ -2114,9 +2177,6 @@ void input_parse2(input_data *input) {
                     break;
                case XRTM_INPUT_LTAU_P:
                     parse_layer_param_l_double(input, input->fd, n_derivs, "ltau", "p", (int (*)(void *, int, int, double)) xrtm_fd_set_ltau_p_11, (int (*)(void *, int, double *)) xrtm_fd_set_ltau_p_n1, (int (*)(void *, int, double *)) xrtm_fd_set_ltau_p_1n, (int (*)(void *, double **)) xrtm_fd_set_ltau_p_nn);
-                    break;
-               case XRTM_INPUT_SURFACE_B:
-                    parse_scaler_param_double(input, "surface_b", xrtm_set_surface_b);
                     break;
                case XRTM_INPUT_KERNEL_AMPFAC:
                     parse_kernel_ampfac(input);
@@ -2271,7 +2331,7 @@ int xrtm_fread_input(xrtm_data *d, xrtm_fd_data *fd, misc_data *md, const char *
      }
      else {
           if ((yyin = fopen(filename, "r")) == NULL) {
-               printf("ERROR: Error opening file for reading: %s ... %s\n",
+               fprintf(stderr, "ERROR: Error opening file for reading: %s ... %s\n",
                       filename, strerror(errno));
                return -1;
           }
@@ -2311,14 +2371,14 @@ int xrtm_fwrite_input_fn(xrtm_data *d, xrtm_fd_data *fd, misc_data *md, const ch
           fp = stderr;
      else {
           if ((fp = fopen(filename, "w")) == NULL) {
-               printf("ERROR: Error opening file for writing: %s ... %s\n",
+               fprintf(stderr, "ERROR: Error opening file for writing: %s ... %s\n",
                       filename, strerror(errno));
                return -1;
           }
      }
 
      if (xrtm_fwrite_input_fp(d, fd, md, fp, nl, use_aligned, use_array2, use_dash, use_equal)) {
-          eprintf("ERROR: xrtm_fwrite_input_fp()\n");
+          fprintf(stderr, "ERROR: xrtm_fwrite_input_fp()\n");
           return -1;
      }
 
@@ -2412,7 +2472,7 @@ int xrtm_fwrite_input_fp(xrtm_data *d, xrtm_fd_data *fd, misc_data *md, FILE *fp
 
      if (solvers & XRTM_SOLVERS_DOUBLING) {
           if ((x = xrtm_get_doub_d_tau(d)) < 0.) {
-               eprintf("ERROR: xrtm_get_doub_d_tau()\n");
+               fprintf(stderr, "ERROR: xrtm_get_doub_d_tau()\n");
                return -1;
           }
           print_lhs(fp, &f, "doub_d_tau"); fprintf(fp, "%e%c", x, f.nl);
@@ -2420,7 +2480,7 @@ int xrtm_fwrite_input_fp(xrtm_data *d, xrtm_fd_data *fd, misc_data *md, FILE *fp
 
      if (solvers & XRTM_SOLVER_PADE_ADD) {
           if (xrtm_get_pade_params(d, &i, &j) < 0.) {
-               eprintf("ERROR: xrtm_get_pade_params()\n");
+               fprintf(stderr, "ERROR: xrtm_get_pade_params()\n");
                return -1;
           }
           print_lhs(fp, &f, "pade_params"); fprintf(fp, "%d, %d%c", i, j, f.nl);
@@ -2428,146 +2488,159 @@ int xrtm_fwrite_input_fp(xrtm_data *d, xrtm_fd_data *fd, misc_data *md, FILE *fp
 
      if (solvers & XRTM_SOLVER_SOS) {
           if (xrtm_get_sos_params(d, &i, &x, &y) < 0.) {
-               eprintf("ERROR: xrtm_get_sos_params()\n");
+               fprintf(stderr, "ERROR: xrtm_get_sos_params()\n");
                return -1;
           }
           print_lhs(fp, &f, "sos_params"); fprintf(fp, "%d, %e, %e%c", i, x, y, f.nl);
      }
 
      if ((x = xrtm_get_fourier_tol(d)) < 0.) {
-          eprintf("ERROR: xrtm_get_fourier_tol()\n");
+          fprintf(stderr, "ERROR: xrtm_get_fourier_tol()\n");
           return -1;
      }
      print_lhs(fp, &f, "fourier_tol"); fprintf(fp, "%e%c", x, f.nl);
 
      if (options & XRTM_OPTION_SOURCE_THERMAL) {
           if ((x = xrtm_get_lambda(d)) < 0.) {
-               eprintf("ERROR: xrtm_get_lambda()\n");
+               fprintf(stderr, "ERROR: xrtm_get_lambda()\n");
                return -1;
           }
           print_lhs(fp, &f, "lambda"); fprintf(fp, "%e%c", x, f.nl);
      }
 
-     if ((x = xrtm_get_F_0(d)) < 0.) {
-          eprintf("ERROR: xrtm_get_F_0()\n");
-          return -1;
-     }
-     print_lhs(fp, &f, "F_0"); fprintf(fp, "%e%c", x, f.nl);
-
-     if ((x = xrtm_get_theta_0(d)) < 0.) {
-          eprintf("ERROR: xrtm_get_theta_0()\n");
-          return -1;
-     }
-     print_lhs(fp, &f, "theta_0"); fprintf(fp, "%e%c", x, f.nl);
-
-     if ((x = xrtm_get_phi_0(d)) < 0.) {
-          eprintf("ERROR: xrtm_get_phi_0()\n");
-          return -1;
-     }
-     print_lhs(fp, &f, "phi_0"); fprintf(fp, "%e%c", x, f.nl);
-
-     if (options & XRTM_OPTION_OUTPUT_AT_LEVELS) {
-          if (print_array_param_int(fp, &f, d, "out_levels", n_out_levels, xrtm_get_out_levels)) {
-               eprintf("ERROR: print_array_param_int()\n");
-               return -1;
-          }
-     }
-
-     if (n_out_thetas > 0) {
-          if (print_array_param_double(fp, &f, d, "out_thetas", n_out_thetas, xrtm_get_out_thetas)) {
-               eprintf("ERROR: print_array_param_double()\n");
-               return -1;
-          }
-     }
-
      if (options & XRTM_OPTION_PSA) {
           if ((x = xrtm_get_planet_r(d)) < 0.) {
-               eprintf("ERROR: xrtm_get_planet_r()\n");
+               fprintf(stderr, "ERROR: xrtm_get_planet_r()\n");
                return -1;
           }
           print_lhs(fp, &f, "planet_r"); fprintf(fp, "%e%c", x, f.nl);
 
           if (print_array_param_double(fp, &f, d, "levels_z", n_layers + 1, xrtm_get_levels_z)) {
-               eprintf("ERROR: print_array_param_double()\n");
+               fprintf(stderr, "ERROR: print_array_param_double()\n");
                return -1;
           }
      }
 
-     if (options & XRTM_OPTION_SOURCE_THERMAL) {
-          if (print_array_param_double(fp, &f, d, "levels_b", n_layers + 1, xrtm_get_levels_b)) {
-               eprintf("ERROR: print_array_param_double()\n");
-               return -1;
-          }
-     }
-
-     if (solvers & XRTM_SOLVERS_USE_G) {
-          if (print_layer_param_double(fp, &f, d, "g", xrtm_get_g)) {
-               eprintf("ERROR: print_layer_param_double()\n");
-               return -1;
-          }
-
-          if (n_derivs > 0) {
-               if (print_layer_param_l_double(fp, &f, d, "g_l", xrtm_get_g_l)) {
-                    eprintf("ERROR: print_layer_param_l_double()\n");
-                    return -1;
-               }
-          }
-     }
-
-     if (print_layer_param_double(fp, &f, d, "omega", xrtm_get_omega)) {
-          eprintf("ERROR: print_layer_param_double()\n");
-          return -1;
-     }
-
-     if (n_derivs > 0) {
-          if (print_layer_param_l_double(fp, &f, d, "omega_l", xrtm_get_omega_l)) {
-               eprintf("ERROR: print_layer_param_l_double()\n");
-               return -1;
-          }
-     }
-
-     if (print_layer_param_double(fp, &f, d, "ltau", xrtm_get_ltau)) {
-          eprintf("ERROR: print_layer_param_double()\n");
-          return -1;
-     }
-
-     if (n_derivs > 0) {
-          if (print_layer_param_l_double(fp, &f, d, "ltau_l", xrtm_get_ltau_l)) {
-               eprintf("ERROR: print_layer_param_l_double()\n");
-               return -1;
-          }
-     }
-
-     if (print_coef(fp, &f, d, md)) {
-          eprintf("ERROR: print_coef()\n");
-          return -1;
-     }
-
-     if (n_derivs > 0) {
-          if (print_coef_l(fp, &f, d, md)) {
-               eprintf("ERROR: print_coef_l()\n");
+     if (options & XRTM_OPTION_OUTPUT_AT_LEVELS) {
+          if (print_array_param_int(fp, &f, d, "out_levels", n_out_levels, xrtm_get_out_levels)) {
+               fprintf(stderr, "ERROR: print_array_param_int()\n");
                return -1;
           }
      }
 
      if (options & XRTM_OPTION_OUTPUT_AT_TAUS) {
           if (print_array_param_double(fp, &f, d, "out_taus", n_out_levels, xrtm_get_out_taus)) {
-               eprintf("ERROR: print_array_param_double()\n");
+               fprintf(stderr, "ERROR: print_array_param_double()\n");
                return -1;
           }
      }
 
+     if (n_out_thetas > 0) {
+          if (print_array_param_double(fp, &f, d, "out_thetas", n_out_thetas, xrtm_get_out_thetas)) {
+               fprintf(stderr, "ERROR: print_array_param_double()\n");
+               return -1;
+          }
+     }
+
+     if ((x = xrtm_get_F_iso_top(d)) < 0.) {
+          fprintf(stderr, "ERROR: xrtm_get_F_iso_top()\n");
+          return -1;
+     }
+     print_lhs(fp, &f, "F_iso_top"); fprintf(fp, "%e%c", x, f.nl);
+
+     if ((x = xrtm_get_F_iso_bot(d)) < 0.) {
+          fprintf(stderr, "ERROR: xrtm_get_F_iso_bot()\n");
+          return -1;
+     }
+     print_lhs(fp, &f, "F_iso_bot"); fprintf(fp, "%e%c", x, f.nl);
+
+
+     if (options & XRTM_OPTION_SOURCE_SOLAR) {
+          if ((x = xrtm_get_F_0(d)) < 0.) {
+               fprintf(stderr, "ERROR: xrtm_get_F_0()\n");
+               return -1;
+          }
+          print_lhs(fp, &f, "F_0"); fprintf(fp, "%e%c", x, f.nl);
+
+          if ((x = xrtm_get_theta_0(d)) < 0.) {
+               fprintf(stderr, "ERROR: xrtm_get_theta_0()\n");
+               return -1;
+          }
+          print_lhs(fp, &f, "theta_0"); fprintf(fp, "%e%c", x, f.nl);
+
+          if ((x = xrtm_get_phi_0(d)) < 0.) {
+               fprintf(stderr, "ERROR: xrtm_get_phi_0()\n");
+               return -1;
+          }
+          print_lhs(fp, &f, "phi_0"); fprintf(fp, "%e%c", x, f.nl);
+     }
+
      if (options & XRTM_OPTION_SOURCE_THERMAL) {
+          if (print_array_param_double(fp, &f, d, "levels_b", n_layers + 1, xrtm_get_levels_b)) {
+               fprintf(stderr, "ERROR: print_array_param_double()\n");
+               return -1;
+          }
+
           if ((x = xrtm_get_surface_b(d)) < 0.) {
-               eprintf("ERROR: xrtm_get_surface_b()\n");
+               fprintf(stderr, "ERROR: xrtm_get_surface_b()\n");
                return -1;
           }
           print_lhs(fp, &f, "surface_b"); fprintf(fp, "%e%c", x, f.nl);
      }
 
+     if (solvers & XRTM_SOLVERS_USE_G) {
+          if (print_layer_param_double(fp, &f, d, "g", xrtm_get_g)) {
+               fprintf(stderr, "ERROR: print_layer_param_double()\n");
+               return -1;
+          }
+
+          if (n_derivs > 0) {
+               if (print_layer_param_l_double(fp, &f, d, "g_l", xrtm_get_g_l)) {
+                    fprintf(stderr, "ERROR: print_layer_param_l_double()\n");
+                    return -1;
+               }
+          }
+     }
+
+     if (print_layer_param_double(fp, &f, d, "omega", xrtm_get_omega)) {
+          fprintf(stderr, "ERROR: print_layer_param_double()\n");
+          return -1;
+     }
+
+     if (n_derivs > 0) {
+          if (print_layer_param_l_double(fp, &f, d, "omega_l", xrtm_get_omega_l)) {
+               fprintf(stderr, "ERROR: print_layer_param_l_double()\n");
+               return -1;
+          }
+     }
+
+     if (print_layer_param_double(fp, &f, d, "ltau", xrtm_get_ltau)) {
+          fprintf(stderr, "ERROR: print_layer_param_double()\n");
+          return -1;
+     }
+
+     if (n_derivs > 0) {
+          if (print_layer_param_l_double(fp, &f, d, "ltau_l", xrtm_get_ltau_l)) {
+               fprintf(stderr, "ERROR: print_layer_param_l_double()\n");
+               return -1;
+          }
+     }
+
+     if (print_coef(fp, &f, d, md)) {
+          fprintf(stderr, "ERROR: print_coef()\n");
+          return -1;
+     }
+
+     if (n_derivs > 0) {
+          if (print_coef_l(fp, &f, d, md)) {
+               fprintf(stderr, "ERROR: print_coef_l()\n");
+               return -1;
+          }
+     }
+
      for (i = 0; i < n_kernels; ++i) {
           if ((x = xrtm_get_kernel_ampfac(d, i)) < 0.) {
-               eprintf("ERROR: xrtm_get_kernel_ampfac(), i_kernel = %d", i);
+               fprintf(stderr, "ERROR: xrtm_get_kernel_ampfac(), i_kernel = %d", i);
                return -1;
           }
           print_lhs_dimens(fp, &f, "kernel_ampfac", 1, &i); fprintf(fp, "%e%c", x, f.nl);
@@ -2576,7 +2649,7 @@ int xrtm_fwrite_input_fp(xrtm_data *d, xrtm_fd_data *fd, misc_data *md, FILE *fp
      if (n_derivs > 0) {
           for (i = 0; i < n_kernels; ++i) {
                if (print_kernel_ampfac_l(fp, &f, d, i)) {
-                    eprintf("ERROR: print_kernel_ampfac_l()\n");
+                    fprintf(stderr, "ERROR: print_kernel_ampfac_l()\n");
                     return -1;
                }
           }
@@ -2585,7 +2658,7 @@ int xrtm_fwrite_input_fp(xrtm_data *d, xrtm_fd_data *fd, misc_data *md, FILE *fp
      for (i = 0; i < n_kernels; ++i) {
           if (kernel_n_params((enum xrtm_kernel_type) xrtm_get_kernel(d, i))) {
                if (print_kernel_params(fp, &f, d, i)) {
-                    eprintf("ERROR: print_kernel_params()\n");
+                    fprintf(stderr, "ERROR: print_kernel_params()\n");
                     return -1;
                }
           }
@@ -2595,7 +2668,7 @@ int xrtm_fwrite_input_fp(xrtm_data *d, xrtm_fd_data *fd, misc_data *md, FILE *fp
           for (i = 0; i < n_kernels; ++i) {
                if (kernel_n_params((enum xrtm_kernel_type) xrtm_get_kernel(d, i))) {
                     if (print_kernel_params_l(fp, &f, d, i)) {
-                         eprintf("ERROR: print_kernel_params_l()\n");
+                         fprintf(stderr, "ERROR: print_kernel_params_l()\n");
                          return -1;
                     }
                }

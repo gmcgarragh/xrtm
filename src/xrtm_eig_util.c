@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -36,12 +36,34 @@ void dgeev_(const char *, const char *, int *, double *, int *, double *, double
 /*******************************************************************************
  *
  ******************************************************************************/
+int is_trivial_eigenvector(int i, int n_quad, double **evecs) {
+
+     int j;
+
+     int count = 0;
+
+     if (n_quad == 1)
+          return 0;
+
+     for (j = 0; j < n_quad; ++j) {
+          if (fabs(evecs[j][i]) > DBL_EPSILON)
+               count++;
+     }
+
+     return count == 1;
+}
+
+
+/*
 int is_dummy_node_eigenvector(int i, int n_quad, double **evecs) {
 
      int j;
 
      int count1 = 0;
      int count2 = 0;
+
+     if (n_quad == 1)
+          return 0;
 
      for (j = 0; j < n_quad; ++j) {
           count1 += fabs(1. - evecs[j][i]) < DBL_EPSILON ? 1 : 0;
@@ -50,10 +72,27 @@ int is_dummy_node_eigenvector(int i, int n_quad, double **evecs) {
 
      return count1 == 1 && count2 == n_quad - 1;
 }
+*/
+
+
+int is_degenerate_eigenvalue(int i, int n_quad, double *evals) {
+
+     int j;
+
+     for (j = 0; j < n_quad; ++j) {
+          if (i != j) {
+               if (fabs(evals[i] - evals[j]) <= DBL_EPSILON * 1.e2) {
+                    return 1;
+                }
+          }
+     }
+
+     return 0;
+}
 
 
 
-void fill_dummy_node_eigen_derivs(int i, int n_quad, int n_derivs, double **evals_r_l, double **evals_i_l, double ***evecs_l, uchar *derivs) {
+void zero_eigen_derivs(int i, int n_quad, int n_derivs, double **evals_r_l, double **evals_i_l, double ***evecs_l, uchar *derivs) {
 
      int j;
      int k;
@@ -95,13 +134,14 @@ static void eig_func_gen_real(int n_quad, double **A, double *evals,
                               double **evecs, int eigen_solver, work_data work) {
 #ifdef HAVE_FORTRAN_COMPILER
      if (eigen_solver == EIGEN_SOLVER_GEN_REAL_ASYMTX) {
+/*
           int i;
           int j;
-
+*/
           int ier;
-
+/*
           double a;
-
+*/
           double **w1;
 
           double *wkd;
@@ -114,12 +154,12 @@ static void eig_func_gen_real(int n_quad, double **A, double *evals,
 
           dasymtx_(*evecs, *w1, evals, &n_quad, &n_quad, &n_quad, &ier, wkd);
           if (ier) {
-               eprintf("ERROR: dasymtx() info = %d\n", ier);
+               fprintf(stderr, "ERROR: dasymtx() info = %d\n", ier);
                exit(1);
           }
 
           dmat_trans(w1, evecs, n_quad, n_quad);
-
+/*
           for (j = 0; j < n_quad; ++j) {
                a = 0.;
                for (i = 0; i < n_quad; ++i) {
@@ -131,6 +171,7 @@ static void eig_func_gen_real(int n_quad, double **A, double *evals,
                     evecs[i][j] /= a;
                }
           }
+*/
      }
      else
 #endif
@@ -159,7 +200,7 @@ static void eig_func_gen_real(int n_quad, double **A, double *evals,
 
           rg_(&n_quad, &n_quad, *evecs, evals, v1, &matz, *w1, iv1, fv1, &ierr);
           if (ierr) {
-               eprintf("ERROR: rg() info = %d\n", ierr);
+               fprintf(stderr, "ERROR: rg() info = %d\n", ierr);
                exit(1);
           }
 
@@ -188,7 +229,7 @@ static void eig_func_gen_real(int n_quad, double **A, double *evals,
           dgeev_("N", "V", &n_quad, *evecs, &n_quad, evals, v1, NULL, &n_quad, *w1,
                  &n_quad, dwork, &lwork, &info);
           if (info) {
-               eprintf("ERROR: dgeev() info = %d\n", info);
+               fprintf(stderr, "ERROR: dgeev() info = %d\n", info);
                exit(1);
           }
 
@@ -209,11 +250,6 @@ static void eigen_derivatives_real(int i, int n_quad, int n_derivs, double **gam
      double a;
      double b;
 
-     if (is_dummy_node_eigenvector(i, n_quad, evecs)) {
-          fill_dummy_node_eigen_derivs(i, n_quad, n_derivs, evals_r_l, evals_i_l, evecs_l, derivs);
-          return;
-     }
-
      a = sqrt(evals_r[i]) * 2.;
      b = evals_r[i];
 
@@ -229,10 +265,10 @@ static void eigen_derivatives_real(int i, int n_quad, int n_derivs, double **gam
 
      for (j = 0; j < n_quad; ++j)
           A[n_quad][j+1] = evecs[j][i];
-
+/*
      if (evals_i_l)
           perturb_zero_elems(n_quad + 1, A);
-
+*/
      dmat_getrf(A, n_quad + 1, n_quad + 1, ip);
 
      for (j = 0; j < n_quad; ++j)
@@ -301,7 +337,14 @@ static void eig_1n_gen_real(int n_quad, int n_derivs,
           A  = get_work_d2(&work, n_quad + 1, n_quad + 1);
 
           for (i = 0; i < n_quad; ++i) {
-               eigen_derivatives_real(i, n_quad, n_derivs, gamma, evals, NULL, evecs, gamma_l, evals_l, NULL, evecs_l, derivs, A, B, i1, v1);
+
+               if (is_trivial_eigenvector(i, n_quad, evecs))
+/*
+               if (is_dummy_node_eigenvector(i, n_quad, evecs))
+*/
+                    zero_eigen_derivs(i, n_quad, n_derivs, evals_l, NULL, evecs_l, derivs);
+               else
+                    eigen_derivatives_real(i, n_quad, n_derivs, gamma, evals, NULL, evecs, gamma_l, evals_l, NULL, evecs_l, derivs, A, B, i1, v1);
 
                if (save_tree.t) {
                     copy_array1_i(save->ip[i], i1, n_quad + 1);
@@ -345,7 +388,7 @@ static void eig_func_gen_complex(int n_quad, double **A, double *evals_r, double
 
           rg_(&n_quad, &n_quad, *w1, evals_r, evals_i, &matz, *w2, iv1, fv1, &ierr);
           if (ierr) {
-               eprintf("ERROR: rg() info = %d\n", ierr);
+               fprintf(stderr, "ERROR: rg() info = %d\n", ierr);
                exit(1);
           }
 
@@ -372,7 +415,7 @@ static void eig_func_gen_complex(int n_quad, double **A, double *evals_r, double
           dgeev_("N", "V", &n_quad, *w1, &n_quad, evals_r, evals_i, NULL, &n_quad,
                  *w2, &n_quad, ework, &lwork, &info);
           if (info) {
-               eprintf("ERROR: dgeev() info = %d\n", info);
+               fprintf(stderr, "ERROR: dgeev() info = %d\n", info);
                exit(1);
           }
 
@@ -449,7 +492,14 @@ void eig_1n_gen_complex(int n_quad, int n_derivs,
 
           for (i = 0; i < n_quad; ++i) {
                if (evals_i[i] == 0.) {
-                    eigen_derivatives_real(i, n_quad, n_derivs, gamma, evals_r, evals_i, evecs, gamma_l, evals_r_l, evals_i_l, evecs_l, derivs, Ar, Br, ip, v1);
+
+                    if (is_degenerate_eigenvalue(i, n_quad, evals_r))
+/*
+                    if (is_dummy_node_eigenvector(i, n_quad, evecs))
+*/
+                         zero_eigen_derivs(i, n_quad, n_derivs, evals_r_l, evals_i_l, evecs_l, derivs);
+                    else
+                         eigen_derivatives_real(i, n_quad, n_derivs, gamma, evals_r, evals_i, evecs, gamma_l, evals_r_l, evals_i_l, evecs_l, derivs, Ar, Br, ip, v1);
 
                     if (save_tree.t) {
                          copy_array1_i(save->ip[i], ip, n_quad + 1);
@@ -457,7 +507,7 @@ void eig_1n_gen_complex(int n_quad, int n_derivs,
                          dmat_copy(save->A[i], Ar, n_quad + 1, n_quad + 1);
                     }
                }
-               else 
+               else
                if (evals_i[i] > 0.) {
                     i1 = i;
                     i2 = i + 1;
@@ -912,9 +962,9 @@ else {
  ******************************************************************************/
 void eig_2n_gen_real(int n_quad, int n_derivs,
                      double  **tpr, double  **tmr, double  **gamma,
-                     double  *nu, double  **X_p, double  **X_m, 
+                     double  *nu, double  **X_p, double  **X_m,
                      double ***tpr_l, double ***tmr_l, double ***gamma_l,
-                     double **nu_l, double ***X_p_l, double ***X_m_l, 
+                     double **nu_l, double ***X_p_l, double ***X_m_l,
                      int eigen_solver, uchar *derivs, save_tree_data save_tree,
                      work_data work) {
 
@@ -962,9 +1012,9 @@ void eig_2n_gen_real(int n_quad, int n_derivs,
  ******************************************************************************/
 void eig_2n_gen_complex(int n_quad, int n_derivs,
                         double  **tpr, double  **tmr, double  **gamma,
-                        dcomplex  *nu, dcomplex  **X_p, dcomplex  **X_m, 
+                        dcomplex  *nu, dcomplex  **X_p, dcomplex  **X_m,
                         double ***tpr_l, double ***tmr_l, double ***gamma_l,
-                        dcomplex **nu_l, dcomplex ***X_p_l, dcomplex ***X_m_l, 
+                        dcomplex **nu_l, dcomplex ***X_p_l, dcomplex ***X_m_l,
                         int eigen_solver, uchar *derivs, save_tree_data save_tree,
                         work_data work) {
 

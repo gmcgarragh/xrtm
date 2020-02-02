@@ -1,6 +1,6 @@
-/******************************************************************************%
+/*******************************************************************************
 **
-**    Copyright (C) 2007-2012 Greg McGarragh <gregm@atmos.colostate.edu>
+**    Copyright (C) 2007-2020 Greg McGarragh <greg.mcgarragh@colostate.edu>
 **
 **    This source code is licensed under the GNU General Public License (GPL),
 **    Version 3.  See the file COPYING for more details.
@@ -32,13 +32,13 @@ double scat_angle(double mu_0, double phi_0, double mu, double phi) {
 /*******************************************************************************
  *
  ******************************************************************************/
-void phase_func(int n_coef, double *p, double *chi, double *P) {
+void phase_func(int n_coef, double *p, double *coefs, double *P) {
 
      int i;
 
      *P = 0.;
      for (i = 0; i < n_coef; ++i)
-          *P += p[i] * chi[i];
+          *P += p[i] * coefs[i];
 }
 
 
@@ -46,7 +46,95 @@ void phase_func(int n_coef, double *p, double *chi, double *P) {
 /*******************************************************************************
  *
  ******************************************************************************/
-void build_phase_vecs_scalar(int i_four, int n_coef, int n_mus, double **Y1, double *Y2, int lda, double *chi, double *P_pp, double *P_mp) {
+void calc_Y_x(int i_four, double x, double *Y) {
+
+     double x2;
+     double x3;
+     double x4;
+
+     double a1;
+     double a2;
+     double a3;
+     double a4;
+
+     x2 = x * x;
+     x3 = x2 * x;
+     x4 = x3 * x;
+
+     a1 = sqrt(1. - x2);
+     a2 = a1 * a1 * a1;
+     a3 = a2 * a1;
+     a4 = a3 * a1;
+
+     if (i_four == 0) {
+          Y[0] = 1.;
+          Y[1] = x;
+          Y[2] = 1. / 2. * (3. * x2 - 1.);
+          Y[3] = 1. / 2. * (5. * x3 - 3. * x);
+          Y[4] = 1. / 8. * (35. * x4 - 30. * x2 + 3.);
+          Y[5] = 1. / 8. * x * (63. * x4 - 70. * x2 + 15.);
+     }
+     else if (i_four == 1) {
+          Y[1] = -a1						/ sqrt(2.);
+          Y[2] = -3. * x * a1					/ sqrt(6.);
+          Y[3] = -3. / 2. * (5. * x2 - 1.) * a1			/ sqrt(12.);
+          Y[4] = 5. / 2. * (7. * x3 - 3. * x) * a1		/ sqrt(20.);
+          Y[5] = 15. / 8. * a1 * (21. * x4 - 14. * x2 + 1.)	/ sqrt(30.);
+     }
+     else if (i_four == 2) {
+          Y[2] = 3. * (1. - x2)					/ sqrt(24.);
+          Y[3] = 15. * x * (1. - x2)				/ sqrt(120.);
+          Y[4] = 15. / 2. * (7. * x2 - 1.) * (1. - x2)		/ sqrt(360.);
+          Y[5] = 105. / 2. * x * (1. - x2) * (3. * x2 - 1.)	/ sqrt(840.);
+     }
+     else if (i_four == 3) {
+          Y[3] = -15. * a2					/ sqrt(720.);
+          Y[4] = 105. * x * a2					/ sqrt(5040.);
+          Y[5] = 105. / 2. * a2 * (9. * x2 - 1.)		/ sqrt(20160.);
+     }
+     else if (i_four == 4) {
+          Y[4] = 105. * a3					/ sqrt(40320.);
+          Y[5] = 945. * x * a3					/ sqrt(362880.);
+     }
+     else if (i_four == 5) {
+          Y[5] = 945. * a4					/ sqrt(3628800.);
+     }
+}
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+void print_Y_x_constant_code(int n_four, int n_coef, double mu) {
+
+     int i;
+     int j;
+
+     double Y[6];
+
+     printf("     /* This code was automatically generated\n");
+     printf("        with function print_Y_x_constant_code() */\n");
+     printf("\n");
+
+     for (i = 0; i < n_four; ++i) {
+          calc_Y_x(i, mu, Y);
+
+          if (i == 0)
+               printf("     if (i_four == 0) {\n");
+          else
+               printf("     else if (i_four == %d) {\n", i);
+          for (j = i; j < n_coef; ++j)
+               printf("          Y[%d] = % .16e;\n", j, Y[j]);
+          printf("     }\n");
+     }
+}
+
+
+
+/*******************************************************************************
+ *
+ ******************************************************************************/
+void build_phase_vecs_scalar(int i_four, int n_coef, int n_mus, double **Y1, double *Y2, int lda, double *coefs, double *P_pp, double *P_mp) {
 
      int i;
      int k;
@@ -61,7 +149,7 @@ void build_phase_vecs_scalar(int i_four, int n_coef, int n_mus, double **Y1, dou
           P_pp[i] = 0.;
           P_mp[i] = 0.;
           for (k = i_four; k < n_coef; ++k) {
-               c = chi[k] * Y1[i][k] * Y2[k];
+               c = coefs[k] * Y1[i][k] * Y2[k];
                P_pp[i] += c;
                P_mp[i] += c * b;
                b *= -1.;
@@ -79,7 +167,7 @@ void build_phase_vecs_scalar(int i_four, int n_coef, int n_mus, double **Y1, dou
 
      a = 1.;
      for (k = i_four; k < n_coef; ++k) {
-          b = chi[k] * Y2[k];
+          b = coefs[k] * Y2[k];
           for (i = 0; i < n_mus; ++i) {
                c = b * Y1[i][k];
                P_pp[i] += c;
@@ -100,14 +188,14 @@ void build_phase_vecs_scalar(int i_four, int n_coef, int n_mus, double **Y1, dou
      }
 
      for (k = i_four    ; k < n_coef; k += 2) {
-          a = chi[k] * Y2[k];
+          a = coefs[k] * Y2[k];
           for (i = 0; i < n_mus; ++i) {
                P_pp[i] += a * Y1[i][k];
           }
      }
 
      for (k = i_four + 1; k < n_coef; k += 2) {
-          a = chi[k] * Y2[k];
+          a = coefs[k] * Y2[k];
           for (i = 0; i < n_mus; ++i) {
                P_mp[i] += a * Y1[i][k];
           }
@@ -127,7 +215,7 @@ void build_phase_vecs_scalar(int i_four, int n_coef, int n_mus, double **Y1, dou
 /*******************************************************************************
  *
  ******************************************************************************/
-void build_phase_mats_scalar(int i_four, int n_coef, int n_mus1, int n_mus2, double **Y1, double **Y2, int lda, double *chi, double **P_pp, double **P_mp) {
+void build_phase_mats_scalar(int i_four, int n_coef, int n_mus1, int n_mus2, double **Y1, double **Y2, int lda, double *coefs, double **P_pp, double **P_mp) {
 
      int i;
      int j;
@@ -144,7 +232,7 @@ void build_phase_mats_scalar(int i_four, int n_coef, int n_mus1, int n_mus2, dou
                P_pp[i][j] = 0.;
                P_mp[i][j] = 0.;
                for (k = i_four; k < n_coef; ++k) {
-                    c = chi[k] * Y1[i][k] * Y2[j][k];
+                    c = coefs[k] * Y1[i][k] * Y2[j][k];
                     P_pp[i][j] += c;
                     P_mp[i][j] += c * b;
                     b *= -1.;
@@ -165,7 +253,7 @@ void build_phase_mats_scalar(int i_four, int n_coef, int n_mus1, int n_mus2, dou
      a = 1.;
      for (k = i_four; k < n_coef; ++k) {
           for (i = 0; i < n_mus1; ++i) {
-               b = chi[k] * Y1[i][k];
+               b = coefs[k] * Y1[i][k];
                for (j = 0; j < n_mus2; ++j) {
                     c = b * Y2[j][k];
                     P_pp[i][j] += c;
@@ -192,7 +280,7 @@ void build_phase_mats_scalar(int i_four, int n_coef, int n_mus1, int n_mus2, dou
 
      for (k = i_four    ; k < n_coef; k += 2) {
           for (i = 0; i < n_mus1; ++i) {
-               a = chi[k] * Y1[i][k];
+               a = coefs[k] * Y1[i][k];
                for (j = 0; j < n_mus2; ++j) {
                     P_pp[i][j] += a * Y2[j][k];
                }
@@ -201,7 +289,7 @@ void build_phase_mats_scalar(int i_four, int n_coef, int n_mus1, int n_mus2, dou
 
      for (k = i_four + 1; k < n_coef; k += 2) {
           for (i = 0; i < n_mus1; ++i) {
-               a = chi[k] * Y1[i][k];
+               a = coefs[k] * Y1[i][k];
                for (j = 0; j < n_mus2; ++j) {
                     P_mp[i][j] += a * Y2[j][k];
                }
@@ -217,6 +305,52 @@ void build_phase_mats_scalar(int i_four, int n_coef, int n_mus1, int n_mus2, dou
                P_mp[i][j] = c;
           }
      }
+/*
+     int i;
+     int j;
+     int n;
+
+     double a;
+
+     double alpha = 1.;
+     double beta  = 0.;
+
+     double **w1;
+
+     void dgemm_(const char *, const char *, int *, int *, int *, double *, double *, int *, double *, int *, double *, double *, int *);
+
+     n = n_coef - i_four;
+
+     w1 = alloc_array2_d(n_mus1, n);
+
+     for (i = 0; i < n_mus1; ++i) {
+          for (j = i_four; j < n_coef; ++j) {
+               w1[i][j-i_four] = Y1[i][j] * coefs[j];
+          }
+     }
+
+     dgemm_("t", "n", &n_mus2, &n_mus1, &n, &alpha, Y2[0]+i_four, &n_coef, *w1, &n, &beta, *P_pp, &n_mus2);
+
+     for (i = 0; i < n_mus1; ++i) {
+          a = 1.;
+          for (j = i_four; j < n_coef; ++j) {
+               w1[i][j-i_four] = w1[i][j-i_four] * a;
+               a *= -1.;
+          }
+     }
+
+     dgemm_("t", "n", &n_mus2, &n_mus1, &n, &alpha, Y2[0]+i_four, &n_coef, *w1, &n, &beta, *P_mp, &n_mus2);
+
+     free_array2_d(w1);
+
+     a = 2. - (i_four == 0 ? 1. : 0.);
+     for (i = 0; i < n_mus1; ++i) {
+          for (j = 0; j < n_mus2; ++j) {
+               P_pp[i][j] *= a;
+               P_mp[i][j] *= a;
+          }
+     }
+*/
 }
 
 
@@ -224,7 +358,7 @@ void build_phase_mats_scalar(int i_four, int n_coef, int n_mus1, int n_mus2, dou
 /*******************************************************************************
  *
  ******************************************************************************/
-void build_scat_vector_gc(int n_coef, int n_stokes, double **gsf, double **chi, double *F) {
+void build_scat_vector_gc(int n_coef, int n_stokes, double **gsf, double **coefs, double *F) {
 
      int i;
      int ii;
@@ -233,14 +367,14 @@ void build_scat_vector_gc(int n_coef, int n_stokes, double **gsf, double **chi, 
 
      F[ii] = 0.;
      for (i = 0; i < n_coef; ++i)
-          F[ii] += chi[0][i] * gsf[0][i];
+          F[ii] += coefs[0][i] * gsf[0][i];
      ii++;
 
      if (n_stokes > 1) {
           F[ii] = 0.;
 
           for (i = 2; i < n_coef; ++i)
-               F[ii] += chi[4][i] * gsf[1][i];
+               F[ii] += coefs[4][i] * gsf[1][i];
           ii++;
      }
 
@@ -253,7 +387,7 @@ void build_scat_vector_gc(int n_coef, int n_stokes, double **gsf, double **chi, 
 
 
 
-void build_scat_matrix_gc(int n_coef, double **gsf, double **chi, double **F, int flag) {
+void build_scat_matrix_gc(int n_coef, double **gsf, double **coefs, double **F, int flag) {
 
      int i;
      int j;
@@ -264,22 +398,22 @@ void build_scat_matrix_gc(int n_coef, double **gsf, double **chi, double **F, in
           a[i] = 0.;
 
      for (i = 0; i < 2; ++i) {
-          a[0] += chi[0][i] * gsf[0][i];
+          a[0] += coefs[0][i] * gsf[0][i];
           if (flag)
-               a[3] += chi[3][i] * gsf[0][i];
+               a[3] += coefs[3][i] * gsf[0][i];
      }
 
      for ( ; i < n_coef; ++i) {
-          a[0] += chi[0][i] * gsf[0][i];
+          a[0] += coefs[0][i] * gsf[0][i];
 
           if (flag) {
-               a[3] += chi[3][i] * gsf[0][i];
+               a[3] += coefs[3][i] * gsf[0][i];
 
-               a[4] += chi[4][i] * gsf[1][i];
-               a[5] += chi[5][i] * gsf[1][i];
+               a[4] += coefs[4][i] * gsf[1][i];
+               a[5] += coefs[5][i] * gsf[1][i];
 
-               a[1] += (chi[1][i] + chi[2][i]) * gsf[2][i];
-               a[2] += (chi[1][i] - chi[2][i]) * gsf[3][i];
+               a[1] += (coefs[1][i] + coefs[2][i]) * gsf[2][i];
+               a[2] += (coefs[1][i] - coefs[2][i]) * gsf[3][i];
           }
      }
 
@@ -312,7 +446,7 @@ void build_scat_matrix_gc(int n_coef, double **gsf, double **chi, double **F, in
 /*******************************************************************************
  *
  ******************************************************************************/
-void build_scat_vector_lc(int n_coef, int n_stokes, double *p, double **chi, double *F) {
+void build_scat_vector_lc(int n_coef, int n_stokes, double *p, double **coefs, double *F) {
 
      int i;
      int ii;
@@ -321,13 +455,13 @@ void build_scat_vector_lc(int n_coef, int n_stokes, double *p, double **chi, dou
 
      F[ii] = 0.;
      for (i = 0; i < n_coef; ++i)
-          F[ii] += chi[0][i] * p[i];
+          F[ii] += coefs[0][i] * p[i];
      ii++;
 
      if (n_stokes > 1) {
           F[ii] = 0.;
           for (i = 0; i < n_coef; ++i)
-               F[ii] += chi[4][i] * p[i];
+               F[ii] += coefs[4][i] * p[i];
           ii++;
      }
 
@@ -340,7 +474,7 @@ void build_scat_vector_lc(int n_coef, int n_stokes, double *p, double **chi, dou
 
 
 
-void build_scat_matrix_lc(int n_coef, double *p, double **chi, double **F, int flag) {
+void build_scat_matrix_lc(int n_coef, double *p, double **coefs, double **F, int flag) {
 
      int i;
      int j;
@@ -355,13 +489,13 @@ void build_scat_matrix_lc(int n_coef, double *p, double **chi, double **F, int f
      }
 
      for (j = 0; j < n_coef; ++j) {
-          F[row[0]][col[0]] += chi[0][j] * p[j];
+          F[row[0]][col[0]] += coefs[0][j] * p[j];
      }
 
      if (flag) {
           for (i = 1; i < 6; ++i) {
                for (j = 0; j < n_coef; ++j) {
-                    F[row[i]][col[i]] += chi[i][j] * p[j];
+                    F[row[i]][col[i]] += coefs[i][j] * p[j];
                }
           }
 
@@ -771,8 +905,9 @@ void build_phase_mats_vector_gc(int i_four, int n_coef, int n_mus1, int n_mus2, 
 
      double **w1;
      double **w2;
+/*
      double **w3;
-
+*/
      double **B;
 
      double ***A;
@@ -802,8 +937,9 @@ void build_phase_mats_vector_gc(int i_four, int n_coef, int n_mus1, int n_mus2, 
 
      w1  = get_work_d2(&work, n_mus_v1,  n_stokes2);
      w2  = get_work_d2(&work, n_stokes2, n_mus_v2);
+/*
      w3  = get_work_d2(&work, n_mus_v1,  n_mus_v2);
-
+*/
      B   = get_work_d2(&work, n_stokes2, n_stokes2);
 
      A   = get_work_d3(&work, n_coef, n_stokes2, n_stokes2);
@@ -848,16 +984,24 @@ void build_phase_mats_vector_gc(int i_four, int n_coef, int n_mus1, int n_mus2, 
           dmat_mul(ll[i], B, n_mus_v1, n_stokes2, n_stokes2, w1);
 
           dmat_trans(ll2[i], w2, n_mus_v2, n_stokes2);
+/*
           dmat_mul(w1, w2, n_mus_v1, n_mus_v2, n_stokes2, w3);
           dmat_add(P_pp, w3, P_pp, n_mus_v1, n_mus_v2);
+*/
+          dmat_gxgxmx(0, w1, 0, w2, 1., P_pp, 1., n_mus_v1, n_mus_v2, n_stokes2);
 
           dmat_mul_diag(w1, D, w1, n_mus_v1, n_stokes2);
+/*
           dmat_mul(w1, w2, n_mus_v1, n_mus_v2, n_stokes2, w3);
           if (a > 0.)
                dmat_add(P_mp, w3, P_mp, n_mus_v1, n_mus_v2);
           else
                dmat_sub(P_mp, w3, P_mp, n_mus_v1, n_mus_v2);
-
+*/
+          if (a > 0.)
+               dmat_gxgxmx(0, w1, 0, w2,  1., P_mp, 1., n_mus_v1, n_mus_v2, n_stokes2);
+          else
+               dmat_gxgxmx(0, w1, 0, w2, -1., P_mp, 1., n_mus_v1, n_mus_v2, n_stokes2);
           a *= -1.;
 
           b *= (i + 1 - i_four) / (i + 1. + i_four);
@@ -874,10 +1018,10 @@ void build_phase_mats_vector_gc(int i_four, int n_coef, int n_mus1, int n_mus2, 
 
 
 /*******************************************************************************
- * mu1 = incident direction
- * mu2 = scattering direction
+ * mu       = scattering direction
+ * mu_prime = incident direction
  ******************************************************************************/
-void scat_vector_rotate(int n_stokes, double mu1, double mu2, double MU, double d_phi, double *P1, double *P2) {
+void scat_vector_rotate_hovenier(int n_stokes, double mu, double mu_prime, double MU, double d_phi, double *P1, double *P2) {
 
      /* Hovenier 1983 */
 
@@ -900,12 +1044,12 @@ void scat_vector_rotate(int n_stokes, double mu1, double mu2, double MU, double 
 
      P1_01 = P1[1];
 
-     sin_scat   = sqrt(1. - MU *MU );
+     sin_scat = sqrt(1. - MU*MU);
 
      if (sin_scat == 0.)
           cos_sig1 = 0.;
      else {
-          sin_theta2 = sqrt(1. - mu2*mu2);
+          sin_theta2 = sqrt(1. - mu_prime*mu_prime);
 
           if (sin_theta2 == 0.)
 /*
@@ -913,7 +1057,7 @@ void scat_vector_rotate(int n_stokes, double mu1, double mu2, double MU, double 
 */
                cos_sig1 = cos(D2R*d_phi);
           else
-               cos_sig1 = (mu1 - mu2 * MU) / (sin_theta2 * sin_scat);
+               cos_sig1 = (mu - mu_prime * MU) / (sin_theta2 * sin_scat);
      }
 
      cos_sig1_2 = cos_sig1 * cos_sig1;
@@ -935,9 +1079,7 @@ void scat_vector_rotate(int n_stokes, double mu1, double mu2, double MU, double 
 
 
 
-void scat_vector_rotate_a(int n_stokes, double mu1, double mu2, double MU, double d_phi, double *P1_a, double *P2_a) {
-
-     /* Hovenier 1983 */
+void scat_vector_rotate_hovenier_a(int n_stokes, double mu, double mu_prime, double MU, double d_phi, double *P1_a, double *P2_a) {
 
      double sin_scat;
 
@@ -954,12 +1096,12 @@ void scat_vector_rotate_a(int n_stokes, double mu1, double mu2, double MU, doubl
      if (n_stokes == 1)
           return;
 
-     sin_scat   = sqrt(1. - MU *MU );
+     sin_scat = sqrt(1. - MU*MU);
 
      if (sin_scat == 0.)
           cos_sig1 = 0.;
      else {
-          sin_theta2 = sqrt(1. - mu2*mu2);
+          sin_theta2 = sqrt(1. - mu_prime*mu_prime);
 
           if (sin_theta2 == 0.)
 /*
@@ -967,7 +1109,7 @@ void scat_vector_rotate_a(int n_stokes, double mu1, double mu2, double MU, doubl
 */
                cos_sig1 = cos(D2R*d_phi);
           else
-               cos_sig1 = (mu1 - mu2 * MU) / (sin_theta2 * sin_scat);
+               cos_sig1 = (mu - mu_prime * MU) / (sin_theta2 * sin_scat);
      }
 
      cos_sig1_2 = cos_sig1 * cos_sig1;
@@ -985,6 +1127,133 @@ void scat_vector_rotate_a(int n_stokes, double mu1, double mu2, double MU, doubl
           P1_a[1] += -P2_a[2]*S1;
      if (n_stokes >= 4)
           P2_a[3]  =  0.0;
+}
+
+
+
+/*******************************************************************************
+ * mu       = scattering direction
+ * mu_prime = incident direction
+ ******************************************************************************/
+void scat_matrix_rotate_hovenier(int n_stokes, double mu, double mu_prime, double MU, double d_phi, double **P1, double **P2) {
+
+     /* Hovenier 1983 */
+
+     double sin_scat;
+
+     double sin_theta1;
+     double sin_theta2;
+
+     double P1_01;
+     double P1_11;
+     double P1_22;
+
+     double P1_23;
+     double P1_33;
+
+     double cos_sig1;
+     double cos_sig2;
+
+     double cos_sig1_2;
+     double cos_sig2_2;
+
+     double C1;
+     double C2;
+     double S1;
+     double S2;
+
+     P2[0][0] = P1[0][0];
+     if (n_stokes == 1)
+          return;
+
+     P1_01 = P1[0][1];
+     P1_11 = P1[1][1];
+     P1_22 = P1[2][2];
+
+     if (n_stokes >= 4) {
+        P1_23 = P1[2][3];
+        P1_33 = P1[3][3];
+     }
+
+     sin_scat = sqrt(1. - MU*MU);
+
+     if (sin_scat == 0.) {
+          cos_sig1 = 0.;
+          cos_sig2 = 0.;
+     }
+     else {
+          sin_theta1 = sqrt(1. - mu*mu);
+          sin_theta2 = sqrt(1. - mu_prime*mu_prime);
+
+          if (sin_theta2 == 0.)
+/*
+               cos_sig1 = 1.;
+*/
+               cos_sig1 = cos(D2R*d_phi);
+          else
+               cos_sig1 = (mu - mu_prime * MU) / (sin_theta2 * sin_scat);
+
+          if (sin_theta1 == 0.)
+/*
+               cos_sig2 = 1.;
+*/
+               cos_sig2 = cos(D2R*d_phi);
+          else
+               cos_sig2 = (mu_prime - mu * MU) / (sin_theta1 * sin_scat);
+     }
+
+     cos_sig1_2 = cos_sig1 * cos_sig1;
+     cos_sig2_2 = cos_sig2 * cos_sig2;
+
+     C1 = 2. * cos_sig1_2 - 1.;
+     C2 = 2. * cos_sig2_2 - 1.;
+
+     if (1. - cos_sig1_2 < 0.)
+          S1 = 0.;
+     else {
+          if (1. - cos_sig1_2 <= DBL_EPSILON)
+               S1 = 0.;
+          else {
+               S1 = 2.* sqrt(1. - cos_sig1_2) * cos_sig1;
+               if (d_phi > PI)
+                    S1 = -S1;
+          }
+
+          if (1. - cos_sig2_2 <= DBL_EPSILON)
+               S2 = 0.;
+          else
+               S2 = 2.* sqrt(1. - cos_sig2_2) * cos_sig2;
+               if (d_phi > PI)
+                    S2 = -S2;
+     }
+
+     if (n_stokes >= 2) {
+          P2[0][1] =  P1_01*C1;
+          P2[1][0] =  P1_01*C2;
+          P2[1][1] =  C2*P1_11*C1 - S2*P1_22*S1;
+     }
+     if (n_stokes >= 3) {
+          P2[0][2] = -P1_01*S1;
+          P2[1][2] = -C2*P1_11*S1 - S2*P1_22*C1;
+          P2[2][0] =  P1_01*S2;
+          P2[2][1] =  S2*P1_11*C1 + C2*P1_22*S1;
+          P2[2][2] = -S2*P1_11*S1 + C2*P1_22*C1;
+     }
+     if (n_stokes >= 4) {
+          P2[0][3] =  0.0;
+          P2[1][3] = -P1_23*S2;
+          P2[2][3] =  P1_23*C2;
+          P2[3][0] =  0.0;
+          P2[3][1] = -P1_23*S1;
+          P2[3][2] = -P1_23*C1;
+          P2[3][3] =  P1_33;
+     }
+}
+
+
+
+void scat_matrix_rotate_hovenier_a(int n_stokes, double mu, double mu_prime, double MU, double d_phi, double **P1_a, double **P2_a) {
+
 }
 
 
@@ -1071,7 +1340,7 @@ void phase_matrix_symmetry_ldx3(int n_quad1, int n_stokes1, int n_quad2, int n_s
                               P_mm[j_offset + 1] =  P_pp[j_offset + 1];
                               P_mm[j_offset + 2] = -P_pp[j_offset + 2];
                               P_mm[j_offset + 3] = -P_pp[j_offset + 3];
-          
+
                               P_pm[j_offset    ] =  P_mp[j_offset    ];
                               P_pm[j_offset + 1] =  P_mp[j_offset + 1];
                               P_pm[j_offset + 2] = -P_mp[j_offset + 2];
@@ -1082,7 +1351,7 @@ void phase_matrix_symmetry_ldx3(int n_quad1, int n_stokes1, int n_quad2, int n_s
 
                          i_offset += ldx;
                     }
-          
+
                     for (      ; ii < i + 4; ++ii) {
                          j_offset = i_offset;
                          for (j = 0; j < n_quad_v2; j += 4) {
@@ -1090,7 +1359,7 @@ void phase_matrix_symmetry_ldx3(int n_quad1, int n_stokes1, int n_quad2, int n_s
                               P_mm[j_offset + 1] = -P_pp[j_offset + 1];
                               P_mm[j_offset + 2] =  P_pp[j_offset + 2];
                               P_mm[j_offset + 3] =  P_pp[j_offset + 3];
-          
+
                               P_pm[j_offset    ] = -P_mp[j_offset    ];
                               P_pm[j_offset + 1] = -P_mp[j_offset + 1];
                               P_pm[j_offset + 2] =  P_mp[j_offset + 2];
@@ -1113,7 +1382,7 @@ void phase_matrix_symmetry_ldx3(int n_quad1, int n_stokes1, int n_quad2, int n_s
                               P_mm[j_offset + 1] = -P_pp[j_offset + 1];
                               P_mm[j_offset + 2] =  P_pp[j_offset + 2];
                               P_mm[j_offset + 3] =  P_pp[j_offset + 3];
-          
+
                               P_pm[j_offset    ] = -P_mp[j_offset    ];
                               P_pm[j_offset + 1] = -P_mp[j_offset + 1];
                               P_pm[j_offset + 2] =  P_mp[j_offset + 2];
@@ -1124,7 +1393,7 @@ void phase_matrix_symmetry_ldx3(int n_quad1, int n_stokes1, int n_quad2, int n_s
 
                          i_offset += ldx;
                     }
-          
+
                     for (      ; ii < i + 4; ++ii) {
                          j_offset = i_offset;
                          for (j = 0; j < n_quad_v2; j += 4) {
@@ -1132,7 +1401,7 @@ void phase_matrix_symmetry_ldx3(int n_quad1, int n_stokes1, int n_quad2, int n_s
                               P_mm[j_offset + 1] =  P_pp[j_offset + 1];
                               P_mm[j_offset + 2] = -P_pp[j_offset + 2];
                               P_mm[j_offset + 3] = -P_pp[j_offset + 3];
-          
+
                               P_pm[j_offset    ] =  P_mp[j_offset    ];
                               P_pm[j_offset + 1] =  P_mp[j_offset + 1];
                               P_pm[j_offset + 2] = -P_mp[j_offset + 2];

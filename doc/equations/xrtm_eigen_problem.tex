@@ -1,0 +1,224 @@
+%*******************************************************************************
+%
+%*******************************************************************************
+\section{Eigen problem}
+\label{sec:eigen_problem}
+
+
+\subsection{Tangent linear}
+\label{sec:eigen_problem-tangent_linear}
+
+\begin{equation}
+\mathbf{A} =
+\left[
+\begin{array}{ccccc}
+2\xi_{i}\chi_{1i}  &  \xi^{2}_{i}-\Gamma_{11} &            -\Gamma_{12} & \cdots &            -\Gamma_{1n} \\
+2\xi_{i}\chi_{2i}  &             -\Gamma_{21} & \xi^{2}_{i}-\Gamma_{22} & \cdots &            -\Gamma_{2n} \\
+\vdots             &  \vdots                  & \vdots                  & \ddots & \vdots                  \\
+ 2\xi_{i}\chi_{ni} &             -\Gamma_{n1} &            -\Gamma_{n2} & \cdots & \xi^{2}_{i}-\Gamma_{nn} \\
+0                  &  \chi_{1i}               & \chi_{1i}               & \cdots & \chi_{ni}
+\end{array}
+\right]
+\label{eq:eigen_problem-tangent_linear-A}
+\end{equation}
+
+\begin{equation}
+\mathbf{b} =
+\left[
+\begin{array}{ccccc}
+\boldsymbol{\Delta}\boldsymbol{\chi}_{i}  \\
+0
+\end{array}
+\right] =
+\left[
+\begin{array}{ccccc}
+b_{i}  \\
+b_{i}  \\
+\vdots \\
+b_{n}  \\
+0
+\end{array}
+\right] =
+\left[
+\begin{array}{ccccc}
+\sum_{j}^{n} \mathcal{L}(\Gamma_{1j})\chi_{j,i}  \\
+\sum_{j}^{n} \mathcal{L}(\Gamma_{2j})\chi_{j,i}  \\
+\vdots \\
+\sum_{j}^{n} \mathcal{L}(\Gamma_{nj})\chi_{j,i}  \\
+0
+\end{array}
+\right]
+\label{eq:eigen_problem-tangent_linear-b}
+\end{equation}
+
+\begin{equation}
+\mathbf{x} =
+\mathbf{A}^{-1}\mathbf{b} =
+\left[
+\begin{array}{ccccc}
+\mathcal{L}(\xi_{i})   \\
+\mathcal{L}(\chi_{1i}) \\
+\mathcal{L}(\chi_{2i}) \\
+\vdots \\
+\mathcal{L}(\chi_{ni})
+\end{array}
+\right] = \mathbf{\Gamma} \boldsymbol{\chi}_{i}
+\label{eq:eigen_problem-tangent_linear-x}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Adjoint of tangent linear}
+\label{sec:eigen_problem-adjoint_of_tangent_linear}
+
+\begin{equation}
+\mathcal{A}(\mathbf{b}) = \mathbf{A}^{-T}\mathcal{A}(\mathbf{x})
+\label{eq:eigen_problem-adjoint_of_tangent_linear-b_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\boldsymbol{\Delta}) = \mathcal{A}(\mathbf{b})\boldsymbol{\chi}^{T}_{i}
+\label{eq:eigen_problem-adjoint_of_tangent_linear-delta_a}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Reduction of order}
+\label{sec:eigen_problem-reduction_of_order}
+
+
+\subsubsection{Forward}
+\label{sec:eigen_problem-reduction_of_order-forward}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:eigen_problem-reduction_of_order-tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:eigen_problem-reduction_of_order-adjoint_of_tangent_linear}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsection{Inversion of the reduction of order}
+\label{sec:eigen_problem-invert_reduction_of_order}
+
+
+\subsubsection{Forward}
+\label{sec:eigen_problem-invert_reduction_of_order-forward}
+
+\begin{equation}
+\nu_{i} = \sqrt{\xi_{i}}
+\label{eq:eigen_problem-invert_reduction_of_order-forward_nu}
+\end{equation}
+
+\begin{equation}
+\mathbf{a} = \mathrm{diag}(\nu_{i})
+\label{eq:eigen_problem-invert_reduction_of_order-forward_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{b} = (\mathbf{t} + \mathbf{r})\boldsymbol{\chi}\mathbf{a}^{-1}
+\label{eq:eigen_problem-invert_reduction_of_order-forward_b}
+\end{equation}
+
+\begin{equation}
+\mathbf{X}_{+} = \frac{1}{2} (\boldsymbol{\chi} + \mathbf{b})
+\label{eq:eigen_problem-invert_reduction_of_order-forward_x_p}
+\end{equation}
+
+\begin{equation}
+\mathbf{X}_{-} = \frac{1}{2} (\boldsymbol{\chi} - \mathbf{b})
+\label{eq:eigen_problem-invert_reduction_of_order-forward_x_m}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Tangent linear}
+\label{sec:eigen_problem-invert_reduction_of_order-tangent_linear}
+
+\begin{equation}
+\mathcal{L}(\nu_{i}) = \mathcal{L}(\xi_{i})
+\label{eq:eigen_problem-invert_reduction_of_order-forward_nu}
+\end{equation}
+
+\begin{equation}
+\mathbf{c} = \mathrm{diag}[\mathcal{L}(\nu_{i})]
+\label{eq:eigen_problem-invert_reduction_of_order-tangent_linear-c}
+\end{equation}
+
+\begin{equation}
+\mathbf{d} = \left\{\left[\mathcal{L}(\mathbf{t}) + \mathcal{L}(\mathbf{r})\right]\boldsymbol{\chi} + (\mathbf{t} + \mathbf{r})\mathcal{L}(\boldsymbol{\chi}) - \mathbf{b}\mathbf{c}\right\}\mathbf{a}^{-1}
+\label{eq:eigen_problem-invert_reduction_of_order-tangent_linear-d}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{X}_{+}) = \frac{1}{2} (\mathcal{L}(\boldsymbol{\chi}) + \mathbf{d})
+\label{eq:eigen_problem-invert_reduction_of_order-tangent_linear-y_p}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}(\mathbf{X}_{-}) = \frac{1}{2} (\mathcal{L}(\boldsymbol{\chi}) - \mathbf{d})
+\label{eq:eigen_problem-invert_reduction_of_order-tangent_linear-y_m}
+\end{equation}
+
+
+%*******************************************************************************
+%
+%*******************************************************************************
+\subsubsection{Adjoint of tangent linear}
+\label{sec:eigen_problem-invert_reduction_of_order-adjoint_of_tangent_linear}
+
+\begin{equation}
+\mathcal{A}(\boldsymbol{\chi}) = \frac{1}{2} (\mathcal{A}(\mathbf{X}_{+}) + \mathcal{A}(\mathbf{X}_{-}))
+\label{eq:eigen_problem-invert_reduction_of_order-adjoint_of_tangent_linear-chi_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{d}) = \frac{1}{2} (\mathcal{A}(\mathbf{X}_{+}) - \mathcal{A}(\mathbf{X}_{-}))
+\label{eq:eigen_problem-invert_reduction_of_order-adjoint_of_tangent_linear-d_a}
+\end{equation}
+
+\begin{equation}
+\mathbf{t} = \mathcal{A}(\mathbf{d})\mathbf{a}^{-T}
+\label{eq:eigen_problem-invert_reduction_of_order-adjoint_of_tangent_linear-t}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{t} + \mathbf{r}) = \mathbf{t}\boldsymbol{\chi}^{T}
+\label{eq:eigen_problem-invert_reduction_of_order-adjoint_of_tangent_linear-tpr_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\boldsymbol{\chi}) = \mathcal{A}(\boldsymbol{\chi}) + (\mathbf{t} + \mathbf{r})^{T}\mathbf{t}
+\label{eq:eigen_problem-invert_reduction_of_order-adjoint_of_tangent_linear-chi_a2}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\mathbf{c}) = -\mathbf{b}^{T}\mathbf{t}
+\label{eq:eigen_problem-invert_reduction_of_order-adjoint_of_tangent_linear-c_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\nu_{i}) = \mathcal{A}(\nu_{i}) + \mathcal{A}(\mathbf{c}_{ii})
+\label{eq:eigen_problem-invert_reduction_of_order-adjoint_of_tangent_linear-nu_a}
+\end{equation}
+
+\begin{equation}
+\mathcal{A}(\xi_{i}) = \mathcal{A}(\nu_{i})
+\label{eq:eigen_problem-invert_reduction_of_order-adjoint_of_tangent_linear-lambda_a}
+\end{equation}

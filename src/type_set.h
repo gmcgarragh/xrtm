@@ -43,6 +43,9 @@
 #define xmat_pow_count		XCAT(TYPE_PREFIX, mat_pow_count)
 #define xmat_pow		XCAT(TYPE_PREFIX, mat_pow)
 
+#define xxmat_gxgxmx		XCAT(TYPE_TYPE_PREFIX, mat_gxgxmx)
+#define xxmat_diag_mul		XCAT(TYPE_TYPE_PREFIX, mat_diag_mul)
+
 #define xmat_pocon		XCAT(TYPE_PREFIX, mat_pocon)
 #define xmat_gecon		XCAT(TYPE_PREFIX, mat_gecon)
 #define xmat_potrf		XCAT(TYPE_PREFIX, mat_potrf)
@@ -62,5 +65,8 @@
 #define get_work_x2		XCAT(XCAT(get_work_, TYPE_POSTFIX), 2)
 #define get_work_x3		XCAT(XCAT(get_work_, TYPE_POSTFIX), 3)
 
-#define copy_to_band_storage_x	XCAT(copy_to_band_storage_,  TYPE_POSTFIX)
-#define copy_to_band_storage2_x	XCAT(copy_to_band_storage2_, TYPE_POSTFIX)
+#define insert_matrix1_x	XCAT(insert_matrix1_, TYPE_POSTFIX)
+#define insert_matrix2_x	XCAT(insert_matrix2_, TYPE_POSTFIX)
+
+#define insert_matrix_band_storage1_x	XCAT(insert_matrix_band_storage1_, TYPE_POSTFIX)
+#define insert_matrix_band_storage2_x	XCAT(insert_matrix_band_storage2_, TYPE_POSTFIX)
