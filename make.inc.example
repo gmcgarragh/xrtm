@@ -60,16 +60,16 @@ LINKS        += ${HOME}/opt/openblas/lib/libopenblas.a
 #*******************************************************************************
 # Uncomment (and modify include path as needed) to compile the IDL interface
 #*******************************************************************************
-make_int_idl  = 1
-INCDIRS      += -I${HOME}/opt/exelis/idl/external
+#make_int_idl  = 1
+#INCDIRS      += -I${HOME}/opt/exelis/idl/external
 
 
 #*******************************************************************************
 # Uncomment (and modify include path as needed) to compile the Python interface
 #*******************************************************************************
-make_int_python = 1
-INCDIRS        += -I${HOME}/opt/anaconda3/include/python3.7m \
-                  -I${HOME}/opt/anaconda3/lib/python3.7/site-packages/numpy/core/include
+#make_int_python = 1
+#INCDIRS        += -I${HOME}/opt/anaconda3/include/python3.7m \
+#                  -I${HOME}/opt/anaconda3/lib/python3.7/site-packages/numpy/core/include
 
 
 #*******************************************************************************
