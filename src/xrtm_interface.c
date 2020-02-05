@@ -691,7 +691,10 @@ int xrtm_check_solvers(int options, int solvers, int max_coef, int n_quad, int n
      }
 
      if (options & XRTM_OPTION_SFI) {
+          if (check_solvers(solvers, 0, report, "option", xrtm_option_mask_to_name(XRTM_OPTION_SFI), XRTM_SOLVER_DOUB_ADD, XRTM_SOLVER_EIG_ADD, XRTM_SOLVER_MEM_BVP, XRTM_SOLVER_PADE_ADD,                     XRTM_SOLVER_SOS, 0))
+/*
           if (check_solvers(solvers, 0, report, "option", xrtm_option_mask_to_name(XRTM_OPTION_SFI), XRTM_SOLVER_DOUB_ADD, XRTM_SOLVER_EIG_ADD, XRTM_SOLVER_MEM_BVP, XRTM_SOLVER_PADE_ADD, XRTM_SOLVER_SINGLE, XRTM_SOLVER_SOS, 0))
+*/
                return XRTM_INT_ERROR;
      }
 
