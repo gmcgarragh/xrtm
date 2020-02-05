@@ -1114,12 +1114,14 @@ if (upwelling) {
           if (surface) {
                a1 = x[ii] * -X_m[i] * Lambda[i] + x[ii + 1] * -X_p[i] + F_m[i] * atran[i];
 
-               for (j = 0; j < n_umus; ++j)
+               for (j = 0; j < n_umus; ++j) {
                     I_0[j] = a1 * Rs_uq[j][0];
 if (solar) {
      if (add_single_scattering)
                     I_0[j] += solfac * btran[n_layers - 0] * Rs_u0[j];
 }
+               }
+
                for (j = 0; j < n_derivs; ++j) {
 if (0)
                     a1_l = (x_l[j][ii] * -X_m[i] + x[ii] * -X_m_l[i][j]) * Lambda[i] + x[ii] * -X_m[i] * Lambda_l[i][j] + x_l[j][ii + 1] * -X_p[i] + x[ii + 1] * -X_p_l[i][j] + F_m_l[i][j] * atran[i] + F_m[i] * atran_l[i][j];
@@ -1399,11 +1401,12 @@ if (add_single_scattering)
 
                a2 = btran_l[j] * solfac;
 
-               for (k = 0; k < n_umus; ++k)
+               for (k = 0; k < n_umus; ++k) {
 if (! add_single_scattering)
                     Gu_0[k]  =                      omega * (                       u3[k]);
 else
                     Gu_0[k]  =                      omega * (a2 * P_u0_pm     [k] + u3[k]);
+               }
           }
 
           if (derivs->layers[i_layer][j]) {
