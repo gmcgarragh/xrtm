@@ -35,7 +35,7 @@ xrtm.so: xrtm_int_py.o ../src/libxrtm.a ../misc/libxrtm_misc.a
 	$(CFMIX_LD) $(CFMIX_LDFLAGS) -shared -o xrtm.so xrtm_int_py.o ../src/libxrtm.a ../misc/libxrtm_misc.a \
         $(LIBDIRS) $(LINKS)
 
-xrtm_int_idl.so: xrtm_int_idl.o ../src/libxrtm.a
+xrtm_int_idl.so: xrtm_int_idl.o ../src/libxrtm.a ../misc/libxrtm_misc.a
 	$(CFMIX_LD) $(CCFLAGS) -shared -o xrtm_int_idl.so xrtm_int_idl.o ../src/libxrtm.a ../misc/libxrtm_misc.a \
         $(LIBDIRS) $(LINKS) $(CFMIX_LDLINKS)
 
