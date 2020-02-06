@@ -65,13 +65,10 @@ BINARIES =
 
 PRODUCTS = version.c
 
-all: libxrtm.a libxrtm.so
+all: libxrtm.a
 
 libxrtm.a: $(OBJECTS)
 	ar -rs libxrtm.a $(OBJECTS)
-
-libxrtm.so: $(OBJECTS)
-	gcc -shared -Wl,-soname,libxrtm.so.1 -o libxrtm.so.1.0 $(OBJECTS)
 
 version.o: version.c version.h
 
