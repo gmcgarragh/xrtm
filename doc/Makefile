@@ -44,4 +44,7 @@ xrtm_equations.pdf: xrtm_equations.tex equations/*.tex
 xrtm_equation_spell_check:
 	aspell --disable-backup -c xrtm_equations.tex
 
+clean_doc:
+	rm -f xrtm.pdf xrtm_equations.pdf *.html
+
 include depend.inc

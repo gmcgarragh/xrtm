@@ -92,3 +92,9 @@ proto_types-subdirs:
 .f90.o:
 	$(F90) $(F90FLAGS) -c $(F90DEFINES) $(INCDIRS) -o $*.o $<
 %.o : %.mod
+
+
+clean_doc: clean_doc-subdirs
+
+clean_doc-subdirs:
+	$(MAKE_SUBDIRS)
