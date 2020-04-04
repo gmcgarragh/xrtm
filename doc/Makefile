@@ -9,7 +9,7 @@ BINARIES =
 
 PRODUCTS = xrtm.aux xrtm.bbl xrtm.blg xrtm.brf xrtm.log xrtm.out xrtm.toc \
            xrtm_equations.aux xrtm_equations.log xrtm_equations.out xrtm_equations.toc \
-           # *.html xrtm.pdf xrtm_equations.pdf
+           # xrtm.pdf xrtm_equations.pdf *.html
 
 all: index.html xrtm.pdf xrtm_equations.pdf
 
@@ -25,15 +25,6 @@ index.html: common.tex xrtm.tex xrtm.bib xrtm.pdf
 	sed 's|Callxrtm input format</a><br />|Callxrtm input format</a><br /><a href="refs.html">Bibliography</a><br />|g' temp.out > index.html
 	rm -f temp.out
 
-xrtm_equations.pdf: xrtm_equations.tex equations/*.tex
-#	pdflatex -halt-on-error xrtm_equations.tex
-#	bibtex xrtm_equations
-	pdflatex -halt-on-error xrtm_equations.tex
-	pdflatex -halt-on-error xrtm_equations.tex
-
-spell_check:
-	aspell --disable-backup -c xrtm_equations.tex
-
 xrtm_spell_check:
 	aspell --disable-backup \
                --add-tex-command="bibliographystyle p" \
@@ -43,5 +34,14 @@ xrtm_spell_check:
                --add-tex-command="sourcenamearg p" \
                --add-tex-command="textcolor p" \
                -c xrtm.tex
+
+xrtm_equations.pdf: xrtm_equations.tex equations/*.tex
+#	pdflatex -halt-on-error xrtm_equations.tex
+#	bibtex xrtm_equations
+	pdflatex -halt-on-error xrtm_equations.tex
+	pdflatex -halt-on-error xrtm_equations.tex
+
+xrtm_equation_spell_check:
+	aspell --disable-backup -c xrtm_equations.tex
 
 include depend.inc

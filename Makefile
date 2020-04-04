@@ -1,4 +1,4 @@
-NAME    = xrtm
+NAME = xrtm
 
 include make.inc
 include common.inc
