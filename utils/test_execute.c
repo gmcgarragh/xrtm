@@ -407,14 +407,14 @@ int test_execute(xrtm_data *gd, misc_data *md, test_data *td, int index, int ind
                                    I_m[i_solver2][i_out_level][i_mu][i_out_phi][i_stokes] = 0.;
                               }
 */
-                              if (solvers[i_solver] == XRTM_SOLVER_EIG_BVP &&
-                                  solvers[i_solver] == XRTM_SOLVER_MEM_BVP &&
+                              if ((solvers[i_solver] == XRTM_SOLVER_EIG_BVP ||
+                                   solvers[i_solver] == XRTM_SOLVER_MEM_BVP) &&
                                   i_out_level == n_out_levels - 1 &&
                                   fabs(I_p[i_solver2][i_out_level][i_mu][i_out_phi][i_stokes]) < 1.e-15)
                                    I_p[i_solver2][i_out_level][i_mu][i_out_phi][i_stokes] = 0.;
 
-                              if (solvers[i_solver] == XRTM_SOLVER_EIG_BVP &&
-                                  solvers[i_solver] == XRTM_SOLVER_MEM_BVP &&
+                              if ((solvers[i_solver] == XRTM_SOLVER_EIG_BVP ||
+                                   solvers[i_solver] == XRTM_SOLVER_MEM_BVP) &&
                                   i_out_level == 0 &&
                                   fabs(I_m[i_solver2][i_out_level][i_mu][i_out_phi][i_stokes]) < 1.e-15)
                                    I_m[i_solver2][i_out_level][i_mu][i_out_phi][i_stokes] = 0.;
