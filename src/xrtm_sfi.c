@@ -24,20 +24,23 @@
  ******************************************************************************/
 #define REAL
 
-#define TYPE			double
-#define TYPE_PREFIX		d
-#define TYPE_TYPE_PREFIX	d
-#define TYPE_POSTFIX		d
-#define WORK_XX			WORK_DX
-#define WORK_XXX		WORK_DXX
-#define WORK_XUX		WORK_DUX
-#define XEXP			exp
-#define XREAL(x)		(x)
+#define TYPE				double
+#define TYPE_PREFIX			d
+#define TYPE_TYPE_PREFIX		d
+#define TYPE_POSTFIX			d
+#define WORK_XX				WORK_DX
+#define WORK_XXX			WORK_DXX
+#define WORK_XUX			WORK_DUX
+#define XEXP				exp
+#define XREAL(x)			(x)
 
-#define SFI_LAYER		sfi_layer
-#define SFI			sfi
-#define SFI_UP			sfi_up
-#define SFI_DN			sfi_dn
+#define SFI_SOURCE_SOLAR_CLASSIC	sfi_source_solar_classic
+#define SFI_SOURCE_SOLAR_GREENS		sfi_source_solar_greens
+#define SFI_SOURCE_THERMAL		sfi_source_thermal
+#define SFI_LAYER			sfi_layer
+#define SFI				sfi
+#define SFI_UP				sfi_up
+#define SFI_DN				sfi_dn
 
 #include "type_set.h"
 
@@ -57,6 +60,9 @@
 #undef XEXP
 #undef XREAL
 
+#undef SFI_SOURCE_SOLAR_CLASSIC
+#undef SFI_SOURCE_SOLAR_GREENS
+#undef SFI_SOURCE_THERMAL
 #undef SFI_LAYER
 #undef SFI
 #undef SFI_UP
@@ -67,20 +73,24 @@
 /*******************************************************************************
  *
  ******************************************************************************/
-#define TYPE			dcomplex
-#define TYPE_PREFIX		z
-#define TYPE_TYPE_PREFIX	dz
-#define TYPE_POSTFIX		dc
-#define WORK_XX			WORK_ZX
-#define WORK_XXX		WORK_ZXX
-#define WORK_XUX		WORK_ZUX
-#define XEXP			cexp
-#define XREAL(x)		(creal(x))
+#define TYPE				dcomplex
+#define TYPE_PREFIX			z
+#define TYPE_TYPE_PREFIX		dz
+#define TYPE_POSTFIX			dc
+#define WORK_XX				WORK_ZX
+#define WORK_XXX			WORK_ZXX
+#define WORK_XUX			WORK_ZUX
+#define XEXP				cexp
+#define XREAL(x)			(creal(x))
 
-#define SFI_LAYER		sfi_layer2
-#define SFI			sfi2
-#define SFI_UP			sfi_up2
-#define SFI_DN			sfi_dn2
+#define SFI_SOURCE_SOLAR_CLASSIC	sfi_source_solar_classic2
+#define SFI_SOURCE_SOLAR_GREENS		sfi_source_solar_greens2
+#define SFI_SOURCE_THERMAL		sfi_source_thermal2
+#define SFI_LAYER			sfi_layer2
+#define SFI_LAYER			sfi_layer2
+#define SFI				sfi2
+#define SFI_UP				sfi_up2
+#define SFI_DN				sfi_dn2
 
 #include "type_set.h"
 
@@ -98,6 +108,9 @@
 #undef XEXP
 #undef XREAL
 
+#undef SFI_SOURCE_SOLAR_CLASSIC
+#undef SFI_SOURCE_SOLAR_GREENS
+#undef SFI_SOURCE_THERMAL
 #undef SFI_LAYER
 #undef SFI
 #undef SFI_UP
