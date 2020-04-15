@@ -9,7 +9,7 @@ BINARIES =
 
 PRODUCTS = xrtm.aux xrtm.bbl xrtm.blg xrtm.brf xrtm.log xrtm.out xrtm.toc \
            xrtm_equations.aux xrtm_equations.log xrtm_equations.out xrtm_equations.toc \
-           # xrtm.pdf xrtm_equations.pdf *.html
+           xrtm_equations.pdf # xrtm.pdf *.html
 
 all: index.html xrtm.pdf xrtm_equations.pdf
 
