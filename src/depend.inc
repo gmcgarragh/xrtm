@@ -180,8 +180,9 @@ xrtm_scatter_a.o: xrtm_scatter_a.c xrtm.h xrtm_scatter.h xrtm_save_tree.h \
 xrtm_sfi.o: xrtm_sfi.c xrtm.h xrtm_derivs.h prototypes/xrtm_derivs_p.h \
  xrtm_matrix.h prototypes/xrtm_matrix_p.h xrtm_utility.h xrtm_save_tree.h \
  prototypes/xrtm_save_tree_p.h xrtm_work.h prototypes/xrtm_work_p.h \
- prototypes/xrtm_utility_p.h type_set.h xrtm_sfi_x.c type_unset.h
-xrtm_sfi_x.o: xrtm_sfi_x.c
+ prototypes/xrtm_utility_p.h type_set.h xrtm_sfi_x.c sfi_block.h \
+ type_unset.h
+xrtm_sfi_x.o: xrtm_sfi_x.c sfi_block.h
 xrtm_single.o: xrtm_single.c xrtm.h xrtm_save_tree.h \
  prototypes/xrtm_save_tree_p.h xrtm_single.h xrtm_work.h \
  prototypes/xrtm_work_p.h prototypes/xrtm_single_p.h xrtm_single_a.h \

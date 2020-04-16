@@ -161,11 +161,11 @@ static void SFI_SOURCE_SOLAR_GREENS(double ptau, double *ptau_l,
                                     double omega, double *omega_l, double ltau, double *ltau_l,
                                     double btran, double *btran_l,
                                     double as_0, double *as_0_l, double atran, double *atran_l,
-                                    double *P_u0_pm,
+                                    double *P_q0_mm, double *P_q0_pm, double *P_u0_pm,
                                     TYPE *nu, TYPE **X_p, TYPE **X_m,
                                     double *I_u, double **I_u_l, int offset,
                                     int add_single_scattering,
-                                    work_data work, int flag, double *P_q0_mm, double *P_q0_pm,
+                                    work_data work, int flag,
                                     double *A, double *e1, double **e1_l, double e2,
                                     TYPE *e3, TYPE *e4, TYPE *e5, TYPE **Xu_p, TYPE **Xu_m) {
 
@@ -472,6 +472,7 @@ static void SFI_LAYER(int i_layer, double ptau, int i_four,
                       double omega, double *omega_l, double ltau, double *ltau_l,
                       double btran, double *btran_l,
                       double as_0, double *as_0_l, double atran, double *atran_l,
+                      double *P_q0_mm, double *P_q0_pm,
                       double *P_u0_pm, double **P_uq_pp, double **P_uq_mp,
                       TYPE *nu, TYPE **X_p, TYPE **X_m,
                       double *F_p, double *F_m,
@@ -485,7 +486,7 @@ static void SFI_LAYER(int i_layer, double ptau, int i_four,
                       double *I_0, double **I_0_l, int offset, double *I_u, double **I_u_l,
                       int add_single_scattering, int greens, int solar, int thermal,
                       uchar *derivs_layers, uchar *derivs_beam, uchar *derivs_thermal,
-                      work_data work, int flag, double c[][2], double c_l[][128][2], double *P_q0_mm, double *P_q0_pm) {
+                      work_data work, int flag, double c[][2], double c_l[][128][2]) {
 
      int ii;
      int j;
@@ -701,11 +702,11 @@ static void SFI_LAYER(int i_layer, double ptau, int i_four,
                                        omega, omega_l, ltau, ltau_l,
                                        btran, btran_l,
                                        as_0, as_0_l, atran, atran_l,
-                                       P_u0_pm,
+                                       P_q0_mm, P_q0_pm, P_u0_pm,
                                        nu, X_p, X_m,
                                        I_u, I_u_l, offset,
                                        add_single_scattering,
-                                       work, flag, P_q0_mm, P_q0_pm,
+                                       work, flag,
                                        A, e1, e1_l, e2,
                                        e3, e4, e5, Xu_p, Xu_m);
           }
@@ -910,8 +911,14 @@ static void SFI(int i_four,
 
      int i_out_level;
 
+     int offset2;
+
      double ptau;
 
+     double *P_q0_mm2;
+     double *P_q0_pm2;
+
+     double *I_u2;
      double **I_u_l2;
 
 
@@ -979,56 +986,16 @@ static void SFI(int i_four,
                     while (i_out_level >= 0 && i_out_level < n_ulevels && i == ulevels[i_out_level]) {
                          ptau = utaus[i_out_level];
 
+                         P_q0_mm2 = NULL;
+                         P_q0_pm2 = NULL;
+
+                         offset2 = offset;
+
+                         I_u2 = I_u[i_out_level];
                          if (n_derivs > 0)
                               I_u_l2 = I_u_l[i_out_level];
-                         if (n_derivs == 0) {
-                              if (! solar) {
-                                   if (! thermal || i_four > 0)
-                                        SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, NULL, I_0, NULL,  offset, I_u[i_out_level], NULL,   add_single_scattering, greens, solar, thermal, NULL,             NULL,             NULL,               work, flag, c, c_l, NULL, NULL);
-                                   else
-                                        SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, NULL, I_0, NULL,  offset, I_u[i_out_level], NULL,   add_single_scattering, greens, solar, thermal, NULL,             NULL,             NULL,               work, flag, c, c_l, NULL, NULL);
-                              }
-                              else {
-                                   if (! thermal || i_four > 0)
-                                        SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, NULL, I_0, NULL,  offset, I_u[i_out_level], NULL,   add_single_scattering, greens, solar, thermal, NULL,             NULL,             NULL,               work, flag, c, c_l, NULL, NULL);
-                                   else
-                                        SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, NULL, I_0, NULL,  offset, I_u[i_out_level], NULL,   add_single_scattering, greens, solar, thermal, NULL,             NULL,             NULL,               work, flag, c, c_l, NULL, NULL);
-                              }
-                         }
-                         else {
-                              if (! flags_or2(derivs->layers, n_layers, n_derivs)) {
-                                   if (! solar) {
-                                        if (! thermal || i_four > 0)
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,            NULL,               work, flag, c, c_l, NULL, NULL);
-                                        else if (! flags_or2(derivs->thermal, n_layers, n_derivs))
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,            derivs->thermal[i], work, flag, c, c_l, NULL, NULL);
-                                        else
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,            derivs->thermal[i], work, flag, c, c_l, NULL, NULL);
-                                   }
-                                   else {
-                                        if (! thermal || i_four > 0)
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], NULL,               work, flag, c, c_l, NULL, NULL);
-                                        else if (! flags_or2(derivs->thermal, n_layers, n_derivs))
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], derivs->thermal[i], work, flag, c, c_l, NULL, NULL);
-                                        else
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], derivs->thermal[i], work, flag, c, c_l, NULL, NULL);
-                                   }
-                              }
-                              else {
-                                   if (! solar) {
-                                        if (! thermal || i_four > 0)
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,            NULL,               work, flag, c, c_l, NULL, NULL);
-                                        else
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], NULL,     NULL,     At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,            derivs->thermal[i], work, flag, c, c_l, NULL, NULL);
-                                   }
-                                   else {
-                                        if (! thermal || i_four > 0)
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    P_u0_pm_l[i], P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], F_p_l[i], F_m_l[i], NULL,      NULL,      B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], NULL,               work, flag, c, c_l, NULL, NULL);
-                                        else
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], P_u0_pm_l[i], P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], F_p_l[i], F_m_l[i], At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], derivs->thermal[i], work, flag, c, c_l, NULL, NULL);
-                                   }
-                              }
-                         }
+
+                         #include "sfi_block.h"
 
                          i_out_level += inc;
                     }
@@ -1039,55 +1006,16 @@ static void SFI(int i_four,
                else
                     ptau = ltau[i];
 
-               if (n_derivs == 0) {
-                    if (! solar) {
-                         if (! thermal || i_four > 0)
-                              SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,     NULL,       B, NULL, I_0, NULL,  0, I_0, NULL,  add_single_scattering, greens, solar, thermal, NULL,             NULL,            NULL,                work, flag, c, c_l, NULL, NULL);
-                         else
-                              SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,     NULL,       B, NULL, I_0, NULL,  0, I_0, NULL,  add_single_scattering, greens, solar, thermal, NULL,             NULL,            NULL,                work, flag, c, c_l, NULL, NULL);
-                    }
-                    else {
-                         if (! thermal || i_four > 0)
-                              SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,     NULL,       B, NULL, I_0, NULL,  0, I_0, NULL,  add_single_scattering, greens, solar, thermal, NULL,             NULL,            NULL,                work, flag, c, c_l, NULL, NULL);
-                         else
-                              SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,     NULL,       B, NULL, I_0, NULL,  0, I_0, NULL,  add_single_scattering, greens, solar, thermal, NULL,             NULL,            NULL,                work, flag, c, c_l, NULL, NULL);
-                    }
-               }
-               else {
-                    if (! flags_or2(derivs->layers, n_layers, n_derivs)) {
-                         if (! solar) {
-                              if (! thermal || i_four > 0)
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,           NULL,                work, flag, c, c_l, NULL, NULL);
-                              else if (! flags_or2(derivs->thermal, n_layers, n_derivs))
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,            derivs->thermal[i], work, flag, c, c_l, NULL, NULL);
-                              else
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,            derivs->thermal[i], work, flag, c, c_l, NULL, NULL);
-                         }
-                         else {
-                              if (! thermal || i_four > 0)
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], NULL,               work, flag, c, c_l, NULL, NULL);
-                              else if (! flags_or2(derivs->thermal, n_layers, n_derivs))
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], derivs->thermal[i], work, flag, c, c_l, NULL, NULL);
-                              else
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], derivs->thermal[i], work, flag, c, c_l, NULL, NULL);
-                        }
-                    }
+               P_q0_mm2 = NULL;
+               P_q0_pm2 = NULL;
 
-                    else {
-                         if (! solar) {
-                              if (! thermal || i_four > 0)
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,           NULL,               work, flag, c, c_l, NULL, NULL);
-                              else
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], NULL,     NULL,     At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,           derivs->thermal[i], work, flag, c, c_l, NULL, NULL);
-                         }
-                         else {
-                              if (! thermal || i_four > 0)
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    P_u0_pm_l[i], P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], F_p_l[i], F_m_l[i], NULL,      NULL,      B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], NULL,               work, flag, c, c_l, NULL, NULL);
-                              else
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], P_u0_pm_l[i], P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], F_p_l[i], F_m_l[i], At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], derivs->thermal[i], work, flag, c, c_l, NULL, NULL);
-                         }
-                    }
-               }
+               offset2 = 0;
+
+               I_u2  = I_0;
+               if (n_derivs > 0)
+                    I_u_l2 = I_0_l;
+
+               #include "sfi_block.h"
 
                if ((! flag && ! utau_output && i == ulevels[i_out_level]) || (flag && ! utau_output && i + 1 == ulevels[i_out_level])) {
                     for (j = 0; j < n_umus_v; ++j) {
@@ -1117,56 +1045,16 @@ static void SFI(int i_four,
                     while (i_out_level >= 0 && i_out_level < n_ulevels && i == ulevels[i_out_level]) {
                          ptau = utaus[i_out_level];
 
+                         P_q0_mm2 = P_q0_mm[i];
+                         P_q0_pm2 = P_q0_pm[i];
+
+                         offset2 = offset;
+
+                         I_u2 = I_u[i_out_level];
                          if (n_derivs > 0)
                               I_u_l2 = I_u_l[i_out_level];
-                         if (n_derivs == 0) {
-                              if (! solar) {
-                                   if (! thermal || i_four > 0)
-                                        SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, NULL, I_0, NULL,  offset, I_u[i_out_level], NULL,   add_single_scattering, greens, solar, thermal, NULL,             NULL,             NULL,               work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                                   else
-                                        SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, NULL, I_0, NULL,  offset, I_u[i_out_level], NULL,   add_single_scattering, greens, solar, thermal, NULL,             NULL,             NULL,               work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                              }
-                              else {
-                                   if (! thermal || i_four > 0)
-                                        SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, NULL, I_0, NULL,  offset, I_u[i_out_level], NULL,   add_single_scattering, greens, solar, thermal, NULL,             NULL,             NULL,               work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                                   else
-                                        SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, NULL, I_0, NULL,  offset, I_u[i_out_level], NULL,   add_single_scattering, greens, solar, thermal, NULL,             NULL,             NULL,               work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                              }
-                         }
-                         else {
-                              if (! flags_or2(derivs->layers, n_layers, n_derivs)) {
-                                   if (! solar) {
-                                        if (! thermal || i_four > 0)
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,            NULL,               work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                                        else if (! flags_or2(derivs->thermal, n_layers, n_derivs))
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,            derivs->thermal[i], work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                                        else
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,            derivs->thermal[i], work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                                   }
-                                   else {
-                                        if (! thermal || i_four > 0)
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], NULL,               work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                                        else if (! flags_or2(derivs->thermal, n_layers, n_derivs))
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], derivs->thermal[i], work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                                        else
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], derivs->thermal[i], work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                                   }
-                              }
-                              else {
-                                   if (! solar) {
-                                        if (! thermal || i_four > 0)
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,            NULL,               work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                                        else
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], NULL,     NULL,     At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,            derivs->thermal[i], work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                                   }
-                                   else {
-                                        if (! thermal || i_four > 0)
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    P_u0_pm_l[i], P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], F_p_l[i], F_m_l[i], NULL,      NULL,      B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], NULL,               work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                                        else
-                                             SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], P_u0_pm_l[i], P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], F_p_l[i], F_m_l[i], At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, offset, I_u[i_out_level], I_u_l2, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], derivs->thermal[i], work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                                   }
-                              }
-                         }
+
+                         #include "sfi_block.h"
 
                          i_out_level += inc;
                     }
@@ -1177,55 +1065,16 @@ static void SFI(int i_four,
                else
                     ptau = ltau[i];
 
-               if (n_derivs == 0) {
-                    if (! solar) {
-                         if (! thermal || i_four > 0)
-                              SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,     NULL,       B, NULL, I_0, NULL,  0, I_0, NULL,  add_single_scattering, greens, solar, thermal, NULL,             NULL,            NULL,                work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                         else
-                              SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,     NULL,       B, NULL, I_0, NULL,  0, I_0, NULL,  add_single_scattering, greens, solar, thermal, NULL,             NULL,            NULL,                work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                    }
-                    else {
-                         if (! thermal || i_four > 0)
-                              SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,     NULL,       B, NULL, I_0, NULL,  0, I_0, NULL,  add_single_scattering, greens, solar, thermal, NULL,             NULL,            NULL,                work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                         else
-                              SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], NULL,       ltau[i], NULL,      btran[i], NULL,       as_0[i], NULL,      atran[i], NULL,       P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,     NULL,       B, NULL, I_0, NULL,  0, I_0, NULL,  add_single_scattering, greens, solar, thermal, NULL,             NULL,            NULL,                work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                    }
-               }
-               else {
-                    if (! flags_or2(derivs->layers, n_layers, n_derivs)) {
-                         if (! solar) {
-                              if (! thermal || i_four > 0)
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,           NULL,                work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                              else if (! flags_or2(derivs->thermal, n_layers, n_derivs))
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,            derivs->thermal[i], work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                              else
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,            derivs->thermal[i], work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                         }
-                         else {
-                              if (! thermal || i_four > 0)
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], NULL,               work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                              else if (! flags_or2(derivs->thermal, n_layers, n_derivs))
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], derivs->thermal[i], work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                              else
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         NULL,         NULL,         NULL,    NULL,     NULL,     NULL,     NULL,     At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], derivs->thermal[i], work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                        }
-                    }
+               P_q0_mm2 = P_q0_mm[i];
+               P_q0_pm2 = P_q0_pm[i];
 
-                    else {
-                         if (! solar) {
-                              if (! thermal || i_four > 0)
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,         P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], NULL,     NULL,     NULL,      NULL,      B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,           NULL,               work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                              else
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], NULL,       P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], NULL,   NULL,   At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], NULL,         P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], NULL,     NULL,     At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], NULL,           derivs->thermal[i], work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                         }
-                         else {
-                              if (! thermal || i_four > 0)
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    P_u0_pm_l[i], P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], F_p_l[i], F_m_l[i], NULL,      NULL,      B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], NULL,               work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                              else
-                                   SFI_LAYER(i, ptau, i_four, n_quad, n_stokes, n_derivs, n_umus, qf, qx_v, qw_v, F_0, umus, omega[i], omega_l[i], ltau[i], ltau_l[i], btran[i], btran_l[i], as_0[i], as_0_l[i], atran[i], atran_l[i], P_u0_pm[i], P_uq_pp[i], P_uq_mp[i], nu[i], X_p[i], X_m[i], F_p[i], F_m[i], At_p[i], At_m[i], F0_p[i], F0_m[i], F1_p[i], F1_m[i], P_u0_pm_l[i], P_uq_pp_l[i], P_uq_mp_l[i], nu_l[i], X_p_l[i], X_m_l[i], F_p_l[i], F_m_l[i], At_p_l[i], At_m_l[i], B, B_l,  I_0, I_0_l, 0, I_0, I_0_l, add_single_scattering, greens, solar, thermal, derivs->layers[i], derivs->beam[i], derivs->thermal[i], work, flag, c, c_l, P_q0_mm[i], P_q0_pm[i]);
-                         }
-                    }
-               }
+               offset2 = 0;
+
+               I_u2  = I_0;
+               if (n_derivs > 0)
+                    I_u_l2 = I_0_l;
+
+               #include "sfi_block.h"
 
                if ((! flag && ! utau_output && i == ulevels[i_out_level]) || (flag && ! utau_output && i + 1 == ulevels[i_out_level])) {
                     for (j = 0; j < n_umus_v; ++j) {
@@ -1268,7 +1117,7 @@ void SFI_UP(int i_four,
             double ***F_p_l, double ***F_m_l,
             double ****At_p_l, double ****At_m_l,
             TYPE *B, TYPE **B_l,
-            double **I_m, double ***K_m, double **I_u, int offset, double ***I_u_l,
+            double **I_m, double ***I_m_l, double **I_u, int offset, double ***I_u_l,
             int add_single_scattering, int greens, int surface, int solar, int thermal, int utau_output,
             derivs_data *derivs, work_data work, double F_iso_bot, double *F_iso_bot_l, double surface_b, double *surface_b_l, double cc[][2], double c_l[][128][2], double **P_q0_mm, double **P_q0_pm) {
 
@@ -1351,7 +1200,7 @@ void SFI_UP(int i_four,
                     dm_v_mul(Rs_uq_l[i], I_m[0], n_umus_v, n_quad_v, u1);
                     dvec_add(I_0_l[i], u1, I_0_l[i], n_umus_v);
                }
-                    dm_v_mul(Rs_uq, K_m[0][i], n_umus_v, n_quad_v, u1);
+                    dm_v_mul(Rs_uq, I_m_l[0][i], n_umus_v, n_quad_v, u1);
                     dvec_add(I_0_l[i], u1, I_0_l[i], n_umus_v);
           }
      }
@@ -1492,7 +1341,7 @@ void SFI_DN(int i_four,
             double ***F_p_l, double ***F_m_l,
             double ****At_p_l, double ****At_m_l,
             TYPE *B, TYPE **B_l,
-            double **I_m, double ***K_m, double **I_u, int offset, double ***I_u_l,
+            double **I_m, double ***I_m_l, double **I_u, int offset, double ***I_u_l,
             int add_single_scattering, int greens, int solar, int thermal, int utau_output,
             derivs_data *derivs, work_data work, double F_iso_top, double *F_iso_top_l, double c[][2], double c_l[][128][2], double **P_q0_mm, double **P_q0_pm) {
 
