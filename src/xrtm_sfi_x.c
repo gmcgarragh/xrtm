@@ -133,7 +133,7 @@ static void SFI_SOURCE_SOLAR_CLASSIC(double ptau, double *ptau_l,
 
           for (k = 0; k < n_umus_v; ++k) {
                if (derivs_beam[j])
-                    I_u_l[offset + j][k] += Fu_0_l[k] * Eu_0[k];
+                    I_u_l[j][offset + k] += Fu_0_l[k] * Eu_0[k];
 
                if (derivs_layers[j]) {
                     if (! flag)
@@ -141,7 +141,7 @@ static void SFI_SOURCE_SOLAR_CLASSIC(double ptau, double *ptau_l,
                     else
                          Eu_0_l = ((e2_l -                              e1_l[j][k]) - Eu_0[k] * (-umus[k] * as_0_l[j])) / (1. - umus[k] * as_0);
 
-                    I_u_l[offset + j][k] += Fu_0[k] * Eu_0_l;
+                    I_u_l[j][offset + k] += Fu_0[k] * Eu_0_l;
                }
           }
      }
