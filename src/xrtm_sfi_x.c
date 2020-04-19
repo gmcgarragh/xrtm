@@ -279,18 +279,18 @@ static void SFI_SOURCE_SOLAR_GREENS(double ptau, double *ptau_l,
 /*******************************************************************************
  *
  ******************************************************************************/
-static void SFI_SOURCE_THERMAL(int i_layer,
-                               double ptau, double *ptau_l,
+static void SFI_SOURCE_THERMAL(double ptau, double *ptau_l,
                                int n_quad, int n_stokes, int n_derivs, int n_umus,
                                double *qw_v, double *umus,
                                double omega, double *omega_l, double ltau, double *ltau_l,
+                               double *p_d_tau, double **p_d_tau_l,
                                double **P_uq_pp, double **P_uq_mp,
                                double **At_p, double **At_m,
                                double ***P_uq_pp_l, double ***P_uq_mp_l,
                                double ***At_p_l, double ***At_m_l,
                                double *I_u, double **I_u_l, int offset,
                                uchar *derivs_layers, uchar *derivs_thermal,
-                               work_data work, int flag, double c[][2], double c_l[][128][2],
+                               work_data work, int flag,
                                double *e1, double **e1_l) {
 
      int j;
@@ -367,7 +367,7 @@ static void SFI_SOURCE_THERMAL(int i_layer,
 
           dvec_scale(.5 * omega, u21[j], u22[j], n_umus_v);
 
-          a1 = (1. - omega) * c[i_layer][j];
+          a1 = (1. - omega) * p_d_tau[j];
 
           a2 = pow(ptau, j);
           a3 = pow(tau0, j);
@@ -419,7 +419,7 @@ static void SFI_SOURCE_THERMAL(int i_layer,
                dvec_scale(.5 * omega,      u2,     u2, n_umus_v);
                dvec_add(u2, u3, u2, n_umus_v);
 
-               a1_l = -omega_l[j] * c[i_layer][k] + (1. - omega) * c_l[i_layer][j][k];
+               a1_l = -omega_l[j] * p_d_tau[k] + (1. - omega) * p_d_tau_l[j][k];
 
                if (k > 0) {
                     if (! derivs_layers[j])
@@ -470,6 +470,7 @@ static void SFI_LAYER(int i_layer, double ptau, int i_four,
                       int n_quad, int n_stokes, int n_derivs, int n_umus,
                       double qf, double *qx_v, double *qw_v, double F_0, double *umus,
                       double omega, double *omega_l, double ltau, double *ltau_l,
+                      double *p_d_tau, double **p_d_tau_l,
                       double btran, double *btran_l,
                       double as_0, double *as_0_l, double atran, double *atran_l,
                       double *P_q0_mm, double *P_q0_pm,
@@ -486,7 +487,7 @@ static void SFI_LAYER(int i_layer, double ptau, int i_four,
                       double *I_0, double **I_0_l, int offset, double *I_u, double **I_u_l,
                       int add_single_scattering, int greens, int solar, int thermal,
                       uchar *derivs_layers, uchar *derivs_beam, uchar *derivs_thermal,
-                      work_data work, int flag, double c[][2], double c_l[][128][2]) {
+                      work_data work, int flag) {
 
      int ii;
      int j;
@@ -717,18 +718,18 @@ static void SFI_LAYER(int i_layer, double ptau, int i_four,
       *
       *-----------------------------------------------------------------------*/
      if (thermal && i_four == 0) {
-          SFI_SOURCE_THERMAL(i_layer,
-                             ptau, ptau_l,
+          SFI_SOURCE_THERMAL(ptau, ptau_l,
                              n_quad, n_stokes, n_derivs, n_umus,
                              qw_v, umus,
                              omega, omega_l, ltau, ltau_l,
+                             p_d_tau, p_d_tau_l,
                              P_uq_pp, P_uq_mp,
                              At_p, At_m,
                              P_uq_pp_l, P_uq_mp_l,
                              At_p_l, At_m_l,
                              I_u, I_u_l, offset,
                              derivs_layers, derivs_thermal,
-                             work, flag, c, c_l,
+                             work, flag,
                              e1, e1_l);
      }
 
@@ -883,8 +884,10 @@ static void SFI(int i_four,
                 double qf, double *qx_v, double *qw_v, double F_0,
                 int n_ulevels, int *ulevels, double *utaus, double *umus,
                 double *omega, double **omega_l, double *ltau, double **ltau_l,
+                double **p_d_tau, double ***p_d_tau_l,
                 double *btran, double **btran_l,
                 double *as_0, double **as_0_l, double *atran, double **atran_l,
+                double **P_q0_mm, double **P_q0_pm,
                 double **P_u0_pm, double ***P_uq_pp, double ***P_uq_mp,
                 TYPE **nu, TYPE ***X_p, TYPE ***X_m,
                 double **F_p, double **F_m,
@@ -895,9 +898,9 @@ static void SFI(int i_four,
                 double ***F_p_l, double ***F_m_l,
                 double ****At_p_l, double ****At_m_l,
                 TYPE *B, TYPE **B_l,
-                double *I_0, double **I_0_l, double **I_u, int offset, double ***I_u_l,
+                double *I_0, double **I_0_l, double **I_u, double ***I_u_l, int offset,
                 int add_single_scattering, int greens, int solar, int thermal, int utau_output,
-                derivs_data *derivs, work_data work, int flag, double c[][2], double c_l[][128][2], double **P_q0_mm, double **P_q0_pm) {
+                derivs_data *derivs, work_data work, int flag) {
 
      int i;
      int i1;
@@ -1102,9 +1105,11 @@ void SFI_UP(int i_four,
             double qf, double *qx_v, double *qw_v, double F_0, double mu_0,
             int n_ulevels, int *ulevels, double *utaus, double *umus,
             double *omega, double **omega_l, double *ltau, double **ltau_l,
-            double *Rs_u0, double **Rs_u0_l, double **Rs_uq, double ***Rs_uq_l,
+            double surface_b, double *surface_b_l,
+            double **p_d_tau, double ***p_d_tau_l,
             double *btran, double **btran_l,
             double *as_0, double **as_0_l, double *atran, double **atran_l,
+            double **P_q0_mm, double **P_q0_pm,
             double **P_u0_pm,
             double ***P_uq_pp, double ***P_uq_mp, double ***P_uq_mm, double ***P_uq_pm,
             TYPE **nu, TYPE ***X_p, TYPE ***X_m,
@@ -1116,10 +1121,12 @@ void SFI_UP(int i_four,
             TYPE ***nu_l, TYPE ****X_p_l, TYPE ****X_m_l,
             double ***F_p_l, double ***F_m_l,
             double ****At_p_l, double ****At_m_l,
+            double *Rs_u0, double **Rs_u0_l, double **Rs_uq, double ***Rs_uq_l,
             TYPE *B, TYPE **B_l,
-            double **I_m, double ***I_m_l, double **I_u, int offset, double ***I_u_l,
+            double F_iso_bot, double *F_iso_bot_l,
+            double **I_m, double ***I_m_l, double **I_u, double ***I_u_l, int offset,
             int add_single_scattering, int greens, int surface, int solar, int thermal, int utau_output,
-            derivs_data *derivs, work_data work, double F_iso_bot, double *F_iso_bot_l, double surface_b, double *surface_b_l, double cc[][2], double c_l[][128][2], double **P_q0_mm, double **P_q0_pm) {
+            derivs_data *derivs, work_data work) {
 
      int i;
      int ii;
@@ -1298,7 +1305,7 @@ void SFI_UP(int i_four,
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     SFI(i_four, n_quad, n_stokes, n_derivs, n_layers, n_umus, qf, qx_v, qw_v, F_0, n_ulevels, ulevels, utaus, umus, omega, omega_l, ltau, ltau_l, btran, btran_l, as_0, as_0_l, atran, atran_l, P_u0_pm, P_uq_pp, P_uq_mp, nu, X_p, X_m, F_p, F_m, At_p, At_m, F0_p, F0_m, F1_p, F1_m, P_u0_pm_l, P_uq_pp_l, P_uq_mp_l, nu_l, X_p_l, X_m_l, F_p_l, F_m_l, At_p_l, At_m_l, B, B_l, I_0, I_0_l, I_u, offset, I_u_l, add_single_scattering, greens, solar, thermal, utau_output, derivs, work, 0, cc, c_l, P_q0_mm, P_q0_pm);
+     SFI(i_four, n_quad, n_stokes, n_derivs, n_layers, n_umus, qf, qx_v, qw_v, F_0, n_ulevels, ulevels, utaus, umus, omega, omega_l, ltau, ltau_l, p_d_tau, p_d_tau_l, btran, btran_l, as_0, as_0_l, atran, atran_l, P_q0_mm, P_q0_pm, P_u0_pm, P_uq_pp, P_uq_mp, nu, X_p, X_m, F_p, F_m, At_p, At_m, F0_p, F0_m, F1_p, F1_m, P_u0_pm_l, P_uq_pp_l, P_uq_mp_l, nu_l, X_p_l, X_m_l, F_p_l, F_m_l, At_p_l, At_m_l, B, B_l, I_0, I_0_l, I_u, I_u_l, offset, add_single_scattering, greens, solar, thermal, utau_output, derivs, work, 0);
 
 
      /*-------------------------------------------------------------------------
@@ -1327,8 +1334,10 @@ void SFI_DN(int i_four,
             double qf, double *qx_v, double *qw_v, double F_0,
             int n_ulevels, int *ulevels, double *utaus, double *umus,
             double *omega, double **omega_l, double *ltau, double **ltau_l,
+            double **p_d_tau, double ***p_d_tau_l,
             double *btran, double **btran_l,
             double *as_0, double **as_0_l, double *atran, double **atran_l,
+            double **P_q0_mm, double **P_q0_pm,
             double **P_u0_mm,
             double ***P_uq_pp, double ***P_uq_mp, double ***P_uq_mm, double ***P_uq_pm,
             TYPE **nu, TYPE ***X_p, TYPE ***X_m,
@@ -1341,9 +1350,10 @@ void SFI_DN(int i_four,
             double ***F_p_l, double ***F_m_l,
             double ****At_p_l, double ****At_m_l,
             TYPE *B, TYPE **B_l,
-            double **I_m, double ***I_m_l, double **I_u, int offset, double ***I_u_l,
+            double F_iso_top, double *F_iso_top_l,
+            double **I_m, double ***I_m_l, double **I_u, double ***I_u_l, int offset,
             int add_single_scattering, int greens, int solar, int thermal, int utau_output,
-            derivs_data *derivs, work_data work, double F_iso_top, double *F_iso_top_l, double c[][2], double c_l[][128][2], double **P_q0_mm, double **P_q0_pm) {
+            derivs_data *derivs, work_data work) {
 
      int i;
      int ii;
@@ -1422,7 +1432,7 @@ void SFI_DN(int i_four,
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     SFI(i_four, n_quad, n_stokes, n_derivs, n_layers, n_umus, qf, qx_v, qw_v, F_0, n_ulevels, ulevels, utaus, umus, omega, omega_l, ltau, ltau_l, btran, btran_l, as_0, as_0_l, atran, atran_l, P_u0_mm, P_uq_mp, P_uq_pp, nu, X_p, X_m, F_p, F_m, At_p, At_m, F0_p, F0_m, F1_p, F1_m, P_u0_mm_l, P_uq_mp_l, P_uq_pp_l, nu_l, X_p_l, X_m_l, F_p_l, F_m_l, At_p_l, At_m_l, B, B_l, I_0, I_0_l, I_u, offset, I_u_l, add_single_scattering, greens, solar, thermal, utau_output, derivs, work, 1, c, c_l, P_q0_mm, P_q0_pm);
+     SFI(i_four, n_quad, n_stokes, n_derivs, n_layers, n_umus, qf, qx_v, qw_v, F_0, n_ulevels, ulevels, utaus, umus, omega, omega_l, ltau, ltau_l, p_d_tau, p_d_tau_l, btran, btran_l, as_0, as_0_l, atran, atran_l, P_q0_mm, P_q0_pm, P_u0_mm, P_uq_mp, P_uq_pp, nu, X_p, X_m, F_p, F_m, At_p, At_m, F0_p, F0_m, F1_p, F1_m, P_u0_mm_l, P_uq_mp_l, P_uq_pp_l, nu_l, X_p_l, X_m_l, F_p_l, F_m_l, At_p_l, At_m_l, B, B_l, I_0, I_0_l, I_u, I_u_l, offset, add_single_scattering, greens, solar, thermal, utau_output, derivs, work, 1);
 
 
      /*-------------------------------------------------------------------------
@@ -1431,7 +1441,7 @@ void SFI_DN(int i_four,
 #ifndef REAL
      for (i = 0; i < n_layers; ++i) {
            if (solar)
-                dm_v_mul_D_A (n_umus, n_stokes,                   P_u0_mm[i], P_u0_mm[i]);
+                dm_v_mul_D_A (n_umus, n_stokes, P_u0_mm[i], P_u0_mm[i]);
            dmat_mul_D_A2(n_umus, n_stokes, n_quad, n_stokes, P_uq_mp[i], P_uq_mp[i]);
 
            for (j = 0; j < n_derivs; ++j) {

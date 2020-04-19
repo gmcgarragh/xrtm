@@ -421,8 +421,9 @@ else {
                a = 0.;
                if (solar && derivs_beam[0][m])
                     a -= Fs_m_l[0][m][i];
-if (thermal && derivs_thermal[0][m])
-     a -= Ft0_m_l[0][m][i];
+               if (thermal && derivs_thermal[0][m])
+                    a -= Ft0_m_l[0][m][i];
+
                if (derivs_layers[0][m]) {
                     for (j = 0; j < n_quad_v; ++j) {
                          a -= B[j] * -X_m_l[0][m][i][j] + B[j + n_quad_v] * (lambda_l[0][j] * -X_p[0][i][j] + lambda[0][j] * -X_p_l[0][m][i][j]);
@@ -443,10 +444,11 @@ if (thermal && derivs_thermal[0][m])
                          a -= Fs1_p_l[i][m][j] * atran[i] + Fs1_p[i][j] * atran_l[i][m];
                     if (solar && derivs_beam[i + 1][m])
                          a += Fs_p_l[i + 1][m][j];
-if (thermal && derivs_thermal[i    ][m])
-     a -= Ft1_p_l[i][m][j];
-if (thermal && derivs_thermal[i + 1][m])
-     a += Ft0_p_l[i + 1][m][j];
+                    if (thermal && derivs_thermal[i    ][m])
+                         a -= Ft1_p_l[i][m][j];
+                    if (thermal && derivs_thermal[i + 1][m])
+                         a += Ft0_p_l[i + 1][m][j];
+
                     for (k = 0; k < n_quad_v; ++k) {
                          if (derivs_layers[i  ][m])
                               a -= B[ii + k            ] * (lambda_l[i    ][k] *  X_p[i    ][j][k] + lambda[i    ][k] * X_p_l[i    ][m][j][k]) + B[ii + k + n_quad_v ] *  X_m_l[i    ][m][j][k];
@@ -464,10 +466,11 @@ if (thermal && derivs_thermal[i + 1][m])
                          a -= Fs1_m_l[i][m][j] * atran[i] + Fs1_m[i][j] * atran_l[i][m];
                     if (solar && derivs_beam[i + 1][m])
                          a += Fs_m_l[i + 1][m][j];
-if (thermal && derivs_thermal[i    ][m])
-     a -= Ft1_m_l[i][m][j];
-if (thermal && derivs_thermal[i + 1][m])
-     a += Ft0_m_l[i + 1][m][j];
+                    if (thermal && derivs_thermal[i    ][m])
+                         a -= Ft1_m_l[i][m][j];
+                    if (thermal && derivs_thermal[i + 1][m])
+                         a += Ft0_m_l[i + 1][m][j];
+
                     for (k = 0; k < n_quad_v; ++k) {
                          if (derivs_layers[i  ][m])
                               a -= B[ii + k            ] * (lambda_l[i    ][k] * -X_m[i    ][j][k] + lambda[i    ][k] * -X_m_l[i    ][m][j][k]) + B[ii + k + n_quad_v ] * -X_p_l[i    ][m][j][k];
@@ -487,8 +490,9 @@ if (thermal && derivs_thermal[i + 1][m])
                b = 0.;
                if (solar && derivs_beam[i][m])
                     b += -Fs1_p_l[i][m][j] * atran[i] - Fs1_p[i][j] * atran_l[i][m];
-if (thermal && derivs_thermal[i][m])
-     b -= Ft1_p_l[i][m][j];
+               if (thermal && derivs_thermal[i][m])
+                    b -= Ft1_p_l[i][m][j];
+
                if (surface) {
                     c = 0.;
                     for (k = 0; k < n_quad_v; ++k) {
@@ -496,10 +500,10 @@ if (thermal && derivs_thermal[i][m])
                               c += Rs_qq[j][k] * (Fs1_m_l[i][m][k] * atran[i] + Fs1_m[i][k] * atran_l[i][m]);
                          if (solar && derivs_layers[i + 1][m])
                               c += Rs_qq_l[m][j][k] * Fs1_m[i][k] * atran[i];
-if (thermal && derivs_thermal[i   ][m])
-     c += Rs_qq[j][k] * Ft1_m_l[i][m][k];
-if (thermal && derivs_layers[i + 1][m])
-     c += Rs_qq_l[m][j][k] * Ft1_m[i][k];
+                         if (thermal && derivs_thermal[i   ][m])
+                              c += Rs_qq[j][k] * Ft1_m_l[i][m][k];
+                         if (thermal && derivs_layers[i + 1][m])
+                              c += Rs_qq_l[m][j][k] * Ft1_m[i][k];
                     }
 
                     b += c;
@@ -1069,5 +1073,4 @@ else {
                }
           }
      }
-
 }

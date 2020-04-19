@@ -1488,8 +1488,10 @@ if (n_umus != 0) {
                  1., qx, qw, F_0, mu_0,
                  n_ulevels, ulevels, utaus, umus,
                  omega, omega_l, ltau, ltau_l,
-                 Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l,
+                 0., NULL,
+                 NULL, NULL,
                  btran, btran_l, as_0, as_0_l, atran, atran_l,
+                 NULL, NULL,
                  P_u0_pm,
                  P_uq_pp, P_uq_mp, P_uq_pp, P_uq_mp,
                  nu, X_p, X_m,
@@ -1501,11 +1503,12 @@ if (n_umus != 0) {
                  NULL, NULL, NULL,
                  NULL, NULL,
                  NULL, NULL,
+                 Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l,
                  b, NULL,
-                 I_m2, NULL, I_p, 3, NULL,
+                 0., NULL,
+                 I_m2, NULL, I_p, NULL, 3,
                  1, 0, surface, 1, 0, utau_output,
-                 NULL, work, 0., NULL, 0., NULL,
-                 NULL, NULL, NULL, NULL);
+                 NULL, work);
 
      if (downwelling)
           sfi_dn(i_four,
@@ -1513,8 +1516,10 @@ if (n_umus != 0) {
                  1., qx, qw, F_0,
                  n_ulevels, ulevels, utaus, umus,
                  omega, omega_l, ltau, ltau_l,
+                 NULL, NULL,
                  btran, btran_l,
                  as_0, as_0_l, atran, atran_l,
+                 NULL, NULL,
                  P_u0_mm,
                  P_uq_pp, P_uq_mp, P_uq_pp, P_uq_mp,
                  nu, X_p, X_m,
@@ -1527,10 +1532,10 @@ if (n_umus != 0) {
                  NULL, NULL,
                  NULL, NULL,
                  b, NULL,
-                 I_m2, NULL, I_m, 3, NULL,
+                 0., NULL,
+                 I_m2, NULL, I_m, NULL, 3,
                  1, 0, 1, 0, utau_output,
-                 NULL, work, 0., NULL,
-                 NULL, NULL, NULL, NULL);
+                 NULL, work);
 }
 
 }
