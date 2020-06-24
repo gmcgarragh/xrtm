@@ -11,7 +11,7 @@ gutil_parse.o: gutil_parse.c gutil.h
 gutil_sort.o: gutil_sort.c gutil.h
 gutil_string.o: gutil_string.c gutil.h
 rtutil_math.o: rtutil_math.c rtutil_math.h
-rtutil_scat_fft.o: rtutil_scat_fft.c
+rtutil_scat_fft.o: rtutil_scat_fft.c rtutil_scat_fft.h
 rtutil_scat_io.o: rtutil_scat_io.c rtutil_scat_io.h rtutil_size_dist.h \
  rtutil_support.h
 rtutil_size_dist.o: rtutil_size_dist.c rtutil_math.h rtutil_size_dist.h \

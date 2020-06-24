@@ -7,3 +7,6 @@ void build_phase_vecs_vector_gc_a(int i_four, int n_coef, int n_mus, int n_stoke
 void build_phase_mats_vector_gc_a(int i_four, int n_coef, int n_mus1, int n_mus2, int n_stokes, double *mu1, double *mu2, double **gc_a, double **P_pp_a, double **P_mp_a, double **P_mm_a, double **P_pm_a, int vector, work_data work);
 void phase_matrix_symmetry_a3(int n_quad1, int n_stokes1, int n_quad2, int n_stokes2, double **P_pp_a, double **P_mp_a, double **P_mm_a, double **P_pm_a, double f);
 void phase_matrix_symmetry_a_ldx3(int n_quad1, int n_stokes1, int n_quad2, int n_stokes2, double *P_pp_a, double *P_mp_a, double *P_mm_a, double *P_pm_a, int ldx, double f);
+void build_phase_mats_scalar_tl_with_ad(int i_four, int n_coef, int n_mus1, int n_mus2, double **Y1, double **Y2, int lda, double *coefs_l, double **P_pp_l, double **P_mp_l, work_data work);
+void build_phase_vecs_vector_gc_tl_with_ad(int i_four, int n_coef, int n_mus, int n_stokes, double *mu, double mu_0, double **gc, double *P_pp, double *P_mp, work_data work);
+void build_phase_mats_vector_gc_tl_with_ad(int i_four, int n_coef, int n_mus1, int n_mus2, int n_stokes, double *mu1, double *mu2, double **gc, double **P_pp, double **P_mp, double **P_mm, double **P_pm, int vector, work_data work);

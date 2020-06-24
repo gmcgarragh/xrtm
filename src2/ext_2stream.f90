@@ -264,7 +264,7 @@ subroutine call_2stream_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
      earth_radius         = planet_r
      height_grid(0)       = 1.
      height_grid(1)       = 0.
-     if (psa /= 0) then
+     if (psa .ne. 0) then
           height_grid     = levels_z
      endif
      deltau_input(: , 1)  = ltau

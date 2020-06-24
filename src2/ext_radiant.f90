@@ -183,7 +183,7 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
      !**************************************************************************
      r = radiant_datatype_ctrl2(1, rt_con, scene, jac, rt_out, &
                                 n_quad * 2, n_coef - 1, n_layers, max(1, n_derivs), n_ulevels)
-     if (r /= 0) then
+     if (r .ne. 0) then
           write (0, *) 'ERROR: radiant_datatype_ctrl2(1, ...), status = ', r
           info = 1
           return
@@ -207,15 +207,15 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
      rt_con%streams                 = n_quad * 2
      rt_con%quadrature              = quadrature
 
-     if (F_0 /= 0. .and. thermal == 0) then
+     if (F_0 .ne. 0. .and. thermal .eq. 0) then
           rt_con%sources                 = 1
-     else if (F_0 == 0. .and. thermal /= 0) then
+     else if (F_0 .eq. 0. .and. thermal .ne. 0) then
           rt_con%sources                 = 3
      else
           rt_con%sources                 = 2
      endif
 
-     if (n_umus == 0) then
+     if (n_umus .eq. 0) then
           rt_con%apply_user_zenith_angle = .false.
           rt_con%user_zenith_angle       = 0.
      else
@@ -223,7 +223,7 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
           rt_con%user_zenith_angle       = acos(umus(1))*180.d0/pi
      endif
 
-     if (utau_output == 0) then
+     if (utau_output .eq. 0) then
           rt_con%get_user_rad            = .false.
           rt_con%n_user_tautot           = n_ulevels
      else
@@ -234,24 +234,24 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
           enddo
      endif
 
-     if (n_four == 0) then
+     if (n_four .eq. 0) then
           rt_con%azimuthal_rad_only = .true.
      else
           rt_con%azimuthal_rad_only = .false.
      endif
-     if (delta_m == 0) then
+     if (delta_m .eq. 0) then
           rt_con%delta_m            = .false.
      else
           rt_con%delta_m            = .true.
      endif
-     if (n_t_tms == 0) then
+     if (n_t_tms .eq. 0) then
           rt_con%ss_cor             = .false.
      else
           rt_con%ss_cor             = .true.
      endif
      rt_con%get_rad_direct          = .false.
      rt_con%get_rad_diffuse         = .true.
-     if (flux == 0) then
+     if (flux .eq. 0) then
           rt_con%get_fluxes         = .false.
      else
           rt_con%get_fluxes         = .true.
@@ -277,7 +277,7 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
      scene%itms(:)                     = 0.
      scene%ss_itms(:)                  = 0.
 
-     if (thermal == 0) then
+     if (thermal .eq. 0) then
           scene%ttop                   = 0.
           scene%temiss                 = 0.
           scene%tlev(:)                = 0.
@@ -313,7 +313,7 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
           enddo
      enddo
 
-     if (psa == 0) then
+     if (psa .eq. 0) then
           scene%sphere%use_pseudo_spherical = .false.
      else
           scene%sphere%use_pseudo_spherical = .true.
@@ -333,7 +333,7 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
      scene%surf%use_reflected_direct   = .true.
      scene%surf%use_reflected_diffuse  = .true.
 
-     if (thermal == 0) then
+     if (thermal .eq. 0) then
           scene%surf%use_surface_emission   = .false.
      else
           scene%surf%use_surface_emission   = .true.
@@ -363,7 +363,7 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
      !**************************************************************************
      !
      !**************************************************************************
-     if (n_derivs == 0) then
+     if (n_derivs .eq. 0) then
           jac%numpar = 1
           jac%get_atmos_jacobian(:, :)      = .false.
           jac%l_tau(:, :)                   = 0.
@@ -383,7 +383,7 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
 
           do j = 1, n_derivs
                do i = 1, n_layers
-                    if (derivs(j, i) /= 0) then
+                    if (derivs(j, i) .ne. 0) then
                          jac%get_atmos_jacobian(j, i) = .true.
 
                          jac%l_tau(j, i)              = ltau_l(j, i)
@@ -404,9 +404,9 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
                     endif
                enddo
 
-               if (derivs(j, i) /= 0) then
+               if (derivs(j, i) .ne. 0) then
                     do k = 1, n_kernels
-                         if (ampfac_l(j, k) /= 0.) then
+                         if (ampfac_l(j, k) .ne. 0.) then
                               jac%get_surf_amp_jacobian(k) = .true.
                          endif
                     enddo
@@ -427,15 +427,15 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
 
      call radiant(rt_con, scene, jac, rt_out)
 
-     if (rt_out%radiant_status /= 0) then
+     if (rt_out%radiant_status .ne. 0) then
           write (0, *) 'ERROR: radiant(), rt_out%radiant_status = ', &
                        rt_out%radiant_status
           info = 1
           return
      endif
 
-     if (radiance /= 0) then
-          if (utau_output == 0) then
+     if (radiance .ne. 0) then
+          if (utau_output .eq. 0) then
                if (.not. rt_con%apply_user_zenith_angle) then
                     do i = 1, n_quad
                          I_p(1, i, 1) = rt_out%radiance(3, n_quad - i + 1)
@@ -451,7 +451,7 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
                endif
 
                do i = 1, n_derivs
-                    if (deriv_type(i) == 1) then
+                    if (deriv_type(i) .eq. 1) then
                          i_layer = layers_index(i);
                          i_deriv = derivs_index(i);
 
@@ -468,7 +468,7 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
                               K_p(1, 1, i, 2) = rt_out%l_radiance(2, n_quad + 1, i_deriv, i_layer)
                               K_m(1, 1, i, 2) = rt_out%l_radiance(1, n_quad + 1, i_deriv, i_layer)
                          endif
-                    else if (deriv_type(i) == 2) then
+                    else if (deriv_type(i) .eq. 2) then
                          i_brdf = brdf_index(i)
 
                          if (.not. rt_con%apply_user_zenith_angle) then
@@ -502,7 +502,7 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
                endif
 
                do i = 1, n_derivs
-                    if (deriv_type(i) == 1) then
+                    if (deriv_type(i) .eq. 1) then
                          i_layer = layers_index(i);
                          i_deriv = derivs_index(i);
 
@@ -519,7 +519,7 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
                                    K_m(1, 1, i, j) = rt_out%l_user_radiance(1, n_quad + 1, i_deriv, i_layer, j)
                               enddo
                          endif
-                    else if (deriv_type(i) == 2) then
+                    else if (deriv_type(i) .eq. 2) then
                          i_brdf = brdf_index(i)
 
                          if (.not. rt_con%apply_user_zenith_angle) then
@@ -540,8 +540,8 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
           endif
      endif
 
-     if (flux /= 0) then
-          if (utau_output == 0) then
+     if (flux .ne. 0) then
+          if (utau_output .eq. 0) then
                flux_p(1) = rt_out%flux(3)
                flux_m(1) = rt_out%flux(0)
                flux_p(2) = rt_out%flux(2)
@@ -560,7 +560,7 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
      !**************************************************************************
      r = radiant_datatype_ctrl2(2, rt_con, scene, jac, rt_out, &
                                 n_quad * 2, n_coef, n_layers, 1, 2)
-     if (r /= 0) then
+     if (r .ne. 0) then
           write (0, *) 'ERROR: radiant_datatype_ctrl2(2, ...), status = ', r
           info = 1
           return

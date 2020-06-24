@@ -54,6 +54,7 @@ OBJECTS += ../src2/dsyev2.o      \
            ../src2/rs2.o         \
            ../src2/ext_2stream.o \
            ../src2/ext_lidort.o  \
+           ../src2/ext_lidort2.o \
            ../src2/ext_lrad.o    \
            ../src2/ext_polrad.o  \
            ../src2/ext_radiant.o \

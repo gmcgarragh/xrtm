@@ -22,3 +22,6 @@ void *jalloc_array4(jmp_buf env, long m, long n, long o, long p, int size);
 void *jalloc_array5(jmp_buf env, long m, long n, long o, long p, long q, int size);
 int xrtm_set_layer_x(xrtm_data *d, double *x, double *x_, int i_layer, int n_layers, uchar *set_flags);
 int xrtm_set_layer_x_l(xrtm_data *d, double **x, void *x_, int i_layer, int n_layers, int i_deriv, int n_derivs, int type);
+void xrtm_misc_input_init_dev(misc_input_data *d);
+int eigen_solver_sym_real_code(char *name);
+const char *eigen_solver_sym_real_name(enum eigen_solver_sym_real_type code);

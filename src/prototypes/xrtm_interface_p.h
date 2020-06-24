@@ -169,3 +169,6 @@ int xrtm_flux(xrtm_data *d, enum xrtm_solver_mask solver, double *flux_p, double
 int xrtm_flux_divergence(xrtm_data *d, enum xrtm_solver_mask solver, double *flux_div, double **flux_div_l);
 int xrtm_solution_2(xrtm_data *d, enum xrtm_solver_mask solver, int solutions, int n_out_phis, double **out_phis, double ****I_p, double ****I_m, double *****I_p_l, double *****I_m_l, double *mean_p, double *mean_m, double **mean_p_l, double **mean_m_l, double *flux_p, double *flux_m, double **flux_p_l, double **flux_m_l, double *flux_div, double **flux_div_l);
 int xrtm_radiance_2(xrtm_data *d, enum xrtm_solver_mask solver, int n_out_phis, double **out_phis, double ****I_p, double ****I_m, double *****I_p_l, double *****I_m_l);
+int check_dev_solvers_create(int options, int solvers, int max_coef, int n_quad, int n_stokes, int n_derivs, int n_layers, int n_theta_0s, int n_kernels, int n_kernel_quad, enum xrtm_kernel_type *kernels, int n_out_levels, int n_out_thetas, int report);
+int check_dev_solvers_set_ulevels(xrtm_data *d, int *ulevels);
+int check_dev_solvers_solution(xrtm_data *d, int solver, int solutions, int n_phis, double **phis);
