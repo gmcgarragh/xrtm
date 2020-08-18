@@ -68,8 +68,8 @@ LINKS        += ${HOME}/opt/openblas/lib/libopenblas.a
 # Uncomment (and modify include path as needed) to compile the Python interface
 #*******************************************************************************
 #make_int_python = 1
-#INCDIRS        += -I${HOME}/opt/anaconda3/include/python3.7m \
-#                  -I${HOME}/opt/anaconda3/lib/python3.7/site-packages/numpy/core/include
+#INCDIRS        += -I${HOME}/opt/anaconda3/include/python3.8 \
+#                  -I${HOME}/opt/anaconda3/lib/python3.8/site-packages/numpy/core/include
 
 
 #*******************************************************************************
