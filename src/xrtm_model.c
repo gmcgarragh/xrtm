@@ -3906,7 +3906,7 @@ static void get_brdf_mats_uq(xrtm_data *d, int i_four, double **Rs_uq, double **
  ******************************************************************************/
 static void diff_bound_input_update(xrtm_data *d, int i_four, int *dep_flags, int deps, double btran, double *btran_l, save_tree_data save_tree, work_data work) {
 
-     char temp[sizeof("update_diff_bound_input") + 5];
+     char temp[sizeof("update_diff_bound_input") + 6];
 
      int i;
      int ii;
@@ -3949,7 +3949,7 @@ static void diff_bound_input_update(xrtm_data *d, int i_four, int *dep_flags, in
       *
       *-----------------------------------------------------------------------*/
      if (d->options & XRTM_OPTION_REVERSE_DERIVS && (solar_surface || thermal_surface)) {
-          snprintf(temp, sizeof("update_diff_bound_input") + 5, "%s_%04d", "update_diff_bound_input", i_four);
+          snprintf(temp, sizeof("update_diff_bound_input") + 6, "%s_%04d", "update_diff_bound_input", i_four);
 
           save_tree_encode_s(&save_tree, "update_diff_bound_input");
 
