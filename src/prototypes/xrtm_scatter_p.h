@@ -20,8 +20,3 @@ void phase_matrix_symmetry2(int n_quad, int n_stokes, double **P_pp, double **P_
 void phase_matrix_symmetry_ldx2(int n_quad, int n_stokes, double *P_pp, double *P_mp, double *P_mm, double *P_pm, int ldx, double f);
 void phase_matrix_symmetry3(int n_quad1, int n_stokes1, int n_quad2, int n_stokes2, double **P_pp, double **P_mp, double **P_mm, double **P_pm, double f);
 void phase_matrix_symmetry_ldx3(int n_quad1, int n_stokes1, int n_quad2, int n_stokes2, double *P_pp, double *P_mp, double *P_mm, double *P_pm, int ldx, double f);
-void scat_vector_rotate_evans(int n_stokes, double mu1, double mu2, double MU, double d_phi, double *P1, double *P2);
-void scat_matrix_rotate_evans(int n_stokes, double mu1, double mu2, double MU, double d_phi, double **P1, double **P2);
-void phase_matrix_symmetry(int n_stokes, double **P1, double **P2);
-void build_phase_vecs_vector_lc(int n_four, int n_coef, int n_mus, int n_stokes, double *mu, double mu_0, double **coefs, double **P_pp, double **P_mp, work_data work, int accel);
-void build_phase_mats_vector_lc(int n_four, int n_coef, int n_mus1, int n_mus2, int n_stokes, double *mu1, double *mu2, double **coefs, double ***P_pp, double ***P_mp, double ***P_mm, double ***P_pm, int vector, work_data work, int accel);
