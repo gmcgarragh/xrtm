@@ -84,8 +84,10 @@ LINKS        += ${HOME}/opt/openblas/lib/libopenblas.a
 #CCDEFINES     += -DHAVE_EISPACK_LIBRARY
 #CCDEFINES     += -DHAVE_FORTRAN_COMPILER
 
-# FFTW if is in an unstandard place
+# FFTW
 #CCDEFINES     += -DFFTW_FLAG
+
+# FFTW if it is in an unstandard place
 #INCDIRS       += -I${HOME}/opt/fftw/include
 #LIBDIRS       += -L${HOME}/opt/fftw/lib
 #LINKS         += -lfftw3
