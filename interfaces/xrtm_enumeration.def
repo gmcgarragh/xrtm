@@ -43,16 +43,7 @@ enumeration solver_mask,
      SOLVER_SIX_STREAM         = 128,
      SOLVER_SOS                = 256,
      SOLVER_TWO_OS             = 512,
-     SOLVER_TWO_STREAM         = 1024,
-     SOLVER_DISORT             = 65536,
-     SOLVER_LIDORT             = 131072,
-     SOLVER_LRAD               = 262144,
-     SOLVER_POLRAD             = 524288,
-     SOLVER_RADIANT            = 1048576,
-     SOLVER_RADTRAN3           = 2097152,
-     SOLVER_SOI                = 4194304,
-     SOLVER_TWOSTR             = 8388608,
-     SOLVER_VLIDORT            = 16777216;
+     SOLVER_TWO_STREAM         = 1024;
 
 enumeration output_mask,
      OUTPUT_RADIANCE           = 1,

@@ -93,24 +93,6 @@ c***********************************************************************
       parameter (XRTM_SOLVER_TWO_OS = 512_8)
       integer XRTM_SOLVER_TWO_STREAM
       parameter (XRTM_SOLVER_TWO_STREAM = 1024_8)
-      integer XRTM_SOLVER_DISORT
-      parameter (XRTM_SOLVER_DISORT = 65536_8)
-      integer XRTM_SOLVER_LIDORT
-      parameter (XRTM_SOLVER_LIDORT = 131072_8)
-      integer XRTM_SOLVER_LRAD
-      parameter (XRTM_SOLVER_LRAD = 262144_8)
-      integer XRTM_SOLVER_POLRAD
-      parameter (XRTM_SOLVER_POLRAD = 524288_8)
-      integer XRTM_SOLVER_RADIANT
-      parameter (XRTM_SOLVER_RADIANT = 1048576_8)
-      integer XRTM_SOLVER_RADTRAN3
-      parameter (XRTM_SOLVER_RADTRAN3 = 2097152_8)
-      integer XRTM_SOLVER_SOI
-      parameter (XRTM_SOLVER_SOI = 4194304_8)
-      integer XRTM_SOLVER_TWOSTR
-      parameter (XRTM_SOLVER_TWOSTR = 8388608_8)
-      integer XRTM_SOLVER_VLIDORT
-      parameter (XRTM_SOLVER_VLIDORT = 16777216_8)
 
       integer XRTM_OUTPUT_RADIANCE
       parameter (XRTM_OUTPUT_RADIANCE = 1_8)
@@ -150,7 +132,7 @@ c***********************************************************************
 c
 c***********************************************************************
       integer N_BYTES_XRTM_TYPE
-      parameter (N_BYTES_XRTM_TYPE = 2264)
+      parameter (N_BYTES_XRTM_TYPE = 2248)
 
 
 
