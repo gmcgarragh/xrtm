@@ -294,7 +294,7 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
           enddo
           scene%tsurf                  = surface_t
           scene%planck_type            = 1
-          scene%wvn                    = 1. / (lambda * 1.e-6 * 1.e2);
+          scene%wvn                    = 1. / (lambda * 1.e-6 * 1.e2)
           scene%wvnlo                  = 0.
           scene%wvnhi                  = 0.
      endif
@@ -379,7 +379,7 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
 
           deriv_type(:) = 0
 
-          i_brdf = 0;
+          i_brdf = 0
 
           do j = 1, n_derivs
                do i = 1, n_layers
@@ -452,8 +452,8 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
 
                do i = 1, n_derivs
                     if (deriv_type(i) .eq. 1) then
-                         i_layer = layers_index(i);
-                         i_deriv = derivs_index(i);
+                         i_layer = layers_index(i)
+                         i_deriv = derivs_index(i)
 
                          if (.not. rt_con%apply_user_zenith_angle) then
                               do k = 1, n_quad
@@ -503,8 +503,8 @@ subroutine call_radiant_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
 
                do i = 1, n_derivs
                     if (deriv_type(i) .eq. 1) then
-                         i_layer = layers_index(i);
-                         i_deriv = derivs_index(i);
+                         i_layer = layers_index(i)
+                         i_deriv = derivs_index(i)
 
                          if (.not. rt_con%apply_user_zenith_angle) then
                               do k = 1, n_quad

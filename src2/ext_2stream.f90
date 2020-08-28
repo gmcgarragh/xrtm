@@ -259,7 +259,7 @@ subroutine call_2stream_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, &
      thermal_bb_input     = 0.
      surfbb               = 0.
      emissivity           = 0.
-     thread               = 1;
+     thread               = 1
      flux_factor          = F_0
      earth_radius         = planet_r
      height_grid(0)       = 1.

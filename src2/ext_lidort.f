@@ -476,7 +476,7 @@ c     ******************************************************************
                 do_kernel_factor_wfs(i) = .false.
            enddo
 
-           i_brdf = 0;
+           i_brdf = 0
 
            do j = 1, n_derivs
                 do i = 1, n_layers
@@ -487,7 +487,7 @@ c     ******************************************************************
 
                           layer_vary_number(i) = layer_vary_number(i) + 1
 
-                          jj = layer_vary_number(i);
+                          jj = layer_vary_number(i)
 
                           if (omega(i) .ne. 0.) then
                                l_omega_total_input(jj, i) =
@@ -673,8 +673,8 @@ c     ******************************************************************
                                enddo
                           enddo
                      else if (deriv_type(k) .eq. 1) then
-                          i_layer = layers_index(k);
-                          i_deriv = derivs_index(k);
+                          i_layer = layers_index(k)
+                          i_deriv = derivs_index(k)
                           do i = 1, n_user_streams
                                i1 = quad_index(i)
                                do j = 1, n_phis
@@ -730,7 +730,7 @@ c     ******************************************************************
      &           flux_p, flux_m, flux_p_l, flux_m_l)
       endif
 
-c     print *, fourier_saved(1);
+c     print *, fourier_saved(1)
 
       return
 
@@ -788,8 +788,8 @@ c***********************************************************************
 
       do k = 1, n_totalatmos_wfs
            if (deriv_type(k) .eq. 0) then
-                i_layer = layers_index(k);
-                i_deriv = derivs_index(k);
+                i_layer = layers_index(k)
+                i_deriv = derivs_index(k)
                 do l = 1, n_out_usertaus
                      mean_p_l(k, l) =
      &                    lidort_atmos_l(i_deriv, i_layer, l, 1, 1)
