@@ -284,9 +284,65 @@ int call_disort(int n_coef, int n_quad, int n_layers, double *qx, double lambda,
 #ifdef __cplusplus
 extern "C" {
 #endif
-/*
+
 void call_lidort_f_(int *n_four,
-*/
+                    int *n_elem,
+                    int *n_coef,
+                    int *n_quad,
+                    int *n_derivs,
+                    int *n_layers,
+                    double *qx,
+                    double *F_0,
+                    double *sza,
+                    double *phi_0,
+                    int *ulevels,
+                    double *utaus,
+                    int *n_ulevels,
+                    double *umus,
+                    int *n_umus,
+                    double *phis,
+                    int *n_phis,
+                    double *planet_r,
+                    double *levels_z,
+                    int *n_kernels,
+                    int *n_kernel_quad,
+                    int *kernels,
+                    double *ampfac,
+                    double *ampfac_l,
+                    double *params,
+                    double *params_l,
+                    int *n_coef_layer,
+                    double *coefs,
+                    double *coefs_l,
+                    double *omega,
+                    double *omega_l,
+                    double *ltau,
+                    double *ltau_l,
+                    double *I_p,
+                    double *I_m,
+                    double *I_p_l,
+                    double *I_m_l,
+                    double *mean_p,
+                    double *mean_m,
+                    double *mean_p_l,
+                    double *mean_m_l,
+                    double *flux_p,
+                    double *flux_m,
+                    double *flux_p_l,
+                    double *flux_m_l,
+                    int *delta_m,
+                    int *n_t_tms,
+                    int *psa,
+                    int *quad_output,
+                    int *radiance,
+                    int *mean,
+                    int *flux,
+                    int *utau_output,
+                    uchar *derivs,
+                    double *epsilon,
+                    int *info,
+                    int *n_mus2);
+
 void call_lidort2_f_(int *n_four,
                     int *n_elem,
                     int *n_coef,
@@ -420,9 +476,9 @@ int call_lidort(int n_four, int n_elem, int n_coef, int n_quad, int n_derivs, in
                params_l2 = **params_l;
           }
      }
-/*
+if (1)
      call_lidort_f_(&n_four, &n_elem, &n_coef, &n_quad, &n_derivs, &n_layers, qx, &F_0, &sza, &phi_0, ulevels, utaus, &n_ulevels, umus, &n_umus, phis, &n_phis, &planet_r, levels_z, &n_kernels, &n_kernel_quad, (int *) kernels, ampfac, ampfac_l2, params2, params_l2, n_coef_layer, **coefs, coefs_l2, omega, omega_l2, ltau, ltau_l2, I_p2, I_m2, I_p_l2, I_m_l2, mean_p, mean_m, mean_p_l2, mean_m_l2, flux_p, flux_m, flux_p_l2, flux_m_l2, &delta_m, &n_t_tms, &psa, &quad_output, &radiance, &mean, &flux, &utau_output, derivs2, &fourier_tol, &info, &n_mus2);
-*/
+else
      call_lidort2_f_(&n_four, &n_elem, &n_coef, &n_quad, &n_derivs, &n_layers, qx, &F_0, &sza, &phi_0, ulevels, utaus, &n_ulevels, umus, &n_umus, phis, &n_phis, &planet_r, levels_z, &n_kernels, &n_kernel_quad, (int *) kernels, ampfac, ampfac_l2, params2, params_l2, n_coef_layer, **coefs, coefs_l2, omega, omega_l2, ltau, ltau_l2, I_p2, I_m2, I_p_l2, I_m_l2, mean_p, mean_m, mean_p_l2, mean_m_l2, flux_p, flux_m, flux_p_l2, flux_m_l2, &delta_m, &n_t_tms, &psa, &quad_output, &radiance, &mean, &flux, &utau_output, derivs2, &fourier_tol, &info, &n_mus2);
 
      if (info) {

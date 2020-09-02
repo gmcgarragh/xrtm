@@ -403,7 +403,7 @@ c     integer finegrid(maxlayers)
            enddo
       enddo
 
-      if (n_kernels == 1 .and. kernels(1) == 0) then
+      if (n_kernels .eq. 1 .and. kernels(1) .eq. 0) then
            do_lambertian_surface = .true.
            lambertian_albedo     = ampfac(1)
       else

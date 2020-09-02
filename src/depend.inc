@@ -1,3 +1,4 @@
+version.o: version.c version.h
 xrtm_adding.o: xrtm_adding.c xrtm.h xrtm_adding.h xrtm_save_tree.h \
  prototypes/xrtm_save_tree_p.h xrtm_work.h prototypes/xrtm_work_p.h \
  prototypes/xrtm_adding_p.h xrtm_adding_a.h prototypes/xrtm_adding_a_p.h \

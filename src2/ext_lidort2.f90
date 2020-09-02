@@ -17,9 +17,18 @@ subroutine call_lidort2_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, qx
                            mean, flux, utau_output, derivs, epsilon, info, n_quad2)
 
      use brdf_sup_inputs_def_m
+     use lidort_aux_m
      use lidort_inputs_def_m
      use lidort_io_defs_m
      use lidort_masters_m
+     use lidort_lcs_masters_m
+     use lidort_lps_masters_m
+
+     use brdf_lin_sup_inputs_def_m
+     use lidort_lin_inputs_def_m
+     use lidort_lin_outputs_def_m
+     use lidort_lin_sup_brdf_def_m
+     use lidort_lin_sup_inout_def_m
 
 
      implicit none
@@ -108,6 +117,8 @@ subroutine call_lidort2_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, qx
 
      integer, intent(in)  :: n_quad2
 
+     logical :: crap = .false.
+
 
      !**************************************************************************
      !
@@ -132,14 +143,15 @@ subroutine call_lidort2_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, qx
      integer :: i1
      integer :: i2
      integer :: j
+     integer :: jj
      integer :: k
      integer :: l
 
      integer :: i_kernel
 
-!    integer :: i_layer
-!    integer :: i_deriv
-!    integer :: i_brdf
+     integer :: i_layer
+     integer :: i_deriv
+     integer :: i_brdf
 
 !    integer :: status_inputcheck
 !    integer :: status_calculation
@@ -150,82 +162,49 @@ subroutine call_lidort2_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, qx
 
      integer :: kernel_n_params(max_kernels_lidort) = (/0,0,0,2,2,3,0,3,2/)
 
+     integer :: n_totalatmos_wfs
+
+     byte    :: deriv_type(n_derivs)
+     integer :: layers_index(n_derivs)
+     integer :: derivs_index(n_derivs)
+     integer :: brdf_index(n_derivs)
+
      real(8) :: a
 
      real(8) :: pi
 
      real(8) :: angles(n_quad2)
 
+     real(8) :: brdf_factor(n_derivs)
+
+     type(brdf_sup_inputs)        :: brdf_sup
      type(lidort_fixed_inputs)    :: fixed
      type(lidort_modified_inputs) :: modified
-     type(brdf_sup_inputs)        :: brdf_sup
      type(lidort_sup_inout)       :: sup_inout
      type(lidort_outputs)         :: outputs
+
+     type(brdf_linsup_inputs)        :: brdf_lin_sup
+     type(lidort_fixed_lininputs)    :: fixed_lin
+     type(lidort_modified_lininputs) :: modified_lin
+     type(lidort_linsup_inout)       :: lin_sup_inout
+     type(lidort_linoutputs)         :: lin_ouputs
 
 
      !**************************************************************************
      !
      !**************************************************************************
-     i = n_four
-     i = n_elem
-     i = n_coef
-     i = n_quad
-     i = n_derivs
-     i = n_layers
-
-     a = qx(n_quad)
-
-     a = F_0
-
-     a = theta_0
-
-     a = phi_0
-
-     i = ulevels(1)
      a = utaus(1)
-     i = n_ulevels
 
-     a = umus(1)
-     i = n_umus
-
-     a = phis(1)
-     i = n_phis
-
-     a = planet_r
-     a = levels_z(1)
-
-     i = n_kernels
-     i = n_kernel_quad
-     i = kernels(1)
-     a = ampfac(1)
      a = ampfac_l(1, 1)
-     a = params(1, 1)
      a = params_l(1, 1, 1)
 
-     i = n_coef_layer(1)
-     a = chi  (1, 1, 1)
      a = chi_l(1, 1, 1, 1)
-
-     a = omega(1)
      a = omega_l(1, 1)
-
-     a = ltau(1)
      a = ltau_l(1, 1)
 
-     i = delta_m
      i = n_t_tms
-     i = psa
-     i = quad_output
-     i = radiance
-     i = mean
-     i = flux
-     i = utau_output
 
      i = derivs(1, 1)
-
-     a = epsilon
-
-     i = n_quad2
 
 
      !**************************************************************************
@@ -409,7 +388,11 @@ subroutine call_lidort2_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, qx
      modified%mbool%ts_do_solar_sources           = .true.
 
      modified%mbool%ts_do_refractive_geometry     = .false.
-     modified%mbool%ts_do_chapman_function        = .true.
+     if (psa .eq. 0) then
+          modified%mbool%ts_do_chapman_function   = .false.
+     else
+          modified%mbool%ts_do_chapman_function   = .true.
+     endif
 
      modified%mbool%ts_do_rayleigh_only           = .false.
      modified%mbool%ts_do_isotropic_only          = .false.
@@ -504,7 +487,7 @@ subroutine call_lidort2_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, qx
                if (n_umus .eq. 1) then
                     quad_index(1) = 1
                else
-                    call lidort_indexx(n_umus, angles, quad_index)
+                    call rssort_idx(n_umus, angles, quad_index)
                endif
 
                do i = 1, n_umus
@@ -525,9 +508,9 @@ subroutine call_lidort2_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, qx
 
 !    modified%muserval%ts_geometry_specheight
 
-!    modified%muserval%ts_n_user_obsgeoms
+     modified%muserval%ts_n_user_obsgeoms = 0
 
-!    modified%muserval%ts_user_obsgeom_input
+     modified%muserval%ts_user_obsgeom_input = 0.
 
 
      !**************************************************************************
@@ -550,18 +533,18 @@ subroutine call_lidort2_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, qx
      if (n_kernels .eq. 1 .and. kernels(1) .eq. 0) then
 
      else
-          brdf_sup%bs_do_user_streams            = .true.
+          brdf_sup%bs_do_user_streams     = .true.
 
-          brdf_sup%bs_do_surface_emission        = .false.
+          brdf_sup%bs_do_surface_emission = .false.
 
-          brdf_sup%bs_do_solar_sources           = .true.
-          brdf_sup%bs_do_user_obsgeoms           = .false.
+          brdf_sup%bs_do_solar_sources    = .true.
+          brdf_sup%bs_do_user_obsgeoms    = .false.
 
-          brdf_sup%bs_nstreams = n_kernel_quad * 2
+          brdf_sup%bs_nstreams            = n_kernel_quad * 2
 
-          brdf_sup%bs_nbeams                     = 1
+          brdf_sup%bs_nbeams              = 1
 
-          brdf_sup%bs_beam_szas(1)               = theta_0
+          brdf_sup%bs_beam_szas(1)        = theta_0
 
           brdf_sup%bs_n_user_relazms = n_phis
           do i = 1, n_phis
@@ -576,7 +559,7 @@ subroutine call_lidort2_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, qx
           if (n_umus .eq. 1) then
                quad_index(1) = 1
           else
-               call lidort_indexx(n_umus, angles, quad_index)
+               call rssort_idx(n_umus, angles, quad_index)
           endif
 
           do i = 1, n_umus
@@ -620,7 +603,125 @@ subroutine call_lidort2_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, qx
      !
      !**************************************************************************
      if (n_derivs .eq. 0) then
+!          do_simulation_only        = .false.
+!          do_linearization          = .false.
+!
+!          do_atmos_linearization    = .false.
+!
+!          do_surface_linearization  = .false.
+!          do_surfbb_linearization   = .false.
+
+           modified_lin%mcont%ts_do_simulation_only        = .false.
+
+           modified_lin%mcont%ts_do_linearization          = .false.
+
+           modified_lin%mcont%ts_do_column_linearization   = .false.
+           modified_lin%mcont%ts_do_atmos_linearization    = .false.
+           modified_lin%mcont%ts_do_profile_linearization  = .false.
+           modified_lin%mcont%ts_do_surface_linearization  = .false.
+
+           modified_lin%mcont%ts_do_atmos_lbbf             = .false.
+           modified_lin%mcont%ts_do_surface_lbbf           = .false.
+
+           modified_lin%mcont%ts_do_sleave_wfs             = .false.
      else
+!          do_simulation_only        = .false.
+!          do_linearization          = .true.
+!
+!          do_atmos_linearization    = .true.
+!
+!          do_surface_linearization  = .false.
+!          do_surfbb_linearization   = .false.
+
+           modified_lin%mcont%ts_do_simulation_only        = .false.
+
+           modified_lin%mcont%ts_do_linearization          = .true.
+
+           modified_lin%mcont%ts_do_column_linearization   = .false.
+           modified_lin%mcont%ts_do_atmos_linearization    = .true.
+           modified_lin%mcont%ts_do_profile_linearization  = .false.
+           modified_lin%mcont%ts_do_surface_linearization  = .false.
+
+           modified_lin%mcont%ts_do_atmos_lbbf             = .false.
+           modified_lin%mcont%ts_do_surface_lbbf           = .false.
+
+           modified_lin%mcont%ts_do_sleave_wfs             = .false.
+
+           n_totalatmos_wfs = n_derivs
+
+           fixed_lin%cont%ts_n_totalcolumn_wfs         = 0
+           fixed_lin%cont%ts_n_surface_wfs             = 0
+
+           do i = 1, n_layers
+                fixed_lin%cont%ts_layer_vary_flag  (i) = .false.
+                fixed_lin%cont%ts_layer_vary_number(i) = 0
+           enddo
+
+           do i = 1, n_kernels
+                brdf_lin_sup%bs_do_kernel_factor_wfs(i) = .false.
+           enddo
+
+           i_brdf = 0
+
+           do j = 1, n_derivs
+                do i = 1, n_layers
+                     if (derivs(j, i) .ne. 0) then
+                          modified_lin%mcont%ts_do_atmos_linearization = .true.
+
+                          fixed_lin%cont%ts_layer_vary_flag  (i) = .true.
+
+                          fixed_lin%cont%ts_layer_vary_number(i) = fixed_lin%cont%ts_layer_vary_number(i) + 1
+
+                          jj = fixed_lin%cont%ts_layer_vary_number(i)
+
+                          if (omega(i) .ne. 0.) then
+                               fixed_lin%optical%ts_l_omega_total_input(jj, i) = &
+                                    omega_l(j, i) / omega(i)
+                          endif
+
+                          if (ltau(i)  .ne. 0.) then
+                               fixed_lin%optical%ts_l_deltau_vert_input(jj, i) = &
+                                    ltau_l(j, i) / ltau(i)
+                          endif
+
+                          do k = 0, n_coef_layer(i) - 1
+                               if (chi(k+1, 1, i) .ne. 0.) then
+                                    fixed_lin%optical%ts_l_phasmoms_total_input(jj, k, i) = &
+                                        chi_l(k+1, 1, j, i) / chi(k+1, 1, i)
+                               else
+                                    fixed_lin%optical%ts_l_phasmoms_total_input(jj, k, i) = 0.
+                               endif
+                          enddo
+
+                          deriv_type(j)   = 1
+                          layers_index(j) = i
+                          derivs_index(j) = fixed_lin%cont%ts_layer_vary_number(i)
+
+                          goto 666
+                     endif
+                enddo
+
+                if (derivs(j, i) .ne. 0) then
+                     modified_lin%mcont%ts_do_surface_linearization = .true.
+                else
+                     deriv_type(j) = 0
+                endif
+
+
+666             do i = i + 1, n_layers + 1
+                     if (derivs(j, i) .ne. 0) then
+                          print *, 'ERROR: lidort only supports one linearized layer per deriv, i_layer,i_deriv =', i, j
+                          info = 1
+                          return
+                     endif
+                enddo
+           enddo
+
+
+           fixed_lin%cont%ts_columnwf_names(1)  = 'column wf'
+!          fixed_lin%cont%ts_atmoswf_names(1)   = 'atmos wf'
+           fixed_lin%cont%ts_profilewf_names(1) = 'profile wf'
+!          fixed_lin%cont%ts_surfacewf_names(1) = 'surface wf'
      endif
 
 
@@ -629,32 +730,36 @@ subroutine call_lidort2_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, qx
      !**************************************************************************
      if (n_derivs .eq. 0) then
           call lidort_master(fixed, modified, sup_inout, outputs)
-!         if (status_inputcheck .eq. LIDORT_SERIOUS) then
-!              print *, 'ERROR: lidort_master(), status_inputcheck = ', &
-!                       status_inputcheck
-!              info = 1
-!              return
-!         endif
-!         if (status_calculation .eq. LIDORT_SERIOUS) then
-!              print *, 'ERROR: lidort_master(), status_calculation = ', &
-!                       status_calculation
-!              info = 1
-!              return
-!         endif
+          if (outputs%status%ts_status_inputcheck .eq. LIDORT_SERIOUS) then
+               call lidort_write_status('lidort_error.out', 666, crap, outputs%status)
+               print *, 'ERROR: lidort_master(), status_inputcheck = ', &
+                        outputs%status%ts_status_inputcheck
+               info = 1
+               return
+          endif
+          if (outputs%status%ts_status_calculation .eq. LIDORT_SERIOUS) then
+               call lidort_write_status('lidort_error.out', 666, crap, outputs%status)
+               print *, 'ERROR: lidort_master(), status_calculation = ', &
+                        outputs%status%ts_status_calculation
+               info = 1
+               return
+          endif
      else
-          call lidort_l_master(fixed, modified, sup_inout, outputs)
-!         if (status_inputcheck .eq. LIDORT_SERIOUS) then
-!              print *, 'ERROR: lidort_l_master(), status_inputcheck = ', &
-!                       status_inputcheck
-!              info = 1
-!              return
-!         endif
-!         if (status_calculation .eq. LIDORT_SERIOUS) then
-!              print *, 'ERROR: lidort_l_master(), status_calculation = ', &
-!                       status_calculation
-!              info = 1
-!              return
-!         endif
+          call lidort_lps_master(fixed, modified, sup_inout, outputs, fixed_lin, modified_lin, lin_sup_inout, lin_ouputs)
+          if (outputs%status%ts_status_inputcheck .eq. LIDORT_SERIOUS) then
+               call lidort_write_status('lidort_error.out', 666, crap, outputs%status)
+               print *, 'ERROR: lidort_l_master(), status_inputcheck = ', &
+                        outputs%status%ts_status_inputcheck
+               info = 1
+               return
+          endif
+          if (outputs%status%ts_status_calculation .eq. LIDORT_SERIOUS) then
+               call lidort_write_status('lidort_error.out', 666, crap, outputs%status)
+               print *, 'ERROR: lidort_l_master(), status_calculation = ', &
+                        outputs%status%ts_status_calculation
+               info = 1
+               return
+          endif
      endif
 
 
@@ -685,10 +790,10 @@ subroutine call_lidort2_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, qx
      !
      !**************************************************************************
      flag = .false.
-!     if ((n_user_streams .eq. 1 .and. user_angles_input(1) .eq. zero) &
-!          .or. do_mvout_only) then
-!          flag = .true.
-!     endif
+!    if ((n_user_streams .eq. 1 .and. user_angles_input(1) .eq. zero) &
+!         .or. do_mvout_only) then
+!         flag = .true.
+!    endif
 
      if (radiance .ne. 0) then
           do i = 1, modified%muserval%ts_n_user_streams
@@ -706,58 +811,58 @@ subroutine call_lidort2_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, qx
                enddo
           enddo
 
-!          if (n_derivs .gt. 0) then
-!               do k = 1, n_totalatmos_wfs
-!                    if (deriv_type(k) .eq. 0) then
-!                         do i = 1, n_user_streams
-!                              i1 = quad_index(i)
-!                              do j = 1, n_phis
-!                                   do l = 1, n_out_usertaus
-!                                        K_p(j, i1, k, l) = 0.
-!                                        K_m(j, i1, k, l) = 0.
-!                                   enddo
-!                              enddo
-!                         enddo
-!                    else if (deriv_type(k) .eq. 1) then
-!                         i_layer = layers_index(k);
-!                         i_deriv = derivs_index(k);
-!                         do i = 1, n_user_streams
-!                              i1 = quad_index(i)
-!                              do j = 1, n_phis
-!                                   if (flag) then
-!                                        i2 = (i - 1) * n_phis + 1
-!                                   else
-!                                        i2 = (i - 1) * n_phis + j
-!                                   endif
-!                                   do l = 1, n_out_usertaus
-!                                        K_p(j, i1, k, l) = &
-!                                        atmoswf(i_deriv, i_layer, l, i2, 1)
-!                                        K_m(j, i1, k, l) = &
-!                                        atmoswf(i_deriv, i_layer, l, i2, 2)
-!                                   enddo
-!                              enddo
-!                         enddo
-!                    else if (deriv_type(k) .eq. 2) then
-!                         i_brdf = brdf_index(k)
-!                         do i = 1, n_user_streams
-!                              i1 = quad_index(i)
-!                              do j = 1, n_phis
-!                                   if (flag) then
-!                                        i2 = (i - 1) * n_phis + 1
-!                                   else
-!                                        i2 = (i - 1) * n_phis + j
-!                                   endif
-!                                   do l = 1, n_out_usertaus
-!                                        K_p(j, i1, k, l) = &
-!                                        surfacewf(i_brdf, l, i2, 1) / brdf_factor(i_brdf)
-!                                        K_m(j, i1, k, l) = &
-!                                        surfacewf(i_brdf, l, i2, 2) / brdf_factor(i_brdf)
-!                                   enddo
-!                              enddo
-!                         enddo
-!                    endif
-!               enddo
-!          endif
+          if (n_derivs .gt. 0) then
+                do k = 1, n_totalatmos_wfs
+                     if (deriv_type(k) .eq. 0) then
+                          do i = 1, modified%muserval%ts_n_user_streams
+                               i1 = quad_index(i)
+                               do j = 1, n_phis
+                                    do l = 1, fixed%userval%ts_n_user_levels
+                                         K_p(j, i1, k, l) = 0.
+                                         K_m(j, i1, k, l) = 0.
+                                    enddo
+                               enddo
+                          enddo
+                     else if (deriv_type(k) .eq. 1) then
+                          i_layer = layers_index(k)
+                          i_deriv = derivs_index(k)
+                          do i = 1, modified%muserval%ts_n_user_streams
+                               i1 = quad_index(i)
+                               do j = 1, n_phis
+                                    if (flag) then
+                                         i2 = (i - 1) * n_phis + 1
+                                    else
+                                         i2 = (i - 1) * n_phis + j
+                                    endif
+                                    do l = 1, fixed%userval%ts_n_user_levels
+                                         K_p(j, i1, k, l) = &
+                                         lin_ouputs%atmos%ts_profilewf(i_deriv, i_layer, l, i2, 1)
+                                         K_m(j, i1, k, l) = &
+                                         lin_ouputs%atmos%ts_profilewf(i_deriv, i_layer, l, i2, 2)
+                                    enddo
+                               enddo
+                          enddo
+                     else if (deriv_type(k) .eq. 2) then
+                          i_brdf = brdf_index(k)
+                          do i = 1, modified%muserval%ts_n_user_streams
+                               i1 = quad_index(i)
+                               do j = 1, n_phis
+                                    if (flag) then
+                                         i2 = (i - 1) * n_phis + 1
+                                    else
+                                         i2 = (i - 1) * n_phis + j
+                                    endif
+                                    do l = 1, fixed%userval%ts_n_user_levels
+                                         K_p(j, i1, k, l) = &
+                                         lin_ouputs%surf%ts_surfacewf(i_brdf, l, i2, 1) / brdf_factor(i_brdf)
+                                         K_m(j, i1, k, l) = &
+                                         lin_ouputs%surf%ts_surfacewf(i_brdf, l, i2, 2) / brdf_factor(i_brdf)
+                                    enddo
+                               enddo
+                          enddo
+                     endif
+                enddo
+           endif
      endif
 
 
