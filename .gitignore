@@ -2,3 +2,17 @@
 *.mod
 *.o
 *.so
+make.inc
+doc/xrtm_equations.aux
+doc/xrtm_equations.log
+doc/xrtm_equations.out
+doc/xrtm_equations.pdf
+doc/xrtm_equations.toc
+examples/example_brdf_c
+examples/example_c
+examples/example_cpp
+examples/example_f77
+examples/example_f90
+src/version.c
+utils/callxrtm
+utils/testxrtm
