@@ -79,41 +79,44 @@ LINKS        += ${HOME}/opt/openblas/lib/libopenblas.a
 #*******************************************************************************
 #make_dev_build = 1
 
-#CCDEFINES     += -DDEBUG_BUILD
-#CCDEFINES     += -DINCLUDE_DEV_SOURCE
-#CCDEFINES     += -DHAVE_EISPACK_LIBRARY
-#CCDEFINES     += -DHAVE_FORTRAN_COMPILER
+ifdef make_dev_build
+
+CCDEFINES     += -DDEBUG_BUILD
+CCDEFINES     += -DINCLUDE_DEV_SOURCE
+CCDEFINES     += -DHAVE_EISPACK_LIBRARY
+CCDEFINES     += -DHAVE_FORTRAN_COMPILER
 
 # FFTW
-#CCDEFINES     += -DFFTW_FLAG
+CCDEFINES     += -DFFTW_FLAG
 
 # FFTW if it is in an unstandard place
-#INCDIRS       += -I${HOME}/opt/fftw/include
-#LIBDIRS       += -L${HOME}/opt/fftw/lib
-#LINKS         += -lfftw3
+INCDIRS       += -I${HOME}/opt/fftw/include
+LIBDIRS       += -L${HOME}/opt/fftw/lib
+LINKS         += -lfftw3
 
 # LINPACK
-#LINKS         += ${HOME}/rt/linpack/liblinpack.a
+LINKS         += ${HOME}/rt/linpack/liblinpack.a
 
 # Eispack
-#LINKS         += ${HOME}/rt/eispack/libeispack.a
+LINKS         += ${HOME}/rt/eispack/libeispack.a
 
 # External solvers (for validation)
 
-#INCDIRS       += -I${HOME}/rt/2stream \
-#                 -I${HOME}/rt/lidort/includes \
-#                 -I${HOME}/rt/ms3/mod \
-#                 -I${HOME}/rt/radiant.ss \
-#                 -I${HOME}/rt/vlidort/includes
-#LINKS         += ${HOME}/rt/disort_grm/libdisort.a \
-#                 ${HOME}/rt/2stream/lib2stream.a \
-#                 ${HOME}/rt/lidort/sourcecode/liblidort.a \
-#                 ${HOME}/rt/ms3/src/libms3.a \
-#                 ${HOME}/rt/polrad/libpolrad.a \
-#                 ${HOME}/rt/radiant.ss/libradiant.a \
-#                 ${HOME}/rt/evans/PolRadTran_grm/libradtran.a \
-#                 ${HOME}/rt/twostr/libtwostr.a \
-#                 ${HOME}/rt/vlidort/sourcecode/libvlidort.a
+INCDIRS       += -I${HOME}/rt/2stream \
+                 -I${HOME}/rt/lidort/includes \
+                 -I${HOME}/rt/ms3/mod \
+                 -I${HOME}/rt/radiant.ss \
+                 -I${HOME}/rt/vlidort/includes
+LINKS         += ${HOME}/rt/disort_grm/libdisort.a \
+                 ${HOME}/rt/2stream/lib2stream.a \
+                 ${HOME}/rt/lidort/sourcecode/liblidort.a \
+                 ${HOME}/rt/ms3/src/libms3.a \
+                 ${HOME}/rt/polrad/libpolrad.a \
+                 ${HOME}/rt/radiant.ss/libradiant.a \
+                 ${HOME}/rt/evans/PolRadTran_grm/libradtran.a \
+                 ${HOME}/rt/twostr/libtwostr.a \
+                 ${HOME}/rt/vlidort/sourcecode/libvlidort.a
+endif
 
 
 #*******************************************************************************
