@@ -73,9 +73,7 @@ LINKS        += ${HOME}/opt/openblas/lib/libopenblas.a
 
 
 #*******************************************************************************
-# Leave all comemented unless you know what these do.
-#
-# Preprocessor macros, includes, and libraries used for development.
+# Leave next line commented unless you know what it does.
 #*******************************************************************************
 #make_dev_build = 1
 
