@@ -130,15 +130,22 @@ subroutine call_lidort2_f(n_four, n_elem, n_coef, n_quad, n_derivs, n_layers, qx
      integer max_kernels_lidort
      parameter (max_kernels_lidort = 9)
 
-     character(10) :: kernel_names(max_kernels_lidort) = (/'Lambertian', &
-                                                           'Ross-thin ', &
-                                                           'Ross-thick', &
-                                                           'Li-sparse ', &
-                                                           'Li-dense  ', &
-                                                           'Hapke     ', &
-                                                           'Roujean   ', &
-                                                           'Rahman    ', &
-                                                           'Cox-Munk  '/)
+     character(10) :: kernel_names(max_kernels_lidort + 6) = (/'Lambertian', &
+                                                               'Ross-thin ', &
+                                                               'Ross-thick', &
+                                                               'Li-sparse ', &
+                                                               'Li-dense  ', &
+                                                               'Hapke     ', &
+                                                               'Roujean   ', &
+                                                               'Rahman    ', &
+                                                               'Cox-Munk  ', &
+                                                               'BPDFSoil  ', &
+                                                               'BPDFVegn  ', &
+                                                               'BPDFNDVI  ', &
+                                                               'NewCMGlint', &
+                                                               'RTKHotSpot', &
+                                                               'ModFresnel'/)
+
      integer :: i
      integer :: i1
      integer :: i2

@@ -117,11 +117,11 @@ c     ******************************************************************
       logical flag
 
       integer max_kernels_xrtm
-      parameter (max_kernels_xrtm = 10)
+      parameter (max_kernels_xrtm = 11)
       integer max_kernels_lidort
-      parameter (max_kernels_lidort = 9)
+      parameter (max_kernels_lidort = 10)
 
-      character*10 kernel_names(max_kernels_lidort + 3)
+      character*10 kernel_names(max_kernels_lidort + 2)
       data kernel_names /
      &     'Lambertian',
      &     'Ross-thin ',
@@ -159,10 +159,10 @@ c     ******************************************************************
       integer quad_index(n_quad+n_umus)
 
       integer kernel_index(max_kernels_xrtm)
-      data kernel_index /1,0,7,4,5,2,3,6,8,9/
+      data kernel_index /1,0,7,4,5,2,3,6,8,9,10/
 
       integer kernel_n_params(max_kernels_lidort)
-      data kernel_n_params /0,0,0,2,2,3,0,3,2/
+      data kernel_n_params /0,0,0,2,2,3,0,3,2,2/
 
       byte    deriv_type(n_derivs)
       integer layers_index(n_derivs)

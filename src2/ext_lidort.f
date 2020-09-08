@@ -115,7 +115,7 @@ c     ******************************************************************
       integer max_kernels_lidort
       parameter (max_kernels_lidort = 9)
 
-      character*10 kernel_names(max_kernels_lidort)
+      character*10 kernel_names(max_kernels_lidort + 2)
       data kernel_names /
      &     'Lambertian',
      &     'Ross-thin ',
@@ -125,7 +125,9 @@ c     ******************************************************************
      &     'Hapke     ',
      &     'Roujean   ',
      &     'Rahman    ',
-     &     'Cox-Munk  '/
+     &     'Cox-Munk  ',
+     &     'GISS-soil ',
+     &     'GISS-snow '/
 
       integer i
       integer i1
