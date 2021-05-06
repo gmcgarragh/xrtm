@@ -458,6 +458,16 @@ void rtm_six_stream(int i_four, int n_derivs, int n_layers, double *qx, double *
 */
      calc_Y_x(i_four, -mu_0, Y_0);
 
+if (n_derivs > 0) {
+     for (i = 0; i < n_ulevels; ++i) {
+          for (j = 0; j < n_derivs; ++j) {
+               for (k = 0; k < 3 + n_umus; ++k) {
+                    I_p_l[i][j][k] = 0.;
+                    I_m_l[i][j][k] = 0.;
+               }
+          }
+     }
+}
 
      /*-------------------------------------------------------------------------
       *

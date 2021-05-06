@@ -296,6 +296,16 @@ void rtm_four_stream(int i_four, int n_derivs, int n_layers, double *qx, double 
 */
      calc_Y_x(i_four, -mu_0, Y_0);
 
+if (n_derivs > 0) {
+     for (i = 0; i < n_ulevels; ++i) {
+          for (j = 0; j < n_derivs; ++j) {
+               for (k = 0; k < 2 + n_umus; ++k) {
+                    I_p_l[i][j][k] = 0.;
+                    I_m_l[i][j][k] = 0.;
+               }
+          }
+     }
+}
 
      /*-------------------------------------------------------------------------
       *
@@ -1022,7 +1032,7 @@ if (n_umus == 0) {
                                   uchar **derivs_layers, uchar **derivs_beam,
                                   save_tree_data save_tree, work_data work);
 
-          calc_radiance_taus(2, n_layers, 0, n_ulevels, ulevels, utaus, ltau, ltau_l, as_0, as_0_l, atran, atran_l, nu, X_p, X_m, F_p, F_m, NULL, NULL, NULL, NULL, NULL, b, NULL, I_p, I_m, NULL, NULL, NULL, NULL, save_tree, work);
+          calc_radiance_taus(2, n_layers, 0, n_ulevels, ulevels, utaus, ltau, ltau_l, as_0, as_0_l, atran, atran_l, nu, X_p, X_m, F_p, F_m, NULL, NULL, NULL, NULL, NULL, b, NULL, I_p, I_m, I_p_l, I_m_l, NULL, NULL, save_tree, work);
 */
      }
 }
