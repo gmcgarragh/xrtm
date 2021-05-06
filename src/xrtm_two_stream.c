@@ -271,12 +271,14 @@ void rtm_two_stream(int i_four, int n_derivs, int n_layers, double qx, double F_
 
           Lambda_l  = get_work_d2(&work, n_layers, n_derivs);
      }
-
+/*
      if (flags_or2(derivs->beam, n_layers, n_derivs)) {
+*/
           F_p_l     = get_work_d2(&work, n_layers, n_derivs);
           F_m_l     = get_work_d2(&work, n_layers, n_derivs);
+/*
      }
-
+*/
 
      /*-------------------------------------------------------------------------
       *
@@ -414,7 +416,7 @@ if (solar) {
                     F_m_l[i][j] += ((a12_l * -a14 + a12 * -a14_l + beta_l * a11 + beta * a11_l) - F_m[i] * a15_l) / a15;
                }
                else
-               if (derivs->beam[i][j]) {
+               if (solar && derivs->beam[i][j]) {
                     a10_l = a5 *                             omega[i] * btran_l[i][j];
 
                     a11_l = a10_l * P_q0_pm;
@@ -1139,7 +1141,8 @@ else {
                     if (derivs->layers[i][j])
                          a1_l += x[ii + 1] * -X_p_l[i][j];
 
-                    if (derivs->beam[i][j])
+                    if (solar &&
+                        derivs->beam[i][j])
                          a1_l += F_m_l[i][j] * atran[i] + F_m[i] * atran_l[i][j];
 }
                     for (k = 0; k < n_umus; ++k) {
@@ -1148,7 +1151,8 @@ if (0)
 else {
                          I_0_l[j][k] = 0.;
 if (add_single_scattering) {
-                         if (derivs->beam[n_layers - 0][j])
+                         if (solar &&
+                             derivs->beam[n_layers - 0][j])
                               I_0_l[j][k] += btran_l[n_layers - 0][j] * Rs_u0[k];
                          if (derivs->layers[n_layers - 0][j])
                               I_0_l[j][k] += btran[n_layers - 0] * Rs_u0_l[j][k];
