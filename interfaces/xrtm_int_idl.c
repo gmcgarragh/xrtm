@@ -421,7 +421,7 @@ void IDL_CDECL xrtm_create_dlm(int argc, IDL_VPTR argv[], char *argk)
      options = 0;
      IDL_ENSURE_ARRAY(argv[1]);
      for (i = 0; i < argv[1]->value.arr->n_elts; ++i) {
-          if ((r = xrtm_option_name_to_mask(((IDL_STRING *) argv[1]->value.arr->data)[i].s)) < 0)
+          if ((r = xrtm_option_name_to_mask(((IDL_STRING *) argv[1]->value.arr->data)[i].s)) == -1)
                IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_option_name_to_mask()");
           options |= r;
      }}
@@ -430,7 +430,7 @@ void IDL_CDECL xrtm_create_dlm(int argc, IDL_VPTR argv[], char *argk)
      solvers = 0;
      IDL_ENSURE_ARRAY(argv[2]);
      for (i = 0; i < argv[2]->value.arr->n_elts; ++i) {
-          if ((r = xrtm_solver_name_to_mask(((IDL_STRING *) argv[2]->value.arr->data)[i].s)) < 0)
+          if ((r = xrtm_solver_name_to_mask(((IDL_STRING *) argv[2]->value.arr->data)[i].s)) == -1)
                IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_solver_name_to_mask()");
           solvers |= r;
      }}

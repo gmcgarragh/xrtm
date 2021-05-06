@@ -47,7 +47,7 @@ static int list_to_mask(PyObject *list, int *mask, int (*name_to_mask)(const cha
 #else
           r = name_to_mask(PyUnicode_AsUTF8 (PyList_GetItem(list, i)));
 #endif
-          if (r < 0) {
+          if (r == -1) {
                format = "ERROR: %s()";
                error  = malloc(strlen(format) - 2 + strlen(name) + 1);
                sprintf(error, format, name);
