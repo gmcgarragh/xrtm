@@ -53,6 +53,7 @@ int xrtm_get_solvers(xrtm_data *d);
 int xrtm_get_max_coef(xrtm_data *d);
 int xrtm_get_n_quad(xrtm_data *d);
 int xrtm_get_n_stokes(xrtm_data *d);
+int xrtm_get_n_elem(xrtm_data *d);
 int xrtm_get_n_derivs(xrtm_data *d);
 int xrtm_get_n_layers(xrtm_data *d);
 int xrtm_get_n_kernels(xrtm_data *d);
