@@ -2812,7 +2812,7 @@ double xrtm_get_doub_d_tau(xrtm_data *d) {
  *
  ******************************************************************************/
 int xrtm_set_pade_params(xrtm_data *d, int pade_s, int pade_r) {
-/*
+
      if (pade_s < 0) {
           fprintf(stderr, "ERROR: invalid value for s: %d, "
                   "must be >= zero\n", pade_s);
@@ -2824,7 +2824,7 @@ int xrtm_set_pade_params(xrtm_data *d, int pade_s, int pade_r) {
                   "must be > zero\n", pade_r);
           return XRTM_INT_ERROR;
      }
-*/
+
      d->pade_s = pade_s;
      d->pade_r = pade_r;
 
@@ -3339,7 +3339,7 @@ int xrtm_set_F_iso_top_l_1(xrtm_data *d, int i_deriv, double F_iso_top_l) {
 
      CHECK_INIT_FOR_DERIVS();
 
-     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", XRTM_INT_ERROR);
 
      d->F_iso_top_l[i_deriv] = F_iso_top_l;
 
@@ -3368,7 +3368,7 @@ int xrtm_set_F_iso_top_l_n(xrtm_data *d, double *F_iso_top_l) {
 
 double xrtm_get_F_iso_top_l(xrtm_data *d, int i_deriv) {
 
-     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", XRTM_DBL_ERROR);
 
      return d->F_iso_top_l[i_deriv];
 }
@@ -3410,7 +3410,7 @@ int xrtm_set_F_iso_bot_l_1(xrtm_data *d, int i_deriv, double F_iso_bot_l) {
 
      CHECK_INIT_FOR_DERIVS();
 
-     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", XRTM_INT_ERROR);
 
      d->F_iso_bot_l[i_deriv] = F_iso_bot_l;
 
@@ -3439,7 +3439,7 @@ int xrtm_set_F_iso_bot_l_n(xrtm_data *d, double *F_iso_bot_l) {
 
 double xrtm_get_F_iso_bot_l(xrtm_data *d, int i_deriv) {
 
-     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", XRTM_DBL_ERROR);
 
      return d->F_iso_bot_l[i_deriv];
 }
@@ -3477,7 +3477,7 @@ double xrtm_get_F_0(xrtm_data *d) {
 
      if (! (d->options & XRTM_OPTION_SOURCE_SOLAR)) {
           fprintf(stderr, "ERROR: model not initialized for solar sources\n");
-          return XRTM_INT_ERROR;
+          return XRTM_DBL_ERROR;
      }
 
      GET_INPUTS_CHECK_SET_FLAGS(d->set_flags_F_0, xrtm_input_index_to_name(INPUT_F_0), XRTM_DBL_ERROR);
@@ -3635,7 +3635,7 @@ int xrtm_set_levels_b_l_1(xrtm_data *d, int i_deriv, double *levels_b_l) {
 
      CHECK_INIT_FOR_DERIVS();
 
-     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", XRTM_INT_ERROR);
 
      for (i = 0; i < d->n_layers + 1; ++i)
           d->levels_b_l[i][i_deriv] = levels_b_l[i];
@@ -3677,10 +3677,10 @@ double xrtm_get_levels_b_l(xrtm_data *d, int i_deriv, double *levels_b_l) {
 
      if (! (d->options & XRTM_OPTION_SOURCE_THERMAL)) {
           fprintf(stderr, "ERROR: model not initialized for thermal sources\n");
-          return XRTM_INT_ERROR;
+          return XRTM_DBL_ERROR;
      }
 
-     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", XRTM_DBL_ERROR);
 
      for (i = 0; i < d->n_layers + 1; ++i)
           levels_b_l[i] = d->levels_b_l[i][i_deriv];
@@ -3740,7 +3740,7 @@ int xrtm_set_surface_b_l_1(xrtm_data *d, int i_deriv, double surface_b_l) {
 
      CHECK_INIT_FOR_DERIVS();
 
-     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", XRTM_INT_ERROR);
 
      d->surface_b_l[i_deriv] = surface_b_l;
 
@@ -3779,7 +3779,7 @@ double xrtm_get_surface_b_l(xrtm_data *d, int i_deriv) {
           return XRTM_INT_ERROR;
      }
 
-     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", XRTM_DBL_ERROR);
 
      return d->surface_b_l[i_deriv];
 
@@ -3803,7 +3803,7 @@ static int xrtm_set_g_x(xrtm_data *d, double *g,
           return -1;
      }
 
-     CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", -1);
+     CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", XRTM_INT_ERROR);
 
      for (i = i_layer; i < n_layers; ++i) {
           if (g[i - i_layer] < -1. || g[i - i_layer] > 1.) {
@@ -3879,8 +3879,8 @@ static int xrtm_set_g_x_l(xrtm_data *d, void *g_l, int i_layer,
           return -1;
      }
 
-     CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", -1);
-     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+     CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", XRTM_INT_ERROR);
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", XRTM_INT_ERROR);
 
      if (xrtm_set_layer_x_l(d, d->g0_l, g_l,
                             i_layer, n_layers, i_deriv, n_derivs, type)) {
@@ -4127,8 +4127,8 @@ static int xrtm_set_coef_x_l(xrtm_data *d, void *coef_l, int i_layer, int n_laye
           return -1;
      }
 
-     CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", -1);
-     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+     CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", XRTM_INT_ERROR);
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", XRTM_INT_ERROR);
 
      for (i = i_layer, ii = 0; i < n_layers; ++i, ++ii) {
           for (j = i_deriv, jj = 0; j < n_derivs; ++j, ++jj) {
@@ -4250,7 +4250,7 @@ static int xrtm_set_omega_x(xrtm_data *d, double *omega,
 
      int deps;
 
-     CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", -1);
+     CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", XRTM_INT_ERROR);
 
      for (i = i_layer; i < n_layers; ++i) {
           if (omega[i - i_layer] < 0. || omega[i - i_layer] > 1.) {
@@ -4329,8 +4329,8 @@ static int xrtm_set_omega_x_l(xrtm_data *d, void *omega_l, int i_layer,
 
      CHECK_INIT_FOR_DERIVS();
 
-     CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", -1);
-     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+     CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", XRTM_INT_ERROR);
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", XRTM_INT_ERROR);
 
      if (xrtm_set_layer_x_l(d, d->omega0_l, omega_l,
                             i_layer, n_layers, i_deriv, n_derivs, type)) {
@@ -4416,7 +4416,7 @@ static int xrtm_set_ltau_x(xrtm_data *d, double *ltau,
 
      int i;
 
-     CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", -1);
+     CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", XRTM_INT_ERROR);
 
      for (i = i_layer; i < n_layers; ++i) {
           if (ltau[i - i_layer] <= 0.) {
@@ -4478,8 +4478,8 @@ static int xrtm_set_ltau_x_l(xrtm_data *d, void *ltau_l, int i_layer,
 
      CHECK_INIT_FOR_DERIVS();
 
-     CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", -1);
-     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", -1);
+     CHECK_INDEX_RANGE(i_layer, d->n_layers, "i_layer", "n_layers", XRTM_INT_ERROR);
+     CHECK_INDEX_RANGE(i_deriv, d->n_derivs, "i_deriv", "n_derivs", XRTM_INT_ERROR);
 
      if (xrtm_set_layer_x_l(d, d->ltau0_l, ltau_l,
                             i_layer, n_layers, i_deriv, n_derivs, type)) {
