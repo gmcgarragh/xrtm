@@ -4,7 +4,7 @@
 #*******************************************************************************
 #
 #*******************************************************************************
-import numpy
+import numpy as np
 import sys
 
 sys.path.insert(1, '../interfaces')
@@ -46,15 +46,12 @@ ltau          = [.02, .05, 1., .1]
 omega         = [1., 1., .9, 1.]
 
 n_ray_coef    = 3
-
-ray_coef1     = [1.000000e+00,
+ray_coef      = [1.000000e+00,
                  0.000000e+00,
                  4.798741e-01]
-ray_coef      = [ray_coef1]
 
 n_aer_coef    = 34
-
-aer_coef1     = [1.000000e+00,
+aer_coef      = [1.000000e+00,
                  1.865569e+00,
                  1.789985e+00,
                  1.220838e+00,
@@ -88,11 +85,14 @@ aer_coef1     = [1.000000e+00,
                  1.472730e-07,
                  1.448956e-07,
                  6.591328e-08]
-aer_coef      = [aer_coef1]
 
 n_coef        = [n_ray_coef, n_ray_coef, n_aer_coef, n_ray_coef]
 
-coef          = [ray_coef, ray_coef, aer_coef, ray_coef]
+coef          = np.zeros((n_layers, 1, max_coef), dtype = np.double)
+coef[0,0,0:n_ray_coef] = np.reshape(ray_coef, (1, 1, n_ray_coef))
+coef[1,0,0:n_ray_coef] = np.reshape(ray_coef, (1, 1, n_ray_coef))
+coef[2,0,0:n_aer_coef] = np.reshape(aer_coef, (1, 1, n_aer_coef))
+coef[3,0,0:n_ray_coef] = np.reshape(ray_coef, (1, 1, n_ray_coef))
 
 albedo        = .2
 
@@ -178,11 +178,11 @@ except xrtm.error as e:
     print(str(e) + '\nERROR: xrtm.set_omega_n()')
     exit()
 
-#try:
-#    model.set_coef_n(coef)
-#except xrtm.error as e:
-#    print(str(e) + '\nERROR: xrtm.set_coef_n()')
-#    exit()
+try:
+    model.set_coef_n(n_coef, coef)
+except xrtm.error as e:
+    print(str(e) + '\nERROR: xrtm.set_coef_n()')
+    exit()
 
 
 # Alternatively the inputs can be set one layer at a time.
