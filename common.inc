@@ -60,10 +60,11 @@ depend: depend-subdirs
         fi
 
 
-# Requires cproto
 depend-subdirs:
 	${MAKE_SUBDIRS}
 
+
+# Requires cproto
 proto_types: proto_types-subdirs
 	@if [ -e prototypes ]; then \
              files='$(OBJECTS)'; \
