@@ -69,7 +69,7 @@ xrtm_int_f77.f xrtm_int_f77_util.c: xrtm_enumeration.def xrtm_structure.def xrtm
         -int_def_in xrtm_interface.def \
         -f77 xrtm_int_f77 xrtm_int_f77_util.c xrtm_int_f77.inc xrtm_int_f77.f
 
-xrtm_int_f90.f90 xrtm_int_f90_util.c:
+xrtm_int_f90.f90 xrtm_int_f90_util.c: xrtm_enumeration.def xrtm_structure.def xrtm_interface.def
 	~/bindx2/bindx \
         -int_def_in xrtm_enumeration.def \
         -int_def_in xrtm_structure.def \
@@ -90,7 +90,7 @@ xrtm_fd_int_f77.f xrtm_fd_int_f77_util.c: xrtm_fd_enumeration.def xrtm_fd_struct
         -int_def_in xrtm_fd_interface.def \
         -f77 xrtm_fd_int_f77 xrtm_fd_int_f77_util.c xrtm_fd_int_f77.inc xrtm_fd_int_f77.f \
 
-xrtm_fd_int_f90.f90 xrtm_fd_int_f90_util.c:
+xrtm_fd_int_f90.f90 xrtm_fd_int_f90_util.c: xrtm_enumeration.def xrtm_structure.def xrtm_interface.def
 	~/bindx2/bindx \
         -int_def_in xrtm_fd_enumeration.def \
         -int_def_in xrtm_fd_structure.def \
