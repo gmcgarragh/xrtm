@@ -177,15 +177,6 @@ integer, parameter, public :: XRTM_SOLVER_SIX_STREAM = 128_int64
 integer, parameter, public :: XRTM_SOLVER_SOS = 256_int64
 integer, parameter, public :: XRTM_SOLVER_TWO_OS = 512_int64
 integer, parameter, public :: XRTM_SOLVER_TWO_STREAM = 1024_int64
-integer, parameter, public :: XRTM_SOLVER_DISORT = 65536_int64
-integer, parameter, public :: XRTM_SOLVER_LIDORT = 131072_int64
-integer, parameter, public :: XRTM_SOLVER_LRAD = 262144_int64
-integer, parameter, public :: XRTM_SOLVER_POLRAD = 524288_int64
-integer, parameter, public :: XRTM_SOLVER_RADIANT = 1048576_int64
-integer, parameter, public :: XRTM_SOLVER_RADTRAN3 = 2097152_int64
-integer, parameter, public :: XRTM_SOLVER_SOI = 4194304_int64
-integer, parameter, public :: XRTM_SOLVER_TWOSTR = 8388608_int64
-integer, parameter, public :: XRTM_SOLVER_VLIDORT = 16777216_int64
 
 integer, parameter, public :: XRTM_OUTPUT_RADIANCE = 1_int64
 integer, parameter, public :: XRTM_OUTPUT_RADIANCE_MEAN = 2_int64
@@ -210,7 +201,7 @@ integer, parameter, public :: XRTM_KERNEL_USER_DEFINED = 10_int64
 !
 !*******************************************************************************
 type, bind(c) :: xrtm_type
-     integer(c_signed_char) :: data(2264)
+     integer(c_signed_char) :: data(2248)
 end type xrtm_type
 
 
