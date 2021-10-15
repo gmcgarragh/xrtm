@@ -55,59 +55,51 @@ write_int_def: write_int_def.o ../src/libxrtm.a ../misc/libxrtm_misc.a
         $(LIBDIRS) $(LINKS)
 	write_int_def
 
-xrtm_int_cpp.cpp: xrtm_enumeration.def xrtm_structure.def xrtm_interface.def
+xrtm_int_cpp.cpp: xrtm_int_defs.def xrtm_interface.def
 	${HOME}/bindx2/bindx \
-        -int_def_in xrtm_enumeration.def \
-        -int_def_in xrtm_structure.def \
+        -int_def_in xrtm_int_defs.def \
         -int_def_in xrtm_interface.def \
         -cpp xrtm_int_cpp xrtm_int_cpp.h xrtm_int_cpp.cpp
 
-xrtm_int_f77.f xrtm_int_f77_util.c: xrtm_enumeration.def xrtm_structure.def xrtm_interface.def
+xrtm_int_f77.f xrtm_int_f77_util.c: xrtm_int_defs.def xrtm_interface.def
 	~/bindx2/bindx \
-        -int_def_in xrtm_enumeration.def \
-        -int_def_in xrtm_structure.def \
+        -int_def_in xrtm_int_defs.def \
         -int_def_in xrtm_interface.def \
         -f77 xrtm_int_f77 xrtm_int_f77_util.c xrtm_int_f77.inc xrtm_int_f77.f
 
-xrtm_int_f90.f90 xrtm_int_f90_util.c: xrtm_enumeration.def xrtm_structure.def xrtm_interface.def
+xrtm_int_f90.f90 xrtm_int_f90_util.c: xrtm_int_defs.def xrtm_interface.def
 	~/bindx2/bindx \
-        -int_def_in xrtm_enumeration.def \
-        -int_def_in xrtm_structure.def \
+        -int_def_in xrtm_int_defs.def \
         -int_def_in xrtm_interface.def \
         -f90 xrtm_int_f90 xrtm_int_f90_util.c xrtm_int_f90.f90
 
-xrtm_fd_int_cpp.cpp: xrtm_fd_enumeration.def xrtm_fd_structure.def xrtm_fd_interface.def
+xrtm_fd_int_cpp.cpp: xrtm_fd_int_defs.def xrtm_fd_interface.def
 	${HOME}/bindx2/bindx \
-        -int_def_in xrtm_fd_enumeration.def \
-        -int_def_in xrtm_fd_structure.def \
+        -int_def_in xrtm_fd_int_defs.def \
         -int_def_in xrtm_fd_interface.def \
         -cpp xrtm_fd_int_cpp xrtm_fd_int_cpp.h xrtm_fd_int_cpp.cpp
 
-xrtm_fd_int_f77.f xrtm_fd_int_f77_util.c: xrtm_fd_enumeration.def xrtm_fd_structure.def xrtm_fd_interface.def
+xrtm_fd_int_f77.f xrtm_fd_int_f77_util.c: xrtm_fd_int_defs.def xrtm_fd_interface.def
 	~/bindx2/bindx \
-        -int_def_in xrtm_fd_enumeration.def \
-        -int_def_in xrtm_fd_structure.def \
+        -int_def_in xrtm_fd_int_defs.def \
         -int_def_in xrtm_fd_interface.def \
         -f77 xrtm_fd_int_f77 xrtm_fd_int_f77_util.c xrtm_fd_int_f77.inc xrtm_fd_int_f77.f \
 
-xrtm_fd_int_f90.f90 xrtm_fd_int_f90_util.c: xrtm_fd_enumeration.def xrtm_fd_structure.def xrtm_fd_interface.def
+xrtm_fd_int_f90.f90 xrtm_fd_int_f90_util.c: xrtm_fd_int_defs.def xrtm_fd_interface.def
 	~/bindx2/bindx \
-        -int_def_in xrtm_fd_enumeration.def \
-        -int_def_in xrtm_fd_structure.def \
+        -int_def_in xrtm_fd_int_defs.def \
         -int_def_in xrtm_fd_interface.def \
         -f90 xrtm_fd_int_f90 xrtm_fd_int_f90_util.c xrtm_fd_int_f90.f90
 
-xrtm_int_py.c: xrtm_enumeration.def xrtm_structure.def xrtm_interface.def
+xrtm_int_py.c: xrtm_int_defs.def xrtm_interface.def
 	~/bindx2/bindx \
-        -int_def_in xrtm_enumeration.def \
-        -int_def_in xrtm_structure.def \
+        -int_def_in xrtm_int_defs.def \
         -int_def_in xrtm_interface.def \
         -py xrtm_int_py xrtm_int_py.c
 
-xrtm_int_idl.c: xrtm_enumeration.def xrtm_structure.def xrtm_interface.def
+xrtm_int_idl.c: xrtm_int_defs.def xrtm_interface.def
 	~/bindx2/bindx \
-        -int_def_in xrtm_enumeration.def \
-        -int_def_in xrtm_structure.def \
+        -int_def_in xrtm_int_defs.def \
         -int_def_in xrtm_interface.def \
         -idl xrtm_int_idl xrtm_int_idl.c xrtm_int_idl.dlm
 
