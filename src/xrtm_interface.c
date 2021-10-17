@@ -760,12 +760,28 @@ int xrtm_create(xrtm_data *d, int options, int solvers, int max_coef, int n_quad
 
      xrtm_misc_input_init(&misc_input);
 
-     return xrtm_create2(d, options, solvers, max_coef, n_quad, n_stokes, n_derivs, n_layers, n_theta_0s, n_kernels, n_kernel_quad, kernels, n_out_levels, n_out_thetas, &misc_input);
+     return xrtm_create_misc(d, options, solvers, max_coef, n_quad, n_stokes, n_derivs, n_layers, n_theta_0s, n_kernels, n_kernel_quad, kernels, n_out_levels, n_out_thetas, &misc_input);
 }
 
 
 
-int xrtm_create2(xrtm_data *d, int options, int solvers, int max_coef, int n_quad, int n_stokes, int n_derivs, int n_layers, int n_theta_0s, int n_kernels, int n_kernel_quad, enum xrtm_kernel_type *kernels, int n_out_levels, int n_out_thetas, misc_input_data *misc_input) {
+xrtm_data *xrtm_create2(int options, int solvers, int max_coef, int n_quad, int n_stokes, int n_derivs, int n_layers, int n_theta_0s, int n_kernels, int n_kernel_quad, enum xrtm_kernel_type *kernels, int n_out_levels, int n_out_thetas) {
+
+     xrtm_data *d;
+
+     d = (xrtm_data *) malloc(sizeof(xrtm_data));
+
+     if (xrtm_create(d, options, solvers, max_coef, n_quad, n_stokes, n_derivs, n_layers, n_theta_0s, n_kernels, n_kernel_quad, kernels, n_out_levels, n_out_thetas) == XRTM_INT_ERROR) {
+          fprintf(stderr, "ERROR: xrtm_create()\n");
+          return NULL;
+     }
+
+    return d;
+}
+
+
+
+int xrtm_create_misc(xrtm_data *d, int options, int solvers, int max_coef, int n_quad, int n_stokes, int n_derivs, int n_layers, int n_theta_0s, int n_kernels, int n_kernel_quad, enum xrtm_kernel_type *kernels, int n_out_levels, int n_out_thetas, misc_input_data *misc_input) {
 
      int i;
      int ii;
@@ -2378,6 +2394,20 @@ int xrtm_destroy(xrtm_data *d) {
      if (d->options & XRTM_OPTION_REVERSE_DERIVS)
           save_tree_free(&d->save_tree);
 
+
+     return 0;
+}
+
+
+
+int xrtm_destroy2(xrtm_data *d) {
+
+     if (xrtm_destroy(d) == XRTM_INT_ERROR) {
+          fprintf(stderr, "ERROR: xrtm_destroy()\n");
+          return XRTM_INT_ERROR;
+     }
+
+     free(d);
 
      return 0;
 }
