@@ -9,8 +9,6 @@
  * single scattering albedo in the aerosol layer and with intensity with respect
  * to the surface albedo are also determined.
  ******************************************************************************/
-#include <gutil.h>
-
 #include <xrtm_interface.h>
 
 

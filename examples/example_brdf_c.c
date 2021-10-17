@@ -12,8 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <gutil.h>
-
 #include <xrtm_interface.h>
 
 /*
