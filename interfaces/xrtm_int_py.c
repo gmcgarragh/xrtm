@@ -98,7 +98,7 @@ static int check_pyarray_shape(PyObject *array, const char *name, int n, ...)
      va_list valist;
      n_py = PyArray_NDIM((PyArrayObject *) array);
      if (n_py != n) {
-          PyErr_Format(XRTMError, "ERROR: number of dimensions for %s input (%d) must be == %d", name, n_py);
+          PyErr_Format(XRTMError, "ERROR: Number of dimensions for %s input (%d) must be == %d", name, n_py);
           return -1;
      }
      va_start(valist, n);
@@ -106,7 +106,7 @@ static int check_pyarray_shape(PyObject *array, const char *name, int n, ...)
           dim = va_arg(valist, int);
           dim_py = PyArray_DIM((PyArrayObject *) array, i);
           if (dim_py != dim) {
-              PyErr_Format(XRTMError, "ERROR: dimension %d of %s input (%d) must be == %d", i, name, dim_py, dim);
+              PyErr_Format(XRTMError, "ERROR: Dimension %d of %s input (%d) must be == %d", i, name, dim_py, dim);
               return -1;
           }
      }
@@ -115,19 +115,19 @@ static int check_pyarray_shape(PyObject *array, const char *name, int n, ...)
 }
 
 
-static void *array_from_pyarray(PyObject *array, size_t size)
+static void *array_from_ndarray(PyObject *ndarray, size_t size)
 {
      int i;
      int n_dims;
      size_t *dims;
-     void *array2;
-     n_dims = PyArray_NDIM((PyArrayObject *) array);
+     void *array;
+     n_dims = PyArray_NDIM((PyArrayObject *) ndarray);
      dims = malloc(n_dims * sizeof(long));
      for (i = 0; i < n_dims; ++i)
-          dims[i] = PyArray_DIM((PyArrayObject *) array, i);
-     array2 = array_from_mem(PyArray_DATA((PyArrayObject *) array), n_dims, dims, size, 1);
+          dims[i] = PyArray_DIM((PyArrayObject *) ndarray, i);
+     array = array_from_mem(PyArray_DATA((PyArrayObject *) ndarray), n_dims, dims, size, 1);
      free(dims);
-     return array2;
+     return array;
 }
 
 
@@ -575,7 +575,7 @@ static PyObject *xrtm_set_levels_z_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(levels_z_ndarray, "levels_z", 1, d->n_layers + 1) < 0)
           return NULL;
-     levels_z = (double *) array_from_pyarray(levels_z_ndarray, 8);
+     levels_z = (double *) array_from_ndarray(levels_z_ndarray, 8);
      r = xrtm_set_levels_z(d, levels_z);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_levels_z()");
@@ -599,7 +599,7 @@ static PyObject *xrtm_get_levels_z_py(xrtm_data_py *self, PyObject *args)
      levels_z_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (levels_z_ndarray == NULL)
           return NULL;
-     levels_z = (double *) array_from_pyarray(levels_z_ndarray, 8);
+     levels_z = (double *) array_from_ndarray(levels_z_ndarray, 8);
      r = xrtm_get_levels_z(d, levels_z);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_get_levels_z()");
@@ -623,7 +623,7 @@ static PyObject *xrtm_set_out_levels_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(out_levels_ndarray, "out_levels", 1, d->n_ulevels) < 0)
           return NULL;
-     out_levels = (int *) array_from_pyarray(out_levels_ndarray, 4);
+     out_levels = (int *) array_from_ndarray(out_levels_ndarray, 4);
      r = xrtm_set_out_levels(d, out_levels);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_out_levels()");
@@ -647,7 +647,7 @@ static PyObject *xrtm_get_out_levels_py(xrtm_data_py *self, PyObject *args)
      out_levels_ndarray = PyArray_SimpleNew(1, dims, NPY_INT);
      if (out_levels_ndarray == NULL)
           return NULL;
-     out_levels = (int *) array_from_pyarray(out_levels_ndarray, 4);
+     out_levels = (int *) array_from_ndarray(out_levels_ndarray, 4);
      r = xrtm_get_out_levels(d, out_levels);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_get_out_levels()");
@@ -671,7 +671,7 @@ static PyObject *xrtm_set_out_taus_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(out_taus_ndarray, "out_taus", 1, d->n_ulevels) < 0)
           return NULL;
-     out_taus = (double *) array_from_pyarray(out_taus_ndarray, 8);
+     out_taus = (double *) array_from_ndarray(out_taus_ndarray, 8);
      r = xrtm_set_out_taus(d, out_taus);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_out_taus()");
@@ -695,7 +695,7 @@ static PyObject *xrtm_get_out_taus_py(xrtm_data_py *self, PyObject *args)
      out_taus_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (out_taus_ndarray == NULL)
           return NULL;
-     out_taus = (double *) array_from_pyarray(out_taus_ndarray, 8);
+     out_taus = (double *) array_from_ndarray(out_taus_ndarray, 8);
      r = xrtm_get_out_taus(d, out_taus);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_get_out_taus()");
@@ -719,7 +719,7 @@ static PyObject *xrtm_set_out_thetas_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(out_thetas_ndarray, "out_thetas", 1, d->n_umus) < 0)
           return NULL;
-     out_thetas = (double *) array_from_pyarray(out_thetas_ndarray, 8);
+     out_thetas = (double *) array_from_ndarray(out_thetas_ndarray, 8);
      r = xrtm_set_out_thetas(d, out_thetas);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_out_thetas()");
@@ -743,7 +743,7 @@ static PyObject *xrtm_get_out_thetas_py(xrtm_data_py *self, PyObject *args)
      out_thetas_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (out_thetas_ndarray == NULL)
           return NULL;
-     out_thetas = (double *) array_from_pyarray(out_thetas_ndarray, 8);
+     out_thetas = (double *) array_from_ndarray(out_thetas_ndarray, 8);
      r = xrtm_get_out_thetas(d, out_thetas);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_get_out_thetas()");
@@ -815,7 +815,7 @@ static PyObject *xrtm_set_F_iso_top_l_n_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(F_iso_top_l_ndarray, "F_iso_top_l", 1, d->n_derivs) < 0)
           return NULL;
-     F_iso_top_l = (double *) array_from_pyarray(F_iso_top_l_ndarray, 8);
+     F_iso_top_l = (double *) array_from_ndarray(F_iso_top_l_ndarray, 8);
      r = xrtm_set_F_iso_top_l_n(d, F_iso_top_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_F_iso_top_l_n()");
@@ -904,7 +904,7 @@ static PyObject *xrtm_set_F_iso_bot_l_n_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(F_iso_bot_l_ndarray, "F_iso_bot_l", 1, d->n_derivs) < 0)
           return NULL;
-     F_iso_bot_l = (double *) array_from_pyarray(F_iso_bot_l_ndarray, 8);
+     F_iso_bot_l = (double *) array_from_ndarray(F_iso_bot_l_ndarray, 8);
      r = xrtm_set_F_iso_bot_l_n(d, F_iso_bot_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_F_iso_bot_l_n()");
@@ -1038,7 +1038,7 @@ static PyObject *xrtm_set_levels_b_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(levels_b_ndarray, "levels_b", 1, d->n_ulevels) < 0)
           return NULL;
-     levels_b = (double *) array_from_pyarray(levels_b_ndarray, 8);
+     levels_b = (double *) array_from_ndarray(levels_b_ndarray, 8);
      r = xrtm_set_levels_b(d, levels_b);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_levels_b()");
@@ -1062,7 +1062,7 @@ static PyObject *xrtm_get_levels_b_py(xrtm_data_py *self, PyObject *args)
      levels_b_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (levels_b_ndarray == NULL)
           return NULL;
-     levels_b = (double *) array_from_pyarray(levels_b_ndarray, 8);
+     levels_b = (double *) array_from_ndarray(levels_b_ndarray, 8);
      r = xrtm_get_levels_b(d, levels_b);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_get_levels_b()");
@@ -1087,7 +1087,7 @@ static PyObject *xrtm_set_levels_b_l_1_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(levels_b_l_ndarray, "levels_b_l", 1, d->n_derivs) < 0)
           return NULL;
-     levels_b_l = (double *) array_from_pyarray(levels_b_l_ndarray, 8);
+     levels_b_l = (double *) array_from_ndarray(levels_b_l_ndarray, 8);
      r = xrtm_set_levels_b_l_1(d, i_deriv, levels_b_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_levels_b_l_1()");
@@ -1112,7 +1112,7 @@ static PyObject *xrtm_set_levels_b_l_n_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(levels_b_l_ndarray, "levels_b_l", 2, d->n_layers + 1, d->n_derivs) < 0)
           return NULL;
-     levels_b_l = (double **) array_from_pyarray(levels_b_l_ndarray, 8);
+     levels_b_l = (double **) array_from_ndarray(levels_b_l_ndarray, 8);
      r = xrtm_set_levels_b_l_n(d, levels_b_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_levels_b_l_n()");
@@ -1138,7 +1138,7 @@ static PyObject *xrtm_get_levels_b_l_py(xrtm_data_py *self, PyObject *args)
      levels_b_l_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (levels_b_l_ndarray == NULL)
           return NULL;
-     levels_b_l = (double *) array_from_pyarray(levels_b_l_ndarray, 8);
+     levels_b_l = (double *) array_from_ndarray(levels_b_l_ndarray, 8);
      r = xrtm_get_levels_b_l(d, i_deriv, levels_b_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_get_levels_b_l()");
@@ -1210,7 +1210,7 @@ static PyObject *xrtm_set_surface_b_l_n_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(surface_b_l_ndarray, "surface_b_l", 1, d->n_derivs) < 0)
           return NULL;
-     surface_b_l = (double *) array_from_pyarray(surface_b_l_ndarray, 8);
+     surface_b_l = (double *) array_from_ndarray(surface_b_l_ndarray, 8);
      r = xrtm_set_surface_b_l_n(d, surface_b_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_surface_b_l_n()");
@@ -1268,7 +1268,7 @@ static PyObject *xrtm_set_g_n_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(g_ndarray, "g", 1, d->n_layers) < 0)
           return NULL;
-     g = (double *) array_from_pyarray(g_ndarray, 8);
+     g = (double *) array_from_ndarray(g_ndarray, 8);
      r = xrtm_set_g_n(d, g);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_g_n()");
@@ -1328,7 +1328,7 @@ static PyObject *xrtm_set_g_l_n1_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(g_l_ndarray, "g_l", 1, d->n_layers) < 0)
           return NULL;
-     g_l = (double *) array_from_pyarray(g_l_ndarray, 8);
+     g_l = (double *) array_from_ndarray(g_l_ndarray, 8);
      r = xrtm_set_g_l_n1(d, i_deriv, g_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_g_l_n1()");
@@ -1354,7 +1354,7 @@ static PyObject *xrtm_set_g_l_1n_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(g_l_ndarray, "g_l", 1, d->n_derivs) < 0)
           return NULL;
-     g_l = (double *) array_from_pyarray(g_l_ndarray, 8);
+     g_l = (double *) array_from_ndarray(g_l_ndarray, 8);
      r = xrtm_set_g_l_1n(d, i_layer, g_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_g_l_1n()");
@@ -1379,7 +1379,7 @@ static PyObject *xrtm_set_g_l_nn_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(g_l_ndarray, "g_l", 2, d->n_layers, d->n_derivs) < 0)
           return NULL;
-     g_l = (double **) array_from_pyarray(g_l_ndarray, 8);
+     g_l = (double **) array_from_ndarray(g_l_ndarray, 8);
      r = xrtm_set_g_l_nn(d, g_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_g_l_nn()");
@@ -1424,7 +1424,7 @@ static PyObject *xrtm_set_coef_1_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(coef_ndarray, "coef", 2, d->n_elem, n_coef_layer) < 0)
           return NULL;
-     coef = (double **) array_from_pyarray(coef_ndarray, 8);
+     coef = (double **) array_from_ndarray(coef_ndarray, 8);
      r = xrtm_set_coef_1(d, i_layer, n_coef_layer, coef);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_coef_1()");
@@ -1453,13 +1453,13 @@ static PyObject *xrtm_set_coef_n_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(n_coef_layer_ndarray, "n_coef_layer", 1, d->n_layers) < 0)
           return NULL;
-     n_coef_layer = (int *) array_from_pyarray(n_coef_layer_ndarray, 4);
+     n_coef_layer = (int *) array_from_ndarray(n_coef_layer_ndarray, 4);
      coef_ndarray = PyArray_FROM_OTF(coef_object, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
      if (coef_ndarray == NULL)
           return NULL;
      if (check_pyarray_shape(coef_ndarray, "coef", 3, d->n_layers, d->n_elem, d->n_coef) < 0)
           return NULL;
-     coef = (double ***) array_from_pyarray(coef_ndarray, 8);
+     coef = (double ***) array_from_ndarray(coef_ndarray, 8);
      r = xrtm_set_coef_n(d, n_coef_layer, coef);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_coef_n()");
@@ -1522,7 +1522,7 @@ static PyObject *xrtm_set_coef_l_11_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(coef_l_ndarray, "coef_l", 2, d->n_elem, d->n_coef_layer[i_layer]) < 0)
           return NULL;
-     coef_l = (double **) array_from_pyarray(coef_l_ndarray, 8);
+     coef_l = (double **) array_from_ndarray(coef_l_ndarray, 8);
      r = xrtm_set_coef_l_11(d, i_layer, i_deriv, coef_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_coef_l_11()");
@@ -1549,7 +1549,7 @@ static PyObject *xrtm_set_coef_l_n1_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(coef_l_ndarray, "coef_l", 3, d->n_layers, d->n_elem, d->n_coef) < 0)
           return NULL;
-     coef_l = (double ***) array_from_pyarray(coef_l_ndarray, 8);
+     coef_l = (double ***) array_from_ndarray(coef_l_ndarray, 8);
      r = xrtm_set_coef_l_n1(d, i_deriv, coef_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_coef_l_n1()");
@@ -1576,7 +1576,7 @@ static PyObject *xrtm_set_coef_l_1n_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(coef_l_ndarray, "coef_l", 3, d->n_derivs, d->n_elem, d->n_coef_layer[i_layer]) < 0)
           return NULL;
-     coef_l = (double ***) array_from_pyarray(coef_l_ndarray, 8);
+     coef_l = (double ***) array_from_ndarray(coef_l_ndarray, 8);
      r = xrtm_set_coef_l_1n(d, i_layer, coef_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_coef_l_1n()");
@@ -1602,7 +1602,7 @@ static PyObject *xrtm_set_coef_l_nn_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(coef_l_ndarray, "coef_l", 4, d->n_layers, d->n_derivs, d->n_elem, d->n_coef) < 0)
           return NULL;
-     coef_l = (double ****) array_from_pyarray(coef_l_ndarray, 8);
+     coef_l = (double ****) array_from_ndarray(coef_l_ndarray, 8);
      r = xrtm_set_coef_l_nn(d, coef_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_coef_l_nn()");
@@ -1664,7 +1664,7 @@ static PyObject *xrtm_set_omega_n_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(omega_ndarray, "omega", 1, d->n_layers) < 0)
           return NULL;
-     omega = (double *) array_from_pyarray(omega_ndarray, 8);
+     omega = (double *) array_from_ndarray(omega_ndarray, 8);
      r = xrtm_set_omega_n(d, omega);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_omega_n()");
@@ -1724,7 +1724,7 @@ static PyObject *xrtm_set_omega_l_n1_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(omega_l_ndarray, "omega_l", 1, d->n_layers) < 0)
           return NULL;
-     omega_l = (double *) array_from_pyarray(omega_l_ndarray, 8);
+     omega_l = (double *) array_from_ndarray(omega_l_ndarray, 8);
      r = xrtm_set_omega_l_n1(d, i_deriv, omega_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_omega_l_n1()");
@@ -1750,7 +1750,7 @@ static PyObject *xrtm_set_omega_l_1n_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(omega_l_ndarray, "omega_l", 1, d->n_derivs) < 0)
           return NULL;
-     omega_l = (double *) array_from_pyarray(omega_l_ndarray, 8);
+     omega_l = (double *) array_from_ndarray(omega_l_ndarray, 8);
      r = xrtm_set_omega_l_1n(d, i_layer, omega_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_omega_l_1n()");
@@ -1775,7 +1775,7 @@ static PyObject *xrtm_set_omega_l_nn_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(omega_l_ndarray, "omega_l", 2, d->n_layers, d->n_derivs) < 0)
           return NULL;
-     omega_l = (double **) array_from_pyarray(omega_l_ndarray, 8);
+     omega_l = (double **) array_from_ndarray(omega_l_ndarray, 8);
      r = xrtm_set_omega_l_nn(d, omega_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_omega_l_nn()");
@@ -1835,7 +1835,7 @@ static PyObject *xrtm_set_ltau_n_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(ltau_ndarray, "ltau", 1, d->n_layers) < 0)
           return NULL;
-     ltau = (double *) array_from_pyarray(ltau_ndarray, 8);
+     ltau = (double *) array_from_ndarray(ltau_ndarray, 8);
      r = xrtm_set_ltau_n(d, ltau);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_ltau_n()");
@@ -1895,7 +1895,7 @@ static PyObject *xrtm_set_ltau_l_n1_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(ltau_l_ndarray, "ltau_l", 1, d->n_layers) < 0)
           return NULL;
-     ltau_l = (double *) array_from_pyarray(ltau_l_ndarray, 8);
+     ltau_l = (double *) array_from_ndarray(ltau_l_ndarray, 8);
      r = xrtm_set_ltau_l_n1(d, i_deriv, ltau_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_ltau_l_n1()");
@@ -1921,7 +1921,7 @@ static PyObject *xrtm_set_ltau_l_1n_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(ltau_l_ndarray, "ltau_l", 1, d->n_derivs) < 0)
           return NULL;
-     ltau_l = (double *) array_from_pyarray(ltau_l_ndarray, 8);
+     ltau_l = (double *) array_from_ndarray(ltau_l_ndarray, 8);
      r = xrtm_set_ltau_l_1n(d, i_layer, ltau_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_ltau_l_1n()");
@@ -1946,7 +1946,7 @@ static PyObject *xrtm_set_ltau_l_nn_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(ltau_l_ndarray, "ltau_l", 2, d->n_layers, d->n_derivs) < 0)
           return NULL;
-     ltau_l = (double **) array_from_pyarray(ltau_l_ndarray, 8);
+     ltau_l = (double **) array_from_ndarray(ltau_l_ndarray, 8);
      r = xrtm_set_ltau_l_nn(d, ltau_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_ltau_l_nn()");
@@ -2041,7 +2041,7 @@ static PyObject *xrtm_set_kernel_params_n_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(params_ndarray, "params", 1, kernel_n_params((enum xrtm_kernel_type) d->kernels[i_kernel])) < 0)
           return NULL;
-     params = (double *) array_from_pyarray(params_ndarray, 8);
+     params = (double *) array_from_ndarray(params_ndarray, 8);
      r = xrtm_set_kernel_params_n(d, i_kernel, params);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_kernel_params_n()");
@@ -2102,7 +2102,7 @@ static PyObject *xrtm_set_kernel_ampfac_l_n_py(xrtm_data_py *self, PyObject *arg
           return NULL;
      if (check_pyarray_shape(ampfac_l_ndarray, "ampfac_l", 1, d->n_derivs) < 0)
           return NULL;
-     ampfac_l = (double *) array_from_pyarray(ampfac_l_ndarray, 8);
+     ampfac_l = (double *) array_from_ndarray(ampfac_l_ndarray, 8);
      r = xrtm_set_kernel_ampfac_l_n(d, i_kernel, ampfac_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_kernel_ampfac_l_n()");
@@ -2165,7 +2165,7 @@ static PyObject *xrtm_set_kernel_params_l_1n_py(xrtm_data_py *self, PyObject *ar
           return NULL;
      if (check_pyarray_shape(params_l_ndarray, "params_l", 1, kernel_n_params((enum xrtm_kernel_type) d->kernels[i_kernel])) < 0)
           return NULL;
-     params_l = (double *) array_from_pyarray(params_l_ndarray, 8);
+     params_l = (double *) array_from_ndarray(params_l_ndarray, 8);
      r = xrtm_set_kernel_params_l_1n(d, i_kernel, i_deriv, params_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_kernel_params_l_1n()");
@@ -2192,7 +2192,7 @@ static PyObject *xrtm_set_kernel_params_l_n1_py(xrtm_data_py *self, PyObject *ar
           return NULL;
      if (check_pyarray_shape(params_l_ndarray, "params_l", 1, d->n_derivs) < 0)
           return NULL;
-     params_l = (double *) array_from_pyarray(params_l_ndarray, 8);
+     params_l = (double *) array_from_ndarray(params_l_ndarray, 8);
      r = xrtm_set_kernel_params_l_n1(d, i_kernel, i_param, params_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_kernel_params_l_n1()");
@@ -2218,7 +2218,7 @@ static PyObject *xrtm_set_kernel_params_l_nn_py(xrtm_data_py *self, PyObject *ar
           return NULL;
      if (check_pyarray_shape(params_l_ndarray, "params_l", 2, d->n_derivs, kernel_n_params((enum xrtm_kernel_type) d->kernels[i_kernel])) < 0)
           return NULL;
-     params_l = (double **) array_from_pyarray(params_l_ndarray, 8);
+     params_l = (double **) array_from_ndarray(params_l_ndarray, 8);
      r = xrtm_set_kernel_params_l_nn(d, i_kernel, params_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_set_kernel_params_l_nn()");
@@ -2276,7 +2276,7 @@ static PyObject *xrtm_qx_py(xrtm_data_py *self, PyObject *args)
      qx_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (qx_ndarray == NULL)
           return NULL;
-     qx = (double *) array_from_pyarray(qx_ndarray, 8);
+     qx = (double *) array_from_ndarray(qx_ndarray, 8);
      r = xrtm_qx(d, qx);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_qx()");
@@ -2299,7 +2299,7 @@ static PyObject *xrtm_qw_py(xrtm_data_py *self, PyObject *args)
      qw_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (qw_ndarray == NULL)
           return NULL;
-     qw = (double *) array_from_pyarray(qw_ndarray, 8);
+     qw = (double *) array_from_ndarray(qw_ndarray, 8);
      r = xrtm_qw(d, qw);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_qw()");
@@ -2322,7 +2322,7 @@ static PyObject *xrtm_kernel_qx_py(xrtm_data_py *self, PyObject *args)
      kernel_qx_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (kernel_qx_ndarray == NULL)
           return NULL;
-     kernel_qx = (double *) array_from_pyarray(kernel_qx_ndarray, 8);
+     kernel_qx = (double *) array_from_ndarray(kernel_qx_ndarray, 8);
      r = xrtm_kernel_qx(d, kernel_qx);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_kernel_qx()");
@@ -2345,7 +2345,7 @@ static PyObject *xrtm_kernel_qw_py(xrtm_data_py *self, PyObject *args)
      kernel_qw_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (kernel_qw_ndarray == NULL)
           return NULL;
-     kernel_qw = (double *) array_from_pyarray(kernel_qw_ndarray, 8);
+     kernel_qw = (double *) array_from_ndarray(kernel_qw_ndarray, 8);
      r = xrtm_kernel_qw(d, kernel_qw);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_kernel_qw()");
@@ -2407,7 +2407,7 @@ static PyObject *xrtm_solution_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(out_phis_ndarray, "out_phis", 2, d->n_umus, n_out_phis) < 0)
           return NULL;
-     out_phis = (double **) array_from_pyarray(out_phis_ndarray, 8);
+     out_phis = (double **) array_from_ndarray(out_phis_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_umus == 0 ? d->n_quad : d->n_umus;
      dims[2] = n_out_phis;
@@ -2415,7 +2415,7 @@ static PyObject *xrtm_solution_py(xrtm_data_py *self, PyObject *args)
      I_p_ndarray = PyArray_SimpleNew(4, dims, NPY_DOUBLE);
      if (I_p_ndarray == NULL)
           return NULL;
-     I_p = (double ****) array_from_pyarray(I_p_ndarray, 8);
+     I_p = (double ****) array_from_ndarray(I_p_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_umus == 0 ? d->n_quad : d->n_umus;
      dims[2] = n_out_phis;
@@ -2423,7 +2423,7 @@ static PyObject *xrtm_solution_py(xrtm_data_py *self, PyObject *args)
      I_m_ndarray = PyArray_SimpleNew(4, dims, NPY_DOUBLE);
      if (I_m_ndarray == NULL)
           return NULL;
-     I_m = (double ****) array_from_pyarray(I_m_ndarray, 8);
+     I_m = (double ****) array_from_ndarray(I_m_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_derivs;
      dims[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
@@ -2432,7 +2432,7 @@ static PyObject *xrtm_solution_py(xrtm_data_py *self, PyObject *args)
      K_p_ndarray = PyArray_SimpleNew(5, dims, NPY_DOUBLE);
      if (K_p_ndarray == NULL)
           return NULL;
-     K_p = (double *****) array_from_pyarray(K_p_ndarray, 8);
+     K_p = (double *****) array_from_ndarray(K_p_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_derivs;
      dims[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
@@ -2441,62 +2441,62 @@ static PyObject *xrtm_solution_py(xrtm_data_py *self, PyObject *args)
      K_m_ndarray = PyArray_SimpleNew(5, dims, NPY_DOUBLE);
      if (K_m_ndarray == NULL)
           return NULL;
-     K_m = (double *****) array_from_pyarray(K_m_ndarray, 8);
+     K_m = (double *****) array_from_ndarray(K_m_ndarray, 8);
      dims[0] = d->n_ulevels;
      mean_p_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (mean_p_ndarray == NULL)
           return NULL;
-     mean_p = (double *) array_from_pyarray(mean_p_ndarray, 8);
+     mean_p = (double *) array_from_ndarray(mean_p_ndarray, 8);
      dims[0] = d->n_ulevels;
      mean_m_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (mean_m_ndarray == NULL)
           return NULL;
-     mean_m = (double *) array_from_pyarray(mean_m_ndarray, 8);
+     mean_m = (double *) array_from_ndarray(mean_m_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_derivs;
      mean_p_l_ndarray = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
      if (mean_p_l_ndarray == NULL)
           return NULL;
-     mean_p_l = (double **) array_from_pyarray(mean_p_l_ndarray, 8);
+     mean_p_l = (double **) array_from_ndarray(mean_p_l_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_derivs;
      mean_m_l_ndarray = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
      if (mean_m_l_ndarray == NULL)
           return NULL;
-     mean_m_l = (double **) array_from_pyarray(mean_m_l_ndarray, 8);
+     mean_m_l = (double **) array_from_ndarray(mean_m_l_ndarray, 8);
      dims[0] = d->n_ulevels;
      flux_p_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (flux_p_ndarray == NULL)
           return NULL;
-     flux_p = (double *) array_from_pyarray(flux_p_ndarray, 8);
+     flux_p = (double *) array_from_ndarray(flux_p_ndarray, 8);
      dims[0] = d->n_ulevels;
      flux_m_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (flux_m_ndarray == NULL)
           return NULL;
-     flux_m = (double *) array_from_pyarray(flux_m_ndarray, 8);
+     flux_m = (double *) array_from_ndarray(flux_m_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_derivs;
      flux_p_l_ndarray = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
      if (flux_p_l_ndarray == NULL)
           return NULL;
-     flux_p_l = (double **) array_from_pyarray(flux_p_l_ndarray, 8);
+     flux_p_l = (double **) array_from_ndarray(flux_p_l_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_derivs;
      flux_m_l_ndarray = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
      if (flux_m_l_ndarray == NULL)
           return NULL;
-     flux_m_l = (double **) array_from_pyarray(flux_m_l_ndarray, 8);
+     flux_m_l = (double **) array_from_ndarray(flux_m_l_ndarray, 8);
      dims[0] = d->n_ulevels;
      flux_div_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (flux_div_ndarray == NULL)
           return NULL;
-     flux_div = (double *) array_from_pyarray(flux_div_ndarray, 8);
+     flux_div = (double *) array_from_ndarray(flux_div_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_derivs;
      flux_div_l_ndarray = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
      if (flux_div_l_ndarray == NULL)
           return NULL;
-     flux_div_l = (double **) array_from_pyarray(flux_div_l_ndarray, 8);
+     flux_div_l = (double **) array_from_ndarray(flux_div_l_ndarray, 8);
      r = xrtm_solution(d, (enum xrtm_solver_mask) solver, solutions, n_out_phis, out_phis, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_solution()");
@@ -2548,7 +2548,7 @@ static PyObject *xrtm_radiance_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      if (check_pyarray_shape(out_phis_ndarray, "out_phis", 2, d->n_umus, n_out_phis) < 0)
           return NULL;
-     out_phis = (double **) array_from_pyarray(out_phis_ndarray, 8);
+     out_phis = (double **) array_from_ndarray(out_phis_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_umus == 0 ? d->n_quad : d->n_umus;
      dims[2] = n_out_phis;
@@ -2556,7 +2556,7 @@ static PyObject *xrtm_radiance_py(xrtm_data_py *self, PyObject *args)
      I_p_ndarray = PyArray_SimpleNew(4, dims, NPY_DOUBLE);
      if (I_p_ndarray == NULL)
           return NULL;
-     I_p = (double ****) array_from_pyarray(I_p_ndarray, 8);
+     I_p = (double ****) array_from_ndarray(I_p_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_umus == 0 ? d->n_quad : d->n_umus;
      dims[2] = n_out_phis;
@@ -2564,7 +2564,7 @@ static PyObject *xrtm_radiance_py(xrtm_data_py *self, PyObject *args)
      I_m_ndarray = PyArray_SimpleNew(4, dims, NPY_DOUBLE);
      if (I_m_ndarray == NULL)
           return NULL;
-     I_m = (double ****) array_from_pyarray(I_m_ndarray, 8);
+     I_m = (double ****) array_from_ndarray(I_m_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_derivs;
      dims[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
@@ -2573,7 +2573,7 @@ static PyObject *xrtm_radiance_py(xrtm_data_py *self, PyObject *args)
      K_p_ndarray = PyArray_SimpleNew(5, dims, NPY_DOUBLE);
      if (K_p_ndarray == NULL)
           return NULL;
-     K_p = (double *****) array_from_pyarray(K_p_ndarray, 8);
+     K_p = (double *****) array_from_ndarray(K_p_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_derivs;
      dims[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
@@ -2582,7 +2582,7 @@ static PyObject *xrtm_radiance_py(xrtm_data_py *self, PyObject *args)
      K_m_ndarray = PyArray_SimpleNew(5, dims, NPY_DOUBLE);
      if (K_m_ndarray == NULL)
           return NULL;
-     K_m = (double *****) array_from_pyarray(K_m_ndarray, 8);
+     K_m = (double *****) array_from_ndarray(K_m_ndarray, 8);
      r = xrtm_radiance(d, (enum xrtm_solver_mask) solver, n_out_phis, out_phis, I_p, I_m, K_p, K_m);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_radiance()");
@@ -2624,24 +2624,24 @@ static PyObject *xrtm_mean_radiance_py(xrtm_data_py *self, PyObject *args)
      mean_p_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (mean_p_ndarray == NULL)
           return NULL;
-     mean_p = (double *) array_from_pyarray(mean_p_ndarray, 8);
+     mean_p = (double *) array_from_ndarray(mean_p_ndarray, 8);
      dims[0] = d->n_ulevels;
      mean_m_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (mean_m_ndarray == NULL)
           return NULL;
-     mean_m = (double *) array_from_pyarray(mean_m_ndarray, 8);
+     mean_m = (double *) array_from_ndarray(mean_m_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_derivs;
      mean_p_l_ndarray = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
      if (mean_p_l_ndarray == NULL)
           return NULL;
-     mean_p_l = (double **) array_from_pyarray(mean_p_l_ndarray, 8);
+     mean_p_l = (double **) array_from_ndarray(mean_p_l_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_derivs;
      mean_m_l_ndarray = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
      if (mean_m_l_ndarray == NULL)
           return NULL;
-     mean_m_l = (double **) array_from_pyarray(mean_m_l_ndarray, 8);
+     mean_m_l = (double **) array_from_ndarray(mean_m_l_ndarray, 8);
      r = xrtm_mean_radiance(d, (enum xrtm_solver_mask) solver, mean_p, mean_m, mean_p_l, mean_m_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_mean_radiance()");
@@ -2679,24 +2679,24 @@ static PyObject *xrtm_flux_py(xrtm_data_py *self, PyObject *args)
      flux_p_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (flux_p_ndarray == NULL)
           return NULL;
-     flux_p = (double *) array_from_pyarray(flux_p_ndarray, 8);
+     flux_p = (double *) array_from_ndarray(flux_p_ndarray, 8);
      dims[0] = d->n_ulevels;
      flux_m_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (flux_m_ndarray == NULL)
           return NULL;
-     flux_m = (double *) array_from_pyarray(flux_m_ndarray, 8);
+     flux_m = (double *) array_from_ndarray(flux_m_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_derivs;
      flux_p_l_ndarray = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
      if (flux_p_l_ndarray == NULL)
           return NULL;
-     flux_p_l = (double **) array_from_pyarray(flux_p_l_ndarray, 8);
+     flux_p_l = (double **) array_from_ndarray(flux_p_l_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_derivs;
      flux_m_l_ndarray = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
      if (flux_m_l_ndarray == NULL)
           return NULL;
-     flux_m_l = (double **) array_from_pyarray(flux_m_l_ndarray, 8);
+     flux_m_l = (double **) array_from_ndarray(flux_m_l_ndarray, 8);
      r = xrtm_flux(d, (enum xrtm_solver_mask) solver, flux_p, flux_m, flux_p_l, flux_m_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_flux()");
@@ -2730,13 +2730,13 @@ static PyObject *xrtm_flux_divergence_py(xrtm_data_py *self, PyObject *args)
      flux_div_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (flux_div_ndarray == NULL)
           return NULL;
-     flux_div = (double *) array_from_pyarray(flux_div_ndarray, 8);
+     flux_div = (double *) array_from_ndarray(flux_div_ndarray, 8);
      dims[0] = d->n_ulevels;
      dims[1] = d->n_derivs;
      flux_div_l_ndarray = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
      if (flux_div_l_ndarray == NULL)
           return NULL;
-     flux_div_l = (double **) array_from_pyarray(flux_div_l_ndarray, 8);
+     flux_div_l = (double **) array_from_ndarray(flux_div_l_ndarray, 8);
      r = xrtm_flux_divergence(d, (enum xrtm_solver_mask) solver, flux_div, flux_div_l);
      if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_flux_divergence()");
