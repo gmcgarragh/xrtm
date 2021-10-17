@@ -101,6 +101,10 @@ int main() {
      fprintf(fp, ";\n");
      fprintf(fp, "\n");
 
+     fprintf(fp, "global_const int 0 XRTM_INT_ERROR = %d;\n", XRTM_INT_ERROR);
+     fprintf(fp, "global_const double 0 XRTM_DBL_ERROR = %f;\n", XRTM_DBL_ERROR);
+     fprintf(fp, "\n");
+
      fprintf(fp, "structure xrtm_type %lu;\n", sizeof(xrtm_data));
      fprintf(fp, "\n");
 
@@ -125,6 +129,10 @@ int main() {
                fprintf(fp, ",\n");
      }
      fprintf(fp, ";\n");
+     fprintf(fp, "\n");
+
+     fprintf(fp, "global_const int 0 XRTM_INT_ERROR = %d;\n", XRTM_INT_ERROR);
+     fprintf(fp, "global_const double 0 XRTM_DBL_ERROR = %f;\n", XRTM_DBL_ERROR);
      fprintf(fp, "\n");
 
      fprintf(fp, "structure xrtm_fd_type %lu;\n", sizeof(xrtm_fd_data));
