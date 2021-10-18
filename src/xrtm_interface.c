@@ -2777,7 +2777,7 @@ int xrtm_get_n_kernel_quad(xrtm_data *d) {
 /*******************************************************************************
  *
  ******************************************************************************/
-int xrtm_get_kernel(xrtm_data *d, int i_kernel) {
+enum xrtm_kernel_type xrtm_get_kernel(xrtm_data *d, int i_kernel) {
 
      if (i_kernel > d->n_kernels - 1) {
           fprintf(stderr, "ERROR: invalid kernel index: %d\n", i_kernel);

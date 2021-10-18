@@ -101,7 +101,7 @@ public:
      int get_n_layers();
      int get_n_kernels();
      int get_n_kernel_quad();
-     int get_kernel(int i_kernel);
+     xrtm_int_cpp::kernel_type get_kernel(int i_kernel);
      int get_n_out_levels();
      int get_n_out_thetas();
      void set_doub_d_tau(double d_tau);

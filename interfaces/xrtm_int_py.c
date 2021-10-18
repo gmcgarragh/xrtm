@@ -323,17 +323,17 @@ static PyObject *xrtm_get_n_kernel_quad_py(xrtm_data_py *self, PyObject *args)
 
 static PyObject *xrtm_get_kernel_py(xrtm_data_py *self, PyObject *args)
 {
-     int r;
+     enum xrtm_kernel_type r;
      xrtm_data *d = &self->xrtm;
      int i_kernel;
      if (! PyArg_ParseTuple(args, "i", &i_kernel))
           return NULL;
      r = xrtm_get_kernel(d, i_kernel);
-     if (r == XRTM_INT_ERROR) {
+     if ((int) r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_get_kernel()");
           return NULL;
      }
-     return Py_BuildValue("i", r);
+     return Py_BuildValue("s", r);
 }
 
 

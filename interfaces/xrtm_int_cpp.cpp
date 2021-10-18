@@ -117,13 +117,13 @@ int xrtm_int_cpp::get_n_kernel_quad()
 }
 
 
-int xrtm_int_cpp::get_kernel(int i_kernel)
+xrtm_int_cpp::kernel_type xrtm_int_cpp::get_kernel(int i_kernel)
 {
-     int r;
+     enum xrtm_kernel_type r;
      r = xrtm_get_kernel(&d, i_kernel);
-     if (r == XRTM_INT_ERROR)
+     if ((int) r == XRTM_INT_ERROR)
           throw xrtm_int_cpp::ERROR;
-     return r;
+     return (xrtm_int_cpp::kernel_type) r;
 }
 
 

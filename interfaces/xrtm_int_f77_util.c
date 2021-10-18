@@ -145,7 +145,7 @@ int xrtm_get_n_kernel_quad_bindx_f77_(xrtm_data *d)
 }
 
 
-int xrtm_get_kernel_bindx_f77_(xrtm_data *d, int *i_kernel_)
+enum xrtm_kernel_type xrtm_get_kernel_bindx_f77_(xrtm_data *d, int *i_kernel_)
 {
      int i_kernel;
      i_kernel = *i_kernel_;

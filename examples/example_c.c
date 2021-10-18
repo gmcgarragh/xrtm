@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
      int n_theta_0s      = 1;
      int n_kernels       = 1;
      int n_kernel_quad   = 16;	/* Not used for the Lambertian kernel */
-     int kernels[]       = {XRTM_KERNEL_LAMBERTIAN};
+     enum xrtm_kernel_type kernels[] = {XRTM_KERNEL_LAMBERTIAN};
      int n_out_levels    = 2;
      int n_out_thetas    = 3;
      int n_out_phis      = 1;

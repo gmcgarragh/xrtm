@@ -734,7 +734,7 @@ void IDL_CDECL xrtm_get_n_kernel_quad_dlm(int argc, IDL_VPTR argv[], char *argk)
 
 void IDL_CDECL xrtm_get_kernel_dlm(int argc, IDL_VPTR argv[], char *argk)
 {
-     int r;
+     enum xrtm_kernel_type r;
      xrtm_data *d;
      IDL_VARIABLE var;
      int i_kernel;
@@ -750,7 +750,7 @@ void IDL_CDECL xrtm_get_kernel_dlm(int argc, IDL_VPTR argv[], char *argk)
      else
           i_kernel = argv[1]->value.i;
      r = xrtm_get_kernel(d, i_kernel);
-     if (r == XRTM_INT_ERROR)
+     if ((int) r == XRTM_INT_ERROR)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_get_kernel()");
      var.type = IDL_TYP_LONG;
      var.flags = 0;
