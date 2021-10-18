@@ -200,7 +200,7 @@ for i in range(0, n_layers):
         exit()
 
     try:
-        model.set_coef_1(i, n_coef[i], coef[i])
+        model.set_coef_1(i, n_coef[i], coef[i][0:1,0:n_coef[i]])
     except xrtm.error as e:
         print(str(e) + '\nERROR: xrtm.set_coef_1()')
         exit()
