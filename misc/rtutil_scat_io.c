@@ -1239,7 +1239,7 @@ void scat_coefs_ray(double rho, double **coefs) {
      coefs[5][1] = 0.;
 
      coefs[0][2] = a;
-     coefs[1][2] =       6. * a;
+     coefs[1][2] =      6.  * a;
      coefs[2][2] = 0.;
      coefs[3][2] = 0.;
      coefs[4][2] = sqrt(6.) * a;
@@ -1269,7 +1269,7 @@ void scat_coefs_ray_l(double rho, double rho_l, double **coefs) {
      coefs[5][1] = 0.;
 
      coefs[0][2] = a_l;
-     coefs[1][2] =       6. * a_l;
+     coefs[1][2] =      6.  * a_l;
      coefs[2][2] = 0.;
      coefs[3][2] = 0.;
      coefs[4][2] = sqrt(6.) * a_l;
@@ -1969,7 +1969,7 @@ int load_scat_coefs(const char *filename, int n_coef, double ***coefs_, int *fla
 
           token2 = strtok_r(NULL, "", &lasts);
 
-          if (strtod_errmsg(token2, "linearizedray depolarization factor rho_l", &rho_l)) {
+          if (strtod_errmsg(token2, "linearized ray depolarization factor rho_l", &rho_l)) {
                fprintf(stderr, "ERROR: strtod_errmsg()\n");
                goto L1;
           }

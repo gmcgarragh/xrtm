@@ -39,7 +39,9 @@ int max_name_length(const char **names, int n) {
 const char *index_to_name(int index, const char **names, int n, const char *desc) {
 
      if (index < 0 || index >= n) {
+/*
           fprintf(stderr, "ERROR: invalid %s index: %d\n", desc, index);
+*/
           return NULL;
      }
 
@@ -71,7 +73,9 @@ int name_to_index(const char *name, const char **names, int n, const char *desc)
 long index_to_value(int index, long *values, int n, const char *desc) {
 
      if (index < 0 || index >= n) {
+/*
           fprintf(stderr, "ERROR: invalid %s index: %d\n", desc, index);
+*/
           return -1;
      }
 
