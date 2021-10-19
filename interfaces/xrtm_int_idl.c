@@ -489,7 +489,7 @@ void IDL_CDECL xrtm_create_dlm(int argc, IDL_VPTR argv[], char *argk)
      n_kernels = argv[10]->value.arr->n_elts;
      kernels = malloc(n_kernels * sizeof(int));
      for (i = 0; i < argv[10]->value.arr->n_elts; ++i) {
-          if ((r = xrtm_kernel_name_to_value(((IDL_STRING *) argv[10]->value.arr->data)[i].s)) < 0)
+          if ((r = xrtm_kernel_name_to_value(((IDL_STRING *) argv[10]->value.arr->data)[i].s)) == -1)
                IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_kernel_name_to_value()");
           kernels[i] = r;
      }}
@@ -3789,7 +3789,7 @@ void IDL_CDECL xrtm_solution_dlm(int argc, IDL_VPTR argv[], char *argk)
      IDL_ENSURE_SCALAR(argv[1]);
      if (argv[1]->type != IDL_TYP_STRING)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: solver must be of type string");
-     if ((r = xrtm_solver_name_to_mask(IDL_STRING_STR(&argv[1]->value.str))) < 0)
+     if ((r = xrtm_solver_name_to_mask(IDL_STRING_STR(&argv[1]->value.str))) == -1)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_solver_name_to_mask()");
      solver = r;
      IDL_ENSURE_SCALAR(argv[2]);
@@ -3972,7 +3972,7 @@ void IDL_CDECL xrtm_radiance_dlm(int argc, IDL_VPTR argv[], char *argk)
      IDL_ENSURE_SCALAR(argv[1]);
      if (argv[1]->type != IDL_TYP_STRING)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: solver must be of type string");
-     if ((r = xrtm_solver_name_to_mask(IDL_STRING_STR(&argv[1]->value.str))) < 0)
+     if ((r = xrtm_solver_name_to_mask(IDL_STRING_STR(&argv[1]->value.str))) == -1)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_solver_name_to_mask()");
      solver = r;
      IDL_ENSURE_SCALAR(argv[2]);
@@ -4079,7 +4079,7 @@ void IDL_CDECL xrtm_mean_radiance_dlm(int argc, IDL_VPTR argv[], char *argk)
      IDL_ENSURE_SCALAR(argv[1]);
      if (argv[1]->type != IDL_TYP_STRING)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: solver must be of type string");
-     if ((r = xrtm_solver_name_to_mask(IDL_STRING_STR(&argv[1]->value.str))) < 0)
+     if ((r = xrtm_solver_name_to_mask(IDL_STRING_STR(&argv[1]->value.str))) == -1)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_solver_name_to_mask()");
      solver = r;
      mean_p = malloc((d->n_ulevels) * sizeof(double));
@@ -4136,7 +4136,7 @@ void IDL_CDECL xrtm_flux_dlm(int argc, IDL_VPTR argv[], char *argk)
      IDL_ENSURE_SCALAR(argv[1]);
      if (argv[1]->type != IDL_TYP_STRING)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: solver must be of type string");
-     if ((r = xrtm_solver_name_to_mask(IDL_STRING_STR(&argv[1]->value.str))) < 0)
+     if ((r = xrtm_solver_name_to_mask(IDL_STRING_STR(&argv[1]->value.str))) == -1)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_solver_name_to_mask()");
      solver = r;
      flux_p = malloc((d->n_ulevels) * sizeof(double));
@@ -4190,7 +4190,7 @@ void IDL_CDECL xrtm_flux_divergence_dlm(int argc, IDL_VPTR argv[], char *argk)
      IDL_ENSURE_SCALAR(argv[1]);
      if (argv[1]->type != IDL_TYP_STRING)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: solver must be of type string");
-     if ((r = xrtm_solver_name_to_mask(IDL_STRING_STR(&argv[1]->value.str))) < 0)
+     if ((r = xrtm_solver_name_to_mask(IDL_STRING_STR(&argv[1]->value.str))) == -1)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_solver_name_to_mask()");
      solver = r;
      flux_div = malloc((d->n_ulevels) * sizeof(double));
