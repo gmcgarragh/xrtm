@@ -329,7 +329,7 @@ static PyObject *xrtm_get_kernel_py(xrtm_data_py *self, PyObject *args)
      if (! PyArg_ParseTuple(args, "i", &i_kernel))
           return NULL;
      r = xrtm_get_kernel(d, i_kernel);
-     if ((int) r == XRTM_INT_ERROR) {
+     if (r == XRTM_INT_ERROR) {
           PyErr_SetString(XRTMError, "ERROR: xrtm_get_kernel()");
           return NULL;
      }

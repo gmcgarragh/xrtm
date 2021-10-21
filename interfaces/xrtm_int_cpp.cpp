@@ -121,7 +121,7 @@ xrtm_int_cpp::kernel_type xrtm_int_cpp::get_kernel(int i_kernel)
 {
      enum xrtm_kernel_type r;
      r = xrtm_get_kernel(&d, i_kernel);
-     if ((int) r == XRTM_INT_ERROR)
+     if (r == XRTM_INT_ERROR)
           throw xrtm_int_cpp::ERROR;
      return (xrtm_int_cpp::kernel_type) r;
 }
