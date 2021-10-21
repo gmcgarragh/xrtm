@@ -3,6 +3,8 @@
  ******************************************************************************/
 prefix xrtm;
 
+err_ret_vals XRTM_INT_ERROR XRTM_DBL_ERROR;
+
 subprogram_init int 0 create				0, int 0 options in enum_mask xrtm_option_name_to_mask, int 0 solvers in enum_mask xrtm_solver_name_to_mask, int 0 max_coef in, int 0 n_quad in, int 0 n_stokes in, int 0 n_derivs in, int 0 n_layers in, int 0 n_theta_0s in, int 0 n_kernels in list_size, int 0 n_kernel_quad in, enum kernel_type 1 "n_kernels" kernels in enum_array xrtm_kernel_name_to_value, int 0 n_out_levels in, int 0 n_out_thetas in;
 subprogram_free int 0 destroy				0;
 
