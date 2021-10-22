@@ -177,6 +177,37 @@ for i = 0, n_out_levels - 1 do begin
         endfor
     endfor
 endfor
+print
+
+
+;*******************************************************************************
+; Let's get the inputs and print them just for a test.
+;*******************************************************************************
+xrtm_get_fourier_tol, xrtm, x & print, x
+xrtm_get_out_levels,  xrtm, x & print, x
+xrtm_get_out_thetas,  xrtm, x & print, x
+xrtm_get_F_iso_top,   xrtm, x & print, x
+xrtm_get_F_iso_bot,   xrtm, x & print, x
+xrtm_get_F_0,         xrtm, x & print, x
+xrtm_get_theta_0,     xrtm, x & print, x
+xrtm_get_phi_0,       xrtm, x & print, x
+print
+
+xrtm_get_ltau,  xrtm, 0, x & print, x
+xrtm_get_ltau,  xrtm, 2, x & print, x
+xrtm_get_omega, xrtm, 0, x & print, x
+xrtm_get_omega, xrtm, 2, x & print, x
+xrtm_get_coef,  xrtm, 0, 0, n_ray_coef - 1, x & print, x
+xrtm_get_coef,  xrtm, 2, 0, n_aer_coef - 1, x & print, x
+print
+
+xrtm_get_kernel_ampfac, xrtm, 0, x & print, x
+print
+
+xrtm_get_ltau_l,           xrtm, 2, 0, x & print, x
+xrtm_get_omega_l,          xrtm, 2, 1, x & print, x
+xrtm_get_kernel_ampfac_l,  xrtm, 0, 2, x & print, x
+print
 
 
 ;*******************************************************************************

@@ -268,3 +268,34 @@ for i in range(0, n_out_levels):
         for k in range(0, n_out_thetas):
             print('          theta = %9.2E, K_p = %13.6E, K_m = %13.6E' % \
                   (out_thetas[k], K_p[i,j,k,0,0], K_m[i,j,k,0,0]))
+print()
+
+
+#*******************************************************************************
+# Let's get the inputs and print them just for a test.
+#*******************************************************************************
+print(model.get_fourier_tol())
+print(model.get_out_levels())
+print(model.get_out_thetas())
+print(model.get_F_iso_top())
+print(model.get_F_iso_bot())
+print(model.get_F_0())
+print(model.get_theta_0())
+print(model.get_phi_0())
+print()
+
+print(model.get_ltau(0))
+print(model.get_ltau(2))
+print(model.get_omega(0))
+print(model.get_omega(2))
+print(model.get_coef(0, 0, n_ray_coef - 1))
+print(model.get_coef(2, 0, n_aer_coef - 1))
+print()
+
+print(model.get_kernel_ampfac(0))
+print()
+
+print(model.get_ltau_l(2, 0))
+print(model.get_omega_l(2, 1))
+print(model.get_kernel_ampfac_l(0, 2))
+print()
