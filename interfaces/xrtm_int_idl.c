@@ -1172,8 +1172,8 @@ void IDL_CDECL xrtm_set_levels_z_dlm(int argc, IDL_VPTR argv[], char *argk)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: levels_z must be of type double");
      if (argv[1]->value.arr->n_dim != 1)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: levels_z must be an array with 2 dimensions");
-     if (argv[1]->value.arr->dim[0] != (d->n_layers + 1))
-          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: levels_z dimension 1 must have d->n_layers + 1 elements");
+     if (argv[1]->value.arr->dim[0] != (d->n_out_levels))
+          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: levels_z dimension 1 must have d->n_out_levels elements");
      levels_z = (double *) argv[1]->value.arr->data;
      r = xrtm_set_levels_z(d, levels_z);
      if (r == XRTM_INT_ERROR)
@@ -1193,11 +1193,11 @@ void IDL_CDECL xrtm_get_levels_z_dlm(int argc, IDL_VPTR argv[], char *argk)
      if (argv[0]->type != IDL_TYP_BYTE)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: Invalid xrtm instance");
      d = (xrtm_data *) argv[0]->value.arr->data;
-     levels_z = malloc((d->n_layers + 1) * sizeof(double));
+     levels_z = malloc((d->n_out_levels) * sizeof(double));
      r = xrtm_get_levels_z(d, levels_z);
      if (r == XRTM_INT_ERROR)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_get_levels_z()");
-     dim_idl[0] = d->n_layers + 1;
+     dim_idl[0] = d->n_out_levels;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) levels_z, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[1]);
      return;
@@ -1830,11 +1830,11 @@ void IDL_CDECL xrtm_set_levels_b_l_n_dlm(int argc, IDL_VPTR argv[], char *argk)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: levels_b_l must be of type double");
      if (argv[1]->value.arr->n_dim != 2)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: levels_b_l must be an array with 2 dimensions");
-     if (argv[1]->value.arr->dim[1] != (d->n_layers + 1))
-          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: levels_b_l dimension 2 must have d->n_layers + 1 elements");
+     if (argv[1]->value.arr->dim[1] != (d->n_out_levels))
+          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: levels_b_l dimension 2 must have d->n_out_levels elements");
      if (argv[1]->value.arr->dim[0] != (d->n_derivs))
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: levels_b_l dimension 1 must have d->n_derivs elements");
-     dim[0] = d->n_layers + 1;
+     dim[0] = d->n_out_levels;
      dim[1] = d->n_derivs;
      levels_b_l = (double **) array_from_mem((void *) argv[1]->value.arr->data, 2, dim, sizeof(double), 1);
      r = xrtm_set_levels_b_l_n(d, levels_b_l);
@@ -1864,11 +1864,11 @@ void IDL_CDECL xrtm_get_levels_b_l_dlm(int argc, IDL_VPTR argv[], char *argk)
           i_deriv = argv[1]->value.l;
      else
           i_deriv = argv[1]->value.i;
-     levels_b_l = malloc((d->n_layers + 1) * sizeof(double));
+     levels_b_l = malloc((d->n_out_levels) * sizeof(double));
      r = xrtm_get_levels_b_l(d, i_deriv, levels_b_l);
      if (r == XRTM_INT_ERROR)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_get_levels_b_l()");
-     dim_idl[0] = d->n_layers + 1;
+     dim_idl[0] = d->n_out_levels;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) levels_b_l, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[2]);
      return;

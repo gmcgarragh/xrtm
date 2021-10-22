@@ -612,7 +612,7 @@ int xrtm_set_levels_b_l_1_bindx_f77_(xrtm_data *d, int *i_deriv_, double *levels
 int xrtm_set_levels_b_l_n_bindx_f77_(xrtm_data *d, double *levels_b_l)
 {
      double **levels_b_l2;
-     levels_b_l2 = array_from_mem2_d(levels_b_l, d->n_layers + 1, d->n_derivs);
+     levels_b_l2 = array_from_mem2_d(levels_b_l, d->n_out_levels, d->n_derivs);
      if (xrtm_set_levels_b_l_n(d, levels_b_l2)) {
           fprintf(stderr, "ERROR: xrtm_set_levels_b_l_n()\n");
           return -1;

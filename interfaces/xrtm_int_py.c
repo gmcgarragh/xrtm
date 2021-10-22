@@ -573,7 +573,7 @@ static PyObject *xrtm_set_levels_z_py(xrtm_data_py *self, PyObject *args)
      levels_z_ndarray = PyArray_FROM_OTF(levels_z_object, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
      if (levels_z_ndarray == NULL)
           return NULL;
-     if (check_pyarray_shape(levels_z_ndarray, "levels_z", 1, d->n_layers + 1) < 0)
+     if (check_pyarray_shape(levels_z_ndarray, "levels_z", 1, d->n_out_levels) < 0)
           return NULL;
      levels_z = (double *) array_from_ndarray(levels_z_ndarray, 8);
      r = xrtm_set_levels_z(d, levels_z);
@@ -595,7 +595,7 @@ static PyObject *xrtm_get_levels_z_py(xrtm_data_py *self, PyObject *args)
      double *levels_z;
      if (! PyArg_ParseTuple(args, ""))
           return NULL;
-     dims[0] = d->n_layers + 1;
+     dims[0] = d->n_out_levels;
      levels_z_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (levels_z_ndarray == NULL)
           return NULL;
@@ -1110,7 +1110,7 @@ static PyObject *xrtm_set_levels_b_l_n_py(xrtm_data_py *self, PyObject *args)
      levels_b_l_ndarray = PyArray_FROM_OTF(levels_b_l_object, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
      if (levels_b_l_ndarray == NULL)
           return NULL;
-     if (check_pyarray_shape(levels_b_l_ndarray, "levels_b_l", 2, d->n_layers + 1, d->n_derivs) < 0)
+     if (check_pyarray_shape(levels_b_l_ndarray, "levels_b_l", 2, d->n_out_levels, d->n_derivs) < 0)
           return NULL;
      levels_b_l = (double **) array_from_ndarray(levels_b_l_ndarray, 8);
      r = xrtm_set_levels_b_l_n(d, levels_b_l);
@@ -1134,7 +1134,7 @@ static PyObject *xrtm_get_levels_b_l_py(xrtm_data_py *self, PyObject *args)
      double *levels_b_l;
      if (! PyArg_ParseTuple(args, "i", &i_deriv))
           return NULL;
-     dims[0] = d->n_layers + 1;
+     dims[0] = d->n_out_levels;
      levels_b_l_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (levels_b_l_ndarray == NULL)
           return NULL;
