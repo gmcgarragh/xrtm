@@ -1392,16 +1392,16 @@ int xrtm_solution_bindx_f77_(xrtm_data *d, enum xrtm_solver_mask *solver_, int *
      solver = *solver_;
      solutions = *solutions_;
      n_out_phis = *n_out_phis_;
-     out_phis2 = array_from_mem2_d(out_phis, d->n_umus, n_out_phis);
-     I_p2 = array_from_mem4_d(I_p, d->n_ulevels, d->n_umus == 0 ? d->n_quad : d->n_umus, n_out_phis, d->n_stokes);
-     I_m2 = array_from_mem4_d(I_m, d->n_ulevels, d->n_umus == 0 ? d->n_quad : d->n_umus, n_out_phis, d->n_stokes);
-     K_p2 = array_from_mem5_d(K_p, d->n_ulevels, d->n_derivs, d->n_umus == 0 ? d->n_quad : d->n_umus, n_out_phis, d->n_stokes);
-     K_m2 = array_from_mem5_d(K_m, d->n_ulevels, d->n_derivs, d->n_umus == 0 ? d->n_quad : d->n_umus, n_out_phis, d->n_stokes);
-     mean_p_l2 = array_from_mem2_d(mean_p_l, d->n_ulevels, d->n_derivs);
-     mean_m_l2 = array_from_mem2_d(mean_m_l, d->n_ulevels, d->n_derivs);
-     flux_p_l2 = array_from_mem2_d(flux_p_l, d->n_ulevels, d->n_derivs);
-     flux_m_l2 = array_from_mem2_d(flux_m_l, d->n_ulevels, d->n_derivs);
-     flux_div_l2 = array_from_mem2_d(flux_div_l, d->n_ulevels, d->n_derivs);
+     out_phis2 = array_from_mem2_d(out_phis, d->n_out_thetas, n_out_phis);
+     I_p2 = array_from_mem4_d(I_p, d->n_out_levels, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
+     I_m2 = array_from_mem4_d(I_m, d->n_out_levels, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
+     K_p2 = array_from_mem5_d(K_p, d->n_out_levels, d->n_derivs, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
+     K_m2 = array_from_mem5_d(K_m, d->n_out_levels, d->n_derivs, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
+     mean_p_l2 = array_from_mem2_d(mean_p_l, d->n_out_levels, d->n_derivs);
+     mean_m_l2 = array_from_mem2_d(mean_m_l, d->n_out_levels, d->n_derivs);
+     flux_p_l2 = array_from_mem2_d(flux_p_l, d->n_out_levels, d->n_derivs);
+     flux_m_l2 = array_from_mem2_d(flux_m_l, d->n_out_levels, d->n_derivs);
+     flux_div_l2 = array_from_mem2_d(flux_div_l, d->n_out_levels, d->n_derivs);
      if (xrtm_solution(d, (enum xrtm_solver_mask) solver, solutions, n_out_phis, out_phis2, I_p2, I_m2, K_p2, K_m2, mean_p, mean_m, mean_p_l2, mean_m_l2, flux_p, flux_m, flux_p_l2, flux_m_l2, flux_div, flux_div_l2)) {
           fprintf(stderr, "ERROR: xrtm_solution()\n");
           return -1;
@@ -1431,11 +1431,11 @@ int xrtm_radiance_bindx_f77_(xrtm_data *d, enum xrtm_solver_mask *solver_, int *
      double *****K_m2;
      solver = *solver_;
      n_out_phis = *n_out_phis_;
-     out_phis2 = array_from_mem2_d(out_phis, d->n_umus, n_out_phis);
-     I_p2 = array_from_mem4_d(I_p, d->n_ulevels, d->n_umus == 0 ? d->n_quad : d->n_umus, n_out_phis, d->n_stokes);
-     I_m2 = array_from_mem4_d(I_m, d->n_ulevels, d->n_umus == 0 ? d->n_quad : d->n_umus, n_out_phis, d->n_stokes);
-     K_p2 = array_from_mem5_d(K_p, d->n_ulevels, d->n_derivs, d->n_umus == 0 ? d->n_quad : d->n_umus, n_out_phis, d->n_stokes);
-     K_m2 = array_from_mem5_d(K_m, d->n_ulevels, d->n_derivs, d->n_umus == 0 ? d->n_quad : d->n_umus, n_out_phis, d->n_stokes);
+     out_phis2 = array_from_mem2_d(out_phis, d->n_out_thetas, n_out_phis);
+     I_p2 = array_from_mem4_d(I_p, d->n_out_levels, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
+     I_m2 = array_from_mem4_d(I_m, d->n_out_levels, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
+     K_p2 = array_from_mem5_d(K_p, d->n_out_levels, d->n_derivs, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
+     K_m2 = array_from_mem5_d(K_m, d->n_out_levels, d->n_derivs, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
      if (xrtm_radiance(d, (enum xrtm_solver_mask) solver, n_out_phis, out_phis2, I_p2, I_m2, K_p2, K_m2)) {
           fprintf(stderr, "ERROR: xrtm_radiance()\n");
           return -1;
@@ -1455,8 +1455,8 @@ int xrtm_mean_radiance_bindx_f77_(xrtm_data *d, enum xrtm_solver_mask *solver_, 
      double **mean_p_l2;
      double **mean_m_l2;
      solver = *solver_;
-     mean_p_l2 = array_from_mem2_d(mean_p_l, d->n_ulevels, d->n_derivs);
-     mean_m_l2 = array_from_mem2_d(mean_m_l, d->n_ulevels, d->n_derivs);
+     mean_p_l2 = array_from_mem2_d(mean_p_l, d->n_out_levels, d->n_derivs);
+     mean_m_l2 = array_from_mem2_d(mean_m_l, d->n_out_levels, d->n_derivs);
      if (xrtm_mean_radiance(d, (enum xrtm_solver_mask) solver, mean_p, mean_m, mean_p_l2, mean_m_l2)) {
           fprintf(stderr, "ERROR: xrtm_mean_radiance()\n");
           return -1;
@@ -1473,8 +1473,8 @@ int xrtm_flux_bindx_f77_(xrtm_data *d, enum xrtm_solver_mask *solver_, double *f
      double **flux_p_l2;
      double **flux_m_l2;
      solver = *solver_;
-     flux_p_l2 = array_from_mem2_d(flux_p_l, d->n_ulevels, d->n_derivs);
-     flux_m_l2 = array_from_mem2_d(flux_m_l, d->n_ulevels, d->n_derivs);
+     flux_p_l2 = array_from_mem2_d(flux_p_l, d->n_out_levels, d->n_derivs);
+     flux_m_l2 = array_from_mem2_d(flux_m_l, d->n_out_levels, d->n_derivs);
      if (xrtm_flux(d, (enum xrtm_solver_mask) solver, flux_p, flux_m, flux_p_l2, flux_m_l2)) {
           fprintf(stderr, "ERROR: xrtm_flux()\n");
           return -1;
@@ -1490,7 +1490,7 @@ int xrtm_flux_divergence_bindx_f77_(xrtm_data *d, enum xrtm_solver_mask *solver_
      enum xrtm_solver_mask solver;
      double **flux_div_l2;
      solver = *solver_;
-     flux_div_l2 = array_from_mem2_d(flux_div_l, d->n_ulevels, d->n_derivs);
+     flux_div_l2 = array_from_mem2_d(flux_div_l, d->n_out_levels, d->n_derivs);
      if (xrtm_flux_divergence(d, (enum xrtm_solver_mask) solver, flux_div, flux_div_l2)) {
           fprintf(stderr, "ERROR: xrtm_flux_divergence()\n");
           return -1;

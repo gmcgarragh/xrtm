@@ -237,9 +237,12 @@ typedef struct {
      int n_kernel_quad;
 
      int n_ulevels;
+     int n_out_levels;
 
      int n_umus;
      int n_umus_v;
+
+     int n_out_thetas;
 
      int order_p;
      int order_0;

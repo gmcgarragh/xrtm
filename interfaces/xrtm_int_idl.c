@@ -1218,8 +1218,8 @@ void IDL_CDECL xrtm_set_out_levels_dlm(int argc, IDL_VPTR argv[], char *argk)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_levels must be of type long");
      if (argv[1]->value.arr->n_dim != 1)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_levels must be an array with 2 dimensions");
-     if (argv[1]->value.arr->dim[0] != (d->n_ulevels))
-          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_levels dimension 1 must have d->n_ulevels elements");
+     if (argv[1]->value.arr->dim[0] != (d->n_out_levels))
+          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_levels dimension 1 must have d->n_out_levels elements");
      out_levels = (int *) argv[1]->value.arr->data;
      r = xrtm_set_out_levels(d, out_levels);
      if (r == XRTM_INT_ERROR)
@@ -1239,11 +1239,11 @@ void IDL_CDECL xrtm_get_out_levels_dlm(int argc, IDL_VPTR argv[], char *argk)
      if (argv[0]->type != IDL_TYP_BYTE)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: Invalid xrtm instance");
      d = (xrtm_data *) argv[0]->value.arr->data;
-     out_levels = malloc((d->n_ulevels) * sizeof(int));
+     out_levels = malloc((d->n_out_levels) * sizeof(int));
      r = xrtm_get_out_levels(d, out_levels);
      if (r == XRTM_INT_ERROR)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_get_out_levels()");
-     dim_idl[0] = d->n_ulevels;
+     dim_idl[0] = d->n_out_levels;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_LONG, (UCHAR *) out_levels, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[1]);
      return;
@@ -1264,8 +1264,8 @@ void IDL_CDECL xrtm_set_out_taus_dlm(int argc, IDL_VPTR argv[], char *argk)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_taus must be of type double");
      if (argv[1]->value.arr->n_dim != 1)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_taus must be an array with 2 dimensions");
-     if (argv[1]->value.arr->dim[0] != (d->n_ulevels))
-          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_taus dimension 1 must have d->n_ulevels elements");
+     if (argv[1]->value.arr->dim[0] != (d->n_out_levels))
+          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_taus dimension 1 must have d->n_out_levels elements");
      out_taus = (double *) argv[1]->value.arr->data;
      r = xrtm_set_out_taus(d, out_taus);
      if (r == XRTM_INT_ERROR)
@@ -1285,11 +1285,11 @@ void IDL_CDECL xrtm_get_out_taus_dlm(int argc, IDL_VPTR argv[], char *argk)
      if (argv[0]->type != IDL_TYP_BYTE)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: Invalid xrtm instance");
      d = (xrtm_data *) argv[0]->value.arr->data;
-     out_taus = malloc((d->n_ulevels) * sizeof(double));
+     out_taus = malloc((d->n_out_levels) * sizeof(double));
      r = xrtm_get_out_taus(d, out_taus);
      if (r == XRTM_INT_ERROR)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_get_out_taus()");
-     dim_idl[0] = d->n_ulevels;
+     dim_idl[0] = d->n_out_levels;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) out_taus, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[1]);
      return;
@@ -1310,8 +1310,8 @@ void IDL_CDECL xrtm_set_out_thetas_dlm(int argc, IDL_VPTR argv[], char *argk)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_thetas must be of type double");
      if (argv[1]->value.arr->n_dim != 1)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_thetas must be an array with 2 dimensions");
-     if (argv[1]->value.arr->dim[0] != (d->n_umus))
-          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_thetas dimension 1 must have d->n_umus elements");
+     if (argv[1]->value.arr->dim[0] != (d->n_out_thetas))
+          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_thetas dimension 1 must have d->n_out_thetas elements");
      out_thetas = (double *) argv[1]->value.arr->data;
      r = xrtm_set_out_thetas(d, out_thetas);
      if (r == XRTM_INT_ERROR)
@@ -1331,11 +1331,11 @@ void IDL_CDECL xrtm_get_out_thetas_dlm(int argc, IDL_VPTR argv[], char *argk)
      if (argv[0]->type != IDL_TYP_BYTE)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: Invalid xrtm instance");
      d = (xrtm_data *) argv[0]->value.arr->data;
-     out_thetas = malloc((d->n_umus) * sizeof(double));
+     out_thetas = malloc((d->n_out_thetas) * sizeof(double));
      r = xrtm_get_out_thetas(d, out_thetas);
      if (r == XRTM_INT_ERROR)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_get_out_thetas()");
-     dim_idl[0] = d->n_umus;
+     dim_idl[0] = d->n_out_thetas;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) out_thetas, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[1]);
      return;
@@ -1751,8 +1751,8 @@ void IDL_CDECL xrtm_set_levels_b_dlm(int argc, IDL_VPTR argv[], char *argk)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: levels_b must be of type double");
      if (argv[1]->value.arr->n_dim != 1)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: levels_b must be an array with 2 dimensions");
-     if (argv[1]->value.arr->dim[0] != (d->n_ulevels))
-          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: levels_b dimension 1 must have d->n_ulevels elements");
+     if (argv[1]->value.arr->dim[0] != (d->n_out_levels))
+          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: levels_b dimension 1 must have d->n_out_levels elements");
      levels_b = (double *) argv[1]->value.arr->data;
      r = xrtm_set_levels_b(d, levels_b);
      if (r == XRTM_INT_ERROR)
@@ -1772,11 +1772,11 @@ void IDL_CDECL xrtm_get_levels_b_dlm(int argc, IDL_VPTR argv[], char *argk)
      if (argv[0]->type != IDL_TYP_BYTE)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: Invalid xrtm instance");
      d = (xrtm_data *) argv[0]->value.arr->data;
-     levels_b = malloc((d->n_ulevels) * sizeof(double));
+     levels_b = malloc((d->n_out_levels) * sizeof(double));
      r = xrtm_get_levels_b(d, levels_b);
      if (r == XRTM_INT_ERROR)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_get_levels_b()");
-     dim_idl[0] = d->n_ulevels;
+     dim_idl[0] = d->n_out_levels;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) levels_b, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[1]);
      return;
@@ -3811,62 +3811,62 @@ void IDL_CDECL xrtm_solution_dlm(int argc, IDL_VPTR argv[], char *argk)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_phis must be of type double");
      if (argv[4]->value.arr->n_dim != 2)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_phis must be an array with 2 dimensions");
-     if (argv[4]->value.arr->dim[1] != (d->n_umus))
-          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_phis dimension 2 must have d->n_umus elements");
+     if (argv[4]->value.arr->dim[1] != (d->n_out_thetas))
+          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_phis dimension 2 must have d->n_out_thetas elements");
      if (argv[4]->value.arr->dim[0] != (n_out_phis))
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_phis dimension 1 must have n_out_phis elements");
-     dim[0] = d->n_umus;
+     dim[0] = d->n_out_thetas;
      dim[1] = n_out_phis;
      out_phis = (double **) array_from_mem((void *) argv[4]->value.arr->data, 2, dim, sizeof(double), 1);
-     I_p_data = malloc((d->n_ulevels) * (d->n_umus == 0 ? d->n_quad : d->n_umus) * (n_out_phis) * (d->n_stokes) * sizeof(double));
-     dim[0] = d->n_ulevels;
-     dim[1] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     I_p_data = malloc((d->n_out_levels) * (d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas) * (n_out_phis) * (d->n_stokes) * sizeof(double));
+     dim[0] = d->n_out_levels;
+     dim[1] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim[2] = n_out_phis;
      dim[3] = d->n_stokes;
      I_p = (double ****) array_from_mem(I_p_data, 4, dim, sizeof(double), 1);
-     I_m_data = malloc((d->n_ulevels) * (d->n_umus == 0 ? d->n_quad : d->n_umus) * (n_out_phis) * (d->n_stokes) * sizeof(double));
-     dim[0] = d->n_ulevels;
-     dim[1] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     I_m_data = malloc((d->n_out_levels) * (d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas) * (n_out_phis) * (d->n_stokes) * sizeof(double));
+     dim[0] = d->n_out_levels;
+     dim[1] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim[2] = n_out_phis;
      dim[3] = d->n_stokes;
      I_m = (double ****) array_from_mem(I_m_data, 4, dim, sizeof(double), 1);
-     K_p_data = malloc((d->n_ulevels) * (d->n_derivs) * (d->n_umus == 0 ? d->n_quad : d->n_umus) * (n_out_phis) * (d->n_stokes) * sizeof(double));
-     dim[0] = d->n_ulevels;
+     K_p_data = malloc((d->n_out_levels) * (d->n_derivs) * (d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas) * (n_out_phis) * (d->n_stokes) * sizeof(double));
+     dim[0] = d->n_out_levels;
      dim[1] = d->n_derivs;
-     dim[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     dim[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim[3] = n_out_phis;
      dim[4] = d->n_stokes;
      K_p = (double *****) array_from_mem(K_p_data, 5, dim, sizeof(double), 1);
-     K_m_data = malloc((d->n_ulevels) * (d->n_derivs) * (d->n_umus == 0 ? d->n_quad : d->n_umus) * (n_out_phis) * (d->n_stokes) * sizeof(double));
-     dim[0] = d->n_ulevels;
+     K_m_data = malloc((d->n_out_levels) * (d->n_derivs) * (d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas) * (n_out_phis) * (d->n_stokes) * sizeof(double));
+     dim[0] = d->n_out_levels;
      dim[1] = d->n_derivs;
-     dim[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     dim[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim[3] = n_out_phis;
      dim[4] = d->n_stokes;
      K_m = (double *****) array_from_mem(K_m_data, 5, dim, sizeof(double), 1);
-     mean_p = malloc((d->n_ulevels) * sizeof(double));
-     mean_m = malloc((d->n_ulevels) * sizeof(double));
-     mean_p_l_data = malloc((d->n_ulevels) * (d->n_derivs) * sizeof(double));
-     dim[0] = d->n_ulevels;
+     mean_p = malloc((d->n_out_levels) * sizeof(double));
+     mean_m = malloc((d->n_out_levels) * sizeof(double));
+     mean_p_l_data = malloc((d->n_out_levels) * (d->n_derivs) * sizeof(double));
+     dim[0] = d->n_out_levels;
      dim[1] = d->n_derivs;
      mean_p_l = (double **) array_from_mem(mean_p_l_data, 2, dim, sizeof(double), 1);
-     mean_m_l_data = malloc((d->n_ulevels) * (d->n_derivs) * sizeof(double));
-     dim[0] = d->n_ulevels;
+     mean_m_l_data = malloc((d->n_out_levels) * (d->n_derivs) * sizeof(double));
+     dim[0] = d->n_out_levels;
      dim[1] = d->n_derivs;
      mean_m_l = (double **) array_from_mem(mean_m_l_data, 2, dim, sizeof(double), 1);
-     flux_p = malloc((d->n_ulevels) * sizeof(double));
-     flux_m = malloc((d->n_ulevels) * sizeof(double));
-     flux_p_l_data = malloc((d->n_ulevels) * (d->n_derivs) * sizeof(double));
-     dim[0] = d->n_ulevels;
+     flux_p = malloc((d->n_out_levels) * sizeof(double));
+     flux_m = malloc((d->n_out_levels) * sizeof(double));
+     flux_p_l_data = malloc((d->n_out_levels) * (d->n_derivs) * sizeof(double));
+     dim[0] = d->n_out_levels;
      dim[1] = d->n_derivs;
      flux_p_l = (double **) array_from_mem(flux_p_l_data, 2, dim, sizeof(double), 1);
-     flux_m_l_data = malloc((d->n_ulevels) * (d->n_derivs) * sizeof(double));
-     dim[0] = d->n_ulevels;
+     flux_m_l_data = malloc((d->n_out_levels) * (d->n_derivs) * sizeof(double));
+     dim[0] = d->n_out_levels;
      dim[1] = d->n_derivs;
      flux_m_l = (double **) array_from_mem(flux_m_l_data, 2, dim, sizeof(double), 1);
-     flux_div = malloc((d->n_ulevels) * sizeof(double));
-     flux_div_l_data = malloc((d->n_ulevels) * (d->n_derivs) * sizeof(double));
-     dim[0] = d->n_ulevels;
+     flux_div = malloc((d->n_out_levels) * sizeof(double));
+     flux_div_l_data = malloc((d->n_out_levels) * (d->n_derivs) * sizeof(double));
+     dim[0] = d->n_out_levels;
      dim[1] = d->n_derivs;
      flux_div_l = (double **) array_from_mem(flux_div_l_data, 2, dim, sizeof(double), 1);
      r = xrtm_solution(d, (enum xrtm_solver_mask) solver, solutions, n_out_phis, out_phis, I_p, I_m, K_p, K_m, mean_p, mean_m, mean_p_l, mean_m_l, flux_p, flux_m, flux_p_l, flux_m_l, flux_div, flux_div_l);
@@ -3882,64 +3882,64 @@ void IDL_CDECL xrtm_solution_dlm(int argc, IDL_VPTR argv[], char *argk)
      free_array((void *) flux_div_l, 2);
      if (r == XRTM_INT_ERROR)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_solution()");
-     dim_idl[3] = d->n_ulevels;
-     dim_idl[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     dim_idl[3] = d->n_out_levels;
+     dim_idl[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim_idl[1] = n_out_phis;
      dim_idl[0] = d->n_stokes;
      ptr = IDL_ImportArray(4, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) I_p_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[5]);
-     dim_idl[3] = d->n_ulevels;
-     dim_idl[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     dim_idl[3] = d->n_out_levels;
+     dim_idl[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim_idl[1] = n_out_phis;
      dim_idl[0] = d->n_stokes;
      ptr = IDL_ImportArray(4, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) I_m_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[6]);
-     dim_idl[4] = d->n_ulevels;
+     dim_idl[4] = d->n_out_levels;
      dim_idl[3] = d->n_derivs;
-     dim_idl[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     dim_idl[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim_idl[1] = n_out_phis;
      dim_idl[0] = d->n_stokes;
      ptr = IDL_ImportArray(5, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) K_p_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[7]);
-     dim_idl[4] = d->n_ulevels;
+     dim_idl[4] = d->n_out_levels;
      dim_idl[3] = d->n_derivs;
-     dim_idl[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     dim_idl[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim_idl[1] = n_out_phis;
      dim_idl[0] = d->n_stokes;
      ptr = IDL_ImportArray(5, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) K_m_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[8]);
-     dim_idl[0] = d->n_ulevels;
+     dim_idl[0] = d->n_out_levels;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) mean_p, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[9]);
-     dim_idl[0] = d->n_ulevels;
+     dim_idl[0] = d->n_out_levels;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) mean_m, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[10]);
-     dim_idl[1] = d->n_ulevels;
+     dim_idl[1] = d->n_out_levels;
      dim_idl[0] = d->n_derivs;
      ptr = IDL_ImportArray(2, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) mean_p_l_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[11]);
-     dim_idl[1] = d->n_ulevels;
+     dim_idl[1] = d->n_out_levels;
      dim_idl[0] = d->n_derivs;
      ptr = IDL_ImportArray(2, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) mean_m_l_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[12]);
-     dim_idl[0] = d->n_ulevels;
+     dim_idl[0] = d->n_out_levels;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) flux_p, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[13]);
-     dim_idl[0] = d->n_ulevels;
+     dim_idl[0] = d->n_out_levels;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) flux_m, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[14]);
-     dim_idl[1] = d->n_ulevels;
+     dim_idl[1] = d->n_out_levels;
      dim_idl[0] = d->n_derivs;
      ptr = IDL_ImportArray(2, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) flux_p_l_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[15]);
-     dim_idl[1] = d->n_ulevels;
+     dim_idl[1] = d->n_out_levels;
      dim_idl[0] = d->n_derivs;
      ptr = IDL_ImportArray(2, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) flux_m_l_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[16]);
-     dim_idl[0] = d->n_ulevels;
+     dim_idl[0] = d->n_out_levels;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) flux_div, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[17]);
-     dim_idl[1] = d->n_ulevels;
+     dim_idl[1] = d->n_out_levels;
      dim_idl[0] = d->n_derivs;
      ptr = IDL_ImportArray(2, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) flux_div_l_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[18]);
@@ -3987,36 +3987,36 @@ void IDL_CDECL xrtm_radiance_dlm(int argc, IDL_VPTR argv[], char *argk)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_phis must be of type double");
      if (argv[3]->value.arr->n_dim != 2)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_phis must be an array with 2 dimensions");
-     if (argv[3]->value.arr->dim[1] != (d->n_umus))
-          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_phis dimension 2 must have d->n_umus elements");
+     if (argv[3]->value.arr->dim[1] != (d->n_out_thetas))
+          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_phis dimension 2 must have d->n_out_thetas elements");
      if (argv[3]->value.arr->dim[0] != (n_out_phis))
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: out_phis dimension 1 must have n_out_phis elements");
-     dim[0] = d->n_umus;
+     dim[0] = d->n_out_thetas;
      dim[1] = n_out_phis;
      out_phis = (double **) array_from_mem((void *) argv[3]->value.arr->data, 2, dim, sizeof(double), 1);
-     I_p_data = malloc((d->n_ulevels) * (d->n_umus == 0 ? d->n_quad : d->n_umus) * (n_out_phis) * (d->n_stokes) * sizeof(double));
-     dim[0] = d->n_ulevels;
-     dim[1] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     I_p_data = malloc((d->n_out_levels) * (d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas) * (n_out_phis) * (d->n_stokes) * sizeof(double));
+     dim[0] = d->n_out_levels;
+     dim[1] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim[2] = n_out_phis;
      dim[3] = d->n_stokes;
      I_p = (double ****) array_from_mem(I_p_data, 4, dim, sizeof(double), 1);
-     I_m_data = malloc((d->n_ulevels) * (d->n_umus == 0 ? d->n_quad : d->n_umus) * (n_out_phis) * (d->n_stokes) * sizeof(double));
-     dim[0] = d->n_ulevels;
-     dim[1] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     I_m_data = malloc((d->n_out_levels) * (d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas) * (n_out_phis) * (d->n_stokes) * sizeof(double));
+     dim[0] = d->n_out_levels;
+     dim[1] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim[2] = n_out_phis;
      dim[3] = d->n_stokes;
      I_m = (double ****) array_from_mem(I_m_data, 4, dim, sizeof(double), 1);
-     K_p_data = malloc((d->n_ulevels) * (d->n_derivs) * (d->n_umus == 0 ? d->n_quad : d->n_umus) * (n_out_phis) * (d->n_stokes) * sizeof(double));
-     dim[0] = d->n_ulevels;
+     K_p_data = malloc((d->n_out_levels) * (d->n_derivs) * (d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas) * (n_out_phis) * (d->n_stokes) * sizeof(double));
+     dim[0] = d->n_out_levels;
      dim[1] = d->n_derivs;
-     dim[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     dim[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim[3] = n_out_phis;
      dim[4] = d->n_stokes;
      K_p = (double *****) array_from_mem(K_p_data, 5, dim, sizeof(double), 1);
-     K_m_data = malloc((d->n_ulevels) * (d->n_derivs) * (d->n_umus == 0 ? d->n_quad : d->n_umus) * (n_out_phis) * (d->n_stokes) * sizeof(double));
-     dim[0] = d->n_ulevels;
+     K_m_data = malloc((d->n_out_levels) * (d->n_derivs) * (d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas) * (n_out_phis) * (d->n_stokes) * sizeof(double));
+     dim[0] = d->n_out_levels;
      dim[1] = d->n_derivs;
-     dim[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     dim[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim[3] = n_out_phis;
      dim[4] = d->n_stokes;
      K_m = (double *****) array_from_mem(K_m_data, 5, dim, sizeof(double), 1);
@@ -4028,28 +4028,28 @@ void IDL_CDECL xrtm_radiance_dlm(int argc, IDL_VPTR argv[], char *argk)
      free_array((void *) K_m, 5);
      if (r == XRTM_INT_ERROR)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_radiance()");
-     dim_idl[3] = d->n_ulevels;
-     dim_idl[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     dim_idl[3] = d->n_out_levels;
+     dim_idl[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim_idl[1] = n_out_phis;
      dim_idl[0] = d->n_stokes;
      ptr = IDL_ImportArray(4, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) I_p_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[4]);
-     dim_idl[3] = d->n_ulevels;
-     dim_idl[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     dim_idl[3] = d->n_out_levels;
+     dim_idl[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim_idl[1] = n_out_phis;
      dim_idl[0] = d->n_stokes;
      ptr = IDL_ImportArray(4, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) I_m_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[5]);
-     dim_idl[4] = d->n_ulevels;
+     dim_idl[4] = d->n_out_levels;
      dim_idl[3] = d->n_derivs;
-     dim_idl[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     dim_idl[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim_idl[1] = n_out_phis;
      dim_idl[0] = d->n_stokes;
      ptr = IDL_ImportArray(5, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) K_p_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[6]);
-     dim_idl[4] = d->n_ulevels;
+     dim_idl[4] = d->n_out_levels;
      dim_idl[3] = d->n_derivs;
-     dim_idl[2] = d->n_umus == 0 ? d->n_quad : d->n_umus;
+     dim_idl[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
      dim_idl[1] = n_out_phis;
      dim_idl[0] = d->n_stokes;
      ptr = IDL_ImportArray(5, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) K_m_data, 0, NULL);
@@ -4082,14 +4082,14 @@ void IDL_CDECL xrtm_mean_radiance_dlm(int argc, IDL_VPTR argv[], char *argk)
      if ((r = xrtm_solver_name_to_mask(IDL_STRING_STR(&argv[1]->value.str))) == -1)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_solver_name_to_mask()");
      solver = r;
-     mean_p = malloc((d->n_ulevels) * sizeof(double));
-     mean_m = malloc((d->n_ulevels) * sizeof(double));
-     mean_p_l_data = malloc((d->n_ulevels) * (d->n_derivs) * sizeof(double));
-     dim[0] = d->n_ulevels;
+     mean_p = malloc((d->n_out_levels) * sizeof(double));
+     mean_m = malloc((d->n_out_levels) * sizeof(double));
+     mean_p_l_data = malloc((d->n_out_levels) * (d->n_derivs) * sizeof(double));
+     dim[0] = d->n_out_levels;
      dim[1] = d->n_derivs;
      mean_p_l = (double **) array_from_mem(mean_p_l_data, 2, dim, sizeof(double), 1);
-     mean_m_l_data = malloc((d->n_ulevels) * (d->n_derivs) * sizeof(double));
-     dim[0] = d->n_ulevels;
+     mean_m_l_data = malloc((d->n_out_levels) * (d->n_derivs) * sizeof(double));
+     dim[0] = d->n_out_levels;
      dim[1] = d->n_derivs;
      mean_m_l = (double **) array_from_mem(mean_m_l_data, 2, dim, sizeof(double), 1);
      r = xrtm_mean_radiance(d, (enum xrtm_solver_mask) solver, mean_p, mean_m, mean_p_l, mean_m_l);
@@ -4097,17 +4097,17 @@ void IDL_CDECL xrtm_mean_radiance_dlm(int argc, IDL_VPTR argv[], char *argk)
      free_array((void *) mean_m_l, 2);
      if (r == XRTM_INT_ERROR)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_mean_radiance()");
-     dim_idl[0] = d->n_ulevels;
+     dim_idl[0] = d->n_out_levels;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) mean_p, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[2]);
-     dim_idl[0] = d->n_ulevels;
+     dim_idl[0] = d->n_out_levels;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) mean_m, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[3]);
-     dim_idl[1] = d->n_ulevels;
+     dim_idl[1] = d->n_out_levels;
      dim_idl[0] = d->n_derivs;
      ptr = IDL_ImportArray(2, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) mean_p_l_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[4]);
-     dim_idl[1] = d->n_ulevels;
+     dim_idl[1] = d->n_out_levels;
      dim_idl[0] = d->n_derivs;
      ptr = IDL_ImportArray(2, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) mean_m_l_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[5]);
@@ -4139,14 +4139,14 @@ void IDL_CDECL xrtm_flux_dlm(int argc, IDL_VPTR argv[], char *argk)
      if ((r = xrtm_solver_name_to_mask(IDL_STRING_STR(&argv[1]->value.str))) == -1)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_solver_name_to_mask()");
      solver = r;
-     flux_p = malloc((d->n_ulevels) * sizeof(double));
-     flux_m = malloc((d->n_ulevels) * sizeof(double));
-     flux_p_l_data = malloc((d->n_ulevels) * (d->n_derivs) * sizeof(double));
-     dim[0] = d->n_ulevels;
+     flux_p = malloc((d->n_out_levels) * sizeof(double));
+     flux_m = malloc((d->n_out_levels) * sizeof(double));
+     flux_p_l_data = malloc((d->n_out_levels) * (d->n_derivs) * sizeof(double));
+     dim[0] = d->n_out_levels;
      dim[1] = d->n_derivs;
      flux_p_l = (double **) array_from_mem(flux_p_l_data, 2, dim, sizeof(double), 1);
-     flux_m_l_data = malloc((d->n_ulevels) * (d->n_derivs) * sizeof(double));
-     dim[0] = d->n_ulevels;
+     flux_m_l_data = malloc((d->n_out_levels) * (d->n_derivs) * sizeof(double));
+     dim[0] = d->n_out_levels;
      dim[1] = d->n_derivs;
      flux_m_l = (double **) array_from_mem(flux_m_l_data, 2, dim, sizeof(double), 1);
      r = xrtm_flux(d, (enum xrtm_solver_mask) solver, flux_p, flux_m, flux_p_l, flux_m_l);
@@ -4154,17 +4154,17 @@ void IDL_CDECL xrtm_flux_dlm(int argc, IDL_VPTR argv[], char *argk)
      free_array((void *) flux_m_l, 2);
      if (r == XRTM_INT_ERROR)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_flux()");
-     dim_idl[0] = d->n_ulevels;
+     dim_idl[0] = d->n_out_levels;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) flux_p, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[2]);
-     dim_idl[0] = d->n_ulevels;
+     dim_idl[0] = d->n_out_levels;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) flux_m, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[3]);
-     dim_idl[1] = d->n_ulevels;
+     dim_idl[1] = d->n_out_levels;
      dim_idl[0] = d->n_derivs;
      ptr = IDL_ImportArray(2, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) flux_p_l_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[4]);
-     dim_idl[1] = d->n_ulevels;
+     dim_idl[1] = d->n_out_levels;
      dim_idl[0] = d->n_derivs;
      ptr = IDL_ImportArray(2, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) flux_m_l_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[5]);
@@ -4193,19 +4193,19 @@ void IDL_CDECL xrtm_flux_divergence_dlm(int argc, IDL_VPTR argv[], char *argk)
      if ((r = xrtm_solver_name_to_mask(IDL_STRING_STR(&argv[1]->value.str))) == -1)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_solver_name_to_mask()");
      solver = r;
-     flux_div = malloc((d->n_ulevels) * sizeof(double));
-     flux_div_l_data = malloc((d->n_ulevels) * (d->n_derivs) * sizeof(double));
-     dim[0] = d->n_ulevels;
+     flux_div = malloc((d->n_out_levels) * sizeof(double));
+     flux_div_l_data = malloc((d->n_out_levels) * (d->n_derivs) * sizeof(double));
+     dim[0] = d->n_out_levels;
      dim[1] = d->n_derivs;
      flux_div_l = (double **) array_from_mem(flux_div_l_data, 2, dim, sizeof(double), 1);
      r = xrtm_flux_divergence(d, (enum xrtm_solver_mask) solver, flux_div, flux_div_l);
      free_array((void *) flux_div_l, 2);
      if (r == XRTM_INT_ERROR)
           IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_flux_divergence()");
-     dim_idl[0] = d->n_ulevels;
+     dim_idl[0] = d->n_out_levels;
      ptr = IDL_ImportArray(1, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) flux_div, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[2]);
-     dim_idl[1] = d->n_ulevels;
+     dim_idl[1] = d->n_out_levels;
      dim_idl[0] = d->n_derivs;
      ptr = IDL_ImportArray(2, (IDL_MEMINT *) dim_idl, IDL_TYP_DOUBLE, (UCHAR *) flux_div_l_data, 0, NULL);
      IDL_VarCopy((IDL_VPTR) ptr, argv[3]);

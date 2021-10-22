@@ -201,7 +201,7 @@ integer, parameter, public :: XRTM_KERNEL_USER_DEFINED = 10_int64
 !
 !*******************************************************************************
 type, bind(c) :: xrtm_type
-     integer(c_signed_char) :: data(2248)
+     integer(c_signed_char) :: data(2256)
 end type xrtm_type
 
 

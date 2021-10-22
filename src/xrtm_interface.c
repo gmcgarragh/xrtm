@@ -815,7 +815,9 @@ int xrtm_create_misc(xrtm_data *d, int options, int solvers, int max_coef, int n
      d->n_kernels     = n_kernels;
      d->n_kernel_quad = n_kernel_quad;
      d->n_ulevels     = n_out_levels;
+     d->n_out_levels  = n_out_levels;
      d->n_umus        = n_out_thetas;
+     d->n_out_thetas  = n_out_thetas;
 
      d->misc_input    = *misc_input;
 
