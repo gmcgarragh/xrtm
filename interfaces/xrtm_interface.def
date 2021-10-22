@@ -17,7 +17,7 @@ subprogram_general int 0 get_n_derivs			1;
 subprogram_general int 0 get_n_layers			1;
 subprogram_general int 0 get_n_kernels			1;
 subprogram_general int 0 get_n_kernel_quad		1;
-subprogram_general enum kernel_type 0 get_kernel	1, int 0 i_kernel in;
+subprogram_general enum kernel_type 0 get_kernel	1 enum_array xrtm_option_value_to_name, int 0 i_kernel in;
 subprogram_general int 0 get_n_out_levels		1;
 subprogram_general int 0 get_n_out_thetas		1;
 subprogram_general int 0 set_doub_d_tau			0, double 0 d_tau in;
