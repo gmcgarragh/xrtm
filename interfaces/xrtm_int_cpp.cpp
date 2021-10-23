@@ -147,6 +147,16 @@ int xrtm_int_cpp::get_n_out_thetas()
 }
 
 
+int xrtm_int_cpp::get_n_out_thetas_2()
+{
+     int r;
+     r = xrtm_get_n_out_thetas_2(&d);
+     if (r == XRTM_INT_ERROR)
+          throw xrtm_int_cpp::ERROR;
+     return r;
+}
+
+
 void xrtm_int_cpp::set_doub_d_tau(double d_tau)
 {
      int r;

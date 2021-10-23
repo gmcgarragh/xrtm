@@ -63,6 +63,7 @@ int xrtm_get_n_kernel_quad(xrtm_data *d);
 enum xrtm_kernel_type xrtm_get_kernel(xrtm_data *d, int i_kernel);
 int xrtm_get_n_out_levels(xrtm_data *d);
 int xrtm_get_n_out_thetas(xrtm_data *d);
+int xrtm_get_n_out_thetas_2(xrtm_data *d);
 int xrtm_set_doub_d_tau(xrtm_data *d, double doub_d_tau);
 double xrtm_get_doub_d_tau(xrtm_data *d);
 int xrtm_set_pade_params(xrtm_data *d, int pade_s, int pade_r);

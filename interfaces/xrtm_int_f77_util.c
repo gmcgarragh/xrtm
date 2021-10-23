@@ -177,6 +177,16 @@ int xrtm_get_n_out_thetas_bindx_f77_(xrtm_data *d)
 }
 
 
+int xrtm_get_n_out_thetas_2_bindx_f77_(xrtm_data *d)
+{
+     if (xrtm_get_n_out_thetas_2(d)) {
+          fprintf(stderr, "ERROR: xrtm_get_n_out_thetas_2()\n");
+          return -1;
+     }
+     return 0;
+}
+
+
 int xrtm_set_doub_d_tau_bindx_f77_(xrtm_data *d, double *d_tau_)
 {
      double d_tau;

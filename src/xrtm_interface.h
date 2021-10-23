@@ -243,6 +243,7 @@ typedef struct {
      int n_umus_v;
 
      int n_out_thetas;
+     int n_out_thetas_2;
 
      int order_p;
      int order_0;

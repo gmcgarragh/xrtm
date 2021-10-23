@@ -804,20 +804,21 @@ int xrtm_create_misc(xrtm_data *d, int options, int solvers, int max_coef, int n
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
-     d->options       = options;
-     d->solvers       = solvers;
-     d->n_coef        = max_coef;
-     d->n_quad        = n_quad;
-     d->n_stokes      = n_stokes;
-     d->n_derivs      = n_derivs;
-     d->n_layers      = n_layers;
-     d->n_theta_0s    = n_theta_0s;
-     d->n_kernels     = n_kernels;
-     d->n_kernel_quad = n_kernel_quad;
-     d->n_ulevels     = n_out_levels;
-     d->n_out_levels  = n_out_levels;
-     d->n_umus        = n_out_thetas;
-     d->n_out_thetas  = n_out_thetas;
+     d->options        = options;
+     d->solvers        = solvers;
+     d->n_coef         = max_coef;
+     d->n_quad         = n_quad;
+     d->n_stokes       = n_stokes;
+     d->n_derivs       = n_derivs;
+     d->n_layers       = n_layers;
+     d->n_theta_0s     = n_theta_0s;
+     d->n_kernels      = n_kernels;
+     d->n_kernel_quad  = n_kernel_quad;
+     d->n_ulevels      = n_out_levels;
+     d->n_out_levels   = n_out_levels;
+     d->n_umus         = n_out_thetas;
+     d->n_out_thetas   = n_out_thetas;
+     d->n_out_thetas_2 = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
 
      d->misc_input    = *misc_input;
 
@@ -2807,6 +2808,13 @@ int xrtm_get_n_out_levels(xrtm_data *d) {
 int xrtm_get_n_out_thetas(xrtm_data *d) {
 
      return d->n_umus;
+}
+
+
+
+int xrtm_get_n_out_thetas_2(xrtm_data *d) {
+
+     return d->n_out_thetas_2;
 }
 
 

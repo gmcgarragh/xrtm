@@ -135,6 +135,14 @@ c***********************************************************************
       end function xrtm_get_n_out_thetas_f77
 
 
+      integer function xrtm_get_n_out_thetas_2_f77(d)
+      implicit none
+      byte d(*)
+      integer xrtm_get_n_out_thetas_2_bindx_f77
+      xrtm_get_n_out_thetas_2_f77 = xrtm_get_n_out_thetas_2_bindx_f77(d)
+      end function xrtm_get_n_out_thetas_2_f77
+
+
       subroutine xrtm_set_doub_d_tau_f77(d, d_tau, error)
       implicit none
       byte d(*)

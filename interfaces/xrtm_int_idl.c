@@ -28,6 +28,7 @@ void IDL_CDECL xrtm_get_n_kernel_quad_dlm(int argc, IDL_VPTR argv[], char *argk)
 void IDL_CDECL xrtm_get_kernel_dlm(int argc, IDL_VPTR argv[], char *argk);
 void IDL_CDECL xrtm_get_n_out_levels_dlm(int argc, IDL_VPTR argv[], char *argk);
 void IDL_CDECL xrtm_get_n_out_thetas_dlm(int argc, IDL_VPTR argv[], char *argk);
+void IDL_CDECL xrtm_get_n_out_thetas_2_dlm(int argc, IDL_VPTR argv[], char *argk);
 void IDL_CDECL xrtm_set_doub_d_tau_dlm(int argc, IDL_VPTR argv[], char *argk);
 void IDL_CDECL xrtm_get_doub_d_tau_dlm(int argc, IDL_VPTR argv[], char *argk);
 void IDL_CDECL xrtm_set_pade_params_dlm(int argc, IDL_VPTR argv[], char *argk);
@@ -148,6 +149,7 @@ void IDL_CDECL xrtm_flux_divergence_dlm(int argc, IDL_VPTR argv[], char *argk);
           {{(IDL_FUN_RET) xrtm_get_kernel_dlm}, "XRTM_GET_KERNEL", 3, 3, 0},
           {{(IDL_FUN_RET) xrtm_get_n_out_levels_dlm}, "XRTM_GET_N_OUT_LEVELS", 2, 2, 0},
           {{(IDL_FUN_RET) xrtm_get_n_out_thetas_dlm}, "XRTM_GET_N_OUT_THETAS", 2, 2, 0},
+          {{(IDL_FUN_RET) xrtm_get_n_out_thetas_2_dlm}, "XRTM_GET_N_OUT_THETAS_2", 2, 2, 0},
           {{(IDL_FUN_RET) xrtm_set_doub_d_tau_dlm}, "XRTM_SET_DOUB_D_TAU", 2, 2, 0},
           {{(IDL_FUN_RET) xrtm_get_doub_d_tau_dlm}, "XRTM_GET_DOUB_D_TAU", 2, 2, 0},
           {{(IDL_FUN_RET) xrtm_set_pade_params_dlm}, "XRTM_SET_PADE_PARAMS", 3, 3, 0},
@@ -267,6 +269,7 @@ void IDL_CDECL xrtm_flux_divergence_dlm(int argc, IDL_VPTR argv[], char *argk);
           {{(IDL_FUN_RET) xrtm_get_kernel_dlm}, "XRTM_GET_KERNEL", 3, 3, 0, 0},
           {{(IDL_FUN_RET) xrtm_get_n_out_levels_dlm}, "XRTM_GET_N_OUT_LEVELS", 2, 2, 0, 0},
           {{(IDL_FUN_RET) xrtm_get_n_out_thetas_dlm}, "XRTM_GET_N_OUT_THETAS", 2, 2, 0, 0},
+          {{(IDL_FUN_RET) xrtm_get_n_out_thetas_2_dlm}, "XRTM_GET_N_OUT_THETAS_2", 2, 2, 0, 0},
           {{(IDL_FUN_RET) xrtm_set_doub_d_tau_dlm}, "XRTM_SET_DOUB_D_TAU", 2, 2, 0, 0},
           {{(IDL_FUN_RET) xrtm_get_doub_d_tau_dlm}, "XRTM_GET_DOUB_D_TAU", 2, 2, 0, 0},
           {{(IDL_FUN_RET) xrtm_set_pade_params_dlm}, "XRTM_SET_PADE_PARAMS", 3, 3, 0, 0},
@@ -801,6 +804,28 @@ void IDL_CDECL xrtm_get_n_out_thetas_dlm(int argc, IDL_VPTR argv[], char *argk)
      var.value.l = r;
      if (var.value.d == XRTM_DBL_ERROR)
      IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_get_n_out_thetas()");
+     IDL_VarCopy((IDL_VPTR) &var, argv[1]);
+     return;
+}
+
+
+void IDL_CDECL xrtm_get_n_out_thetas_2_dlm(int argc, IDL_VPTR argv[], char *argk)
+{
+     int r;
+     xrtm_data *d;
+     IDL_VARIABLE var;
+     IDL_ENSURE_ARRAY(argv[0]);
+     if (argv[0]->type != IDL_TYP_BYTE)
+          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: Invalid xrtm instance");
+     d = (xrtm_data *) argv[0]->value.arr->data;
+     r = xrtm_get_n_out_thetas_2(d);
+     if (r == XRTM_INT_ERROR)
+          IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_get_n_out_thetas_2()");
+     var.type = IDL_TYP_LONG;
+     var.flags = 0;
+     var.value.l = r;
+     if (var.value.d == XRTM_DBL_ERROR)
+     IDL_Message(IDL_M_NAMED_GENERIC, IDL_MSG_LONGJMP, "ERROR: xrtm_get_n_out_thetas_2()");
      IDL_VarCopy((IDL_VPTR) &var, argv[1]);
      return;
 }

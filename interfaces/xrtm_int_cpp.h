@@ -104,6 +104,7 @@ public:
      xrtm_int_cpp::kernel_type get_kernel(int i_kernel);
      int get_n_out_levels();
      int get_n_out_thetas();
+     int get_n_out_thetas_2();
      void set_doub_d_tau(double d_tau);
      double get_doub_d_tau();
      void set_pade_params(int pade_s, int pade_r);

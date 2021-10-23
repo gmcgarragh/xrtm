@@ -25,6 +25,7 @@ public :: xrtm_type, &
           xrtm_get_kernel_f90, &
           xrtm_get_n_out_levels_f90, &
           xrtm_get_n_out_thetas_f90, &
+          xrtm_get_n_out_thetas_2_f90, &
           xrtm_set_doub_d_tau_f90, &
           xrtm_get_doub_d_tau_f90, &
           xrtm_set_pade_params_f90, &
@@ -201,7 +202,7 @@ integer, parameter, public :: XRTM_KERNEL_USER_DEFINED = 10_int64
 !
 !*******************************************************************************
 type, bind(c) :: xrtm_type
-     integer(c_signed_char) :: data(2256)
+     integer(c_signed_char) :: data(2264)
 end type xrtm_type
 
 
@@ -360,6 +361,16 @@ interface
      implicit none
      type(xrtm_type), intent(inout) :: d
      end function xrtm_get_n_out_thetas
+end interface
+
+
+interface
+     integer(c_int) function xrtm_get_n_out_thetas_2(d) bind(c, name = "xrtm_get_n_out_thetas_2")
+     use iso_c_binding
+     import xrtm_type
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     end function xrtm_get_n_out_thetas_2
 end interface
 
 
@@ -1686,6 +1697,13 @@ integer function xrtm_get_n_out_thetas_f90(d)
      type(xrtm_type), intent(inout) :: d
      xrtm_get_n_out_thetas_f90 = xrtm_get_n_out_thetas(d)
 end function xrtm_get_n_out_thetas_f90
+
+
+integer function xrtm_get_n_out_thetas_2_f90(d)
+     implicit none
+     type(xrtm_type), intent(inout) :: d
+     xrtm_get_n_out_thetas_2_f90 = xrtm_get_n_out_thetas_2(d)
+end function xrtm_get_n_out_thetas_2_f90
 
 
 subroutine xrtm_set_doub_d_tau_f90(d, d_tau, error)

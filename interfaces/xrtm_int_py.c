@@ -367,6 +367,21 @@ static PyObject *xrtm_get_n_out_thetas_py(xrtm_data_py *self, PyObject *args)
 }
 
 
+static PyObject *xrtm_get_n_out_thetas_2_py(xrtm_data_py *self, PyObject *args)
+{
+     int r;
+     xrtm_data *d = &self->xrtm;
+     if (! PyArg_ParseTuple(args, ""))
+          return NULL;
+     r = xrtm_get_n_out_thetas_2(d);
+     if (r == XRTM_INT_ERROR) {
+          PyErr_SetString(XRTMError, "ERROR: xrtm_get_n_out_thetas_2()");
+          return NULL;
+     }
+     return Py_BuildValue("i", r);
+}
+
+
 static PyObject *xrtm_set_doub_d_tau_py(xrtm_data_py *self, PyObject *args)
 {
      int r;
@@ -2760,6 +2775,7 @@ static PyMethodDef xrtm_methods[] = {
      {"get_kernel", (PyCFunction) xrtm_get_kernel_py, METH_VARARGS, "null"},
      {"get_n_out_levels", (PyCFunction) xrtm_get_n_out_levels_py, METH_VARARGS, "null"},
      {"get_n_out_thetas", (PyCFunction) xrtm_get_n_out_thetas_py, METH_VARARGS, "null"},
+     {"get_n_out_thetas_2", (PyCFunction) xrtm_get_n_out_thetas_2_py, METH_VARARGS, "null"},
      {"set_doub_d_tau", (PyCFunction) xrtm_set_doub_d_tau_py, METH_VARARGS, "null"},
      {"get_doub_d_tau", (PyCFunction) xrtm_get_doub_d_tau_py, METH_VARARGS, "null"},
      {"set_pade_params", (PyCFunction) xrtm_set_pade_params_py, METH_VARARGS, "null"},
