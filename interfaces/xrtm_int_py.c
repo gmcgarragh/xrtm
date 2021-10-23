@@ -2424,7 +2424,7 @@ static PyObject *xrtm_solution_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      out_phis = (double **) array_from_ndarray(out_phis_ndarray, 8);
      dims[0] = d->n_out_levels;
-     dims[1] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
+     dims[1] = d->n_out_thetas_2;
      dims[2] = n_out_phis;
      dims[3] = d->n_stokes;
      I_p_ndarray = PyArray_SimpleNew(4, dims, NPY_DOUBLE);
@@ -2432,7 +2432,7 @@ static PyObject *xrtm_solution_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      I_p = (double ****) array_from_ndarray(I_p_ndarray, 8);
      dims[0] = d->n_out_levels;
-     dims[1] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
+     dims[1] = d->n_out_thetas_2;
      dims[2] = n_out_phis;
      dims[3] = d->n_stokes;
      I_m_ndarray = PyArray_SimpleNew(4, dims, NPY_DOUBLE);
@@ -2441,7 +2441,7 @@ static PyObject *xrtm_solution_py(xrtm_data_py *self, PyObject *args)
      I_m = (double ****) array_from_ndarray(I_m_ndarray, 8);
      dims[0] = d->n_out_levels;
      dims[1] = d->n_derivs;
-     dims[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
+     dims[2] = d->n_out_thetas_2;
      dims[3] = n_out_phis;
      dims[4] = d->n_stokes;
      K_p_ndarray = PyArray_SimpleNew(5, dims, NPY_DOUBLE);
@@ -2450,7 +2450,7 @@ static PyObject *xrtm_solution_py(xrtm_data_py *self, PyObject *args)
      K_p = (double *****) array_from_ndarray(K_p_ndarray, 8);
      dims[0] = d->n_out_levels;
      dims[1] = d->n_derivs;
-     dims[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
+     dims[2] = d->n_out_thetas_2;
      dims[3] = n_out_phis;
      dims[4] = d->n_stokes;
      K_m_ndarray = PyArray_SimpleNew(5, dims, NPY_DOUBLE);
@@ -2565,7 +2565,7 @@ static PyObject *xrtm_radiance_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      out_phis = (double **) array_from_ndarray(out_phis_ndarray, 8);
      dims[0] = d->n_out_levels;
-     dims[1] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
+     dims[1] = d->n_out_thetas_2;
      dims[2] = n_out_phis;
      dims[3] = d->n_stokes;
      I_p_ndarray = PyArray_SimpleNew(4, dims, NPY_DOUBLE);
@@ -2573,7 +2573,7 @@ static PyObject *xrtm_radiance_py(xrtm_data_py *self, PyObject *args)
           return NULL;
      I_p = (double ****) array_from_ndarray(I_p_ndarray, 8);
      dims[0] = d->n_out_levels;
-     dims[1] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
+     dims[1] = d->n_out_thetas_2;
      dims[2] = n_out_phis;
      dims[3] = d->n_stokes;
      I_m_ndarray = PyArray_SimpleNew(4, dims, NPY_DOUBLE);
@@ -2582,7 +2582,7 @@ static PyObject *xrtm_radiance_py(xrtm_data_py *self, PyObject *args)
      I_m = (double ****) array_from_ndarray(I_m_ndarray, 8);
      dims[0] = d->n_out_levels;
      dims[1] = d->n_derivs;
-     dims[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
+     dims[2] = d->n_out_thetas_2;
      dims[3] = n_out_phis;
      dims[4] = d->n_stokes;
      K_p_ndarray = PyArray_SimpleNew(5, dims, NPY_DOUBLE);
@@ -2591,7 +2591,7 @@ static PyObject *xrtm_radiance_py(xrtm_data_py *self, PyObject *args)
      K_p = (double *****) array_from_ndarray(K_p_ndarray, 8);
      dims[0] = d->n_out_levels;
      dims[1] = d->n_derivs;
-     dims[2] = d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas;
+     dims[2] = d->n_out_thetas_2;
      dims[3] = n_out_phis;
      dims[4] = d->n_stokes;
      K_m_ndarray = PyArray_SimpleNew(5, dims, NPY_DOUBLE);

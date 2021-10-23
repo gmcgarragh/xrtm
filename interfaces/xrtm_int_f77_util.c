@@ -1403,10 +1403,10 @@ int xrtm_solution_bindx_f77_(xrtm_data *d, enum xrtm_solver_mask *solver_, int *
      solutions = *solutions_;
      n_out_phis = *n_out_phis_;
      out_phis2 = array_from_mem2_d(out_phis, d->n_out_thetas, n_out_phis);
-     I_p2 = array_from_mem4_d(I_p, d->n_out_levels, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
-     I_m2 = array_from_mem4_d(I_m, d->n_out_levels, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
-     K_p2 = array_from_mem5_d(K_p, d->n_out_levels, d->n_derivs, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
-     K_m2 = array_from_mem5_d(K_m, d->n_out_levels, d->n_derivs, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
+     I_p2 = array_from_mem4_d(I_p, d->n_out_levels, d->n_out_thetas_2, n_out_phis, d->n_stokes);
+     I_m2 = array_from_mem4_d(I_m, d->n_out_levels, d->n_out_thetas_2, n_out_phis, d->n_stokes);
+     K_p2 = array_from_mem5_d(K_p, d->n_out_levels, d->n_derivs, d->n_out_thetas_2, n_out_phis, d->n_stokes);
+     K_m2 = array_from_mem5_d(K_m, d->n_out_levels, d->n_derivs, d->n_out_thetas_2, n_out_phis, d->n_stokes);
      mean_p_l2 = array_from_mem2_d(mean_p_l, d->n_out_levels, d->n_derivs);
      mean_m_l2 = array_from_mem2_d(mean_m_l, d->n_out_levels, d->n_derivs);
      flux_p_l2 = array_from_mem2_d(flux_p_l, d->n_out_levels, d->n_derivs);
@@ -1442,10 +1442,10 @@ int xrtm_radiance_bindx_f77_(xrtm_data *d, enum xrtm_solver_mask *solver_, int *
      solver = *solver_;
      n_out_phis = *n_out_phis_;
      out_phis2 = array_from_mem2_d(out_phis, d->n_out_thetas, n_out_phis);
-     I_p2 = array_from_mem4_d(I_p, d->n_out_levels, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
-     I_m2 = array_from_mem4_d(I_m, d->n_out_levels, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
-     K_p2 = array_from_mem5_d(K_p, d->n_out_levels, d->n_derivs, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
-     K_m2 = array_from_mem5_d(K_m, d->n_out_levels, d->n_derivs, d->n_out_thetas == 0 ? d->n_quad : d->n_out_thetas, n_out_phis, d->n_stokes);
+     I_p2 = array_from_mem4_d(I_p, d->n_out_levels, d->n_out_thetas_2, n_out_phis, d->n_stokes);
+     I_m2 = array_from_mem4_d(I_m, d->n_out_levels, d->n_out_thetas_2, n_out_phis, d->n_stokes);
+     K_p2 = array_from_mem5_d(K_p, d->n_out_levels, d->n_derivs, d->n_out_thetas_2, n_out_phis, d->n_stokes);
+     K_m2 = array_from_mem5_d(K_m, d->n_out_levels, d->n_derivs, d->n_out_thetas_2, n_out_phis, d->n_stokes);
      if (xrtm_radiance(d, (enum xrtm_solver_mask) solver, n_out_phis, out_phis2, I_p2, I_m2, K_p2, K_m2)) {
           fprintf(stderr, "ERROR: xrtm_radiance()\n");
           return -1;
