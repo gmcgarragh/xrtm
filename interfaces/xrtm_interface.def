@@ -9,7 +9,7 @@ subprogram_init int 0 create				0, int 0 options in enum_mask xrtm_option_name_t
 subprogram_free int 0 destroy				0;
 
 subprogram_general int 0 get_options			1 enum_mask xrtm_option_index_to_mask xrtm_option_index_to_name;
-subprogram_general int 0 get_solvers			1 enum_mask xrtm_option_index_to_mask xrtm_option_index_to_name;
+subprogram_general int 0 get_solvers			1 enum_mask xrtm_solver_index_to_mask xrtm_solver_index_to_name;
 subprogram_general int 0 get_max_coef			1;
 subprogram_general int 0 get_n_quad			1;
 subprogram_general int 0 get_n_stokes			1;
