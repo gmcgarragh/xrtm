@@ -299,3 +299,9 @@ print(model.get_ltau_l(2, 0))
 print(model.get_omega_l(2, 1))
 print(model.get_kernel_ampfac_l(0, 2))
 print()
+
+
+#*******************************************************************************
+# Delete xrtm instance.
+#*******************************************************************************
+del model
