@@ -102,6 +102,7 @@ LINKS         += ${HOME}/rt/eispack/libeispack.a
 
 INCDIRS       += -I${HOME}/rt/2stream \
                  -I${HOME}/rt/lidort/includes \
+                 -I${HOME}/rt/RTS_LIDORT3p8p1_f90pack_05May20/mod \
                  -I${HOME}/rt/ms3/mod \
                  -I${HOME}/rt/radiant.ss \
                  -I${HOME}/rt/vlidort/includes
