@@ -30,7 +30,7 @@ CFMIX_LDFLAGS = -fopenmp
 #*******************************************************************************
 # Defaults.  Do not modify.
 #*******************************************************************************
-VERSION       = 0.92
+VERSION       = 0.93
 
 CCDEFINES     = -D'VERSION="$(VERSION)"'
 INCDIRS       = -I../src -I../interfaces -I../misc
