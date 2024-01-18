@@ -109,6 +109,7 @@ INCDIRS       += -I${HOME}/rt/2stream \
 LINKS         += ${HOME}/rt/disort_grm/libdisort.a \
                  ${HOME}/rt/2stream/lib2stream.a \
                  ${HOME}/rt/lidort/sourcecode/liblidort.a \
+                 ${HOME}/rt/RTS_LIDORT3p8p1_f90pack_05May20/liblidort.a \
                  ${HOME}/rt/ms3/src/libms3.a \
                  ${HOME}/rt/polrad/libpolrad.a \
                  ${HOME}/rt/radiant.ss/libradiant.a \
