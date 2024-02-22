@@ -15,7 +15,7 @@ F90           = gfortran
 
 CCFLAGS       = -O2 -fPIC -Wall -Werror -Wno-cpp -Wno-misleading-indentation \
                 -Wno-uninitialized -Wno-unused-function -fno-strict-aliasing \
-                -fopenmp
+                -Wno-format-truncation -fopenmp
 CXXFLAGS      = $(CCFLAGS) -Wno-terminate
 F77FLAGS      = -O2 -fPIC -Wall -Werror -Wno-uninitialized -fno-second-underscore \
                 -ffixed-line-length-none
@@ -35,8 +35,13 @@ VERSION       = 0.93
 CCDEFINES     = -D'VERSION="$(VERSION)"'
 INCDIRS       = -I../src -I../interfaces -I../misc
 LIBDIRS       =
-LINKS         = -Wl,--start-group
 
+# MacOS GCC does not know --start-group
+ifeq ($(shell uname -s),Darwin)
+    #LINKS         = -Wl, 
+else
+    LINKS         = -Wl,--start-group
+endif
 
 #*******************************************************************************
 # BLAS and LAPACK settings.  This includes whatever needs to be on the command
@@ -45,16 +50,23 @@ LINKS         = -Wl,--start-group
 # blank.
 #*******************************************************************************
 
-# LAPACK
-LINKS        += $(HOME)/opt/lapack/liblapack.a
+ifeq ($(shell uname -s),Darwin)
 
-# BLAS
+    LINKS        += -framework Accelerate
 
-# Ref BLAS
-#LINKS        += ${HOME}/opt/lapack/libblas.a
+else
 
-# OpenBLAS
-LINKS        += ${HOME}/opt/openblas/lib/libopenblas.a
+    # LAPACK
+    LINKS        += $(HOME)/opt/lapack/liblapack.a
+
+    # BLAS
+
+    # Ref BLAS
+    #LINKS        += ${HOME}/opt/lapack/libblas.a
+
+    # OpenBLAS
+    LINKS        += ${HOME}/opt/openblas/lib/libopenblas.a
+endif
 
 
 #*******************************************************************************
@@ -122,4 +134,11 @@ endif
 #*******************************************************************************
 # Defaults.  Do not modify.
 #*******************************************************************************
-LINKS        += -Wl,--end-group
+ifeq ($(shell uname -s),Darwin)
+    # No --end-group for GCC in MacOS
+    # We pass a different flag during the linking of
+    # XRTM.dylib, which is set in interfaces/Makefile
+    # (--all_load)
+else
+    LINKS        += -Wl,--end-group
+endif
