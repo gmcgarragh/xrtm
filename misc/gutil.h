@@ -182,6 +182,8 @@ typedef unsigned int		uint32_t;
 #if   (PLATFORM    == WIN32_MSVC)
 typedef signed __int64		int64_t;
 typedef unsigned __int64	uint64_t;
+#elif (PLATFORM  == MACOS_GCC)
+/* MacOS has int64_t and uint_64t already, and complains if we re-define. */
 #else
 typedef signed long		int64_t;
 typedef unsigned long		uint64_t;
