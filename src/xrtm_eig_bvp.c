@@ -183,6 +183,9 @@ void rtm_eig_bvp(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layer
      double *planck0_l2;
      double *planck1_l2;
 
+     double  **p_d_tau;
+     double ***p_d_tau_l;
+
      double **P_q0_mm_l2;
      double **P_q0_pm_l2;
 
@@ -263,9 +266,6 @@ void rtm_eig_bvp(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layer
      double **I_p_l2;
      double **I_m_l2;
 
-double  **p_d_tau   = get_work_d2(&work, n_layers,           2);
-double ***p_d_tau_l = get_work_d3(&work, n_layers, n_derivs, 2);
-
      dcomplex *B_c;
      dcomplex **B_l_c;
 
@@ -338,6 +338,8 @@ double **atran2_l;
                At_p = alloc_array3_d(n_layers, 2, n_quad_v_x);
                At_m = alloc_array3_d(n_layers, 2, n_quad_v_x);
           }
+
+          p_d_tau = get_work_d2(&work, n_layers, 2);
      }
 
      if (solar) {
@@ -367,6 +369,8 @@ double **atran2_l;
                     At_p_l = alloc_array4_d(n_layers, n_derivs, 2, n_quad_v_x);
                     At_m_l = alloc_array4_d(n_layers, n_derivs, 2, n_quad_v_x);
                }
+
+               p_d_tau_l = get_work_d3(&work, n_layers, n_derivs, 2);
           }
      }
 
