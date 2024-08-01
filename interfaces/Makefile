@@ -22,7 +22,11 @@ ifdef make_int_python
 BINARIES += xrtm.so
 endif
 
+ifeq ($(shell uname -s),Darwin)
+BINARIES += XRTM.dylib
+else
 BINARIES += XRTM.so
+endif
 
 PRODUCTS =
 
@@ -43,6 +47,10 @@ xrtm.so: xrtm_int_py.o ../src/libxrtm.a ../misc/libxrtm_misc.a
 
 XRTM.so: xrtm_int_jl_util.o ../src/libxrtm.a ../misc/libxrtm_misc.a
 	$(CFMIX_LD) $(CFMIX_LDFLAGS) -shared -o XRTM.so xrtm_int_jl_util.o -Wl,--whole-archive ../src/libxrtm.a ../misc/libxrtm_misc.a -Wl,--no-whole-archive \
+        $(LIBDIRS) $(LINKS)
+
+XRTM.dylib: xrtm_int_jl_util.o ../src/libxrtm.a ../misc/libxrtm_misc.a
+	$(CFMIX_LD) $(CFMIX_LDFLAGS) -shared -o XRTM.dylib xrtm_int_jl_util.o -all_load ../src/libxrtm.a ../misc/libxrtm_misc.a \
         $(LIBDIRS) $(LINKS)
 
 

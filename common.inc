@@ -2,7 +2,15 @@
 #
 #*******************************************************************************
 CCDEFINES += -DGBYTE_ORDER=BYTE_ORDER_LE -DNATIVE_SIZE=NATIVE_SIZE_64_BIT \
-             -DPLATFORM=LINUX_GCC -DUNIX
+             -DUNIX
+
+# Change platform according to uname -s
+ifeq ($(shell uname -s),Linux)
+     CCDEFINES += -DPLATFORM=LINUX_GCC
+endif
+ifeq ($(shell uname -s),Darwin)
+     CCDEFINES += -DPLATFORM=MACOS_GCC
+endif
 
 
 MAKE_SUBDIRS  = + \
