@@ -44,16 +44,11 @@ LINKS         = -Wl,--start-group
 # places (/usr/include, /usr/lib) then these variable definitions may be left
 # blank.
 #*******************************************************************************
-
-# LAPACK
-LINKS        += $(HOME)/opt/lapack/liblapack.a
-
-# BLAS
-
-# Ref BLAS
+# Reference BLAS LAPACK
+#LINKS        += $(HOME)/opt/lapack/liblapack.a
 #LINKS        += ${HOME}/opt/lapack/libblas.a
 
-# OpenBLAS
+# OpenBLAS (has LAPACK)
 LINKS        += ${HOME}/opt/openblas/lib/libopenblas.a
 
 
@@ -68,8 +63,8 @@ LINKS        += ${HOME}/opt/openblas/lib/libopenblas.a
 # Uncomment (and modify include path as needed) to compile the Python interface
 #*******************************************************************************
 #make_int_python = 1
-#INCDIRS        += -I${HOME}/opt/anaconda3/include/python3.9 \
-#                  -I${HOME}/opt/anaconda3/lib/python3.9/site-packages/numpy/core/include
+#INCDIRS        += -I${HOME}/opt/anaconda3/include/python3.12 \
+#                  -I${HOME}/opt/anaconda3/lib/python3.12/site-packages/numpy/core/include
 
 
 #*******************************************************************************
