@@ -7,56 +7,56 @@ program example_f90
 
      implicit none
 
-     integer                 :: i
-     integer                 :: j
-     integer                 :: k
+     integer              :: i
+     integer              :: j
+     integer              :: k
 
-     integer                 :: error
+     integer              :: error
 
-     integer                 :: options
-     integer                 :: solvers
-     integer                 :: max_coef
-     integer                 :: n_quad
-     integer                 :: n_stokes
-     integer                 :: n_derivs
-     integer                 :: n_layers
-     integer                 :: n_theta_0s
-     integer                 :: n_kernels
-     integer                 :: n_kernel_quad
-     integer                 :: kernels(1)
-     integer                 :: n_out_levels
-     integer                 :: n_out_thetas
-     integer                 :: n_out_phis
+     integer              :: options
+     integer              :: solvers
+     integer              :: max_coef
+     integer              :: n_quad
+     integer              :: n_stokes
+     integer              :: n_derivs
+     integer              :: n_layers
+     integer              :: n_theta_0s
+     integer              :: n_kernels
+     integer              :: n_kernel_quad
+     integer              :: kernels(1)
+     integer              :: n_out_levels
+     integer              :: n_out_thetas
+     integer              :: n_out_phis
 
-     integer, allocatable    :: out_levels(:)
+     integer, allocatable :: out_levels(:)
 
-     integer                 :: n_ray_coef
-     integer                 :: n_aer_coef
+     integer              :: n_ray_coef
+     integer              :: n_aer_coef
 
-     integer, allocatable    :: n_coef(:)
+     integer, allocatable :: n_coef(:)
 
-     real(8)                 :: F_0
-     real(8)                 :: theta_0
+     real(8)              :: F_0
+     real(8)              :: theta_0
 
-     real(8), allocatable    :: out_thetas(:)
-     real(8), allocatable    :: out_phis(:,:)
+     real(8), allocatable :: out_thetas(:)
+     real(8), allocatable :: out_phis(:,:)
 
-     real(8), allocatable    :: ltau(:)
-     real(8), allocatable    :: omega(:)
-     real(8)                 :: ray_coef(3,1)
-     real(8), allocatable    :: aer_coef(:,:)
-     real(8), allocatable    :: coef(:,:,:)
+     real(8), allocatable :: ltau(:)
+     real(8), allocatable :: omega(:)
+     real(8)              :: ray_coef(3,1)
+     real(8), allocatable :: aer_coef(:,:)
+     real(8), allocatable :: coef(:,:,:)
 
-     real(8)                 :: albedo
+     real(8)              :: albedo
 
-     real(8), allocatable    :: I_p(:,:,:,:)
-     real(8), allocatable    :: I_m(:,:,:,:)
-     real(8), allocatable    :: K_p(:,:,:,:,:)
-     real(8), allocatable    :: K_m(:,:,:,:,:)
+     real(8), allocatable :: I_p(:,:,:,:)
+     real(8), allocatable :: I_m(:,:,:,:)
+     real(8), allocatable :: K_p(:,:,:,:,:)
+     real(8), allocatable :: K_m(:,:,:,:,:)
 
      ! Structure the represents the XRTM instance the members of which should
      ! never be modfied by the user.
-     type(xrtm_type)         :: xrtm
+     type(xrtm_type)      :: xrtm
 
 
      !**************************************************************************
@@ -173,14 +173,14 @@ program example_f90
      endif
 
 
-     !******************************************************************
+     !**************************************************************************
      ! Set inputs.
      !
      ! Inputs must be set before the first model run.  For subsequent runs only
      ! the inputs that change need to be set.  For example calculating the
      ! radiance across the O2-A band spectrum, assuming constant scattering
      ! properites, would require only updating ltau and omega for each point.
-     ! ******************************************************************
+     ! *************************************************************************
      call xrtm_set_fourier_tol_f90(xrtm, .0001d0, error)
      if (error /= 0) then
           write (0, *) 'error calling xrtm_set_fourier_tol_f90()'
