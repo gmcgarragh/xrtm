@@ -4938,6 +4938,8 @@ static void build_derivs_layers(xrtm_data *d, uchar **derivs_layers, int flag) {
 
      for (i = 0; i < d->n_layers; ++i) {
           for (j = 0; j < d->n_derivs; ++j) {
+               derivs_layers[i][j] = 0;
+
                if (d->ltau0_l[i][j] != 0.) {
                     derivs_layers[i][j] = 1;
                     goto L1;
