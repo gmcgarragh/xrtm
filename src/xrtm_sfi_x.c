@@ -419,7 +419,9 @@ static void SFI_SOURCE_THERMAL(double ptau, double *ptau_l,
                dvec_scale(.5 * omega,      u2,     u2, n_umus_v);
                dvec_add(u2, u3, u2, n_umus_v);
 
-               a1_l = -omega_l[j] * p_d_tau[k] + (1. - omega) * p_d_tau_l[j][k];
+               a1_l = 0.;
+               if (derivs_thermal[j])
+                    a1_l = -omega_l[j] * p_d_tau[k] + (1. - omega) * p_d_tau_l[j][k];
 
                if (k > 0) {
                     if (! derivs_layers[j])

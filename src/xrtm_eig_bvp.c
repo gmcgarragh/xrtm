@@ -622,9 +622,14 @@ else {
           for (i = 0; i < n_layers; ++i) {
                p_d_tau[i][0] =  planck[i];
                p_d_tau[i][1] = (planck[i+1] - planck[i]) / ltau[i];
-               for (j = 0; j < n_derivs; ++j) {
-                    p_d_tau_l[i][j][0] =  planck_l[i][j];
-                    p_d_tau_l[i][j][1] = ((planck_l[i+1][j] - planck_l[i][j]) - p_d_tau[i][1] * ltau_l[i][j]) / ltau[i];
+               if (n_derivs > 0 && flags_or(derivs->thermal[i], n_derivs)) {
+                    for (j = 0; j < n_derivs; ++j) {
+                         if (! derivs->thermal[i][j])
+                              continue;
+
+                         p_d_tau_l[i][j][0] =  planck_l[i][j];
+                         p_d_tau_l[i][j][1] = ((planck_l[i+1][j] - planck_l[i][j]) - p_d_tau[i][1] * ltau_l[i][j]) / ltau[i];
+                    }
                }
           }
      }
