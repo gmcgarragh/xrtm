@@ -2862,7 +2862,7 @@ double xrtm_get_doub_d_tau(xrtm_data *d) {
  *
  ******************************************************************************/
 int xrtm_set_pade_params(xrtm_data *d, int pade_s, int pade_r) {
-
+/*
      if (pade_s < 0) {
           fprintf(stderr, "ERROR: invalid value for s: %d, "
                   "must be >= zero\n", pade_s);
@@ -2874,7 +2874,7 @@ int xrtm_set_pade_params(xrtm_data *d, int pade_s, int pade_r) {
                   "must be > zero\n", pade_r);
           return XRTM_INT_ERROR;
      }
-
+*/
      d->pade_s = pade_s;
      d->pade_r = pade_r;
 
