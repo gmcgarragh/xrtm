@@ -2446,6 +2446,11 @@ static int check_inputs_initialized(xrtm_data *d) {
                return INPUT_SOS_PARAMS;
           }
      }
+
+     if (! d->set_flags_fourier_tol) {
+          fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_FOURIER_TOL));
+          return INPUT_FOURIER_TOL;
+     }
 /*
      if (d->options & XRTM_OPTION_SOURCE_THERMAL) {
           if (! d->set_flags_lambda) {
