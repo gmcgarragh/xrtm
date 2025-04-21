@@ -588,7 +588,7 @@ static PyObject *xrtm_set_levels_z_py(xrtm_data_py *self, PyObject *args)
      levels_z_ndarray = PyArray_FROM_OTF(levels_z_object, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
      if (levels_z_ndarray == NULL)
           return NULL;
-     if (check_pyarray_shape(levels_z_ndarray, "levels_z", 1, d->n_out_levels) < 0)
+     if (check_pyarray_shape(levels_z_ndarray, "levels_z", 1, d->n_layers + 1) < 0)
           return NULL;
      levels_z = (double *) array_from_ndarray(levels_z_ndarray, 8);
      r = xrtm_set_levels_z(d, levels_z);
@@ -610,7 +610,7 @@ static PyObject *xrtm_get_levels_z_py(xrtm_data_py *self, PyObject *args)
      double *levels_z;
      if (! PyArg_ParseTuple(args, ""))
           return NULL;
-     dims[0] = d->n_out_levels;
+     dims[0] = d->n_layers + 1;
      levels_z_ndarray = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
      if (levels_z_ndarray == NULL)
           return NULL;
