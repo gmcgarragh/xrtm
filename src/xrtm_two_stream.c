@@ -1391,7 +1391,7 @@ if (add_single_scattering)
      }
 
      for (j = 0; j < n_derivs; ++j) {
-          if (derivs->beam[j]) {
+          if (derivs->beam[i_layer][j]) {
                q3 = AA * F_p_l[j];
                for (k = 0; k < n_umus; ++k)
                     u3[k] = P_uq_pp[k] * q3;
@@ -1429,7 +1429,7 @@ else
           }
 
           for (k = 0; k < n_umus; ++k) {
-               if (derivs->beam[j])
+               if (derivs->beam[i_layer][j])
                     I_u_l[j][offset + k] += Gu_0[k] * Du_0[k];
 
                if (derivs->layers[i_layer][j]) {
