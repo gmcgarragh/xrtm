@@ -22,10 +22,11 @@
 /*******************************************************************************
  *
  ******************************************************************************/
-int rtm_two_os(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
+int rtm_two_os(int i_four,
+               int n_quad, int n_stokes, int n_derivs, int n_layers,
                double qf, double *qx_v, double *qw_v, double F_0, double mu_0,
-               int *ulevels, double *utaus, int n_ulevels,
-               double *umus_v, int n_umus,
+               int n_ulevels, int *ulevels, double *utaus,
+               int n_umus, double *umus_v,
                double *omega, double **omega_l, double *ltau, double **ltau_l,
                double *Rs_q0, double **Rs_q0_l, double **Rs_qq, double ***Rs_qq_l,
                double *btran, double **btran_l,

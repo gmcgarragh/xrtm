@@ -4407,7 +4407,21 @@ static void get_single(xrtm_data *d, int n_phis, double **phis, double ****I_p, 
                     }
                }
 
-               single_scattered_radiance_up(d->n_stokes, d->n_derivs, d->n_layers, d->F_0, d->n_ulevels, d->ulevels, d->utaus2, &mus2[i], 1, omega2, omega2_l, d->ltau, d->ltau_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, P_full, P_full_l, d->In_p[0]+ii, In_p_l, I, I_l, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->derivs.layers, d->derivs.beam, save_tree, work);
+               single_scattered_radiance_up(d->n_stokes, d->n_derivs, d->n_layers,
+                                            d->F_0,
+                                            d->n_ulevels, d->ulevels, d->utaus2,
+                                            1, &mus2[i],
+                                            omega2, omega2_l,
+                                            d->ltau, d->ltau_l,
+                                            P_full, P_full_l,
+                                            d->btran, d->btran_l,
+                                            d->as_0, d->as_0_l,
+                                            d->atran, d->atran_l,
+                                            d->In_p[0]+ii, In_p_l,
+                                            I, I_l,
+                                            d->options & XRTM_OPTION_OUTPUT_AT_TAUS,
+                                            d->derivs.layers, d->derivs.beam,
+                                            save_tree, work);
                for (k = 0; k < d->n_ulevels; ++k) {
                     dvec_copy(I_p[k][i][j], I[k], d->n_stokes);
                     for (l = 0; l < d->n_derivs; ++l) {
@@ -4435,7 +4449,21 @@ static void get_single(xrtm_data *d, int n_phis, double **phis, double ****I_p, 
                     }
                }
 
-               single_scattered_radiance_dn(d->n_stokes, d->n_derivs, d->n_layers, d->F_0, d->n_ulevels, d->ulevels, d->utaus2, &mus2[i], 1, omega2, omega2_l, d->ltau, d->ltau_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, P_full, P_full_l, d->I1_m[0]+ii, I1_m_l, I, I_l, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->derivs.layers, d->derivs.beam, save_tree, work);
+               single_scattered_radiance_dn(d->n_stokes, d->n_derivs, d->n_layers,
+                                            d->F_0,
+                                            d->n_ulevels, d->ulevels, d->utaus2,
+                                            1, &mus2[i],
+                                            omega2, omega2_l,
+                                            d->ltau, d->ltau_l,
+                                            P_full, P_full_l,
+                                            d->btran, d->btran_l,
+                                            d->as_0, d->as_0_l,
+                                            d->atran, d->atran_l,
+                                            d->I1_m[0]+ii, I1_m_l,
+                                            I, I_l,
+                                            d->options & XRTM_OPTION_OUTPUT_AT_TAUS,
+                                            d->derivs.layers, d->derivs.beam,
+                                            save_tree, work);
                for (k = 0; k < d->n_ulevels; ++k) {
                     dvec_copy(I_m[k][i][j], I[k], d->n_stokes);
                     for (l = 0; l < d->n_derivs; ++l) {
@@ -4932,6 +4960,8 @@ static int fourier_get_bvp(xrtm_data *d, int i_four, int solver, double **I_p, d
      int solar;
      int thermal;
 
+     int add_single_scattering;
+
      double **In_p_l;
      double **I1_m_l;
 
@@ -5099,6 +5129,11 @@ if (! (d->solvers & XRTM_SOLVER_TWO_STREAM)) {
      /*-------------------------------------------------------------------------
       *
       *-----------------------------------------------------------------------*/
+     add_single_scattering = 1;
+
+     if (d->misc_input.do_not_add_sfi_ss)
+          add_single_scattering = 0;
+
      if (solver & XRTM_SOLVER_EIG_BVP) {
 #ifndef USE_NEW_SFI_FOUR_CONV
           int add_single_scattering = 1;
@@ -5113,29 +5148,118 @@ if (! (d->solvers & XRTM_SOLVER_TWO_STREAM)) {
           if (d->misc_input.do_not_add_sfi_ss)
                add_single_scattering = 0;
 #endif
-          rtm_eig_bvp(i_four, d->n_quad,   d->n_stokes, d->n_derivs, d->n_layers, d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->umus_v, d->n_umus, d->levels_b, d->levels_b_l, d->omega, d->omega_l, d->ltau, d->ltau_l, d->surface_b, d->surface_b_l,                                       d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, P_q0_mm, P_q0_pm, P_u0_mm, P_u0_pm, P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm, r_p, t_p, r_m, t_m, P_q0_mm_l, P_q0_pm_l, P_u0_mm_l, P_u0_pm_l, P_uq_pp_l, P_uq_mp_l, P_uq_mm_l, P_uq_pm_l, r_p_l, t_p_l, r_m_l, t_m_l, Rs_qq, Rs_qq_l, Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l, d->I1_m[i_four], I1_m_l, d->In_p[i_four], In_p_l, d->F_iso_top, d->F_iso_top_l, d->F_iso_bot, d->F_iso_bot_l, I_p, I_m, I_p_l, I_m_l, add_single_scattering, d->options & XRTM_OPTION_PART_SOL_GREENS, d->options & XRTM_OPTION_SFI, surface, solar, thermal, d->options & XRTM_OPTION_UPWELLING_OUTPUT, d->options & XRTM_OPTION_DOWNWELLING_OUTPUT, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, d->misc_input.eigen_solver_gen_real, d->misc_input.eigen_solver_gen_complex, &d->derivs, save_tree, work);
+          rtm_eig_bvp(i_four,
+                      d->n_quad,   d->n_stokes, d->n_derivs, d->n_layers,
+                      d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0,
+                      d->n_ulevels, d->ulevels, d->utaus2, d->n_umus, d->umus_v,
+                      d->levels_b, d->levels_b_l,
+                      d->omega, d->omega_l, d->ltau, d->ltau_l,
+                      d->surface_b, d->surface_b_l,
+                      d->btran, d->btran_l,
+                      d->as_0, d->as_0_l, d->atran, d->atran_l,
+                      P_q0_mm, P_q0_pm, P_u0_mm, P_u0_pm,
+                      P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm,
+                      r_p, t_p, r_m, t_m,
+                      P_q0_mm_l, P_q0_pm_l, P_u0_mm_l, P_u0_pm_l,
+                      P_uq_pp_l, P_uq_mp_l, P_uq_mm_l, P_uq_pm_l,
+                      r_p_l, t_p_l, r_m_l, t_m_l,
+                      Rs_qq, Rs_qq_l,
+                      Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l,
+                      d->I1_m[i_four], I1_m_l, d->In_p[i_four], In_p_l,
+                      d->F_iso_top, d->F_iso_top_l, d->F_iso_bot, d->F_iso_bot_l,
+                      I_p, I_m, I_p_l, I_m_l,
+                      add_single_scattering,
+                      d->options & XRTM_OPTION_PART_SOL_GREENS,
+                      d->options & XRTM_OPTION_SFI,
+                      solar, thermal, surface,
+                      d->options & XRTM_OPTION_UPWELLING_OUTPUT, d->options & XRTM_OPTION_DOWNWELLING_OUTPUT,
+                      d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR,
+                      d->misc_input.eigen_solver_gen_real, d->misc_input.eigen_solver_gen_complex,
+                      &d->derivs, save_tree, work);
      }
      else
      if (solver & XRTM_SOLVER_MEM_BVP)
-          rtm_mem_bvp(i_four, d->n_quad,   d->n_stokes, d->n_derivs, d->n_layers, d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->umus_v, d->n_umus,                             d->omega, d->omega_l, d->ltau, d->ltau_l, Rs_qq, Rs_qq_l, Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l, d->btau, d->btau_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, P_q0_mm, P_q0_pm, P_u0_mm, P_u0_pm, P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm, r_p, t_p, r_m, t_m, P_q0_mm_l, P_q0_pm_l, P_u0_mm_l, P_u0_pm_l, P_uq_pp_l, P_uq_mp_l, P_uq_mm_l, P_uq_pm_l, r_p_l, t_p_l, r_m_l, t_m_l,                                                 d->I1_m[i_four], I1_m_l, d->In_p[i_four], In_p_l, I_p, I_m, I_p_l, I_m_l,                                                                  d->options & XRTM_OPTION_SFI, surface,                                                                                                         d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, d->misc_input.eigen_solver_gen_real, d->misc_input.eigen_solver_gen_complex, &d->derivs, save_tree, work);
+          rtm_mem_bvp(i_four,
+                      d->n_quad, d->n_stokes, d->n_derivs, d->n_layers,
+                      d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0,
+                      d->n_ulevels, d->ulevels, d->utaus2, d->n_umus, d->umus_v,
+                      d->omega, d->omega_l, d->ltau, d->ltau_l,
+                      d->btau, d->btau_l, d->btran, d->btran_l,
+                      d->as_0, d->as_0_l, d->atran, d->atran_l,
+                      P_q0_mm, P_q0_pm, P_u0_mm, P_u0_pm,
+                      P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm,
+                      r_p, t_p, r_m, t_m,
+                      P_q0_mm_l, P_q0_pm_l, P_u0_mm_l, P_u0_pm_l,
+                      P_uq_pp_l, P_uq_mp_l, P_uq_mm_l, P_uq_pm_l,
+                      r_p_l, t_p_l, r_m_l, t_m_l,
+                      Rs_qq, Rs_qq_l,
+                      Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l,
+                      d->I1_m[i_four], I1_m_l, d->In_p[i_four], In_p_l,
+                      I_p, I_m, I_p_l, I_m_l,
+                      d->options & XRTM_OPTION_SFI, surface,
+                      d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR,
+                      d->misc_input.eigen_solver_gen_real, d->misc_input.eigen_solver_gen_complex,
+                      &d->derivs, save_tree, work);
      else
      if (solver & XRTM_SOLVER_SOS)
-          rtm_sos    (i_four, d->n_quad_x, d->n_stokes, d->n_derivs, d->n_layers, d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->omega, d->omega_l, d->ltau, d->ltau_l, Rs_qq, Rs_qq_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, P_q0_mm, P_q0_pm, P_qq_pp, P_qq_mp, P_qq_mm, P_qq_pm, P_q0_mm_l, P_q0_pm_l, P_qq_pp_l, P_qq_mp_l, P_qq_mm_l, P_qq_pm_l, d->I1_m[i_four], I1_m_l, d->In_p[i_four], In_p_l, I_p, I_m, I_p_l, I_m_l, d->sos_max_os, d->sos_max_tau, d->sos_tol, d->options & XRTM_OPTION_SFI, surface, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, &d->derivs, work);
+          rtm_sos    (i_four,
+                      d->n_quad_x, d->n_stokes, d->n_derivs, d->n_layers,
+                      d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0,
+                      d->n_ulevels, d->ulevels, d->utaus2,
+                      d->omega, d->omega_l, d->ltau, d->ltau_l,
+                      d->btran, d->btran_l,
+                      d->as_0, d->as_0_l, d->atran, d->atran_l,
+                      P_q0_mm, P_q0_pm,
+                      P_qq_pp, P_qq_mp, P_qq_mm, P_qq_pm,
+                      P_q0_mm_l, P_q0_pm_l,
+                      P_qq_pp_l, P_qq_mp_l, P_qq_mm_l, P_qq_pm_l,
+                      Rs_qq, Rs_qq_l,
+                      d->I1_m[i_four], I1_m_l, d->In_p[i_four], In_p_l,
+                      I_p, I_m, I_p_l, I_m_l,
+                      d->sos_max_os, d->sos_max_tau, d->sos_tol,
+                      d->options & XRTM_OPTION_SFI, surface, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR,
+                      &d->derivs, work);
      else
      if (solver & XRTM_SOLVER_TWO_OS) {
           if (! (d->options & XRTM_OPTION_SFI))
-               rtm_two_os(i_four, d->n_quad,   d->n_stokes, d->n_derivs, d->n_layers, d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->umus_v, d->n_umus, d->omega, d->omega_l, d->ltau, d->ltau_l, Rs_q0, Rs_q0_l, Rs_qq, Rs_qq_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, P_q0_mm, P_q0_pm, P_qq_pp, P_qq_mp, P_qq_mm, P_qq_pm, P_q0_mm_l, P_q0_pm_l, P_qq_pp_l, P_qq_mp_l, P_qq_mm_l, P_qq_pm_l, I_p, I_m, I_p_l, I_m_l, d->options & XRTM_OPTION_SFI, surface, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, 0, &d->derivs, work);
+               rtm_two_os(i_four,
+                          d->n_quad, d->n_stokes, d->n_derivs, d->n_layers,
+                          d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0,
+                          d->n_ulevels, d->ulevels, d->utaus2, d->n_umus, d->umus_v,
+                          d->omega, d->omega_l,
+                          d->ltau, d->ltau_l,
+                          Rs_q0, Rs_q0_l, Rs_qq, Rs_qq_l,
+                          d->btran, d->btran_l,
+                          d->as_0, d->as_0_l,
+                          d->atran, d->atran_l,
+                          P_q0_mm, P_q0_pm,
+                          P_qq_pp, P_qq_mp, P_qq_mm, P_qq_pm,
+                          P_q0_mm_l, P_q0_pm_l,
+                          P_qq_pp_l, P_qq_mp_l, P_qq_mm_l, P_qq_pm_l,
+                          I_p, I_m, I_p_l, I_m_l,
+                          d->options & XRTM_OPTION_SFI, surface, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, 0,
+                          &d->derivs, work);
           else
-               rtm_two_os(i_four, d->n_quad_x, d->n_stokes, d->n_derivs, d->n_layers, d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->umus_v, d->n_umus, d->omega, d->omega_l, d->ltau, d->ltau_l, Rs_q0, Rs_q0_l, Rs_uq, Rs_uq_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, P_q0_mm, P_q0_pm, P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm, P_q0_mm_l, P_q0_pm_l, P_uq_pp_l, P_uq_mp_l, P_uq_mm_l, P_uq_pm_l, I_p, I_m, I_p_l, I_m_l, d->options & XRTM_OPTION_SFI, surface, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, 1, &d->derivs, work);
+               rtm_two_os(i_four,
+                          d->n_quad_x, d->n_stokes, d->n_derivs, d->n_layers,
+                          d->qf, d->qx_v, d->qw_v, d->F_0, d->mu_0,
+                          d->n_ulevels, d->ulevels, d->utaus2,
+                          d->n_umus, d->umus_v,
+                          d->omega, d->omega_l, d->ltau, d->ltau_l,
+                          Rs_q0, Rs_q0_l, Rs_uq, Rs_uq_l,
+                          d->btran, d->btran_l,
+                          d->as_0, d->as_0_l, d->atran, d->atran_l,
+                          P_q0_mm, P_q0_pm,
+                          P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm,
+                          P_q0_mm_l, P_q0_pm_l,
+                          P_uq_pp_l, P_uq_mp_l, P_uq_mm_l, P_uq_pm_l,
+                          I_p, I_m, I_p_l, I_m_l,
+                          d->options & XRTM_OPTION_SFI, surface, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->options & XRTM_OPTION_VECTOR, 1,
+                          &d->derivs, work);
      }
      else
      if (solver & XRTM_SOLVER_TWO_STREAM) {
-#ifndef USE_NEW_SFI_FOUR_CONV
-          int add_single_scattering = 1;
-
-          if (d->misc_input.do_not_add_sfi_ss)
-               add_single_scattering = 0;
-#else
+#ifdef USE_NEW_SFI_FOUR_CONV
           int add_single_scattering = (! (d->options & XRTM_OPTION_N_T_TMS)) ||
                                       (   d->options & XRTM_OPTION_N_T_TMS &&   (d->options & XRTM_OPTION_FOUR_CONV_OLD || d->fourier_tol == 0.)) ||
                                       (   d->options & XRTM_OPTION_N_T_TMS && ! (d->options & XRTM_OPTION_FOUR_CONV_OLD || d->fourier_tol == 0.) && ! (d->options & XRTM_OPTION_SFI));
@@ -5143,14 +5267,63 @@ if (! (d->solvers & XRTM_SOLVER_TWO_STREAM)) {
           if (d->misc_input.do_not_add_sfi_ss)
                add_single_scattering = 0;
 #endif
-          rtm_two_stream (i_four, d->n_derivs, d->n_layers, d->qx[0],     d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->umus, d->n_umus, d->coef, d->coef_l, d->omega, d->omega_l, d->ltau, d->ltau_l, Rs_q0, Rs_q0_l, Rs_qq, Rs_qq_l, Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, d->kernel_ampfac, d->kernel_ampfac_l, I_p, I_m, I_p_l, I_m_l, add_single_scattering, solar, thermal, surface, d->options & XRTM_OPTION_UPWELLING_OUTPUT, d->options & XRTM_OPTION_DOWNWELLING_OUTPUT, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, &d->derivs, save_tree, work);
+          rtm_two_stream(i_four,
+                         d->n_derivs, d->n_layers,
+                         d->qx[0], d->F_0, d->mu_0,
+                         d->n_ulevels, d->ulevels, d->utaus2,
+                         d->n_umus, d->umus,
+                         d->coef, d->coef_l, d->omega, d->omega_l, d->ltau, d->ltau_l,
+                         d->btran, d->btran_l,
+                         d->as_0, d->as_0_l, d->atran, d->atran_l,
+                         Rs_q0, Rs_q0_l, Rs_qq, Rs_qq_l,
+                         Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l,
+                         I_p, I_m, I_p_l, I_m_l,
+                         add_single_scattering,
+                         solar, thermal, surface,
+                         d->options & XRTM_OPTION_UPWELLING_OUTPUT, d->options & XRTM_OPTION_DOWNWELLING_OUTPUT,
+                         d->options & XRTM_OPTION_OUTPUT_AT_TAUS,
+                         &d->derivs,
+                         save_tree, work);
      }
      else
      if (solver & XRTM_SOLVER_FOUR_STREAM)
-          rtm_four_stream(i_four, d->n_derivs, d->n_layers, d->qx, d->qw, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->umus, d->n_umus, d->coef, d->coef_l, d->omega, d->omega_l, d->ltau, d->ltau_l, Rs_q0, Rs_q0_l, Rs_qq, Rs_qq_l, Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, d->kernel_ampfac, d->kernel_ampfac_l, d->I1_m[i_four], I1_m_l, d->In_p[i_four], In_p_l, I_p, I_m, I_p_l, I_m_l, solar, thermal, surface, d->options & XRTM_OPTION_UPWELLING_OUTPUT, d->options & XRTM_OPTION_DOWNWELLING_OUTPUT, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, &d->derivs, save_tree, work);
+          rtm_four_stream(i_four,
+                          d->n_derivs, d->n_layers,
+                          d->qx, d->qw, d->F_0, d->mu_0,
+                          d->n_ulevels, d->ulevels, d->utaus2,
+                          d->n_umus, d->umus,
+                          d->coef, d->coef_l, d->omega, d->omega_l, d->ltau, d->ltau_l,
+                          d->btran, d->btran_l,
+                          d->as_0, d->as_0_l, d->atran, d->atran_l,
+                          Rs_q0, Rs_q0_l, Rs_qq, Rs_qq_l,
+                          Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l,
+                          d->I1_m[i_four], I1_m_l, d->In_p[i_four], In_p_l,
+                          I_p, I_m, I_p_l, I_m_l,
+                          add_single_scattering,
+                          solar, thermal, surface,
+                          d->options & XRTM_OPTION_UPWELLING_OUTPUT, d->options & XRTM_OPTION_DOWNWELLING_OUTPUT,
+                          d->options & XRTM_OPTION_OUTPUT_AT_TAUS,
+                          &d->derivs, save_tree, work);
      else
      if (solver & XRTM_SOLVER_SIX_STREAM)
-          rtm_six_stream (i_four, d->n_derivs, d->n_layers, d->qx, d->qw, d->F_0, d->mu_0, d->ulevels, d->utaus2, d->n_ulevels, d->umus, d->n_umus, d->coef, d->coef_l, d->omega, d->omega_l, d->ltau, d->ltau_l, Rs_q0, Rs_q0_l, Rs_qq, Rs_qq_l, Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, d->kernel_ampfac, d->kernel_ampfac_l, d->I1_m[i_four], I1_m_l, d->In_p[i_four], In_p_l, I_p, I_m, I_p_l, I_m_l, solar, thermal, surface, d->options & XRTM_OPTION_UPWELLING_OUTPUT, d->options & XRTM_OPTION_DOWNWELLING_OUTPUT, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, &d->derivs, save_tree, work);
+          rtm_six_stream (i_four,
+                          d->n_derivs, d->n_layers,
+                          d->qx, d->qw, d->F_0, d->mu_0,
+                          d->n_ulevels, d->ulevels, d->utaus2,
+                          d->n_umus, d->umus,
+                          d->coef, d->coef_l,
+                          d->omega, d->omega_l, d->ltau, d->ltau_l,
+                          d->btran, d->btran_l,
+                          d->as_0, d->as_0_l, d->atran, d->atran_l,
+                          Rs_q0, Rs_q0_l, Rs_qq, Rs_qq_l,
+                          Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l,
+                          d->I1_m[i_four], I1_m_l, d->In_p[i_four], In_p_l,
+                          I_p, I_m, I_p_l, I_m_l,
+                          add_single_scattering,
+                          solar, thermal, surface,
+                          d->options & XRTM_OPTION_UPWELLING_OUTPUT, d->options & XRTM_OPTION_DOWNWELLING_OUTPUT,
+                          d->options & XRTM_OPTION_OUTPUT_AT_TAUS,
+                          &d->derivs, save_tree, work);
 #ifdef DEBUG
      else {
          fprintf(stderr, "ERROR: fourier_get_bvp(): end of if / else if\n");
@@ -5502,7 +5675,23 @@ static int apply_corrections_radiance(xrtm_data *d, int n_phis, double **phis, d
                                    }
                               }
 
-                              n_t_tms_correction_up(d->n_stokes, d->n_derivs, d->n_layers, d->F_0, d->n_ulevels, d->ulevels, d->utaus2, &mus2[i], 1, d->omega, d->omega_l, omega_tms, omega_tms_l, d->ltau, d->ltau_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, P_trun, P_full, P_trun_l, P_full_l, d->In_p[0]+ii, In_p_l, I, I_l, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->derivs.layers, d->derivs.beam, save_tree, work);
+                              n_t_tms_correction_up(d->n_stokes, d->n_derivs, d->n_layers,
+                                                    d->F_0,
+                                                    d->n_ulevels, d->ulevels, d->utaus2,
+                                                    1, &mus2[i],
+                                                    d->omega, d->omega_l,
+                                                    omega_tms, omega_tms_l,
+                                                    d->ltau, d->ltau_l,
+                                                    P_trun, P_full,
+                                                    P_trun_l, P_full_l,
+                                                    d->btran, d->btran_l,
+                                                    d->as_0, d->as_0_l,
+                                                    d->atran, d->atran_l,
+                                                    d->In_p[0]+ii, In_p_l,
+                                                    I, I_l,
+                                                    d->options & XRTM_OPTION_OUTPUT_AT_TAUS,
+                                                    d->derivs.layers, d->derivs.beam,
+                                                    save_tree, work);
                          }
                          else {
                               get_phase_func_full_all(d, -mus2[i], phis[i][j], polys, P_full, P_full_l, work);
@@ -5512,7 +5701,21 @@ static int apply_corrections_radiance(xrtm_data *d, int n_phis, double **phis, d
                                         dvec_copy(save->P_full_up[i][j][k], P_full[k], d->n_stokes);
                               }
 
-                              single_scattered_radiance_up(d->n_stokes, d->n_derivs, d->n_layers, d->F_0, d->n_ulevels, d->ulevels, d->utaus2, &mus2[i], 1, omega_tms, omega_tms_l, d->ltau, d->ltau_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, P_full, P_full_l, d->In_p[0]+ii, In_p_l, I, I_l, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->derivs.layers, d->derivs.beam, save_tree, work);
+                              single_scattered_radiance_up(d->n_stokes, d->n_derivs, d->n_layers,
+                                                           d->F_0,
+                                                           d->n_ulevels, d->ulevels, d->utaus2,
+                                                           1, &mus2[i],
+                                                           omega_tms, omega_tms_l,
+                                                           d->ltau, d->ltau_l,
+                                                           P_full, P_full_l,
+                                                           d->btran, d->btran_l,
+                                                           d->as_0, d->as_0_l,
+                                                           d->atran, d->atran_l,
+                                                           d->In_p[0]+ii, In_p_l,
+                                                           I, I_l,
+                                                           d->options & XRTM_OPTION_OUTPUT_AT_TAUS,
+                                                           d->derivs.layers, d->derivs.beam,
+                                                           save_tree, work);
                          }
 
                          for (k = 0; k < d->n_ulevels; ++k) {
@@ -5550,7 +5753,23 @@ static int apply_corrections_radiance(xrtm_data *d, int n_phis, double **phis, d
                                    }
                               }
 
-                              n_t_tms_correction_dn(d->n_stokes, d->n_derivs, d->n_layers, d->F_0, d->n_ulevels, d->ulevels, d->utaus2, &mus2[i], 1, d->omega, d->omega_l, omega_tms, omega_tms_l, d->ltau, d->ltau_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, P_trun, P_full, P_trun_l, P_full_l, d->I1_m[0]+ii, I1_m_l, I, I_l, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->derivs.layers, d->derivs.beam, save_tree, work);
+                              n_t_tms_correction_dn(d->n_stokes, d->n_derivs, d->n_layers,
+                                                    d->F_0,
+                                                    d->n_ulevels, d->ulevels, d->utaus2,
+                                                    1., &mus2[i],
+                                                    d->omega, d->omega_l,
+                                                    omega_tms, omega_tms_l,
+                                                    d->ltau, d->ltau_l,
+                                                    P_trun, P_full,
+                                                    P_trun_l, P_full_l,
+                                                    d->btran, d->btran_l,
+                                                    d->as_0, d->as_0_l,
+                                                    d->atran, d->atran_l,
+                                                    d->I1_m[0]+ii, I1_m_l,
+                                                    I, I_l,
+                                                    d->options & XRTM_OPTION_OUTPUT_AT_TAUS,
+                                                    d->derivs.layers, d->derivs.beam,
+                                                    save_tree, work);
                          }
                          else {
                               get_phase_func_full_all(d,  mus2[i], phis[i][j], polys, P_full, P_full_l, work);
@@ -5560,7 +5779,21 @@ static int apply_corrections_radiance(xrtm_data *d, int n_phis, double **phis, d
                                         dvec_copy(save->P_full_dn[i][j][k], P_full[k], d->n_stokes);
                               }
 
-                              single_scattered_radiance_dn(d->n_stokes, d->n_derivs, d->n_layers, d->F_0, d->n_ulevels, d->ulevels, d->utaus2, &mus2[i], 1, omega_tms, omega_tms_l, d->ltau, d->ltau_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, P_full, P_full_l, d->I1_m[0]+ii, I1_m_l, I, I_l, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->derivs.layers, d->derivs.beam, save_tree, work);
+                              single_scattered_radiance_dn(d->n_stokes, d->n_derivs, d->n_layers,
+                                                           d->F_0,
+                                                           d->n_ulevels, d->ulevels, d->utaus2,
+                                                           1, &mus2[i],
+                                                           omega_tms, omega_tms_l,
+                                                           d->ltau, d->ltau_l,
+                                                           P_full, P_full_l,
+                                                           d->btran, d->btran_l,
+                                                           d->as_0, d->as_0_l,
+                                                           d->atran, d->atran_l,
+                                                           d->I1_m[0]+ii, I1_m_l,
+                                                           I, I_l,
+                                                           d->options & XRTM_OPTION_OUTPUT_AT_TAUS,
+                                                           d->derivs.layers, d->derivs.beam,
+                                                           save_tree, work);
                          }
 
                          for (k = 0; k < d->n_ulevels; ++k) {
@@ -5694,7 +5927,21 @@ static int apply_corrections_fourier(xrtm_data *d, int i_four, double **I_p, dou
            *
            *------------------------------------------------------------------*/
           if (d->options & XRTM_OPTION_UPWELLING_OUTPUT) {
-               single_scattered_radiance_up(d->n_stokes, d->n_derivs, d->n_layers, d->F_0, d->n_ulevels, d->ulevels, d->utaus2, d->qx, d->n_quad_x, d->omega, d->omega_l, d->ltau, d->ltau_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, P_q0_pm, P_q0_pm_l, d->In_p[i_four], In_p_l, I, I_l, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->derivs.layers, d->derivs.beam, save_tree, work);
+               single_scattered_radiance_up(d->n_stokes, d->n_derivs, d->n_layers,
+                                            d->F_0,
+                                            d->n_ulevels, d->ulevels, d->utaus2,
+                                            d->n_quad_x, d->qx,
+                                            d->omega, d->omega_l,
+                                            d->ltau, d->ltau_l,
+                                            P_q0_pm, P_q0_pm_l,
+                                            d->btran, d->btran_l,
+                                            d->as_0, d->as_0_l,
+                                            d->atran, d->atran_l,
+                                            d->In_p[i_four], In_p_l,
+                                            I, I_l,
+                                            d->options & XRTM_OPTION_OUTPUT_AT_TAUS,
+                                            d->derivs.layers, d->derivs.beam,
+                                            save_tree, work);
 
                for (k = 0; k < d->n_ulevels; ++k) {
                     dvec_sub(I_p[k], I[k], I_p[k], d->n_quad_v_x);
@@ -5711,7 +5958,20 @@ static int apply_corrections_fourier(xrtm_data *d, int i_four, double **I_p, dou
                               dvec_copy(m1[k], In_p_l[k] + d->n_quad_v, d->n_umus_v);
                     }
 
-                    single_scattered_radiance_up(d->n_stokes, d->n_derivs, d->n_layers, d->F_0, d->n_ulevels, d->ulevels, d->utaus2, d->umus, d->n_umus, d->omega, d->omega_l, d->ltau, d->ltau_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, P_u0_pm, P_u0_pm_l, d->In_p[i_four] + d->n_quad_v, m1, I, I_l, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->derivs.layers, d->derivs.beam, save_tree, work);
+                    single_scattered_radiance_up(d->n_stokes, d->n_derivs, d->n_layers,
+                                                 d->F_0,
+                                                 d->n_ulevels, d->ulevels, d->utaus2,
+                                                 d->n_umus, d->umus,
+                                                 d->omega, d->omega_l,
+                                                 d->ltau, d->ltau_l,
+                                                 P_u0_pm, P_u0_pm_l,
+                                                 d->btran, d->btran_l,
+                                                 d->as_0, d->as_0_l,
+                                                 d->atran, d->atran_l,
+                                                 d->In_p[i_four] + d->n_quad_v, m1,
+                                                 I, I_l, d->options & XRTM_OPTION_OUTPUT_AT_TAUS,
+                                                 d->derivs.layers, d->derivs.beam,
+                                                 save_tree, work);
 
                     for (k = 0; k < d->n_ulevels; ++k) {
                          dvec_sub(I_p[k]+d->n_quad_v, I[k], I_p[k]+d->n_quad_v, d->n_umus_v);
@@ -5725,7 +5985,20 @@ static int apply_corrections_fourier(xrtm_data *d, int i_four, double **I_p, dou
           }
 
           if (d->options & XRTM_OPTION_DOWNWELLING_OUTPUT) {
-               single_scattered_radiance_dn(d->n_stokes, d->n_derivs, d->n_layers, d->F_0, d->n_ulevels, d->ulevels, d->utaus2, d->qx, d->n_quad_x, d->omega, d->omega_l, d->ltau, d->ltau_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, P_q0_mm, P_q0_mm_l, d->I1_m[i_four], I1_m_l, I, I_l, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->derivs.layers, d->derivs.beam, save_tree, work);
+               single_scattered_radiance_dn(d->n_stokes, d->n_derivs, d->n_layers,
+                                            d->F_0, d->n_ulevels, d->ulevels, d->utaus2,
+                                            d->n_quad_x, d->qx,
+                                            d->omega, d->omega_l,
+                                            d->ltau, d->ltau_l,
+                                            P_q0_mm, P_q0_mm_l,
+                                            d->btran, d->btran_l,
+                                            d->as_0, d->as_0_l,
+                                            d->atran, d->atran_l,
+                                            d->I1_m[i_four], I1_m_l,
+                                            I, I_l,
+                                            d->options & XRTM_OPTION_OUTPUT_AT_TAUS,
+                                            d->derivs.layers, d->derivs.beam,
+                                            save_tree, work);
 
                for (k = 0; k < d->n_ulevels; ++k) {
                     dvec_sub(I_m[k], I[k], I_m[k], d->n_quad_v_x);
@@ -5742,7 +6015,21 @@ static int apply_corrections_fourier(xrtm_data *d, int i_four, double **I_p, dou
                               dvec_copy(m1[k], I1_m_l[k] + d->n_quad_v, d->n_umus_v);
                     }
 
-                    single_scattered_radiance_dn(d->n_stokes, d->n_derivs, d->n_layers, d->F_0, d->n_ulevels, d->ulevels, d->utaus2, d->umus, d->n_umus, d->omega, d->omega_l, d->ltau, d->ltau_l, d->btran, d->btran_l, d->as_0, d->as_0_l, d->atran, d->atran_l, P_u0_mm, P_u0_mm_l, d->I1_m[i_four] + d->n_quad_v, m1, I, I_l, d->options & XRTM_OPTION_OUTPUT_AT_TAUS, d->derivs.layers, d->derivs.beam, save_tree, work);
+                    single_scattered_radiance_dn(d->n_stokes, d->n_derivs, d->n_layers,
+                                                 d->F_0,
+                                                 d->n_ulevels, d->ulevels, d->utaus2,
+                                                 d->n_umus, d->umus,
+                                                 d->omega, d->omega_l,
+                                                 d->ltau, d->ltau_l,
+                                                 P_u0_mm, P_u0_mm_l,
+                                                 d->btran, d->btran_l,
+                                                 d->as_0, d->as_0_l,
+                                                 d->atran, d->atran_l,
+                                                 d->I1_m[i_four] + d->n_quad_v, m1,
+                                                 I, I_l,
+                                                 d->options & XRTM_OPTION_OUTPUT_AT_TAUS,
+                                                 d->derivs.layers, d->derivs.beam,
+                                                 save_tree, work);
 
                     for (k = 0; k < d->n_ulevels; ++k) {
                          dvec_sub(I_m[k]+d->n_quad_v, I[k], I_m[k]+d->n_quad_v, d->n_umus_v);

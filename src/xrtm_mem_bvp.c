@@ -92,26 +92,27 @@
 /*******************************************************************************
  *
  ******************************************************************************/
-void rtm_mem_bvp(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
-       double qf, double *qx_v, double *qw_v, double F_0, double mu_0,
-       int *ulevels, double *utaus, int n_ulevels,
-       double *umus, int n_umus,
-       double *omega, double **omega_l, double *ltau, double **ltau_l,
-       double **Rs_qq, double ***Rs_qq_l,
-       double *Rs_u0, double **Us_u0, double **Rs_uq, double ***Us_uq,
-       double *btau, double **btau_l, double *btran, double **btran_l,
-       double *as_0, double **as_0_l, double *atran, double **atran_l,
-       double **P_q0_mm, double **P_q0_pm, double **P_u0_mm, double **P_u0_pm,
-       double ***P_uq_pp, double ***P_uq_mp, double ***P_uq_mm, double ***P_uq_pm,
-       double ***r_p, double ***t_p, double ***r_m, double ***t_m,
-       double ***P_q0_mm_l, double ***P_q0_pm_l, double ***P_u0_mm_l, double ***P_u0_pm_l,
-       double ****P_uq_pp_l, double ****P_uq_mp_l, double ****P_uq_mm_l, double ****P_uq_pm_l,
-       double ****r_p_l, double ****t_p_l, double ****r_m_l, double ****t_m_l,
-       double *I1_m, double **I1_m_l, double *In_p, double **In_p_l,
-       double **I_p, double **I_m, double ***I_p_l, double ***I_m_l,
-       int sfi, int surface, int utau_output, int vector,
-       int eigen_solver_real, int eigen_solver_complex,
-       derivs_data *derivs, save_tree_data save_tree, work_data work) {
+void rtm_mem_bvp(int i_four,
+                 int n_quad, int n_stokes, int n_derivs, int n_layers,
+                 double qf, double *qx_v, double *qw_v, double F_0, double mu_0,
+                 int n_ulevels, int *ulevels, double *utaus,
+                 int n_umus, double *umus,
+                 double *omega, double **omega_l, double *ltau, double **ltau_l,
+                 double *btau, double **btau_l, double *btran, double **btran_l,
+                 double *as_0, double **as_0_l, double *atran, double **atran_l,
+                 double **P_q0_mm, double **P_q0_pm, double **P_u0_mm, double **P_u0_pm,
+                 double ***P_uq_pp, double ***P_uq_mp, double ***P_uq_mm, double ***P_uq_pm,
+                 double ***r_p, double ***t_p, double ***r_m, double ***t_m,
+                 double ***P_q0_mm_l, double ***P_q0_pm_l, double ***P_u0_mm_l, double ***P_u0_pm_l,
+                 double ****P_uq_pp_l, double ****P_uq_mp_l, double ****P_uq_mm_l, double ****P_uq_pm_l,
+                 double ****r_p_l, double ****t_p_l, double ****r_m_l, double ****t_m_l,
+                 double **Rs_qq, double ***Rs_qq_l,
+                 double *Rs_u0, double **Us_u0, double **Rs_uq, double ***Us_uq,
+                 double *I1_m, double **I1_m_l, double *In_p, double **In_p_l,
+                 double **I_p, double **I_m, double ***I_p_l, double ***I_m_l,
+                 int sfi, int surface, int utau_output, int vector,
+                 int eigen_solver_real, int eigen_solver_complex,
+                 derivs_data *derivs, save_tree_data save_tree, work_data work) {
 
      uchar *derivs_layers2;
      uchar *derivs_beam2;
@@ -406,18 +407,58 @@ else
       *
       *-----------------------------------------------------------------------*/
      if (! vector) {
-          solve_bvp (n_quad_x, n_stokes, n_derivs, n_layers, qf, qx_v, qw_v, F_0, n_ulevels, ulevels, omega, omega_l, ltau, ltau_l, Rs_qq, Rs_qq_l, btau, btau_l, btran, btran_l, atran, atran_l, P_q0_mm, P_q0_pm, nu,   X_p,   X_m,   Fs_p, Fs_m, P_q0_mm_l, P_q0_pm_l, nu_l,   X_p_l,   X_m_l,   Fs_p_l, Fs_m_l, B,   B_l,   I1_m, I1_m_l, In_p, In_p_l, surface, derivs->layers, derivs->beam, work, X_i_11,   X_i_12,   sigma_p,   sigma_m,   X_i_11_l,   X_i_12_l,   sigma_p_l,   sigma_m_l);
+          solve_bvp (n_quad_x, n_stokes, n_derivs, n_layers,
+                     qf, qx_v, qw_v, F_0,
+                     n_ulevels, ulevels,
+                     omega, omega_l, ltau, ltau_l,
+                     btau, btau_l, btran, btran_l,
+                     atran, atran_l,
+                     P_q0_mm, P_q0_pm,
+                     nu, X_p, X_m,
+                     Fs_p, Fs_m,
+                     P_q0_mm_l, P_q0_pm_l,
+                     nu_l, X_p_l, X_m_l,
+                     Fs_p_l, Fs_m_l,
+                     Rs_qq, Rs_qq_l,
+                     B, B_l,
+                     I1_m, I1_m_l, In_p, In_p_l,
+                     surface,
+                     derivs->layers, derivs->beam, work,
+                     X_i_11, X_i_12, sigma_p, sigma_m,
+                     X_i_11_l, X_i_12_l, sigma_p_l, sigma_m_l);
 
           if (! utau_output)
-               calc_radiance_levels (n_quad_v_x, n_layers, n_derivs, n_ulevels, ulevels, B,   B_l,   I_p, I_m, I_p_l, I_m_l, derivs->beam);
+               calc_radiance_levels (n_quad_v_x, n_layers, n_derivs,
+                                     n_ulevels, ulevels, B, B_l,
+                                     I_p, I_m, I_p_l, I_m_l, derivs->beam);
           else
                calc_radiance_taus   (n_quad_v_x, n_layers, n_derivs, n_ulevels, ulevels, utaus, ltau, ltau_l, btau, btau_l, nu,   X_p,   X_m,   X_i_11,   X_i_12,   sigma_p,   sigma_m,   nu_l,   X_p_l,   X_m_l,   X_i_11_l,   X_i_12_l,   sigma_p_l,   sigma_m_l,   B,   B_l,   I_p, I_m, I_p_l, I_m_l, derivs->layers, derivs->beam, work);
      }
      else {
-          solve_bvp2(n_quad_x, n_stokes, n_derivs, n_layers, qf, qx_v, qw_v, F_0, n_ulevels, ulevels, omega, omega_l, ltau, ltau_l, Rs_qq, Rs_qq_l, btau, btau_l, btran, btran_l, atran, atran_l, P_q0_mm, P_q0_pm, nu_c, X_p_c, X_m_c, Fs_p, Fs_m, P_q0_mm_l, P_q0_pm_l, nu_l_c, X_p_l_c, X_m_l_c, Fs_p_l, Fs_m_l, B_c, B_l_c, I1_m, I1_m_l, In_p, In_p_l, surface, derivs->layers, derivs->beam, work, X_i_11_c, X_i_12_c, sigma_p_c, sigma_m_c, X_i_11_l_c, X_i_12_l_c, sigma_p_l_c, sigma_m_l_c);
+          solve_bvp2(n_quad_x, n_stokes, n_derivs, n_layers,
+                     qf, qx_v, qw_v, F_0,
+                     n_ulevels, ulevels,
+                     omega, omega_l, ltau, ltau_l,
+                     btau, btau_l, btran, btran_l,
+                     atran, atran_l,
+                     P_q0_mm, P_q0_pm,
+                     nu_c, X_p_c, X_m_c,
+                     Fs_p, Fs_m,
+                     P_q0_mm_l, P_q0_pm_l,
+                     nu_l_c, X_p_l_c, X_m_l_c,
+                     Fs_p_l, Fs_m_l,
+                     Rs_qq, Rs_qq_l,
+                     B_c, B_l_c,
+                     I1_m, I1_m_l, In_p, In_p_l,
+                     surface,
+                     derivs->layers, derivs->beam, work,
+                     X_i_11_c, X_i_12_c, sigma_p_c, sigma_m_c,
+                     X_i_11_l_c, X_i_12_l_c, sigma_p_l_c, sigma_m_l_c);
 
           if (! utau_output)
-               calc_radiance_levels2(n_quad_v_x, n_layers, n_derivs, n_ulevels, ulevels, B_c, B_l_c, I_p, I_m, I_p_l, I_m_l, derivs->beam);
+               calc_radiance_levels2(n_quad_v_x, n_layers, n_derivs,
+                                     n_ulevels, ulevels, B_c, B_l_c,
+                                     I_p, I_m, I_p_l, I_m_l, derivs->beam);
           else
                calc_radiance_taus2  (n_quad_v_x, n_layers, n_derivs, n_ulevels, ulevels, utaus, ltau, ltau_l, btau, btau_l, nu_c, X_p_c, X_m_c, X_i_11_c, X_i_12_c, sigma_p_c, sigma_m_c, nu_l_c, X_p_l_c, X_m_l_c, X_i_11_l_c, X_i_12_l_c, sigma_p_l_c, sigma_m_l_c, B_c, B_l_c, I_p, I_m, I_p_l, I_m_l, derivs->layers, derivs->beam, work);
      }

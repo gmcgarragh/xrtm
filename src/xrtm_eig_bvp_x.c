@@ -29,20 +29,20 @@ void xgbtrs_(const char *, int *, int *, int *, int *, TYPE *, int *, int *, TYP
  *
  ******************************************************************************/
 static void SOLVE_BVP(int n_quad, int n_stokes, int n_derivs, int n_layers,
-            double *ltau, double **ltau_l,
-            double **Rs_qq, double ***Rs_qq_l,
-            double *atran, double **atran_l,
-            TYPE **nu, TYPE ***X_p, TYPE ***X_m,
-            double **Fs_p, double **Fs_m, double **Fs1_p, double **Fs1_m,
-            double **Ft0_p, double **Ft0_m, double **Ft1_p, double **Ft1_m,
-            TYPE ***nu_l, TYPE ****X_p_l, TYPE ****X_m_l,
-            double ***Fs_p_l, double ***Fs_m_l, double ***Fs1_p_l, double ***Fs1_m_l,
-            double ***Ft0_p_l, double ***Ft0_m_l, double ***Ft1_p_l, double ***Ft1_m_l,
-            TYPE *B, TYPE **B_l,
-            double *I1_m, double **I1_m_l, double *In_p, double **In_p_l,
-            int surface, int solar, int thermal,
-            uchar **derivs_layers, uchar **derivs_beam, uchar **derivs_thermal,
-            save_tree_data save_tree, work_data work) {
+                      double *ltau, double **ltau_l,
+                      double *atran, double **atran_l,
+                      TYPE **nu, TYPE ***X_p, TYPE ***X_m,
+                      double **Fs_p, double **Fs_m, double **Fs1_p, double **Fs1_m,
+                      double **Ft0_p, double **Ft0_m, double **Ft1_p, double **Ft1_m,
+                      TYPE ***nu_l, TYPE ****X_p_l, TYPE ****X_m_l,
+                      double ***Fs_p_l, double ***Fs_m_l, double ***Fs1_p_l, double ***Fs1_m_l,
+                      double ***Ft0_p_l, double ***Ft0_m_l, double ***Ft1_p_l, double ***Ft1_m_l,
+                      double **Rs_qq, double ***Rs_qq_l,
+                      TYPE *B, TYPE **B_l,
+                      double *I1_m, double **I1_m_l, double *In_p, double **In_p_l,
+                      int surface, int solar, int thermal,
+                      uchar **derivs_layers, uchar **derivs_beam, uchar **derivs_thermal,
+                      save_tree_data save_tree, work_data work) {
 
      int i;
      int ii;
@@ -570,20 +570,21 @@ else {
 /*******************************************************************************
  *
  ******************************************************************************/
-void CALC_RADIANCE_LEVELS(int n_quad, int n_layers, int n_derivs, int n_ulevels,
-                     int *ulevels, double *ltau, double **ltau_l,
-                     double *atran, double **atran_l,
-                     TYPE **nu, TYPE ***X_p, TYPE ***X_m,
-                     double **Fs_p, double **Fs_m, double **Fs1_p, double **Fs1_m,
-                     double **Ft0_p, double **Ft0_m, double **Ft1_p, double **Ft1_m,
-                     TYPE ***nu_l, TYPE ****X_p_l, TYPE ****X_m_l,
-                     double ***Fs_p_l, double ***Fs_m_l, double ***Fs1_p_l, double ***Fs1_m_l,
-                     double ***Ft0_p_l, double ***Ft0_m_l, double ***Ft1_p_l, double ***Ft1_m_l,
-                     TYPE *B, TYPE **B_l,
-                     double **I_p, double **I_m, double ***I_p_l, double ***I_m_l,
-                     int solar, int thermal, uchar **derivs_layers,
-                     uchar **derivs_beam, uchar **derivs_thermal,
-                     save_tree_data save_tree, work_data work) {
+void CALC_RADIANCE_LEVELS(int n_quad, int n_layers, int n_derivs,
+                          int n_ulevels, int *ulevels,
+                          double *ltau, double **ltau_l,
+                          double *atran, double **atran_l,
+                          TYPE **nu, TYPE ***X_p, TYPE ***X_m,
+                          double **Fs_p, double **Fs_m, double **Fs1_p, double **Fs1_m,
+                          double **Ft0_p, double **Ft0_m, double **Ft1_p, double **Ft1_m,
+                          TYPE ***nu_l, TYPE ****X_p_l, TYPE ****X_m_l,
+                          double ***Fs_p_l, double ***Fs_m_l, double ***Fs1_p_l, double ***Fs1_m_l,
+                          double ***Ft0_p_l, double ***Ft0_m_l, double ***Ft1_p_l, double ***Ft1_m_l,
+                          TYPE *B, TYPE **B_l,
+                          double **I_p, double **I_m, double ***I_p_l, double ***I_m_l,
+                          int solar, int thermal,
+                          uchar **derivs_layers, uchar **derivs_beam, uchar **derivs_thermal,
+                          save_tree_data save_tree, work_data work) {
 
      int i;
      int ii;
@@ -880,18 +881,19 @@ if (thermal && derivs_thermal[ii][m])
 /*******************************************************************************
  *
  ******************************************************************************/
-void CALC_RADIANCE_TAUS(int n_quad, int n_layers, int n_derivs, int n_ulevels,
-                   int *ulevels, double *utaus, double *ltau, double **ltau_l,
-                   double *as_0, double **as_0_l, double *atran, double **atran_l,
-                   TYPE **nu, TYPE ***X_p, TYPE ***X_m,
-                   double **Fs_p, double **Fs_m,
-                   TYPE ***nu_l, TYPE ****X_p_l, TYPE ****X_m_l,
-                   double ***Fs_p_l, double ***Fs_m_l,
-                   TYPE *B, TYPE **B_l,
-                   double **I_p, double **I_m, double ***I_p_l, double ***I_m_l,
-                   int solar, int thermal, uchar **derivs_layers,
-                   uchar **derivs_beam, uchar **derivs_thermal,
-                   save_tree_data save_tree, work_data work) {
+void CALC_RADIANCE_TAUS(int n_quad, int n_layers, int n_derivs,
+                        int n_ulevels, int *ulevels, double *utaus,
+                        double *ltau, double **ltau_l,
+                        double *as_0, double **as_0_l, double *atran, double **atran_l,
+                        TYPE **nu, TYPE ***X_p, TYPE ***X_m,
+                        double **Fs_p, double **Fs_m,
+                        TYPE ***nu_l, TYPE ****X_p_l, TYPE ****X_m_l,
+                        double ***Fs_p_l, double ***Fs_m_l,
+                        TYPE *B, TYPE **B_l,
+                        double **I_p, double **I_m, double ***I_p_l, double ***I_m_l,
+                        int solar, int thermal,
+                        uchar **derivs_layers, uchar **derivs_beam, uchar **derivs_thermal,
+                        save_tree_data save_tree, work_data work) {
 
      int i;
      int ii;
