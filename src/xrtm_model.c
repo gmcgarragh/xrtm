@@ -214,18 +214,23 @@ static void update_utaus(xrtm_data *d, work_data work) {
 
      if (d->dep_flags_utaus & (DEP_MASK_UTAUS | DEP_MASK_LTAU)) {
           ii = 0;
-          for (i = 0; i < d->n_ulevels - 1; ++i) {
+          for (i = 0; i < d->n_ulevels; ++i) {
+               if (d->utaus[i] == d->ttau[d->n_layers])
+                   break;
+
                for ( ; d->utaus[i] >= d->ttau[ii]; ++ii) ;
 
                d->ulevels[i] = ii - 1;
                d->utaus20[i] = d->utaus[i] - d->ttau[ii - 1];
           }
 
-          if (d->utaus[d->n_ulevels - 1] != d->ttau[d->n_layers])
-               for ( ; d->utaus[i] >= d->ttau[ii]; ++ii) ;
-
-          d->ulevels[i] = ii - 1;
-          d->utaus20[i] = d->utaus[i] - d->ttau[ii - 1];
+          for (i = 0; i < d->n_ulevels; ++i) {
+               ii = d->n_layers;
+               if (d->utaus[i] == d->ttau[d->n_layers]) {
+                    d->ulevels[i] = ii - 1;
+                    d->utaus20[i] = d->utaus[i] - d->ttau[ii - 1];
+               }
+          }
      }
 
      if (d->options & XRTM_OPTION_DELTA_M &&
