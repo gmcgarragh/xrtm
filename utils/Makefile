@@ -14,6 +14,8 @@ OBJECTS_XRTM_TEST  = test_core.o \
                      test_write.o \
                      test_xrtm.o
 
+OBJECTS  = $(OBJECTS_XRTM_INPUT) $(OBJECTS_XRTM_TEST)
+
 BINARIES = callxrtm testxrtm
 
 PRODUCTS =
