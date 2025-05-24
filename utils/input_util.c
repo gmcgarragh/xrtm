@@ -73,7 +73,7 @@ input_type_data list_null = {NULL, 0, INPUT_TYPE_VOID, 0, {0, 0, 0, 0}, {NULL}};
 /*******************************************************************************
  *
  ******************************************************************************/
-input_type_data input_type_strdup(input_data *input, const char *s) {
+static input_type_data input_type_strdup(input_data *input, const char *s) {
 
      input_type_data input_type;
 
@@ -92,7 +92,7 @@ input_type_data input_type_strdup(input_data *input, const char *s) {
 /*******************************************************************************
  *
  ******************************************************************************/
-void parse_char(locus_data *locus, char c) {
+static void parse_char(locus_data *locus, char c) {
 
      lex_type_data lex_type;
 
@@ -104,7 +104,7 @@ void parse_char(locus_data *locus, char c) {
 
 
 
-void parse_equal(input_data *input) {
+static void parse_equal(input_data *input) {
 
      if (input->use_equal)
           parse_char(&input->locus, '=');
@@ -112,7 +112,7 @@ void parse_equal(input_data *input) {
 
 
 
-void parse_comma(input_data *input) {
+static void parse_comma(input_data *input) {
 
      parse_char(&input->locus, ',');
 }
@@ -122,7 +122,7 @@ void parse_comma(input_data *input) {
 /*******************************************************************************
  *
  ******************************************************************************/
-void copy_dimens(int *dimens2, int *dimens1, int n) {
+static void copy_dimens(int *dimens2, int *dimens1, int n) {
 
      int i;
 
@@ -132,9 +132,9 @@ void copy_dimens(int *dimens2, int *dimens1, int n) {
 
 
 
-int parse_scaler_int(input_data *input);
+static int parse_scaler_int(input_data *input);
 
-int dimens_parse(input_data *input, int *dimens) {
+static int dimens_parse(input_data *input, int *dimens) {
 
      int r;
 
@@ -241,7 +241,7 @@ int dimens_parse(input_data *input, int *dimens) {
 /*******************************************************************************
  *
  ******************************************************************************/
-input_type_data parse_type(input_data *input, int type, int n, int *dimens) {
+static input_type_data parse_type(input_data *input, int type, int n, int *dimens) {
 
      switch(type) {
           case INPUT_TYPE_STRING:
@@ -261,7 +261,7 @@ input_type_data parse_type(input_data *input, int type, int n, int *dimens) {
 
 
 
-void free_type(input_type_data *input_type) {
+static void free_type(input_type_data *input_type) {
 
      switch(input_type->type) {
           case INPUT_TYPE_STRING:
@@ -282,7 +282,7 @@ void free_type(input_type_data *input_type) {
 
 
 
-void print_type(FILE *fp, format_data *d, input_type_data *input_type) {
+static void print_type(FILE *fp, format_data *d, input_type_data *input_type) {
 
      switch(input_type->type) {
           case INPUT_TYPE_STRING:
@@ -305,7 +305,7 @@ void print_type(FILE *fp, format_data *d, input_type_data *input_type) {
 /*******************************************************************************
  *
  ******************************************************************************/
-fdclist *list_parse1(input_data *input, int type, int n, int *dimens) {
+static fdclist *list_parse1(input_data *input, int type, int n, int *dimens) {
 
      int r;
 
@@ -338,7 +338,7 @@ fdclist *list_parse1(input_data *input, int type, int n, int *dimens) {
 
 
 
-fdclist *list_prase2(input_data *input, int type, int n, int *dimens) {
+static fdclist *list_prase2(input_data *input, int type, int n, int *dimens) {
 
      int r;
 
@@ -361,7 +361,7 @@ fdclist *list_prase2(input_data *input, int type, int n, int *dimens) {
 
 
 
-fdclist *parse_list(input_data *input, int type, int n, int *dimens) {
+static fdclist *parse_list(input_data *input, int type, int n, int *dimens) {
 
      if (! input->use_array2)
           return list_parse1(input, type, n, dimens);
@@ -375,7 +375,7 @@ fdclist *parse_list(input_data *input, int type, int n, int *dimens) {
 /*******************************************************************************
  *
  ******************************************************************************/
-void print_data(FILE *fp, format_data *d, input_type_data *data) {
+static void print_data(FILE *fp, format_data *d, input_type_data *data) {
 
      switch(data->type) {
           case INPUT_TYPE_STRING:
@@ -393,7 +393,7 @@ void print_data(FILE *fp, format_data *d, input_type_data *data) {
 }
 
 
-void print_list(FILE *fp, format_data *d, fdclist *list) {
+static void print_list(FILE *fp, format_data *d, fdclist *list) {
 
      fdcelem *elem;
      fdcelem *first;
@@ -421,7 +421,7 @@ void print_list(FILE *fp, format_data *d, fdclist *list) {
 /*******************************************************************************
  *
  ******************************************************************************/
-long xrtm_string_list_to_mask(input_data *input, fdclist *list, long (*name_to_mask)(const char *)) {
+static long xrtm_string_list_to_mask(input_data *input, fdclist *list, long (*name_to_mask)(const char *)) {
 
      long mask;
 
@@ -445,7 +445,7 @@ long xrtm_string_list_to_mask(input_data *input, fdclist *list, long (*name_to_m
 
 
 
-long *xrtm_string_list_to_vector(input_data *input, fdclist *list, long (*name_to_mask)(const char *)) {
+static long *xrtm_string_list_to_vector(input_data *input, fdclist *list, long (*name_to_mask)(const char *)) {
 
      int i;
 
@@ -474,7 +474,7 @@ long *xrtm_string_list_to_vector(input_data *input, fdclist *list, long (*name_t
 
 
 
-fdclist *xrtm_mask_to_string_list(input_data *input, long options, int (*count)(), long (*index_to_mask)(int), const char *(*index_to_name)(int)) {
+static fdclist *xrtm_mask_to_string_list(input_data *input, long options, int (*count)(), long (*index_to_mask)(int), const char *(*index_to_name)(int)) {
 
      int i;
      int n;
@@ -498,49 +498,49 @@ fdclist *xrtm_mask_to_string_list(input_data *input, long options, int (*count)(
 
 
 
-long xrtm_string_list_to_options_mask(input_data *input, fdclist *list) {
+static long xrtm_string_list_to_options_mask(input_data *input, fdclist *list) {
 
      return xrtm_string_list_to_mask(input, list, (long (*)(const char*)) xrtm_option_name_to_mask);
 }
 
 
 
-long *xrtm_string_list_to_options_vector(input_data *input, fdclist *list) {
+static long *xrtm_string_list_to_options_vector(input_data *input, fdclist *list) {
 
      return xrtm_string_list_to_vector(input, list, (long (*)(const char*)) xrtm_option_name_to_mask);
 }
 
 
 
-fdclist *xrtm_options_mask_to_string_list(input_data *input, long options) {
+static fdclist *xrtm_options_mask_to_string_list(input_data *input, long options) {
 
      return xrtm_mask_to_string_list(input, options, xrtm_option_n, (long (*)(int)) xrtm_option_index_to_mask, xrtm_option_index_to_name);
 }
 
 
 
-long xrtm_string_list_to_solvers_mask(input_data *input, fdclist *list) {
+static long xrtm_string_list_to_solvers_mask(input_data *input, fdclist *list) {
 
      return xrtm_string_list_to_mask(input, list, (long (*)(const char*)) xrtm_solver_name_to_mask);
 }
 
 
 
-long *xrtm_string_list_to_solvers_vector(input_data *input, fdclist *list) {
+static long *xrtm_string_list_to_solvers_vector(input_data *input, fdclist *list) {
 
      return xrtm_string_list_to_vector(input, list, (long (*)(const char*)) xrtm_solver_name_to_mask);
 }
 
 
 
-fdclist *xrtm_solvers_mask_to_string_list(input_data *input, long solvers) {
+static fdclist *xrtm_solvers_mask_to_string_list(input_data *input, long solvers) {
 
      return xrtm_mask_to_string_list(input, solvers, xrtm_solver_n, (long (*)(int)) xrtm_solver_index_to_mask, xrtm_solver_index_to_name);
 }
 
 
 
-int *xrtm_string_list_to_kernels_vector(input_data *input, fdclist *list) {
+static int *xrtm_string_list_to_kernels_vector(input_data *input, fdclist *list) {
 
      int i;
 
@@ -567,7 +567,7 @@ int *xrtm_string_list_to_kernels_vector(input_data *input, fdclist *list) {
 
 
 
-fdclist *xrtm_kernels_vector_to_string_list(input_data *input, enum xrtm_kernel_type *kernels, int n) {
+static fdclist *xrtm_kernels_vector_to_string_list(input_data *input, enum xrtm_kernel_type *kernels, int n) {
 
      int i;
 
@@ -588,7 +588,7 @@ fdclist *xrtm_kernels_vector_to_string_list(input_data *input, enum xrtm_kernel_
 /*******************************************************************************
  *
  ******************************************************************************/
-void parse_scaler_param_int(input_data *input, const char *name, int (*xrtm_set_x)(xrtm_data *, int)) {
+static void parse_scaler_param_int(input_data *input, const char *name, int (*xrtm_set_x)(xrtm_data *, int)) {
 
      int i;
 
@@ -604,7 +604,7 @@ void parse_scaler_param_int(input_data *input, const char *name, int (*xrtm_set_
 
 
 
-void parse_scaler_param_int2(input_data *input, const char *name, int (*xrtm_set_x)(xrtm_data *, int, int)) {
+static void parse_scaler_param_int2(input_data *input, const char *name, int (*xrtm_set_x)(xrtm_data *, int, int)) {
 
      int i1;
      int i2;
@@ -623,7 +623,7 @@ void parse_scaler_param_int2(input_data *input, const char *name, int (*xrtm_set
 
 
 
-void parse_sos_params(input_data *input) {
+static void parse_sos_params(input_data *input) {
 
      int i;
      double d1;
@@ -645,7 +645,7 @@ void parse_sos_params(input_data *input) {
 
 
 
-void parse_scaler_param_double(input_data *input, const char *name, int (*xrtm_set_x)(xrtm_data *, double)) {
+static void parse_scaler_param_double(input_data *input, const char *name, int (*xrtm_set_x)(xrtm_data *, double)) {
 
      double x;
 
@@ -661,7 +661,7 @@ void parse_scaler_param_double(input_data *input, const char *name, int (*xrtm_s
 
 
 
-void parse_array_param_int(input_data *input, const char *name, int n, int (*xrtm_set_x)(xrtm_data *, void *)) {
+static void parse_array_param_int(input_data *input, const char *name, int n, int (*xrtm_set_x)(xrtm_data *, void *)) {
 
      int *x1;
 
@@ -679,7 +679,7 @@ void parse_array_param_int(input_data *input, const char *name, int n, int (*xrt
 
 
 
-void parse_array_param_double(input_data *input, void *d, const char *name, int n, int (*xrtm_set_x)(void *, void *)) {
+static void parse_array_param_double(input_data *input, void *d, const char *name, int n, int (*xrtm_set_x)(void *, void *)) {
 
      double *x1;
 
@@ -697,7 +697,7 @@ void parse_array_param_double(input_data *input, void *d, const char *name, int 
 
 
 
-void parse_array_param_double2(input_data *input, void *d, const char *name, int m, int n, int (*xrtm_set_x)(void *, void *)) {
+static void parse_array_param_double2(input_data *input, void *d, const char *name, int m, int n, int (*xrtm_set_x)(void *, void *)) {
 
      double **x1;
 
@@ -715,7 +715,7 @@ void parse_array_param_double2(input_data *input, void *d, const char *name, int
 
 
 
-void parse_layer_param_double(input_data *input, const char *name, int (*xrtm_set_x_1)(xrtm_data *, int, double), int (*xrtm_set_x_n)(xrtm_data *, double *)) {
+static void parse_layer_param_double(input_data *input, const char *name, int (*xrtm_set_x_1)(xrtm_data *, int, double), int (*xrtm_set_x_n)(xrtm_data *, double *)) {
 
      int n;
 
@@ -755,7 +755,7 @@ void parse_layer_param_double(input_data *input, const char *name, int (*xrtm_se
 
 
 
-void parse_layer_param_l_double(input_data *input, void *d, int n_derivs, const char *name, const char *type, int (*xrtm_set_x_x_11)(void *, int, int, double), int (*xrtm_set_x_x_n1)(void *, int, double *), int (*xrtm_set_x_x_1n)(void *, int, double *), int (*xrtm_set_x_x_nn)(void *, double **)) {
+static void parse_layer_param_l_double(input_data *input, void *d, int n_derivs, const char *name, const char *type, int (*xrtm_set_x_x_11)(void *, int, int, double), int (*xrtm_set_x_x_n1)(void *, int, double *), int (*xrtm_set_x_x_1n)(void *, int, double *), int (*xrtm_set_x_x_nn)(void *, double **)) {
 
      int n;
 
@@ -817,7 +817,7 @@ void parse_layer_param_l_double(input_data *input, void *d, int n_derivs, const 
 
 
 
-void trans_array_double(double **a, double **b, int m, int n) {
+static void trans_array_double(double **a, double **b, int m, int n) {
 
      int i;
      int j;
@@ -831,7 +831,7 @@ void trans_array_double(double **a, double **b, int m, int n) {
 
 
 
-double **parse_coef_1(input_data *input, int n_elem, int n_coef) {
+static double **parse_coef_1(input_data *input, int n_elem, int n_coef) {
 
      double **a1;
      double **a2;
@@ -849,7 +849,7 @@ double **parse_coef_1(input_data *input, int n_elem, int n_coef) {
 
 
 
-double ***parse_coef_2(input_data *input, int n_x, int n_elem, int n_coef) {
+static double ***parse_coef_2(input_data *input, int n_x, int n_elem, int n_coef) {
 
      int i;
 
@@ -870,7 +870,7 @@ double ***parse_coef_2(input_data *input, int n_x, int n_elem, int n_coef) {
 
 
 
-double ****parse_coef_3(input_data *input, int n_x, int n_y, int n_elem, int n_coef) {
+static double ****parse_coef_3(input_data *input, int n_x, int n_y, int n_elem, int n_coef) {
 
      int i;
      int j;
@@ -895,7 +895,7 @@ double ****parse_coef_3(input_data *input, int n_x, int n_y, int n_elem, int n_c
 
 
 
-void parse_coef(input_data *input) {
+static void parse_coef(input_data *input) {
 
      int i;
      int n;
@@ -957,7 +957,7 @@ void parse_coef(input_data *input) {
 
 
 
-void parse_coef_l(input_data *input, void *d, int n_derivs, const char *type, int (*xrtm_set_coef_x_11)(void *, int, int, double **), int (*xrtm_set_coef_x_n1)(void *, int, double ***), int (*xrtm_set_coef_x_1n)(void *, int, double ***), int (*xrtm_set_coef_x_nn)(void *, double ****)) {
+static void parse_coef_l(input_data *input, void *d, int n_derivs, const char *type, int (*xrtm_set_coef_x_11)(void *, int, int, double **), int (*xrtm_set_coef_x_n1)(void *, int, double ***), int (*xrtm_set_coef_x_1n)(void *, int, double ***), int (*xrtm_set_coef_x_nn)(void *, double ****)) {
 
      int i;
      int j;
@@ -1049,7 +1049,7 @@ void parse_coef_l(input_data *input, void *d, int n_derivs, const char *type, in
 
 
 
-void parse_coef_files(input_data *input) {
+static void parse_coef_files(input_data *input) {
 
      char *x;
      char **x1;
@@ -1144,7 +1144,7 @@ void parse_coef_files(input_data *input) {
 
 
 
-void parse_coef_files_l(input_data *input, void *d, int n_derivs, const char *type, int (*xrtm_set_coef_x_11)(void *, int, int, double **), int (*xrtm_set_coef_x_n1)(void *, int, double ***), int (*xrtm_set_coef_x_1n)(void *, int, double ***), int (*xrtm_set_coef_x_nn)(void *, double ****)) {
+static void parse_coef_files_l(input_data *input, void *d, int n_derivs, const char *type, int (*xrtm_set_coef_x_11)(void *, int, int, double **), int (*xrtm_set_coef_x_n1)(void *, int, double ***), int (*xrtm_set_coef_x_1n)(void *, int, double ***), int (*xrtm_set_coef_x_nn)(void *, double ****)) {
 
      char *x;
      char **x1;
@@ -1346,7 +1346,7 @@ void parse_coef_files_l(input_data *input, void *d, int n_derivs, const char *ty
 
 
 
-void parse_kernel_ampfac(input_data *input) {
+static void parse_kernel_ampfac(input_data *input) {
 
      int n;
 
@@ -1372,7 +1372,7 @@ void parse_kernel_ampfac(input_data *input) {
 
 
 
-void parse_kernel_ampfac_l(input_data *input, void *d, int n_derivs, const char *type, int (*xrtm_set_kernel_ampfac_x_1)(void *, int, int, double), int (*xrtm_set_kernel_ampfac_x_n)(void *, int, double *)) {
+static void parse_kernel_ampfac_l(input_data *input, void *d, int n_derivs, const char *type, int (*xrtm_set_kernel_ampfac_x_1)(void *, int, int, double), int (*xrtm_set_kernel_ampfac_x_n)(void *, int, double *)) {
 
      int n;
 
@@ -1409,7 +1409,7 @@ void parse_kernel_ampfac_l(input_data *input, void *d, int n_derivs, const char 
 
 
 
-void parse_kernel_params(input_data *input) {
+static void parse_kernel_params(input_data *input) {
 
      int n;
 
@@ -1458,7 +1458,7 @@ void parse_kernel_params(input_data *input) {
 
 
 
-void parse_kernel_params_l(input_data *input, void *d, int n_derivs, const char *type, int (*xrtm_set_kernel_params_x_11)(void *, int, int, int, double), int (*xrtm_set_kernel_params_x_n1)(void *, int, int, double *), int (*xrtm_set_kernel_params_x_1n)(void *, int, int, double *), int (*xrtm_set_kernel_params_x_nn)(void *, int, double **)) {
+static void parse_kernel_params_l(input_data *input, void *d, int n_derivs, const char *type, int (*xrtm_set_kernel_params_x_11)(void *, int, int, int, double), int (*xrtm_set_kernel_params_x_n1)(void *, int, int, double *), int (*xrtm_set_kernel_params_x_1n)(void *, int, int, double *), int (*xrtm_set_kernel_params_x_nn)(void *, int, double **)) {
 
      int n;
 
@@ -1523,7 +1523,7 @@ void parse_kernel_params_l(input_data *input, void *d, int n_derivs, const char 
 /*******************************************************************************
  *
  ******************************************************************************/
-int print_lhs(FILE *fp, format_data *d, const char *name) {
+static int print_lhs(FILE *fp, format_data *d, const char *name) {
 
      int i = 0;
 
@@ -1555,7 +1555,7 @@ int print_lhs(FILE *fp, format_data *d, const char *name) {
 
 
 
-int print_lhs_dimens(FILE *fp, format_data *d, const char *name, int n_dimens, int *dimens) {
+static int print_lhs_dimens(FILE *fp, format_data *d, const char *name, int n_dimens, int *dimens) {
 
      int i;
      int n;
@@ -1585,7 +1585,7 @@ int print_lhs_dimens(FILE *fp, format_data *d, const char *name, int n_dimens, i
 
 
 
-int print_array_param_int(FILE *fp, format_data *f, xrtm_data *d, const char *name, int n, int (*xrtm_get_x)(xrtm_data *, int *)) {
+static int print_array_param_int(FILE *fp, format_data *f, xrtm_data *d, const char *name, int n, int (*xrtm_get_x)(xrtm_data *, int *)) {
 
      int *i1;
 
@@ -1607,7 +1607,7 @@ int print_array_param_int(FILE *fp, format_data *f, xrtm_data *d, const char *na
 
 
 
-int print_array_param_double(FILE *fp, format_data *f, xrtm_data *d, const char *name, int n, int (*xrtm_get_x)(xrtm_data *, double *)) {
+static int print_array_param_double(FILE *fp, format_data *f, xrtm_data *d, const char *name, int n, int (*xrtm_get_x)(xrtm_data *, double *)) {
 
      double *x1;
 
@@ -1629,7 +1629,7 @@ int print_array_param_double(FILE *fp, format_data *f, xrtm_data *d, const char 
 
 
 
-int print_layer_param_double(FILE *fp, format_data *f, xrtm_data *d, const char *name, double (*xrtm_get_x)(xrtm_data *, int)) {
+static int print_layer_param_double(FILE *fp, format_data *f, xrtm_data *d, const char *name, double (*xrtm_get_x)(xrtm_data *, int)) {
 
      int i;
 
@@ -1657,7 +1657,7 @@ int print_layer_param_double(FILE *fp, format_data *f, xrtm_data *d, const char 
 
 
 
-int print_layer_param_l_double(FILE *fp, format_data *f, xrtm_data *d, const char *name, double (*xrtm_get_x_l)(xrtm_data *, int, int)) {
+static int print_layer_param_l_double(FILE *fp, format_data *f, xrtm_data *d, const char *name, double (*xrtm_get_x_l)(xrtm_data *, int, int)) {
 
      int i;
      int j;
@@ -1690,7 +1690,7 @@ int print_layer_param_l_double(FILE *fp, format_data *f, xrtm_data *d, const cha
 
 
 
-int print_coef(FILE *fp, format_data *f, xrtm_data *d, misc_data *md) {
+static int print_coef(FILE *fp, format_data *f, xrtm_data *d, misc_data *md) {
 
      int i;
      int j;
@@ -1741,7 +1741,7 @@ int print_coef(FILE *fp, format_data *f, xrtm_data *d, misc_data *md) {
 
 
 
-int print_coef_l(FILE *fp, format_data *f, xrtm_data *d, misc_data *md) {
+static int print_coef_l(FILE *fp, format_data *f, xrtm_data *d, misc_data *md) {
 
      int i;
      int j;
@@ -1796,7 +1796,7 @@ int print_coef_l(FILE *fp, format_data *f, xrtm_data *d, misc_data *md) {
 
 
 
-int print_kernel_ampfac_l(FILE *fp, format_data *f, xrtm_data *d, int i_kernel) {
+static int print_kernel_ampfac_l(FILE *fp, format_data *f, xrtm_data *d, int i_kernel) {
 
      int i;
 
@@ -1824,7 +1824,7 @@ int print_kernel_ampfac_l(FILE *fp, format_data *f, xrtm_data *d, int i_kernel) 
 
 
 
-int print_kernel_params(FILE *fp, format_data *f, xrtm_data *d, int i_kernel) {
+static int print_kernel_params(FILE *fp, format_data *f, xrtm_data *d, int i_kernel) {
 
      int i;
 
@@ -1852,7 +1852,7 @@ int print_kernel_params(FILE *fp, format_data *f, xrtm_data *d, int i_kernel) {
 
 
 
-int print_kernel_params_l(FILE *fp, format_data *f, xrtm_data *d, int i_kernel) {
+static int print_kernel_params_l(FILE *fp, format_data *f, xrtm_data *d, int i_kernel) {
 
      int i;
      int j;
@@ -1888,7 +1888,7 @@ int print_kernel_params_l(FILE *fp, format_data *f, xrtm_data *d, int i_kernel) 
 /*******************************************************************************
  *
  ******************************************************************************/
-void input_parse1(input_data *input) {
+static void input_parse1(input_data *input) {
 
      int r;
 
@@ -2034,7 +2034,7 @@ L1:  if (flag && options & XRTM_OPTION_CALC_DERIVS) {
 
 
 
-void input_parse2(input_data *input) {
+static void input_parse2(input_data *input) {
 
      int m;
      int n;
@@ -2209,7 +2209,7 @@ void input_parse2(input_data *input) {
 
 
 
-void input_parse(input_data *input) {
+static void input_parse(input_data *input) {
 
      input_parse1(input);
      input_parse2(input);
@@ -2220,7 +2220,7 @@ void input_parse(input_data *input) {
 /*******************************************************************************
  *
  ******************************************************************************/
-void input_init(input_data *input, xrtm_data *d, xrtm_fd_data *fd, misc_data *md, int use_aligned, int use_array2, int use_dash, int use_equal, const char *file) {
+static void input_init(input_data *input, xrtm_data *d, xrtm_fd_data *fd, misc_data *md, int use_aligned, int use_array2, int use_dash, int use_equal, const char *file) {
 
      input->use_aligned  = use_aligned;
      input->use_array2   = use_array2;
@@ -2237,7 +2237,7 @@ void input_init(input_data *input, xrtm_data *d, xrtm_fd_data *fd, misc_data *md
 
 
 
-void input_free(input_data *input) {
+static void input_free(input_data *input) {
 
 }
 
