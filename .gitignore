@@ -3,6 +3,7 @@
 *.o
 *.so
 make.inc
+depend.inc
 doc/xrtm_equations.aux
 doc/xrtm_equations.log
 doc/xrtm_equations.out
@@ -13,6 +14,10 @@ examples/example_c
 examples/example_cpp
 examples/example_f77
 examples/example_f90
+interfaces/write_int_def
 src/version.c
+src/prototypes/version_p.h
 utils/callxrtm
 utils/testxrtm
+utils/prototypes/input_util_p.h
+utils/prototypes/input_yylex_p.h
