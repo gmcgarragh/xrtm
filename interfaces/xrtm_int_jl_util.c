@@ -97,7 +97,7 @@ int get_levels_b_levels_b_dims(xrtm_data *d, size_t *dims)
 
 int set_levels_b_l_1_levels_b_l_dims(xrtm_data *d, int i_deriv, double *levels_b_l, size_t *dims)
 {
-    dims[0] = d->n_derivs;
+    dims[0] = d->n_layers + 1;
     return 0;
 }
 
