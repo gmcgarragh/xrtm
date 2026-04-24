@@ -7,7 +7,7 @@
 import numpy as np
 import sys
 
-sys.path.insert(1, '../interfaces')
+sys.path.insert(0, '../interfaces')
 
 # Module that defines the XRTM class which should not be modfied by the user.
 import xrtm

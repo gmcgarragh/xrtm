@@ -49,6 +49,7 @@ endif
 # places (/usr/include, /usr/lib) then these variable definitions may be left
 # blank.
 #*******************************************************************************
+<<<<<<< compile_on_macos
 
 ifeq ($(shell uname -s),Darwin)
 
@@ -67,6 +68,14 @@ else
     # OpenBLAS
     LINKS        += ${HOME}/opt/openblas/lib/libopenblas.a
 endif
+=======
+# Reference BLAS LAPACK
+#LINKS        += $(HOME)/opt/lapack/liblapack.a
+#LINKS        += ${HOME}/opt/lapack/libblas.a
+
+# OpenBLAS (has LAPACK)
+LINKS        += ${HOME}/opt/openblas/lib/libopenblas.a
+>>>>>>> master
 
 
 #*******************************************************************************
@@ -80,8 +89,8 @@ endif
 # Uncomment (and modify include path as needed) to compile the Python interface
 #*******************************************************************************
 #make_int_python = 1
-#INCDIRS        += -I${HOME}/opt/anaconda3/include/python3.9 \
-#                  -I${HOME}/opt/anaconda3/lib/python3.9/site-packages/numpy/core/include
+#INCDIRS        += -I${HOME}/opt/anaconda3/include/python3.12 \
+#                  -I${HOME}/opt/anaconda3/lib/python3.12/site-packages/numpy/core/include
 
 
 #*******************************************************************************

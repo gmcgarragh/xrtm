@@ -133,10 +133,11 @@
 /*******************************************************************************
  *
  ******************************************************************************/
-void rtm_eig_bvp(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layers,
+void rtm_eig_bvp(int i_four,
+                 int n_quad, int n_stokes, int n_derivs, int n_layers,
                  double qf, double *qx_v, double *qw_v, double F_0, double mu_0,
-                 int *ulevels, double *utaus, int n_ulevels,
-                 double *umus, int n_umus, double *planck, double **planck_l,
+                 int n_ulevels, int *ulevels, double *utaus, int n_umus, double *umus,
+                 double *planck, double **planck_l,
                  double *omega, double **omega_l, double *ltau, double **ltau_l,
                  double surface_b, double *surface_b_l,
                  double *btran, double **btran_l,
@@ -152,8 +153,8 @@ void rtm_eig_bvp(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layer
                  double *I1_m, double **I1_m_l, double *In_p, double **In_p_l,
                  double F_iso_top, double *F_iso_top_l, double F_iso_bot, double *F_iso_bot_l,
                  double **I_p, double **I_m, double ***I_p_l, double ***I_m_l,
-                 int add_single_scattering, int greens, int sfi, int surface, int solar,
-                 int thermal, int upwelling, int downwelling, int utau_output, int vector,
+                 int add_single_scattering, int greens, int sfi, int solar, int thermal,
+                 int surface, int upwelling, int downwelling, int utau_output, int vector,
                  int eigen_solver_real, int eigen_solver_complex,
                  derivs_data *derivs, save_tree_data save_tree, work_data work) {
 
@@ -182,6 +183,9 @@ void rtm_eig_bvp(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layer
 
      double *planck0_l2;
      double *planck1_l2;
+
+     double  **p_d_tau;
+     double ***p_d_tau_l;
 
      double **P_q0_mm_l2;
      double **P_q0_pm_l2;
@@ -263,9 +267,6 @@ void rtm_eig_bvp(int i_four, int n_quad, int n_stokes, int n_derivs, int n_layer
      double **I_p_l2;
      double **I_m_l2;
 
-double  **p_d_tau   = get_work_d2(&work, n_layers,           2);
-double ***p_d_tau_l = get_work_d3(&work, n_layers, n_derivs, 2);
-
      dcomplex *B_c;
      dcomplex **B_l_c;
 
@@ -338,6 +339,8 @@ double **atran2_l;
                At_p = alloc_array3_d(n_layers, 2, n_quad_v_x);
                At_m = alloc_array3_d(n_layers, 2, n_quad_v_x);
           }
+
+          p_d_tau = get_work_d2(&work, n_layers, 2);
      }
 
      if (solar) {
@@ -367,6 +370,8 @@ double **atran2_l;
                     At_p_l = alloc_array4_d(n_layers, n_derivs, 2, n_quad_v_x);
                     At_m_l = alloc_array4_d(n_layers, n_derivs, 2, n_quad_v_x);
                }
+
+               p_d_tau_l = get_work_d3(&work, n_layers, n_derivs, 2);
           }
      }
 
@@ -618,9 +623,14 @@ else {
           for (i = 0; i < n_layers; ++i) {
                p_d_tau[i][0] =  planck[i];
                p_d_tau[i][1] = (planck[i+1] - planck[i]) / ltau[i];
-               for (j = 0; j < n_derivs; ++j) {
-                    p_d_tau_l[i][j][0] =  planck_l[i][j];
-                    p_d_tau_l[i][j][1] = ((planck_l[i+1][j] - planck_l[i][j]) - p_d_tau[i][1] * ltau_l[i][j]) / ltau[i];
+               if (n_derivs > 0 && flags_or(derivs->thermal[i], n_derivs)) {
+                    for (j = 0; j < n_derivs; ++j) {
+                         if (! derivs->thermal[i][j])
+                              continue;
+
+                         p_d_tau_l[i][j][0] =  planck_l[i][j];
+                         p_d_tau_l[i][j][1] = ((planck_l[i+1][j] - planck_l[i][j]) - p_d_tau[i][1] * ltau_l[i][j]) / ltau[i];
+                    }
                }
           }
      }
@@ -630,23 +640,107 @@ else {
       *
       *-----------------------------------------------------------------------*/
      if (! vector) {
-          solve_bvp (n_quad_x, n_stokes, n_derivs, n_layers, ltau, ltau_l, Rs_qq, Rs_qq_l, atran2, atran2_l, nu, X_p, X_m, Fs_p, Fs_m, Fs1_p, Fs1_m, Ft0_p, Ft0_m, Ft1_p, Ft1_m, nu_l, X_p_l, X_m_l, Fs_p_l, Fs_m_l, Fs1_p_l, Fs1_m_l, Ft0_p_l, Ft0_m_l, Ft1_p_l, Ft1_m_l, B, B_l, I1_m, I1_m_l, In_p, In_p_l, surface, solar, thermal, derivs->layers, derivs->beam, derivs->thermal, save_tree, work);
+          solve_bvp (n_quad_x, n_stokes, n_derivs, n_layers,
+                     ltau, ltau_l,
+                     atran2, atran2_l,
+                     nu, X_p, X_m,
+                     Fs_p, Fs_m,
+                     Fs1_p, Fs1_m,
+                     Ft0_p, Ft0_m, Ft1_p, Ft1_m,
+                     nu_l, X_p_l, X_m_l,
+                     Fs_p_l, Fs_m_l,
+                     Fs1_p_l, Fs1_m_l,
+                     Ft0_p_l, Ft0_m_l, Ft1_p_l, Ft1_m_l,
+                     Rs_qq, Rs_qq_l,
+                     B, B_l,
+                     I1_m, I1_m_l, In_p, In_p_l,
+                     surface, solar, thermal,
+                     derivs->layers, derivs->beam, derivs->thermal,
+                     save_tree, work);
 
           if (! sfi) {
                if (! utau_output)
-                    calc_radiance_levels(n_quad_v_x, n_layers, n_derivs, n_ulevels, ulevels, ltau, ltau_l, atran2, atran2_l, nu, X_p, X_m, Fs_p, Fs_m, Fs1_p, Fs1_m, Ft0_p, Ft0_m, Ft1_p, Ft1_m, nu_l, X_p_l, X_m_l, Fs_p_l, Fs_m_l, Fs1_p_l, Fs1_m_l, Ft0_p_l, Ft0_m_l, Ft1_p_l, Ft1_m_l, B, B_l, I_p, I_m, I_p_l, I_m_l, solar, thermal, derivs->layers, derivs->beam, derivs->thermal, save_tree, work);
+                    calc_radiance_levels(n_quad_v_x, n_layers, n_derivs,
+                                         n_ulevels, ulevels,
+                                         ltau, ltau_l,
+                                         atran2, atran2_l,
+                                         nu, X_p, X_m,
+                                         Fs_p, Fs_m, Fs1_p, Fs1_m,
+                                         Ft0_p, Ft0_m, Ft1_p, Ft1_m,
+                                         nu_l, X_p_l, X_m_l,
+                                         Fs_p_l, Fs_m_l, Fs1_p_l, Fs1_m_l,
+                                         Ft0_p_l, Ft0_m_l, Ft1_p_l, Ft1_m_l,
+                                         B, B_l,
+                                         I_p, I_m, I_p_l, I_m_l,
+                                         solar, thermal,
+                                         derivs->layers, derivs->beam, derivs->thermal,
+                                         save_tree, work);
                else
-                    calc_radiance_taus  (n_quad_v_x, n_layers, n_derivs, n_ulevels, ulevels, utaus, ltau, ltau_l, as_0, as_0_l, atran2, atran2_l, nu, X_p, X_m, Fs_p, Fs_m, nu_l, X_p_l, X_m_l, Fs_p_l, Fs_m_l, B, B_l, I_p, I_m, I_p_l, I_m_l, solar, thermal, derivs->layers, derivs->beam, derivs->thermal, save_tree, work);
+                    calc_radiance_taus  (n_quad_v_x, n_layers, n_derivs,
+                                         n_ulevels, ulevels, utaus,
+                                         ltau, ltau_l,
+                                         as_0, as_0_l, atran2, atran2_l,
+                                         nu, X_p, X_m,
+                                         Fs_p, Fs_m,
+                                         nu_l, X_p_l, X_m_l,
+                                         Fs_p_l, Fs_m_l,
+                                         B, B_l,
+                                         I_p, I_m, I_p_l, I_m_l,
+                                         solar, thermal,
+                                         derivs->layers, derivs->beam, derivs->thermal,
+                                         save_tree, work);
           }
      }
      else {
-          solve_bvp2(n_quad_x, n_stokes, n_derivs, n_layers, ltau, ltau_l, Rs_qq, Rs_qq_l, atran2, atran2_l, nu_c, X_p_c, X_m_c, Fs_p, Fs_m, Fs1_p, Fs1_m, Ft0_p, Ft0_m, Ft1_p, Ft1_m, nu_l_c, X_p_l_c, X_m_l_c, Fs_p_l, Fs_m_l, Fs1_p_l, Fs1_m_l, Ft0_p_l, Ft0_m_l, Ft1_p_l, Ft1_m_l, B_c, B_l_c, I1_m, I1_m_l, In_p, In_p_l, surface, solar, thermal, derivs->layers, derivs->beam, derivs->thermal, save_tree, work);
+          solve_bvp2(n_quad_x, n_stokes, n_derivs, n_layers,
+                     ltau, ltau_l,
+                     atran2, atran2_l,
+                     nu_c, X_p_c, X_m_c,
+                     Fs_p, Fs_m,
+                     Fs1_p, Fs1_m,
+                     Ft0_p, Ft0_m, Ft1_p, Ft1_m,
+                     nu_l_c, X_p_l_c, X_m_l_c,
+                     Fs_p_l, Fs_m_l,
+                     Fs1_p_l, Fs1_m_l,
+                     Ft0_p_l, Ft0_m_l, Ft1_p_l, Ft1_m_l,
+                     Rs_qq, Rs_qq_l,
+                     B_c, B_l_c,
+                     I1_m, I1_m_l, In_p, In_p_l,
+                     surface, solar, thermal,
+                     derivs->layers, derivs->beam, derivs->thermal,
+                     save_tree, work);
 
           if (! sfi) {
                if (! utau_output)
-                    calc_radiance_levels2(n_quad_v_x, n_layers, n_derivs, n_ulevels, ulevels, ltau, ltau_l, atran2, atran2_l, nu_c, X_p_c, X_m_c, Fs_p, Fs_m, Fs1_p, Fs1_m, Ft0_p, Ft0_m, Ft1_p, Ft1_m, nu_l_c, X_p_l_c, X_m_l_c, Fs_p_l, Fs_m_l, Fs1_p_l, Fs1_m_l, Ft0_p_l, Ft0_m_l, Ft1_p_l, Ft1_m_l, B_c, B_l_c, I_p, I_m, I_p_l, I_m_l, solar, thermal, derivs->layers, derivs->beam, derivs->thermal, save_tree, work);
+                    calc_radiance_levels2(n_quad_v_x, n_layers, n_derivs,
+                                          n_ulevels, ulevels,
+                                          ltau, ltau_l,
+                                          atran2, atran2_l,
+                                          nu_c, X_p_c, X_m_c,
+                                          Fs_p, Fs_m, Fs1_p, Fs1_m,
+                                          Ft0_p, Ft0_m, Ft1_p, Ft1_m,
+                                          nu_l_c, X_p_l_c, X_m_l_c,
+                                          Fs_p_l, Fs_m_l, Fs1_p_l, Fs1_m_l,
+                                          Ft0_p_l, Ft0_m_l, Ft1_p_l, Ft1_m_l,
+                                          B_c, B_l_c,
+                                          I_p, I_m, I_p_l, I_m_l,
+                                          solar, thermal,
+                                          derivs->layers, derivs->beam, derivs->thermal,
+                                          save_tree, work);
                else
-                    calc_radiance_taus2  (n_quad_v_x, n_layers, n_derivs, n_ulevels, ulevels, utaus, ltau, ltau_l, as_0, as_0_l, atran2, atran2_l, nu_c, X_p_c, X_m_c, Fs_p, Fs_m, nu_l_c, X_p_l_c, X_m_l_c, Fs_p_l, Fs_m_l, B_c, B_l_c, I_p, I_m, I_p_l, I_m_l, solar, thermal, derivs->layers, derivs->beam, derivs->thermal, save_tree, work);
+                    calc_radiance_taus2  (n_quad_v_x, n_layers, n_derivs,
+                                          n_ulevels, ulevels, utaus,
+                                          ltau, ltau_l,
+                                          as_0, as_0_l, atran2, atran2_l,
+                                          nu_c, X_p_c, X_m_c,
+                                          Fs_p, Fs_m,
+                                          nu_l_c, X_p_l_c, X_m_l_c,
+                                          Fs_p_l, Fs_m_l,
+                                          B_c, B_l_c,
+                                          I_p, I_m, I_p_l, I_m_l,
+                                          solar, thermal,
+                                          derivs->layers, derivs->beam, derivs->thermal,
+                                          save_tree, work);
                }
      }
 
@@ -695,9 +789,37 @@ else {
           }
 
           if (! vector)
-               calc_radiance_levels (n_quad_v_x, n_layers, n_derivs, 1, &n_layers, ltau, ltau_l, atran2, atran2_l, nu, X_p, X_m, Fs_p, Fs_m, Fs1_p, Fs1_m, Ft0_p, Ft0_m, Ft1_p, Ft1_m, nu_l, X_p_l, X_m_l, Fs_p_l, Fs_m_l, Fs1_p_l, Fs1_m_l, Ft0_p_l, Ft0_m_l, Ft1_p_l, Ft1_m_l, B, B_l, &I_p2, &I_m2, &I_p_l2, &I_m_l2, solar, thermal, derivs->layers, derivs->beam, derivs->thermal, save_tree, work);
+               calc_radiance_levels (n_quad_v_x, n_layers, n_derivs,
+                                     1, &n_layers,
+                                     ltau, ltau_l,
+                                     atran2, atran2_l,
+                                     nu, X_p, X_m,
+                                     Fs_p, Fs_m, Fs1_p, Fs1_m,
+                                     Ft0_p, Ft0_m, Ft1_p, Ft1_m,
+                                     nu_l, X_p_l, X_m_l,
+                                     Fs_p_l, Fs_m_l, Fs1_p_l, Fs1_m_l,
+                                     Ft0_p_l, Ft0_m_l, Ft1_p_l, Ft1_m_l,
+                                     B, B_l,
+                                     &I_p2, &I_m2, &I_p_l2, &I_m_l2,
+                                     solar, thermal,
+                                     derivs->layers, derivs->beam, derivs->thermal,
+                                     save_tree, work);
           else
-               calc_radiance_levels2(n_quad_v_x, n_layers, n_derivs, 1, &n_layers, ltau, ltau_l, atran2, atran2_l, nu_c, X_p_c, X_m_c, Fs_p, Fs_m, Fs1_p, Fs1_m, Ft0_p, Ft0_m, Ft1_p, Ft1_m, nu_l_c, X_p_l_c, X_m_l_c, Fs_p_l, Fs_m_l, Fs1_p_l, Fs1_m_l, Ft0_p_l, Ft0_m_l, Ft1_p_l, Ft1_m_l, B_c, B_l_c, &I_p2, &I_m2, &I_p_l2, &I_m_l2, solar, thermal, derivs->layers, derivs->beam, derivs->thermal, save_tree, work);
+               calc_radiance_levels2(n_quad_v_x, n_layers, n_derivs,
+                                     1, &n_layers,
+                                     ltau, ltau_l,
+                                     atran2, atran2_l,
+                                     nu_c, X_p_c, X_m_c,
+                                     Fs_p, Fs_m, Fs1_p, Fs1_m,
+                                     Ft0_p, Ft0_m, Ft1_p, Ft1_m,
+                                     nu_l_c, X_p_l_c, X_m_l_c,
+                                     Fs_p_l, Fs_m_l, Fs1_p_l, Fs1_m_l,
+                                     Ft0_p_l, Ft0_m_l, Ft1_p_l, Ft1_m_l,
+                                     B_c, B_l_c,
+                                     &I_p2, &I_m2, &I_p_l2, &I_m_l2,
+                                     solar, thermal,
+                                     derivs->layers, derivs->beam, derivs->thermal,
+                                     save_tree, work);
      }
 
 
@@ -707,7 +829,35 @@ else {
      if (! vector) {
           if (sfi && n_umus > 0) {
                if (upwelling)
-                    sfi_up (i_four, n_quad, n_stokes, n_derivs, n_layers, n_umus, qf, qx_v, qw_v, F_0, mu_0, n_ulevels, ulevels, utaus, umus, omega, omega_l, ltau, ltau_l, surface_b, surface_b_l, p_d_tau, p_d_tau_l, btran, btran_l, as_0, as_0_l, atran, atran_l, P_q0_mm, P_q0_pm, P_u0_pm, P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm, nu,   X_p,   X_m,   Fs_p, Fs_m, At_p, At_m, Ft0_p, Ft0_m, Ft1_p, Ft1_m, P_u0_pm_l, P_uq_pp_l, P_uq_mp_l, P_uq_mm_l, P_uq_pm_l, nu_l,   X_p_l,   X_m_l,   Fs_p_l, Fs_m_l, At_p_l, At_m_l, Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l, B,   B_l,   F_iso_bot, F_iso_bot_l, &I_m2, &I_m_l2, I_p, I_p_l, n_quad_v, add_single_scattering, greens, surface, solar, thermal, utau_output, derivs, work);
+                    sfi_up (i_four,
+                            n_quad, n_stokes, n_derivs, n_layers,
+                            qf, qx_v, qw_v, F_0, mu_0,
+                            n_ulevels, ulevels, utaus, n_umus, umus,
+                            omega, omega_l, ltau, ltau_l,
+                            surface_b, surface_b_l,
+                            p_d_tau, p_d_tau_l,
+                            btran, btran_l,
+                            as_0, as_0_l, atran, atran_l,
+                            P_q0_mm, P_q0_pm,
+                            P_u0_pm,
+                            P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm,
+                            nu, X_p, X_m,
+                            Fs_p, Fs_m,
+                            At_p, At_m,
+                            Ft0_p, Ft0_m, Ft1_p, Ft1_m,
+                            P_q0_mm_l, P_q0_pm_l,
+                            P_u0_pm_l,
+                            P_uq_pp_l, P_uq_mp_l, P_uq_mm_l, P_uq_pm_l,
+                            nu_l, X_p_l, X_m_l,
+                            Fs_p_l, Fs_m_l,
+                            At_p_l, At_m_l,
+                            Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l,
+                            B, B_l,
+                            F_iso_bot, F_iso_bot_l,
+                            &I_m2, &I_m_l2,
+                            I_p, I_p_l, n_quad_v,
+                            add_single_scattering, greens, surface, solar, thermal, utau_output,
+                            derivs, work);
                else {
                     for (i = 0; i < n_ulevels; ++i) {
                          init_array1_d(I_p[i]+n_quad_v, n_umus_v, 0.);
@@ -717,7 +867,33 @@ else {
                }
 
                if (downwelling)
-                    sfi_dn (i_four, n_quad, n_stokes, n_derivs, n_layers, n_umus, qf, qx_v, qw_v, F_0,       n_ulevels, ulevels, utaus, umus, omega, omega_l, ltau, ltau_l,                         p_d_tau, p_d_tau_l, btran, btran_l, as_0, as_0_l, atran, atran_l, P_q0_mm, P_q0_pm, P_u0_mm, P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm, nu,   X_p,   X_m,   Fs_p, Fs_m, At_p, At_m, Ft0_p, Ft0_m, Ft1_p, Ft1_m, P_u0_mm_l, P_uq_pp_l, P_uq_mp_l, P_uq_mm_l, P_uq_pm_l, nu_l,   X_p_l,   X_m_l,   Fs_p_l, Fs_m_l, At_p_l, At_m_l,                                 B,   B_l,   F_iso_top, F_iso_top_l, &I_m2, &I_m_l2, I_m, I_m_l, n_quad_v, add_single_scattering, greens,          solar, thermal, utau_output, derivs, work);
+                    sfi_dn (i_four,
+                            n_quad, n_stokes, n_derivs, n_layers,
+                            qf, qx_v, qw_v, F_0,
+                            n_ulevels, ulevels, utaus, n_umus, umus,
+                            omega, omega_l, ltau, ltau_l,
+                            p_d_tau, p_d_tau_l,
+                            btran, btran_l,
+                            as_0, as_0_l, atran, atran_l,
+                            P_q0_mm, P_q0_pm,
+                            P_u0_mm,
+                            P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm,
+                            nu, X_p, X_m,
+                            Fs_p, Fs_m,
+                            At_p, At_m,
+                            Ft0_p, Ft0_m, Ft1_p, Ft1_m,
+                            P_q0_mm_l, P_q0_pm_l,
+                            P_u0_mm_l,
+                            P_uq_pp_l, P_uq_mp_l, P_uq_mm_l, P_uq_pm_l,
+                            nu_l, X_p_l, X_m_l,
+                            Fs_p_l, Fs_m_l,
+                            At_p_l, At_m_l,
+                            B, B_l,
+                            F_iso_top, F_iso_top_l,
+                            &I_m2, &I_m_l2,
+                            I_m, I_m_l, n_quad_v,
+                            add_single_scattering, greens, solar, thermal, utau_output,
+                            derivs, work);
                else {
                     for (i = 0; i < n_ulevels; ++i) {
                          init_array1_d(I_m[i]+n_quad_v, n_umus_v, 0.);
@@ -730,7 +906,35 @@ else {
      else {
           if (sfi && n_umus > 0) {
                if (upwelling)
-                    sfi_up2(i_four, n_quad, n_stokes, n_derivs, n_layers, n_umus, qf, qx_v, qw_v, F_0, mu_0, n_ulevels, ulevels, utaus, umus, omega, omega_l, ltau, ltau_l, surface_b, surface_b_l, p_d_tau, p_d_tau_l, btran, btran_l, as_0, as_0_l, atran, atran_l, P_q0_mm, P_q0_pm, P_u0_pm, P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm, nu_c, X_p_c, X_m_c, Fs_p, Fs_m, At_p, At_m, Ft0_p, Ft0_m, Ft1_p, Ft1_m, P_u0_pm_l, P_uq_pp_l, P_uq_mp_l, P_uq_mm_l, P_uq_pm_l, nu_l_c, X_p_l_c, X_m_l_c, Fs_p_l, Fs_m_l, At_p_l, At_m_l, Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l, B_c, B_l_c, F_iso_bot, F_iso_bot_l, &I_m2, &I_m_l2, I_p, I_p_l, n_quad_v, add_single_scattering, greens, surface, solar, thermal, utau_output, derivs, work);
+                    sfi_up2(i_four,
+                            n_quad, n_stokes, n_derivs, n_layers,
+                            qf, qx_v, qw_v, F_0, mu_0,
+                            n_ulevels, ulevels, utaus, n_umus, umus,
+                            omega, omega_l, ltau, ltau_l,
+                            surface_b, surface_b_l,
+                            p_d_tau, p_d_tau_l,
+                            btran, btran_l,
+                            as_0, as_0_l, atran, atran_l,
+                            P_q0_mm, P_q0_pm,
+                            P_u0_pm,
+                            P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm,
+                            nu_c, X_p_c, X_m_c,
+                            Fs_p, Fs_m,
+                            At_p, At_m,
+                            Ft0_p, Ft0_m, Ft1_p, Ft1_m,
+                            P_q0_mm_l, P_q0_pm_l,
+                            P_u0_pm_l,
+                            P_uq_pp_l, P_uq_mp_l, P_uq_mm_l, P_uq_pm_l,
+                            nu_l_c, X_p_l_c, X_m_l_c,
+                            Fs_p_l, Fs_m_l,
+                            At_p_l, At_m_l,
+                            Rs_u0, Rs_u0_l, Rs_uq, Rs_uq_l,
+                            B_c, B_l_c,
+                            F_iso_bot, F_iso_bot_l,
+                            &I_m2, &I_m_l2,
+                            I_p, I_p_l, n_quad_v,
+                            add_single_scattering, greens, surface, solar, thermal, utau_output,
+                            derivs, work);
                else {
                     for (i = 0; i < n_ulevels; ++i) {
                          init_array1_d(I_p[i]+n_quad_v, n_umus_v, 0.);
@@ -740,7 +944,33 @@ else {
                }
 
                if (downwelling)
-                    sfi_dn2(i_four, n_quad, n_stokes, n_derivs, n_layers, n_umus, qf, qx_v, qw_v, F_0,       n_ulevels, ulevels, utaus, umus, omega, omega_l, ltau, ltau_l,                         p_d_tau, p_d_tau_l, btran, btran_l, as_0, as_0_l, atran, atran_l, P_q0_mm, P_q0_pm, P_u0_mm, P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm, nu_c, X_p_c, X_m_c, Fs_p, Fs_m, At_p, At_m, Ft0_p, Ft0_m, Ft1_p, Ft1_m, P_u0_mm_l, P_uq_pp_l, P_uq_mp_l, P_uq_mm_l, P_uq_pm_l, nu_l_c, X_p_l_c, X_m_l_c, Fs_p_l, Fs_m_l, At_p_l, At_m_l,                                 B_c, B_l_c, F_iso_top, F_iso_top_l, &I_m2, &I_m_l2, I_m, I_m_l, n_quad_v, add_single_scattering, greens,          solar, thermal, utau_output, derivs, work);
+                    sfi_dn2(i_four,
+                            n_quad, n_stokes, n_derivs, n_layers,
+                            qf, qx_v, qw_v, F_0,
+                            n_ulevels, ulevels, utaus, n_umus, umus,
+                            omega, omega_l, ltau, ltau_l,
+                            p_d_tau, p_d_tau_l,
+                            btran, btran_l,
+                            as_0, as_0_l, atran, atran_l,
+                            P_q0_mm, P_q0_pm,
+                            P_u0_mm,
+                            P_uq_pp, P_uq_mp, P_uq_mm, P_uq_pm,
+                            nu_c, X_p_c, X_m_c,
+                            Fs_p, Fs_m,
+                            At_p, At_m,
+                            Ft0_p, Ft0_m, Ft1_p, Ft1_m,
+                            P_q0_mm_l, P_q0_pm_l,
+                            P_u0_mm_l,
+                            P_uq_pp_l, P_uq_mp_l, P_uq_mm_l, P_uq_pm_l,
+                            nu_l_c, X_p_l_c, X_m_l_c,
+                            Fs_p_l, Fs_m_l,
+                            At_p_l, At_m_l,
+                            B_c, B_l_c,
+                            F_iso_top, F_iso_top_l,
+                            &I_m2, &I_m_l2,
+                            I_m, I_m_l, n_quad_v,
+                            add_single_scattering, greens, solar, thermal, utau_output,
+                            derivs, work);
                else {
                     for (i = 0; i < n_ulevels; ++i) {
                          init_array1_d(I_m[i]+n_quad_v, n_umus_v, 0.);

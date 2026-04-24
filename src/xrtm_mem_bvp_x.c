@@ -29,23 +29,24 @@ void xgbtrs_(const char *, int *, int *, int *, int *, TYPE *, int *, int *, TYP
  *
  ******************************************************************************/
 static void SOLVE_BVP(int n_quad, int n_stokes, int n_derivs, int n_layers,
-            double qf, double *qx_v, double *qw_v, double F_0,
-            int n_ulevels, int *ulevels,
-            double *omega, double **omega_l, double *ltau, double **ltau_l,
-            double **Rs_qq, double ***Rs_qq_l,
-            double *btau, double **btau_l, double *btran, double **btran_l,
-            double *atran, double **atran_l,
-            double **P_q0_mm, double **P_q0_pm,
-            TYPE  **nu, TYPE ***X_p, TYPE ***X_m,
-            double  **Fs_p, double  **Fs_m,
-            double ***Q_q0_mm, double ***Q_q0_pm,
-            TYPE ***nu_l, TYPE ****X_p_l, TYPE ****X_m_l,
-            double ***Fs_p_l, double ***Fs_m_l,
-            TYPE *B, TYPE **B_l,
-            double *I1_m, double **I1_m_l, double *In_p, double **In_p_l,
-            int surface, uchar **derivs_layers, uchar **derivs_beam, work_data work,
-            TYPE ***X_i_11, TYPE ***X_i_12, TYPE **sigma_p, TYPE **sigma_m,
-            TYPE ****X_i_11_l, TYPE ****X_i_12_l, TYPE ***sigma_p_l, TYPE ***sigma_m_l) {
+                      double qf, double *qx_v, double *qw_v, double F_0,
+                      int n_ulevels, int *ulevels,
+                      double *omega, double **omega_l, double *ltau, double **ltau_l,
+                      double *btau, double **btau_l, double *btran, double **btran_l,
+                      double *atran, double **atran_l,
+                      double **P_q0_mm, double **P_q0_pm,
+                      TYPE  **nu, TYPE ***X_p, TYPE ***X_m,
+                      double  **Fs_p, double  **Fs_m,
+                      double ***P_q0_mm_l, double ***P_q0_pm_l,
+                      TYPE ***nu_l, TYPE ****X_p_l, TYPE ****X_m_l,
+                      double ***Fs_p_l, double ***Fs_m_l,
+                      double **Rs_qq, double ***Rs_qq_l,
+                      TYPE *B, TYPE **B_l,
+                      double *I1_m, double **I1_m_l, double *In_p, double **In_p_l,
+                      int surface,
+                      uchar **derivs_layers, uchar **derivs_beam, work_data work,
+                      TYPE ***X_i_11, TYPE ***X_i_12, TYPE **sigma_p, TYPE **sigma_m,
+                      TYPE ****X_i_11_l, TYPE ****X_i_12_l, TYPE ***sigma_p_l, TYPE ***sigma_m_l) {
 
      int i;
      int ii;
@@ -463,10 +464,10 @@ static void SOLVE_BVP(int n_quad, int n_stokes, int n_derivs, int n_layers,
                     for (j = 0; j < n_quad_v; ++j) {
                          cc   = bb   / qx_v[j];
                          cc_l = bb_l / qx_v[j];
-                         sigma_p_l[i][m][j]  =  cc_l * P_q0_pm[i]   [j];
-                         sigma_m_l[i][m][j]  = -cc_l * P_q0_mm[i]   [j];
-                         sigma_p_l[i][m][j] +=  cc   * Q_q0_pm[i][m][j];
-                         sigma_m_l[i][m][j] += -cc   * Q_q0_mm[i][m][j];
+                         sigma_p_l[i][m][j]  =  cc_l * P_q0_pm  [i]   [j];
+                         sigma_m_l[i][m][j]  = -cc_l * P_q0_mm  [i]   [j];
+                         sigma_p_l[i][m][j] +=  cc   * P_q0_pm_l[i][m][j];
+                         sigma_m_l[i][m][j] += -cc   * P_q0_mm_l[i][m][j];
 
                          if (j % n_stokes > 1)
                               sigma_m_l[i][m][j] = -sigma_m_l[i][m][j];
@@ -549,9 +550,9 @@ static void SOLVE_BVP(int n_quad, int n_stokes, int n_derivs, int n_layers,
  *
  ******************************************************************************/
 static void CALC_RADIANCE_LEVELS(int n_quad, int n_layers, int n_derivs,
-                       int n_ulevels, int *ulevels, TYPE *B, TYPE **B_l,
-                       double **I_p, double **I_m, double ***I_p_l, double ***I_m_l,
-                       uchar **derivs_beam) {
+                                 int n_ulevels, int *ulevels, TYPE *B, TYPE **B_l,
+                                 double **I_p, double **I_m, double ***I_p_l, double ***I_m_l,
+                                 uchar **derivs_beam) {
 
      int i;
      int ii;
@@ -591,7 +592,17 @@ static void CALC_RADIANCE_LEVELS(int n_quad, int n_layers, int n_derivs,
 /*******************************************************************************
  *
  ******************************************************************************/
-static void CALC_RADIANCE_TAUS(int n_quad, int n_layers, int n_derivs, int n_ulevels, int *ulevels, double *utaus, double *ltau, double **ltau_l, double *btau, double **btau_l, TYPE **nu, TYPE ***X_p, TYPE ***X_m, TYPE ***X_i_11, TYPE ***X_i_12, TYPE **sigma_p, TYPE **sigma_m, TYPE ***nu_l, TYPE ****X_p_l, TYPE ****X_m_l, TYPE ****X_i_11_l, TYPE ****X_i_12_l, TYPE ***sigma_p_l, TYPE ***sigma_m_l, TYPE *B, TYPE **B_l, double **I_p, double **I_m, double ***I_p_l, double ***I_m_l, uchar **derivs_layers, uchar **derivs_beam, work_data work) {
+static void CALC_RADIANCE_TAUS(int n_quad, int n_layers, int n_derivs,
+                               int n_ulevels, int *ulevels, double *utaus,
+                               double *ltau, double **ltau_l,
+                               double *btau, double **btau_l,
+                               TYPE **nu, TYPE ***X_p, TYPE ***X_m,
+                               TYPE ***X_i_11, TYPE ***X_i_12, TYPE **sigma_p, TYPE **sigma_m,
+                               TYPE ***nu_l, TYPE ****X_p_l, TYPE ****X_m_l,
+                               TYPE ****X_i_11_l, TYPE ****X_i_12_l, TYPE ***sigma_p_l, TYPE ***sigma_m_l,
+                               TYPE *B, TYPE **B_l,
+                               double **I_p, double **I_m, double ***I_p_l, double ***I_m_l,
+                               uchar **derivs_layers, uchar **derivs_beam, work_data work) {
 
      int i;
      int ii;

@@ -13,14 +13,14 @@ extern "C" {
 
 int set_levels_z_levels_z_dims(xrtm_data *d, double *levels_z, size_t *dims)
 {
-    dims[0] = d->n_out_levels;
+    dims[0] = d->n_layers + 1;
     return 0;
 }
 
 
 int get_levels_z_levels_z_dims(xrtm_data *d, size_t *dims)
 {
-    dims[0] = d->n_out_levels;
+    dims[0] = d->n_layers + 1;
     return 0;
 }
 

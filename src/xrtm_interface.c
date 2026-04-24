@@ -2446,6 +2446,11 @@ static int check_inputs_initialized(xrtm_data *d) {
                return INPUT_SOS_PARAMS;
           }
      }
+
+     if (! d->set_flags_fourier_tol) {
+          fprintf(stderr, "ERROR: %s not set\n", xrtm_input_index_to_name(INPUT_FOURIER_TOL));
+          return INPUT_FOURIER_TOL;
+     }
 /*
      if (d->options & XRTM_OPTION_SOURCE_THERMAL) {
           if (! d->set_flags_lambda) {
@@ -2862,7 +2867,7 @@ double xrtm_get_doub_d_tau(xrtm_data *d) {
  *
  ******************************************************************************/
 int xrtm_set_pade_params(xrtm_data *d, int pade_s, int pade_r) {
-
+/*
      if (pade_s < 0) {
           fprintf(stderr, "ERROR: invalid value for s: %d, "
                   "must be >= zero\n", pade_s);
@@ -2874,7 +2879,7 @@ int xrtm_set_pade_params(xrtm_data *d, int pade_s, int pade_r) {
                   "must be > zero\n", pade_r);
           return XRTM_INT_ERROR;
      }
-
+*/
      d->pade_s = pade_s;
      d->pade_r = pade_r;
 
@@ -4938,6 +4943,8 @@ static void build_derivs_layers(xrtm_data *d, uchar **derivs_layers, int flag) {
 
      for (i = 0; i < d->n_layers; ++i) {
           for (j = 0; j < d->n_derivs; ++j) {
+               derivs_layers[i][j] = 0;
+
                if (d->ltau0_l[i][j] != 0.) {
                     derivs_layers[i][j] = 1;
                     goto L1;

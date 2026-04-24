@@ -111,7 +111,22 @@ static void calc_Y_2(int i_four, double *Y) {
 /*******************************************************************************
  *
  ******************************************************************************/
-void rtm_four_stream(int i_four, int n_derivs, int n_layers, double *qx, double *qw, double F_0, double mu_0, int *ulevels, double *utaus, int n_ulevels, double *umus, int n_umus, double ***coef, double ****coef_l, double *omega, double **omega_l, double *ltau, double **ltau_l, double *Rs_q0, double **Rs_q0_l, double **Rs_qq, double ***Rs_qq_l, double *Rs_u0, double **Rs_u0_l, double **Rs_uq, double ***Rs_uq_l, double *btran, double **btran_l, double *as_0, double **as_0_l, double *atran, double **atran_l, double *kernel_ampfac, double **kernel_ampfac_l, double *I1_m, double **I1_m_l, double *In_p, double **In_p_l, double **I_p, double **I_m, double ***I_p_l, double ***I_m_l, int solar, int thermal, int surface, int upwelling, int downwelling, int utau_output, derivs_data *derivs, save_tree_data save_tree, work_data work) {
+void rtm_four_stream(int i_four,
+                     int n_derivs, int n_layers,
+                     double *qx, double *qw, double F_0, double mu_0,
+                     int n_ulevels, int *ulevels, double *utaus,
+                     int n_umus, double *umus,
+                     double ***coef, double ****coef_l,
+                     double *omega, double **omega_l, double *ltau, double **ltau_l,
+                     double *btran, double **btran_l,
+                     double *as_0, double **as_0_l, double *atran, double **atran_l,
+                     double *Rs_q0, double **Rs_q0_l, double **Rs_qq, double ***Rs_qq_l,
+                     double *Rs_u0, double **Rs_u0_l, double **Rs_uq, double ***Rs_uq_l,
+                     double *I1_m, double **I1_m_l, double *In_p, double **In_p_l,
+                     double **I_p, double **I_m, double ***I_p_l, double ***I_m_l,
+                     int add_single_scattering, int solar, int thermal, int surface,
+                     int upwelling, int downwelling, int utau_output,
+                     derivs_data *derivs, save_tree_data save_tree, work_data work) {
 
      int i;
      int ii;
@@ -910,9 +925,10 @@ if (n_umus == 0) {
 #endif
                }
           }
-/*
-          void calc_radiance_levels(int n_quad, int n_layers, int n_derivs, int n_ulevels,
-                                    int *ulevels, double *ltau, double **ltau_l,
+
+          void calc_radiance_levels(int n_quad, int n_layers, int n_derivs,
+                                    int n_ulevels, int *ulevels,
+                                    double *ltau, double **ltau_l,
                                     double *atran, double **atran_l,
                                     double **nu, double ***X_p, double ***X_m,
                                     double **F_p, double **F_m,
@@ -922,11 +938,25 @@ if (n_umus == 0) {
                                     double ***F0_p_l, double ***F0_m_l, double ***F1_p_l, double ***F1_m_l,
                                     double *B, double **B_l,
                                     double **I_p, double **I_m, double ***I_p_l, double ***I_m_l,
-                                    int thermal, uchar **derivs_layers, uchar **derivs_beam,
+                                    int thermal,
+                                    uchar **derivs_layers, uchar **derivs_beam,
                                     save_tree_data save_tree, work_data work);
 
-          calc_radiance_levels(2, n_layers, 0, n_ulevels, ulevels, ltau, ltau_l, atran, atran_l, nu, X_p, X_m, F_p, F_m, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, b, NULL, I_p, I_m, I_p_l, I_m_l, 0, NULL, NULL, save_tree, work);
-*/
+          calc_radiance_levels(2, n_layers, 0,
+                               n_ulevels, ulevels,
+                               ltau, ltau_l,
+                               atran, atran_l,
+                               nu, X_p, X_m,
+                               F_p, F_m,
+                               NULL, NULL, NULL, NULL,
+                               NULL, NULL, NULL,
+                               NULL, NULL,
+                               NULL, NULL, NULL, NULL,
+                               b, NULL,
+                               I_p, I_m, I_p_l, I_m_l,
+                               0,
+                               NULL, NULL, save_tree, work);
+
      }
 
 
@@ -1020,8 +1050,9 @@ if (n_umus == 0) {
 #endif
           }
 /*
-          void calc_radiance_taus(int n_quad, int n_layers, int n_derivs, int n_ulevels,
-                                  int *ulevels, double *utaus, double *ltau, double **ltau_l,
+          void calc_radiance_taus(int n_quad, int n_layers, int n_derivs,
+                                  int n_ulevels, int *ulevels, double *utaus,
+                                  double *ltau, double **ltau_l,
                                   double *as_0, double **as_0_l, double *atran, double **atran_l,
                                   double **nu, double ***X_p, double ***X_m,
                                   double **F_p, double **F_m,
@@ -1032,7 +1063,18 @@ if (n_umus == 0) {
                                   uchar **derivs_layers, uchar **derivs_beam,
                                   save_tree_data save_tree, work_data work);
 
-          calc_radiance_taus(2, n_layers, 0, n_ulevels, ulevels, utaus, ltau, ltau_l, as_0, as_0_l, atran, atran_l, nu, X_p, X_m, F_p, F_m, NULL, NULL, NULL, NULL, NULL, b, NULL, I_p, I_m, I_p_l, I_m_l, NULL, NULL, save_tree, work);
+          calc_radiance_taus(2, n_layers, 0,
+                             n_ulevels, ulevels, utaus,
+                             ltau, ltau_l,
+                             as_0, as_0_l, atran, atran_l,
+                             nu, X_p, X_m,
+                             F_p, F_m,
+                             NULL, NULL, NULL,
+                             NULL, NULL,
+                             b, NULL,
+                             I_p, I_m, I_p_l, I_m_l,
+                             NULL, NULL,
+                             save_tree, work);
 */
      }
 }
@@ -1187,9 +1229,9 @@ if (n_umus != 0) {
       *-----------------------------------------------------------------------*/
      if (upwelling)
           sfi_up(i_four,
-                 2, 1, 0, n_layers, n_umus,
+                 2, 1, 0, n_layers,
                  1., qx, qw, F_0, mu_0,
-                 n_ulevels, ulevels, utaus, umus,
+                 n_ulevels, ulevels, utaus, n_umus, umus,
                  omega, omega_l, ltau, ltau_l,
                  0., NULL,
                  NULL, NULL,
@@ -1202,6 +1244,7 @@ if (n_umus != 0) {
                  F_p, F_m,
                  NULL, NULL,
                  NULL, NULL, NULL, NULL,
+                 NULL, NULL,
                  NULL,
                  NULL, NULL, NULL, NULL,
                  NULL, NULL, NULL,
@@ -1216,30 +1259,31 @@ if (n_umus != 0) {
 
      if (downwelling)
           sfi_dn(i_four,
-                 2, 1, 0, n_layers, n_umus,
+                 2, 1, 0, n_layers,
                  1., qx, qw, F_0,
-                n_ulevels, ulevels, utaus, umus,
-                omega, omega_l, ltau, ltau_l,
-                NULL, NULL,
-                btran, btran_l,
-                as_0, as_0_l, atran, atran_l,
-                NULL, NULL,
-                P_u0_mm,
-                P_uq_pp, P_uq_mp, P_uq_pp, P_uq_mp,
-                nu, X_p, X_m,
-                F_p, F_m,
-                NULL, NULL,
-                NULL, NULL, NULL, NULL,
-                NULL,
-                NULL, NULL, NULL, NULL,
-                NULL, NULL, NULL,
-                NULL, NULL,
-                NULL, NULL,
-                b, NULL,
-                0., NULL,
-                I_m2, NULL, I_m, NULL, 2,
-                1, 0, 1, 0, utau_output,
-                NULL, work);
+                 n_ulevels, ulevels, utaus, n_umus, umus,
+                 omega, omega_l, ltau, ltau_l,
+                 NULL, NULL,
+                 btran, btran_l,
+                 as_0, as_0_l, atran, atran_l,
+                 NULL, NULL,
+                 P_u0_mm,
+                 P_uq_pp, P_uq_mp, P_uq_pp, P_uq_mp,
+                 nu, X_p, X_m,
+                 F_p, F_m,
+                 NULL, NULL,
+                 NULL, NULL, NULL, NULL,
+                 NULL, NULL,
+                 NULL,
+                 NULL, NULL, NULL, NULL,
+                 NULL, NULL, NULL,
+                 NULL, NULL,
+                 NULL, NULL,
+                 b, NULL,
+                 0., NULL,
+                 I_m2, NULL, I_m, NULL, 2,
+                 1, 0, 1, 0, utau_output,
+                 NULL, work);
 }
 
 }
