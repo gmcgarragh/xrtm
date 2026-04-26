@@ -83,28 +83,28 @@ int set_F_iso_bot_l_n_F_iso_bot_l_dims(xrtm_data *d, double *F_iso_bot_l, size_t
 
 int set_levels_b_levels_b_dims(xrtm_data *d, double *levels_b, size_t *dims)
 {
-    dims[0] = d->n_out_levels;
+    dims[0] = d->n_layers + 1;
     return 0;
 }
 
 
 int get_levels_b_levels_b_dims(xrtm_data *d, size_t *dims)
 {
-    dims[0] = d->n_out_levels;
+    dims[0] = d->n_layers + 1;
     return 0;
 }
 
 
 int set_levels_b_l_1_levels_b_l_dims(xrtm_data *d, int i_deriv, double *levels_b_l, size_t *dims)
 {
-    dims[0] = d->n_derivs;
+    dims[0] = d->n_layers + 1;
     return 0;
 }
 
 
 int set_levels_b_l_n_levels_b_l_dims(xrtm_data *d, double **levels_b_l, size_t *dims)
 {
-    dims[0] = d->n_out_levels;
+    dims[0] = d->n_layers + 1;
     dims[1] = d->n_derivs;
     return 0;
 }
@@ -112,7 +112,7 @@ int set_levels_b_l_n_levels_b_l_dims(xrtm_data *d, double **levels_b_l, size_t *
 
 int get_levels_b_l_levels_b_l_dims(xrtm_data *d, int i_deriv, size_t *dims)
 {
-    dims[0] = d->n_out_levels;
+    dims[0] = d->n_layers + 1;
     return 0;
 }
 
