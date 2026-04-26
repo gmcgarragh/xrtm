@@ -36,12 +36,15 @@ CCDEFINES     = -D'VERSION="$(VERSION)"'
 INCDIRS       = -I../src -I../interfaces -I../misc
 LIBDIRS       =
 
-# MacOS GCC does not know --start-group
+# MacOS uses it's own linker which automatically resolves circular dependences
+# between multiple libraries and therefore does not have the --start-group and
+# --end-group options.
 ifeq ($(shell uname -s),Darwin)
-    #LINKS         = -Wl, 
+#   LINKS     =
 else
-    LINKS         = -Wl,--start-group
+    LINKS     = -Wl,--start-group
 endif
+
 
 #*******************************************************************************
 # BLAS and LAPACK settings.  This includes whatever needs to be on the command
@@ -49,33 +52,16 @@ endif
 # places (/usr/include, /usr/lib) then these variable definitions may be left
 # blank.
 #*******************************************************************************
-<<<<<<< compile_on_macos
-
 ifeq ($(shell uname -s),Darwin)
-
     LINKS        += -framework Accelerate
-
 else
+    # Reference BLAS LAPACK
+#   LINKS        += $(HOME)/opt/lapack/liblapack.a
+#   LINKS        += ${HOME}/opt/lapack/libblas.a
 
-    # LAPACK
-    LINKS        += $(HOME)/opt/lapack/liblapack.a
-
-    # BLAS
-
-    # Ref BLAS
-    #LINKS        += ${HOME}/opt/lapack/libblas.a
-
-    # OpenBLAS
+    # OpenBLAS (has LAPACK)
     LINKS        += ${HOME}/opt/openblas/lib/libopenblas.a
 endif
-=======
-# Reference BLAS LAPACK
-#LINKS        += $(HOME)/opt/lapack/liblapack.a
-#LINKS        += ${HOME}/opt/lapack/libblas.a
-
-# OpenBLAS (has LAPACK)
-LINKS        += ${HOME}/opt/openblas/lib/libopenblas.a
->>>>>>> master
 
 
 #*******************************************************************************
@@ -144,10 +130,8 @@ endif
 # Defaults.  Do not modify.
 #*******************************************************************************
 ifeq ($(shell uname -s),Darwin)
-    # No --end-group for GCC in MacOS
-    # We pass a different flag during the linking of
-    # XRTM.dylib, which is set in interfaces/Makefile
-    # (--all_load)
+    # No --end-group for GCC in MacOS.  We pass a different flag during the
+    # linking of XRTM.dylib, which is set in interfaces/Makefile (--all_load).
 else
     LINKS        += -Wl,--end-group
 endif
