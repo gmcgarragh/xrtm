@@ -1335,7 +1335,8 @@ static void sfi_layer(int i_layer,
      double e5;
 
      double e1_l[n_derivs][n_umus];
-     double e2_l;
+     double e2_l_beam;
+     double e2_l_layers;
      double e3_l;
      double e4_l;
      double e5_l;
@@ -1470,6 +1471,15 @@ if (! add_single_scattering)
 else
                     Gu_0[k]  =                      omega * (a2 * P_u0_pm     [k] + u3[k]);
                }
+
+               /* Beam-only part of d(e2)/dtheta = d(exp(-ptau*as_0))/dtheta.
+                * as_0 (and atran, below) are cumulative beam-attenuation
+                * quantities that depend on the optical depth of this layer
+                * *and* every layer above it, so their derivative is nonzero
+                * whenever derivs->beam[i_layer][j] is set -- independently of
+                * whether derivs->layers[i_layer][j] (this layer's own
+                * scattering/eigen properties) is set. */
+               e2_l_beam = -ptau * as_0_l[j] * e2;
           }
 
           if (derivs->layers[i_layer][j]) {
@@ -1484,18 +1494,38 @@ else
                     Gu_0[k] += omega_l[j] * u1[k] + omega * (a1 * P_u0_pm_l[j][k] + u2[k]);
                }
 
-               e2_l = (-ptau_l[j] * as_0 - ptau * as_0_l[j]) * e2;
+               /* Layers-only part: this layer's own fractional optical
+                * depth (ptau_l) and its own attenuation (e1_l, used below). */
+               e2_l_layers = -ptau_l[j] * as_0 * e2;
           }
 
           for (k = 0; k < n_umus; ++k) {
                if (derivs->beam[i_layer][j])
                     I_u_l[j][offset + k] += Gu_0[k] * Du_0[k];
 
-               if (derivs->layers[i_layer][j]) {
-                    if (! flag)
-                         Eu_0 = ((e2_l - atran_l[j] * e1[k] - atran * e1_l[j][k]) - Du_0[k] * ( umus[k] * as_0_l[j])) / (1. + umus[k] * as_0);
-                    else
-                         Eu_0 = ((e2_l -                              e1_l[j][k]) - Du_0[k] * (-umus[k] * as_0_l[j])) / (1. - umus[k] * as_0);
+               /* Du_0 = (e2 - atran*e1) / (1 +- umus*as_0) depends on beam
+                * quantities (as_0, atran, via e2_l_beam/atran_l) even when
+                * this layer's own optical properties (ptau_l, e1_l) are
+                * unaffected -- so this term must fire for derivs->beam as
+                * well as derivs->layers, not derivs->layers alone (the
+                * previous code silently dropped d(Du_0)/dtheta for indices
+                * that only propagate into this layer via beam attenuation,
+                * e.g. an overlying layer's optical depth). */
+               if (derivs->layers[i_layer][j] || derivs->beam[i_layer][j]) {
+                    Eu_0 = 0.;
+
+                    if (! flag) {
+                         if (derivs->beam[i_layer][j])
+                              Eu_0 += (e2_l_beam - atran_l[j] * e1[k] - Du_0[k] * ( umus[k] * as_0_l[j])) / (1. + umus[k] * as_0);
+                         if (derivs->layers[i_layer][j])
+                              Eu_0 += (e2_l_layers - atran * e1_l[j][k]) / (1. + umus[k] * as_0);
+                    }
+                    else {
+                         if (derivs->beam[i_layer][j])
+                              Eu_0 += (e2_l_beam - Du_0[k] * (-umus[k] * as_0_l[j])) / (1. - umus[k] * as_0);
+                         if (derivs->layers[i_layer][j])
+                              Eu_0 += (e2_l_layers - e1_l[j][k]) / (1. - umus[k] * as_0);
+                    }
 
                     I_u_l[j][offset + k] += Fu_0[k] * Eu_0;
                }
